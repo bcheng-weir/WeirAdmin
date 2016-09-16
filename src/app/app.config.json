@@ -1,6 +1,6 @@
 {
-	"appname": "default access",
-	"scope": "CategoryAdmin ProductAdmin ProductAssignmentAdmin FullAccess",
+	"appname": "Weir B2B Site Administration",
+	"scope": "CategoryAdmin ProductAdmin ProductAssignmentAdmin FullAccess DevCenterImpersonate",
 	"clientid": "35C0B8D9-4FAD-4544-902B-3AA1B8DC5630",
 	"buyerid": "weir",
 	"environment": "prod",
