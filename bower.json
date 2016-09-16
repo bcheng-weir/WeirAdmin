@@ -1,9 +1,12 @@
 {
-  "name": "OrderCloud-Seed",
+  "name": "weir-admin",
   "authors": [
-    "Four51"
+    "Four51",
+    "RSM US",
+    "RSM UK",
+    "WEIR PLC"
   ],
-  "description": "A seed project for custom Four51 Solutions built on AngularJS",
+  "description": "Order Cloud administration project for WEIR PLC's FlowControl",
   "main": "index",
   "moduleType": [],
   "keywords": [
