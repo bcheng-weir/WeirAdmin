@@ -71,6 +71,12 @@
                     <!-- </a> -->
                 </th>
                 <th class="text-center" scope="col">
+                    Division
+                </th>
+                <th class="text-center" scope="col">
+                    Type
+                </th>
+                <th class="text-center" scope="col">
                     Active
                 </th>
                 <th scope="col"></th>
@@ -80,6 +86,8 @@
             <tr ng-repeat="buyer in buyers.list.Items">
                 <th scope="row">{{buyer.ID}}</th>
                 <td data-title="Name">{{buyer.Name}}</td>
+                <td data-title="Division" class="text-center">{{buyer.xp.Division.label}}</td>
+                <td data-title="Name" class="text-center">{{buyer.xp.Type.label}}</td>
                 <td class="text-center" data-title="Active"><i class="fa fa-circle" aria-hidden="true"
                                                                ng-class="{'active':buyer.Active}"></i></td>
                 <td class="actions-cell">

@@ -1,5 +1,6 @@
 angular.module('orderCloud')
     .config(BuyerConfig)
+    .factory('BuyerService', BuyerService)
     .controller('BuyerCtrl', BuyerController)
     .controller('BuyerEditCtrl', BuyerEditController)
     .controller('BuyerCreateCtrl', BuyerCreateController)
@@ -41,6 +42,17 @@ function BuyerConfig($stateProvider) {
             controller: 'BuyerCreateCtrl',
             controllerAs: 'buyerCreate'
         });
+}
+
+
+function BuyerService($q, $state, OrderCloud) {
+    var _divisions = [{id: "1", label: "UK"}, {id: "2", label: "France"}];
+    var _customerTypes = [{id: "1", label: "End User"}, {id: "2", label: "Service Company"}];
+
+    return {
+        Divisions: _divisions,
+        CustomerTypes: _customerTypes
+    };
 }
 
 function BuyerController($state, $ocMedia, OrderCloud, OrderCloudParameters, Parameters, BuyerList) {
@@ -120,6 +132,8 @@ function BuyerEditController($exceptionHandler, $state, toastr, OrderCloud, Sele
     var vm = this;
     vm.buyer = SelectedBuyer;
     vm.buyerName = SelectedBuyer.Name;
+    vm.divisions = BuyerService.Divisions;
+    vm.types = BuyerService.CustomerTypes;
 
     vm.Submit = function() {
         OrderCloud.Buyers.Update(vm.buyer, SelectedBuyer.ID)
@@ -133,8 +147,10 @@ function BuyerEditController($exceptionHandler, $state, toastr, OrderCloud, Sele
     };
 }
 
-function BuyerCreateController($exceptionHandler, $state, toastr, OrderCloud) {
+function BuyerCreateController($exceptionHandler, $state, toastr, OrderCloud, BuyerService) {
     var vm = this;
+    vm.divisions = BuyerService.Divisions;
+    vm.types = BuyerService.CustomerTypes;
 
     vm.Submit = function() {
         OrderCloud.Buyers.Create(vm.buyer)
