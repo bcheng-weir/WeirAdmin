@@ -49,9 +49,21 @@ function BuyerService($q, $state, OrderCloud) {
     var _divisions = [{id: "1", label: "UK"}, {id: "2", label: "France"}];
     var _customerTypes = [{id: "1", label: "End User"}, {id: "2", label: "Service Company"}];
 
+    function _createBuyerAndAddress(buyer, address) {
+       address.xp.IsPrimary = true;
+       return OrderCloud.Buyers.Create(buyer)
+            .then(function(res) {
+		    OrderCloud.Addresses.Create(address, buyer.ID);
+            })
+            .catch(function(ex) {
+                $exceptionHandler(ex);
+            });
+    }
+
     return {
         Divisions: _divisions,
-        CustomerTypes: _customerTypes
+        CustomerTypes: _customerTypes,
+        CreateBuyerWithPrimaryAddress: _createBuyerAndAddress
     };
 }
 
@@ -151,9 +163,11 @@ function BuyerCreateController($exceptionHandler, $state, toastr, OrderCloud, Bu
     var vm = this;
     vm.divisions = BuyerService.Divisions;
     vm.types = BuyerService.CustomerTypes;
+    wm.primaryAddress = {};
 
     vm.Submit = function() {
         OrderCloud.Buyers.Create(vm.buyer)
+	// BuyerService.CreateBuyerWithPrimaryAddress(vm.buyer, vm.primaryAddress)
             .then(function() {
                 $state.go('buyers', {}, {reload: true});
                 toastr.success('Buyer Created', 'Success');
