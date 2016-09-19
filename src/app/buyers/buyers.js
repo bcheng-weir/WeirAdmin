@@ -163,7 +163,7 @@ function BuyerCreateController($exceptionHandler, $state, toastr, OrderCloud, Bu
     var vm = this;
     vm.divisions = BuyerService.Divisions;
     vm.types = BuyerService.CustomerTypes;
-    wm.primaryAddress = {};
+    vm.primaryAddress = {};
 
     vm.Submit = function() {
         OrderCloud.Buyers.Create(vm.buyer)
