@@ -44,6 +44,20 @@
         </div>
     </div>
 
+    <div class="row">
+        <div class="form-group col-md-6">
+            <label for="buyer_termsConditions" >Terms and Conditions</label>
+            <textarea rows="6" cols="50" id="buyer_termsConditions" type="text" ng-model="buyersAddressesCreate.buyer.xp.termsConditions" class="form-control"/>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="form-group col-md-6">
+            <label for="buyer_shippingDetails" >Shipping Details</label>
+            <textarea rows="6" cols="50" id="buyer_shippingDetails" type="text" ng-model="buyersAddressesCreate.buyer.xp.ShippingDetails" class="form-control"/>
+        </div>
+    </div>
+
     <!-- Address Start -->
     <div class="row">
         <div class="col-sm-6 form-group">
@@ -88,11 +102,11 @@
         </div>
         <div class="col-sm-3 form-group" ng-show="buyersAddressesCreate.address.Country == 'US' || buyersAddressesCreate.address.Country == 'CA'">
             <label for="addressStateInput">State</label>
-            <select  id="addressStateInput" class="form-control" ng-options="state.value as state.label for state in buyersAddressesCreate.states" ng-model="buyersAddressesCreate.address.State" required/>
+            <select  id="addressStateInput" class="form-control" ng-options="state.value as state.label for state in buyersAddressesCreate.states" ng-model="buyersAddressesCreate.address.State" />
         </div>
         <div class="col-sm-3 form-group" ng-hide="buyersAddressesCreate.address.Country == 'US' || buyersAddressesCreate.address.Country == 'CA'">
             <label for="addressStateInput">State</label>
-            <input  id="addressStateInput" class="form-control" ng-model="buyersAddressesCreate.address.State" required/>
+            <input  id="addressStateInput" class="form-control" ng-model="buyersAddressesCreate.address.State" />
         </div>
         <div class="col-sm-3 form-group">
             <label for="addressZipInput">Zip</label>

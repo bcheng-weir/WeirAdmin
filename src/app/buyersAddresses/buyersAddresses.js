@@ -3,8 +3,9 @@ angular.module('orderCloud')
     .factory('BuyerAddressService', BuyerAddressService)
     .controller('BuyerAddressCtrl', BuyerAddressCtrl)
     .controller('BuyerAddressEditCtrl', BuyerAddressEditCtrl)
-    .controller('AddressEditCtrl', AddressEditCtrl)
+    .controller('BAAddressEditCtrl', BAAddressEditCtrl)
     .controller('BuyerAddressCreateCtrl', BuyerAddressCreateCtrl)
+    .controller('BAAddressCreateCtrl', BAAddressCreateCtrl)
 ;
 
 function BuyerAddressConfig($stateProvider) {
@@ -43,8 +44,8 @@ function BuyerAddressConfig($stateProvider) {
         .state('buyersAddresses.edit.addressEdit', {
             url: '/:buyerid/edit/:addressid',
             templateUrl: 'buyersAddresses/templates/addressEdit.tpl.html',
-            controller: 'AddressEditCtrl',
-            controllerAs: 'addressEdit',
+            controller: 'BAAddressEditCtrl',
+            controllerAs: 'BAaddressEdit',
             resolve: {
                 SelectedBuyer: function($stateParams, OrderCloud){
                     return OrderCloud.Buyers.Get($stateParams.buyerid)
@@ -57,6 +58,17 @@ function BuyerAddressConfig($stateProvider) {
                 }
             }
         })
+        .state('buyersAddresses.edit.addressCreate', {
+            url: '/:buyerid/edit/address/create',
+            templateUrl: 'buyersAddresses/templates/addressCreate.tpl.html',
+            controller: 'BAAddressCreateCtrl',
+            controllerAs:'BAaddressCreate',
+            resolve: {
+                SelectedBuyer: function($stateParams, OrderCloud) {
+                    return OrderCloud.Buyers.Get($stateParams.buyerid)
+                }
+            }
+        })
         .state('buyersAddresses.create', {
             url: '/create',
             templateUrl: 'buyersAddresses/templates/buyersAddressesCreate.tpl.html',
@@ -66,21 +78,24 @@ function BuyerAddressConfig($stateProvider) {
 
 }
 
-function BuyerAddressService($q, $state, OrderCloud, toastr) {
+function BuyerAddressService($q, $state, OrderCloud, toastr, Underscore) {
     var _divisions = [{id: "1", label: "UK"}, {id: "2", label: "France"}];
     var _customerTypes = [{id: "1", label: "End User"}, {id: "2", label: "Service Company"}];
+
+    function AbortError() {}
 
     function _createBuyerAndAddress(buyer, address) {
         address.xp = {};
         address.xp.primary = true;
+        var newBuyerID = null;
 
         return OrderCloud.Buyers.Create(buyer)
             .then(function(res) {
-                OrderCloud.Addresses.Create(address, res.ID);
-
+                newBuyerID = res.ID;
+                OrderCloud.Addresses.Create(address, newBuyerID);
             })
             .then(function() {
-                $state.go('buyersAddresses.edit', {}, {reload: true});
+                $state.go('buyersAddresses.edit', {"buyerid": newBuyerID}, {reload: true});
                 toastr.success('Records Created', 'Success');
             })
             .catch(function(ex) {
@@ -88,10 +103,44 @@ function BuyerAddressService($q, $state, OrderCloud, toastr) {
             });
     }
 
+    function _updatePrimaryAddress(buyer, address) {
+        // if vm.address.xp && vm.address.xp.primary === true
+        // OrderCloud.Addresses.List(null,null,null,null,null,null,SelectedBuyer.ID)
+        // then find the one already marked as primary. if its ID === vm.addressid continue
+        // else, update currentPrimary to have xp.primary = false
+        // perform normal address.update.
+        var primaryAddress = null;
+        if(address.xp && address.xp.primary === true)
+        {
+            OrderCloud.Addresses.List(null,null,null,null,null,null,buyer.ID)
+                .then(function(resp) {
+                    primaryAddress = Underscore.find(resp.Items,function(item) {
+                        return item.xp.primary == true;
+                    });
+                    if (primaryAddress && (primaryAddress.ID === address.ID)) {
+                        throw new AbortError(); // Do not perform the update.
+                    } else {
+                        primaryAddress.xp.primary = false;
+                        return true;
+                    }
+                })
+                .then(function() {
+                    OrderCloud.Addresses.Patch(primaryAddress.ID, primaryAddress, buyer.ID);
+                })
+                .then(function(resp) {
+                    toastr.success("Old primary address unset.","Primary Address Changed");
+                })
+                .catch(function(ex) {
+                    $exceptionHandler(ex);
+                });
+        }
+    }
+
     return {
         Divisions: _divisions,
         CustomerTypes: _customerTypes,
-        CreateBuyerWithPrimaryAddress: _createBuyerAndAddress
+        CreateBuyerWithPrimaryAddress: _createBuyerAndAddress,
+        UpdatePrimaryAddress: _updatePrimaryAddress
     };
 }
 
@@ -280,7 +329,7 @@ function BuyerAddressCreateCtrl($exceptionHandler, $scope, $state, toastr, Order
     };
 }
 
-function AddressEditCtrl($exceptionHandler, $state, $scope, toastr, OrderCloud, OCGeography, SelectedBuyer, SelectedAddress) {
+function BAAddressEditCtrl($exceptionHandler, $state, $scope, toastr, OrderCloud, OCGeography, BuyerAddressService, SelectedBuyer, SelectedAddress) {
     var vm = this,
         addressID = SelectedAddress.ID;
     vm.addressName = SelectedAddress.AddressName;
@@ -291,10 +340,11 @@ function AddressEditCtrl($exceptionHandler, $state, $scope, toastr, OrderCloud, 
     $scope.$watch(function() {
         return vm.address.Country
     }, function() {
-        vm.address.State = null;
+        //vm.address.State = null;
     });
 
     vm.Submit = function() {
+        BuyerAddressService.UpdatePrimaryAddress(SelectedBuyer, vm.address);
         OrderCloud.Addresses.Update(addressID, vm.address, SelectedBuyer.ID)
             .then(function() {
                 $state.go('buyersAddresses.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
@@ -306,10 +356,37 @@ function AddressEditCtrl($exceptionHandler, $state, $scope, toastr, OrderCloud, 
     };
 
     vm.Delete = function() {
-        OrderCloud.Addresses.Delete(SelectedAddress.ID, false)
+        OrderCloud.Addresses.Delete(SelectedAddress.ID, SelectedBuyer.ID)
             .then(function() {
                 $state.go('buyersAddresses.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
                 toastr.success('Address Deleted', 'Success');
+            })
+            .catch(function(ex) {
+                $exceptionHandler(ex);
+            });
+    };
+}
+
+function BAAddressCreateCtrl($exceptionHandler, $scope, $state, toastr, OrderCloud, OCGeography, BuyerAddressService, SelectedBuyer) {
+    var vm = this;
+    vm.address = {
+        Country: 'US' // this is to default 'create' addresses to the country US
+    };
+    vm.countries = OCGeography.Countries;
+    vm.states = OCGeography.States;
+
+    $scope.$watch(function() {
+        return vm.address.Country
+    }, function() {
+        vm.address.State = null;
+    });
+
+    vm.Submit = function() {
+        BuyerAddressService.UpdatePrimaryAddress(SelectedBuyer, vm.address);
+        OrderCloud.Addresses.Create(vm.address, SelectedBuyer.ID)
+            .then(function() {
+                $state.go('buyersAddresses.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
+                toastr.success('Address Created', 'Success');
             })
             .catch(function(ex) {
                 $exceptionHandler(ex);

@@ -36,6 +36,21 @@
             </label>
         </div>
     </div>
+
+    <div class="row">
+        <div class="form-group col-md-6">
+            <label for="buyer_termsConditions" >Terms and Conditions</label>
+            <textarea rows="6" cols="50" id="buyer_termsConditions" type="text" ng-model="buyersAddressesEdit.buyer.xp.termsConditions" class="form-control"/>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="form-group col-md-6">
+            <label for="buyer_shippingDetails" >Shipping Details</label>
+            <textarea rows="6" cols="50" id="buyer_shippingDetails" type="text" ng-model="buyersAddressesEdit.buyer.xp.ShippingDetails" class="form-control"/>
+        </div>
+    </div>
+
     <div class="form-group">
         <button class="btn btn-primary" type="submit" ng-disabled="BuyerAddressEditForm.$invalid">Save</button>
         <button class="btn btn-default" ui-sref="^" type="button">Cancel</button>
@@ -50,6 +65,10 @@
 -->
         <!--TODO: The Address Edit state should also include Address Assignments-->
     <!--====== LIST ======-->
+    <div class="page-header">
+        <button type="button" class="btn btn-success pull-right" ui-sref=".addressCreate({buyerid: buyersAddressesEdit.buyer.ID})"><i class="fa fa-plus-circle"></i> Create New</button>
+        <H3>Addresses</H3>
+    </div>
     <div class="no-matches" ng-if="!buyersAddressesEdit.list.Items.length">
         <b>No matches found.</b>
     </div>
