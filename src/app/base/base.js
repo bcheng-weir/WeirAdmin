@@ -125,6 +125,7 @@ function BaseController($rootScope, $ocMedia, Underscore, snapRemote, defaultErr
         //regex ID_Name = ([A-Za-z0-9\-\_]+)
         errorMessages['confirmpassword'] = 'Your passwords do not match';
         errorMessages['noSpecialChars'] = 'Only Alphanumeric characters are allowed';
+        errorMessages['customPhone'] = 'Only numbers, spaces and parenthesis are allowed';
     });
 
     vm.snapOptions = {

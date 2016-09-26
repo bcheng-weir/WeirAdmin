@@ -26,7 +26,7 @@
         <div class="form-group col-sm-6">
             <!-- TODO: make phonefield -->
             <label for="userPhoneNumberInput">Phone Number</label>
-            <input id="userPhoneNumberInput" type="text" class="form-control" ng-model="userEdit.user.Phone" />
+            <input id="userPhoneNumberInput" type="text" class="form-control" ng-model="userEdit.user.Phone" pattern='^[ \d\(\)]{10,15}$' pattern-err-type="customPhone"/>
         </div>
         <div class="form-group col-sm-6">
             <label for="userEmailAddressInput">Email Address</label>
@@ -47,6 +47,16 @@
         <div class="col-sm-6 form-group">
             <label for="userPasswordConfirmInput">Confirm Password</label>
             <input id="userPasswordConfirmInput" type="password" pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!$%@#£€*?&]{8,}$" pattern-err-type="customPassword" class="form-control" ng-model="userEdit.PasswordConfirm" confirmpassword="{{userEdit.user.Password}}"/>
+        </div>
+        <div class="col-sm-6 form-group">
+            <label for="userLanguagePreference">Language Preference</label>
+            <select id="userLanguagePreference" class="form-control" ng-model="userEdit.user.xp.languagePreference" ng-options="language.value as language.label for language in userEdit.languageOptions"/>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6 form-group">
+            <label>User Type</label>
+            <select id="userType" class="form-control" ng-model="userEdit.user.xp.type" ng-options="userType.value as userType.label for userType in userEdit.userTypes"/>
         </div>
     </div>
     <div class="row">

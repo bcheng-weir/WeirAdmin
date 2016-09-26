@@ -1,5 +1,6 @@
 angular.module('orderCloud')
     .config(UsersConfig)
+    .factory('UserService', UserService)
     .controller('UsersCtrl', UsersController)
     .controller('UserEditCtrl', UserEditController)
     .controller('UserCreateCtrl', UserCreateController)
@@ -49,6 +50,16 @@ function UsersConfig($stateProvider) {
             }
         })
     ;
+}
+
+function UserService($q, $state, OrderCloud) {
+    var _languages = [{value: 1, label: "English"}, {value: 2, label: "French"}];
+    var _userTypes = [{value: 1, label: "Buyer"}, {value: 2, label: "Shopper"}];
+
+    return {
+        Languages: _languages,
+        UserTypes: _userTypes
+    };
 }
 
 function UsersController($state, $ocMedia, OrderCloud, OrderCloudParameters, UserList, Parameters) {
@@ -126,12 +137,14 @@ function UsersController($state, $ocMedia, OrderCloud, OrderCloudParameters, Use
     };
 }
 
-function UserEditController($exceptionHandler, $state, toastr, OrderCloud, SelectedUser, SecurityProfilesAvailable) {
+function UserEditController($exceptionHandler, $state, toastr, OrderCloud, SelectedUser, SecurityProfilesAvailable, UserService) {
     var vm = this,
         userid = SelectedUser.ID;
     vm.userName = SelectedUser.Username;
     vm.user = SelectedUser;
     vm.securityProfilesAvailable = SecurityProfilesAvailable.Items;
+    vm.languageOptions = UserService.Languages;
+    vm.userTypes = UserService.UserTypes;
     if (vm.user.TermsAccepted != null) {
         vm.TermsAccepted = true;
     }
@@ -161,11 +174,20 @@ function UserEditController($exceptionHandler, $state, toastr, OrderCloud, Selec
     };
 }
 
-function UserCreateController($exceptionHandler, $state, toastr, OrderCloud, SecurityProfilesAvailable) {
+function UserCreateController($exceptionHandler, $state, toastr, OrderCloud, SecurityProfilesAvailable, UserService) {
     var vm = this;
-    vm.user = {Email: '', Password: ''};
-    vm.user.Active = false;
+    vm.user = {
+        Active: false,
+        Email: '',
+        Password: '',
+        xp: {
+            languagePreference: 1
+        }
+    };
     vm.securityProfilesAvailable = SecurityProfilesAvailable.Items;
+    vm.languageOptions = UserService.Languages;
+    vm.userTypes = UserService.UserTypes;
+
     vm.Submit = function() {
         vm.user.TermsAccepted = new Date();
         OrderCloud.Users.Create(vm.user)
