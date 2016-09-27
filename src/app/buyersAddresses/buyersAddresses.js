@@ -16,7 +16,7 @@ function BuyerAddressConfig($stateProvider) {
             controller: 'BuyerAddressCtrl',
             controllerAs: 'buyersAddresses',
             url: '/buyersAddresses?search&page&pageSize',
-            data: {componentName: 'BuyersAddresses'},
+            data: {componentName: 'Customers'},
             resolve: {
                 Parameters: function($stateParams, OrderCloudParameters) {
                     return OrderCloudParameters.Get($stateParams);
