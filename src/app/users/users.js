@@ -53,11 +53,9 @@ function UsersConfig($stateProvider) {
 }
 
 function UserService($q, $state, OrderCloud) {
-    var _languages = [{value: 1, label: "English"}, {value: 2, label: "French"}];
     var _userTypes = [{value: 1, label: "Buyer"}, {value: 2, label: "Shopper"}];
 
     return {
-        Languages: _languages,
         UserTypes: _userTypes
     };
 }
@@ -143,7 +141,6 @@ function UserEditController($exceptionHandler, $state, toastr, OrderCloud, Selec
     vm.userName = SelectedUser.Username;
     vm.user = SelectedUser;
     vm.securityProfilesAvailable = SecurityProfilesAvailable.Items;
-    vm.languageOptions = UserService.Languages;
     vm.userTypes = UserService.UserTypes;
     if (vm.user.TermsAccepted != null) {
         vm.TermsAccepted = true;
@@ -180,9 +177,7 @@ function UserCreateController($exceptionHandler, $state, toastr, OrderCloud, Sec
         Active: false,
         Email: '',
         Password: '',
-        xp: {
-            languagePreference: 1
-        }
+        xp: {}
     };
     vm.securityProfilesAvailable = SecurityProfilesAvailable.Items;
     vm.languageOptions = UserService.Languages;
@@ -190,6 +185,7 @@ function UserCreateController($exceptionHandler, $state, toastr, OrderCloud, Sec
 
     vm.Submit = function() {
         vm.user.TermsAccepted = new Date();
+        vm.user.Username = vm.user.Email;
         OrderCloud.Users.Create(vm.user)
             .then(function() {
                 $state.go('users', {}, {reload: true});

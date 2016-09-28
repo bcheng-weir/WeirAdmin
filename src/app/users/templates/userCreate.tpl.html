@@ -7,10 +7,10 @@
             <label for="userIDInput">User ID</label>
             <input id="userIDInput" ordercloud-auto-id type="text" pattern="([A-Za-z0-9\-\_]+)" pattern-err-type="ID_Name" class="form-control" ng-model="userCreate.user.ID"/>
         </div>
-        <div class="form-group col-sm-6">
+        <!--<div class="form-group col-sm-6">
             <label for="userNameInput">User Name</label>
             <input id="userNameInput" type="text" class="form-control" ng-model="userCreate.user.Username" required/>
-        </div>
+        </div>-->
     </div>
     <div class="row">
         <div class="col-sm-6 form-group">
@@ -40,7 +40,7 @@
         </div>
         <div class="col-sm-6 form-group">
             <label for="securityProfile">Security Profile</label>
-            <select id="securityProfile"  class="form-control" ng-model="userCreate.user.SecurityProfileID" ng-options="sp.ID as sp.Name for sp in userCreate.securityProfilesAvailable" required></select>
+            <select id="securityProfile"  class="form-control" ng-model="userCreate.user.xp.SecurityProfileID" ng-options="sp.ID as sp.Name for sp in userCreate.securityProfilesAvailable" required></select>
         </div>
     </div>
     <div class="row">
@@ -48,12 +48,6 @@
             <label for="userPasswordConfirmInput">Confirm Password</label>
             <input id="userPasswordConfirmInput" type="password" pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!$%@#£€*?&]{8,}$" pattern-err-type="customPassword"  class="form-control" ng-model="userCreate.user.PasswordConfirm" confirmpassword="{{userCreate.user.Password}}" required/>
         </div>
-        <div class="col-sm-6 form-group">
-            <label for="userLanguagePreference">Language Preference</label>
-            <select id="userLanguagePreference" class="form-control" type="text" ng-model="userCreate.user.xp.languagePreference" ng-options="language.value as language.label for language in userCreate.languageOptions"/>
-        </div>
-    </div>
-    <div class="row">
         <div class="col-sm-6 form-group">
             <label>User Type</label>
             <select id="userType" class="form-control" ng-model="userCreate.user.xp.type" ng-options="userType.value as userType.label for userType in userCreate.userTypes"/>
