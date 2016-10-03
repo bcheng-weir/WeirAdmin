@@ -384,10 +384,13 @@ function CustomerAddressEditCtrl($q, $exceptionHandler, $state, $scope, toastr, 
     }
 
     vm.Delete = function() {
-        OrderCloud.Addresses.Delete(SelectedAddress.ID, SelectedBuyer.ID)
+        vm.address.xp = typeof vm.address.xp === "undefined" ? {} : vm.address.xp;
+        vm.address.xp.inactive = true;
+
+        OrderCloud.Addresses.Update(addressID, vm.address, SelectedBuyer.ID)
             .then(function() {
-                $state.go('customers.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
-                toastr.success('Address Deleted', 'Success');
+                $state.go('customers.edit', {"buyerid":SelectedBuyer.ID}, {reload: true});
+                toastr.success('Address set to inactive.', 'Success');
             })
             .catch(function(ex) {
                 $exceptionHandler(ex);

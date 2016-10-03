@@ -75,7 +75,8 @@
 	<div class="form-group">
 		<button type="submit" class="btn btn-primary" ng-disabled="AddressEditForm.$invalid">Save</button>
 		<button type="button" class="btn btn-default" ui-sref="^">Cancel</button>
-		<button type="button" class="btn btn-default" ng-click="customerAddressEdit.Delete()"><i class="fa fa-trash text-danger"></i></button>
+		<!--<button type="button" class="btn btn-default" ng-click="customerAddressEdit.Delete()" ng-disabled="customerAddressEdit.address.xp.primary"><i class="fa fa-trash text-danger"></i></button>-->
+		<button type="button" class="btn btn-default" ng-click="customerAddressEdit.Delete()" ng-disabled="customerAddressEdit.address.xp.primary">Set as Inactive</button>
 	</div>
 	<!--TODO: The Address Edit state should also include Address Assignments-->
 </form>
