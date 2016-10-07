@@ -100,11 +100,6 @@ function CustomerService($q, $state, OrderCloud, toastr, Underscore, $exceptionH
     }
 
     function _updatePrimaryAddress(buyer, address) {
-        // if vm.address.xp && vm.address.xp.primary === true
-        // OrderCloud.Addresses.List(null,null,null,null,null,null,SelectedBuyer.ID)
-        // then find the one already marked as primary. if its ID === vm.addressid continue
-        // else, update currentPrimary to have xp.primary = false
-        // perform normal address.update.
         var primaryAddress = null;
         if(address.xp && address.xp.primary === true)
         {
@@ -368,19 +363,15 @@ function CustomerAddressEditCtrl($q, $exceptionHandler, $state, $scope, toastr, 
 
     function _submit() {
         var queue = [];
-        var dfd = $q.defer();
         queue.push(CustomerService.UpdatePrimaryAddress(SelectedBuyer, vm.address));
         queue.push(OrderCloud.Addresses.Update(addressID, vm.address, SelectedBuyer.ID));
         $q.all(queue).then(function() {
-                dfd.resolve();
                 $state.go('customers.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
                 toastr.success('Address Updated', 'Success');
             })
             .catch(function(ex) {
                 $exceptionHandler(ex);
             });
-
-        return dfd.promise;
     }
 
     vm.Delete = function() {
@@ -416,18 +407,14 @@ function CustomerAddressCreateCtrl($q, $exceptionHandler, $scope, $state, toastr
 
     function _submit() {
         var queue = [];
-        var dfd = $q.defer();
         queue.push(CustomerService.UpdatePrimaryAddress(SelectedBuyer, vm.address));
         queue.push(OrderCloud.Addresses.Create(vm.address, SelectedBuyer.ID));
         $q.all(queue).then(function() {
-                dfd.resolve();
                 $state.go('customers.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
                 toastr.success('Address Created', 'Success');
             })
             .catch(function(ex) {
                 $exceptionHandler(ex);
             });
-
-        return dfd.promise;
     }
 }
