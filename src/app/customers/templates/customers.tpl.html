@@ -71,7 +71,7 @@
                     <!-- </a> -->
                 </th>
                 <th class="text-center" scope="col">
-                    Division
+                    Weir Group
                 </th>
                 <th class="text-center" scope="col">
                     Type
@@ -86,7 +86,7 @@
             <tr ng-repeat="buyer in customers.list.Items">
                 <th scope="row">{{buyer.ID}}</th>
                 <td data-title="Name">{{buyer.Name}}</td>
-                <td data-title="Division" class="text-center">{{buyer.xp.Division.label}}</td>
+                <td data-title="WeirGroup" class="text-center">{{buyer.xp.WeirGroup.label}}</td>
                 <td data-title="Name" class="text-center">{{buyer.xp.Type.label}}</td>
                 <td class="text-center" data-title="Active"><i class="fa fa-circle" aria-hidden="true"
                                                                ng-class="{'active':buyer.Active}"></i></td>

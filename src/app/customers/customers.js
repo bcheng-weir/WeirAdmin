@@ -78,7 +78,7 @@ function CustomerConfig($stateProvider) {
 }
 
 function CustomerService($q, $state, OrderCloud, toastr, $exceptionHandler) {
-    var _divisions = [{id: "1", label: "UK"}, {id: "2", label: "France"}];
+    var _weirGroups = [{id: "1", label: "UK"}, {id: "2", label: "France"}];
     var _customerTypes = [{id: "1", label: "End User"}, {id: "2", label: "Service Company"}];
 
     function AbortError() {}
@@ -105,7 +105,7 @@ function CustomerService($q, $state, OrderCloud, toastr, $exceptionHandler) {
     }
 
     return {
-        Divisions: _divisions,
+        WeirGroups: _weirGroups,
         CustomerTypes: _customerTypes,
         CreateBuyer: _createBuyer,
         CreateAddress: _createAddress,
@@ -261,7 +261,7 @@ function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, O
     };
 
     vm.buyerName = SelectedBuyer.Name;
-    vm.divisions = CustomerService.Divisions;
+    vm.WeirGroups = CustomerService.WeirGroups;
     vm.types = CustomerService.CustomerTypes;
 
     vm.Submit = function() {
@@ -290,7 +290,7 @@ function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, O
 
 function CustomerCreateCtrl($q, $exceptionHandler, $scope, $state, toastr, OrderCloud, CustomerService, OCGeography) {
     var vm = this;
-    vm.divisions = CustomerService.Divisions;
+    vm.WeirGroups = CustomerService.WeirGroups;
     vm.types = CustomerService.CustomerTypes;
     vm.address = {
         Country: 'US' //This defaults create addresses to the US. Change to UK?
