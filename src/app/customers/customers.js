@@ -431,8 +431,8 @@ function CustomerAddressEditCtrl($q, $exceptionHandler, $state, $scope, toastr, 
                 .catch(function(ex) {
                     $exceptionHandler(ex);
                 });
-        } else if (dirtyItems.length > 0) { //Primary changed to false. No other changes.
-            OrderCloud.Addresses.Update(vm.address.ID, vm.address, SelectedBuyer.ID)
+        } else if (dirtyItems.length > 0) {
+            OrderCloud.Addresses.Update(original.ID, original, SelectedBuyer.ID)
                 .then(function(resp) {
                     vm.address.ID = null;
                     return OrderCloud.Addresses.Create(vm.address,SelectedBuyer.ID);
