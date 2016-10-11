@@ -6,6 +6,7 @@ angular.module('orderCloud')
     .controller('CustomerAddressEditCtrl', CustomerAddressEditCtrl)
     .controller('CustomerCreateCtrl', CustomerCreateCtrl)
     .controller('CustomerAddressCreateCtrl', CustomerAddressCreateCtrl)
+    .controller('CustomerAssignCtrl', CustomerAssignCtrl)
 ;
 
 function CustomerConfig($stateProvider) {
@@ -64,7 +65,7 @@ function CustomerConfig($stateProvider) {
             controllerAs:'customerAddressCreate',
             resolve: {
                 SelectedBuyer: function($stateParams, OrderCloud) {
-                    return OrderCloud.Buyers.Get($stateParams.buyerid)
+                    return OrderCloud.Buyers.Get($stateParams.buyerid);
                 }
             }
         })
@@ -73,6 +74,20 @@ function CustomerConfig($stateProvider) {
             templateUrl: 'customers/templates/customerCreate.tpl.html',
             controller: 'CustomerCreateCtrl',
             controllerAs: 'customerCreate'
+        })
+        .state('customers.assign', {
+            url: '/:buyerid/assign',
+            templateUrl: 'customers/templates/customerAssign.tpl.html',
+            controller: 'CustomerAssignCtrl',
+            controllerAs: 'customerAssign',
+            resolve: {
+                SelectedBuyer: function($stateParams, OrderCloud) {
+                    return OrderCloud.Buyers.Get($stateParams.buyerid);
+                },
+                EndUsers: function($stateParams, OrderCloud) {
+                    return OrderCloud.Buyers.List();
+                }
+            }
         });
 
 }
@@ -518,5 +533,49 @@ function CustomerAddressCreateCtrl($q, $exceptionHandler, $scope, $state, toastr
                     $exceptionHandler(ex);
                 });
         }
+    }
+}
+
+function CustomerAssignCtrl($q, $exceptionHandler, $scope, $state, toastr, Underscore, OrderCloud, SelectedBuyer, EndUsers, Assignments) {
+    var vm = this;
+    vm.assignments = SelectedBuyer.xp.Assignments;
+    vm.serviceCompany = SelectedBuyer;
+    EndUsers.Items = Underscore.filter(EndUsers.Items, function(item) {
+        return item.Active == true && item.xp.Type.id == 1 && item.xp.WeirGroup.id == vm.serviceCompany.xp.WeirGroup.id;
+    });
+    vm.list = EndUsers;
+
+    $scope.$watchCollection(function() {
+        return vm.list;
+    }, function() {
+        setSelected();
+    });
+
+    vm.setSelected = setSelected;
+    function setSelected() {
+        var assigned = Assignments.GetAssigned(vm.assignments, 'ID');
+        angular.forEach(vm.list.Items, function(item) {
+            if(assigned.indexOf(item.ID) > -1) {
+                item.selected = true;
+                //var assignmentItem = Underscore.where(vm.assignments, {ID: item.ID})[0];
+            }
+        })
+    }
+
+    vm.saveAssignments = function() {
+        var selected = Underscore.pluck(Underscore.where(vm.list.Items, {selected: true}), 'ID');
+        vm.assignments = [];
+
+        angular.forEach(selected, function(item) {
+            vm.assignments.push({"ID":item});
+        });
+
+        vm.serviceCompany.xp.Assignments = vm.assignments;
+
+        return OrderCloud.Buyers.Update(vm.serviceCompany, vm.serviceCompany.ID)
+            .then(function() {
+                $state.reload($state.current);
+                toastr.success('Assignments updated.','Success');
+            })
     }
 }

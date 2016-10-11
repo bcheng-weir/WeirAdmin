@@ -14,35 +14,8 @@
 			<button type="submit" class="btn btn-primary">Search</button>
 			<button ng-if="customers.searchResults" ng-click="customers.clearSearch()" type="button" class="btn btn-default"><i class="fa fa-times"></i></button>
 		</span>
-            <!-- Commented out until API supports sorting for buyers -->
-            <!--
-            <span ng-class="{'btn-group':buyers.filtersApplied}" >
-                <button type="button" class="btn btn-default" ng-click="buyers.showFilters = !buyers.showFilters" ng-show="application.$ocMedia('max-width:767px')"><i class="fa fa-filter"></i> Filters</button>
-                <button ng-if="buyers.filtersApplied" ng-click="buyers.clearFilters()" type="button" class="btn btn-default"><i class="fa fa-times"></i></button>
-            </span>
-            -->
         </fieldset>
     </form>
-    <div class="row" style="margin-top:15px;" uib-collapse="!customers.showFilters">
-        <div class="col-md-6 col-lg-4">
-            <div class="form-group" ng-if="application.$ocMedia('max-width:767px')">
-                <label>Sort By:</label>
-                <div ng-class="{'input-group':customers.sortSelection}">
-                    <select placeholder="Sort" class="form-control" ng-model="customers.sortSelection" ng-change="customers.updateSort()">
-                        <option value="">None</option>
-                        <option value="ID">ID</option>
-                        <option value="Name">Name</option>
-                    </select>
-                    <div ng-if="customers.sortSelection" class="input-group-btn">
-                        <button class="btn btn-default" ng-click="customers.reverseSort()">
-                            <i class="fa fa-sort"></i>
-                        </button>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!--====== LIST ======-->
     <div class="no-matches" ng-if="!customers.list.Items.length">
@@ -91,6 +64,8 @@
                 <td class="text-center" data-title="Active"><i class="fa fa-circle" aria-hidden="true"
                                                                ng-class="{'active':buyer.Active}"></i></td>
                 <td class="actions-cell">
+                    <button type="button" ui-sref="customers.assign({buyerid: buyer.ID})" class="btn btn-default btn-sm" ng-hide="buyer.xp.Type.id==1">Assign
+                    </button>
                     <button type="button" ui-sref="customers.edit({buyerid: buyer.ID})" class="btn btn-default btn-sm">Edit
                     </button>
                 </td>
