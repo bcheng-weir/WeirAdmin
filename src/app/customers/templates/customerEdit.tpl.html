@@ -48,17 +48,10 @@
     </div>
 
     <div class="form-group">
-        <button class="btn btn-primary" type="submit" ng-disabled="CustomerEditForm.$invalid">Save</button>
+        <button class="btn btn-primary" type="submit" ng-disabled="CustomerEditForm.$invalid || customerEdit.checkForPrimary()">Save</button>
         <button class="btn btn-default" ui-sref="^" type="button">Cancel</button>
         <!--<button class="btn btn-primary" ng-click="customerEdit.Delete();" type="button"><i class="fa fa-trash text-danger"></i> Delete</button>-->
     </div>
-<!--
-        <div class="form-group">
-            <button type="submit" class="btn btn-primary" ng-disabled="customerEdit.$invalid">Save</button>
-            <button type="button" class="btn btn-default" ui-sref="^">Cancel</button>
-            <button type="button" class="btn btn-default" ng-click="customerEdit.Delete()"><i class="fa fa-trash text-danger"></i></button>
-        </div>
--->
         <!--TODO: The Address Edit state should also include Address Assignments-->
     <!--====== LIST ======-->
     <div class="page-header">

@@ -77,7 +77,7 @@ function CustomerConfig($stateProvider) {
 
 }
 
-function CustomerService($q, $state, OrderCloud, toastr, Underscore, $exceptionHandler) {
+function CustomerService($q, $state, OrderCloud, toastr, $exceptionHandler) {
     var _divisions = [{id: "1", label: "UK"}, {id: "2", label: "France"}];
     var _customerTypes = [{id: "1", label: "End User"}, {id: "2", label: "Service Company"}];
 
@@ -90,49 +90,26 @@ function CustomerService($q, $state, OrderCloud, toastr, Underscore, $exceptionH
             });
     }
 
-    function _createAddress(address, buyer){
-        address.xp = {};
-        address.xp.primary = true;
-        return OrderCloud.Addresses.Create(address, buyer.ID)
+    function _createAddress(address, buyerID){
+        return OrderCloud.Addresses.Create(address, buyerID)
             .catch(function(ex) {
                 $exceptionHandler(ex);
             });
     }
 
-    function _updatePrimaryAddress(buyer, address) {
-        var primaryAddress = null;
-        if(address.xp && address.xp.primary === true)
-        {
-            OrderCloud.Addresses.List(null,null,null,null,null,null,buyer.ID)
-                .then(function(resp) {
-                    primaryAddress = Underscore.find(resp.Items,function(item) {
-                        return item.xp.primary == true;
-                    });
-                    if (primaryAddress && (primaryAddress.ID === address.ID)) {
-                        throw new AbortError(); // Do not perform the update.
-                    } else {
-                        primaryAddress.xp.primary = false;
-                        return true;
-                    }
-                })
-                .then(function() {
-                    OrderCloud.Addresses.Patch(primaryAddress.ID, primaryAddress, buyer.ID);
-                })
-                .then(function(resp) {
-                    toastr.success("Old primary address unset.","Primary Address Changed");
-                })
-                .catch(function(ex) {
-                    $exceptionHandler(ex);
-                });
-        }
+    function _updateAddress(address, buyerID) {
+        return OrderCloud.Addresses.Update(address.ID, address, buyerID)
+            .catch(function(ex) {
+                $exceptionHandler(ex);
+            })
     }
 
     return {
         Divisions: _divisions,
         CustomerTypes: _customerTypes,
-        UpdatePrimaryAddress: _updatePrimaryAddress,
         CreateBuyer: _createBuyer,
-        CreateAddress: _createAddress
+        CreateAddress: _createAddress,
+        UpdateAddress: _updateAddress
     };
 }
 
@@ -209,14 +186,11 @@ function CustomerCtrl($state, $ocMedia, OrderCloud, OrderCloudParameters, Parame
     };
 }
 
-function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, OrderCloud, SelectedBuyer, AddressList, CustomerService, Parameters) {
+function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, OrderCloud, SelectedBuyer, AddressList, CustomerService, Parameters, Underscore) {
     var vm = this;
     $scope.$state = $state;
-    $scope.$watch('$state.$current.locals.globals.AddressList', function(AddressList) {
-        vm.list = AddressList;
-    });
     vm.buyer = SelectedBuyer;
-    //vm.list = AddressList;
+    vm.list = AddressList;
     vm.parameters = Parameters;
     vm.sortSelection =  Parameters.sortBy ? (Parameters.sortBy.indexOf('!') == 0 ? Parameters.sortBy.split('!')[1] : Parameters.sortBy) : null;
 
@@ -300,6 +274,18 @@ function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, O
                 $exceptionHandler(ex);
             });
     };
+
+    vm.checkForPrimary = function() {
+        var primaryAddress = Underscore.find(vm.list.Items, function(item) {
+            return item.xp.primary == true;
+        });
+
+        if(!primaryAddress || primaryAddress.length < 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
 
 function CustomerCreateCtrl($q, $exceptionHandler, $scope, $state, toastr, OrderCloud, CustomerService, OCGeography) {
@@ -325,11 +311,13 @@ function CustomerCreateCtrl($q, $exceptionHandler, $scope, $state, toastr, Order
         var queue = [];
         var dfd = $q.defer();
         var newBuyerID = null;
+        vm.address.xp = {};
+        vm.address.xp.primary = true;
 
         var buyerPromise = CustomerService.CreateBuyer(vm.buyer);
         var addressPromise = buyerPromise.then(function(newBuyer) {
             newBuyerID = newBuyer.ID;
-            return CustomerService.CreateAddress(vm.address, newBuyer)
+            return CustomerService.CreateAddress(vm.address, newBuyerID)
         });
 
         queue.push(buyerPromise);
@@ -345,13 +333,15 @@ function CustomerCreateCtrl($q, $exceptionHandler, $scope, $state, toastr, Order
     }
 }
 
-function CustomerAddressEditCtrl($q, $exceptionHandler, $state, $scope, toastr, OrderCloud, OCGeography, CustomerService, SelectedBuyer, SelectedAddress) {
+function CustomerAddressEditCtrl($q, $exceptionHandler, $state, $scope, toastr, OrderCloud, OCGeography, SelectedBuyer, SelectedAddress, Underscore) {
     var vm = this,
         addressID = SelectedAddress.ID;
     vm.addressName = SelectedAddress.AddressName;
     vm.address = SelectedAddress;
     vm.countries = OCGeography.Countries;
     vm.states = OCGeography.States;
+    var original = angular.copy(vm.address); //use this to make the copy if there are dirty items. Set the inactive to true and primary to false if versioning.
+
 
     $scope.$watch(function() {
         return vm.address.Country
@@ -362,16 +352,99 @@ function CustomerAddressEditCtrl($q, $exceptionHandler, $state, $scope, toastr, 
     vm.Submit = _submit;
 
     function _submit() {
-        var queue = [];
-        queue.push(CustomerService.UpdatePrimaryAddress(SelectedBuyer, vm.address));
-        queue.push(OrderCloud.Addresses.Update(addressID, vm.address, SelectedBuyer.ID));
-        $q.all(queue).then(function() {
-                $state.go('customers.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
-                toastr.success('Address Updated', 'Success');
-            })
-            .catch(function(ex) {
-                $exceptionHandler(ex);
-            });
+        // Determine what has changed. If only xp.primary is changed do NOT version.
+        console.log($scope.AddressEditForm);
+
+        var dirtyItems = [];
+        angular.forEach($scope.AddressEditForm, function(value, key) {
+            //if(key[0] != '$' && key != "addressPrimaryInput" && value.$pristine == false) {
+            if(key[0] != '$' && value.$pristine == false) {
+                this.push(key);
+            }
+        }, dirtyItems);
+
+        console.log(dirtyItems);
+
+        original.xp = typeof original.xp == "undefined" ? {} : original.xp;
+        original.xp.primary = false;
+        original.xp.inactive = true;
+
+        var primaryAddress = null;
+        if(Underscore.contains(dirtyItems,"addressPrimaryInput") && vm.address.xp && vm.address.xp.primary == true && dirtyItems.length == 1) {
+            OrderCloud.Addresses.List(null,null,null,null,null,null,SelectedBuyer.ID)
+                .then(function(resp) {
+                    primaryAddress = Underscore.find(resp.Items,function(item) {
+                        return item.xp.primary == true;
+                    });
+                    if (primaryAddress && (primaryAddress.ID !== vm.address.ID)) {
+                        primaryAddress.xp.primary = false;
+                        return OrderCloud.Addresses.Patch(primaryAddress.ID, primaryAddress, SelectedBuyer.ID)
+                            .then(toastr.success("Previous primary address unset.","Primary Address Changed"));
+                    } else {
+                        return resp;
+                    }
+                })
+                .then(function(resp) {
+                    return OrderCloud.Addresses.Update(addressID, vm.address, SelectedBuyer.ID)
+                })
+                .then(function(resp) {
+                    $state.go('customers.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
+                    toastr.success('Address Updated','Success');
+                })
+                .catch(function(ex) {
+                    $exceptionHandler(ex);
+                });
+        } else if (Underscore.contains(dirtyItems,"addressPrimaryInput") && vm.address.xp && vm.address.xp.primary == true && dirtyItems.length > 1) { //Address updated, but primary is false.
+            OrderCloud.Addresses.List(null, null, null, null, null, null, SelectedBuyer.ID)
+                .then(function (resp) {
+                    primaryAddress = Underscore.find(resp.Items, function (item) {
+                        return item.xp.primary == true;
+                    });
+                    if (primaryAddress && (primaryAddress.ID !== vm.address.ID)) {
+                        primaryAddress.xp.primary = false;
+                        return OrderCloud.Addresses.Patch(primaryAddress.ID, primaryAddress, SelectedBuyer.ID)
+                            .then(toastr.success("Previous primary address unset.", "Primary Address Changed"));
+                    } else {
+                        return resp;
+                    }
+                })
+                .then(function (resp) {
+                    return OrderCloud.Addresses.Update(original.ID, original, SelectedBuyer.ID)
+                })
+                .then(function (resp) {
+                    vm.address.ID = null;
+                    return OrderCloud.Addresses.Create(vm.address, SelectedBuyer.ID);
+                })
+                .then(function (resp) {
+                    $state.go('customers.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
+                    toastr.success('Address Updated', 'Success');
+                })
+                .catch(function (ex) {
+                    $exceptionHandler(ex);
+                });
+        } else if (Underscore.contains(dirtyItems,"addressPrimaryInput") && dirtyItems.length == 1) {
+            OrderCloud.Addresses.Update(vm.address.ID, vm.address, SelectedBuyer.ID)
+                .then(function() {
+                    $state.go('customers.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
+                    toastr.success('Address Updated','Success');
+                })
+                .catch(function(ex) {
+                    $exceptionHandler(ex);
+                });
+        } else if (dirtyItems.length > 0) { //Primary changed to false. No other changes.
+            OrderCloud.Addresses.Update(vm.address.ID, vm.address, SelectedBuyer.ID)
+                .then(function(resp) {
+                    vm.address.ID = null;
+                    return OrderCloud.Addresses.Create(vm.address,SelectedBuyer.ID);
+                })
+                .then(function() {
+                    $state.go('customers.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
+                    toastr.success('Address Updated','Success');
+                })
+                .catch(function(ex) {
+                    $exceptionHandler(ex);
+                });
+        }
     }
 
     vm.Delete = function() {
@@ -389,7 +462,7 @@ function CustomerAddressEditCtrl($q, $exceptionHandler, $state, $scope, toastr, 
     };
 }
 
-function CustomerAddressCreateCtrl($q, $exceptionHandler, $scope, $state, toastr, OrderCloud, OCGeography, CustomerService, SelectedBuyer) {
+function CustomerAddressCreateCtrl($q, $exceptionHandler, $scope, $state, toastr, OrderCloud, OCGeography, CustomerService, SelectedBuyer, Underscore) {
     var vm = this;
     vm.address = {
         Country: 'US' // this is to default 'create' addresses to the country US
@@ -406,15 +479,44 @@ function CustomerAddressCreateCtrl($q, $exceptionHandler, $scope, $state, toastr
     vm.Submit = _submit;
 
     function _submit() {
-        var queue = [];
-        queue.push(CustomerService.UpdatePrimaryAddress(SelectedBuyer, vm.address));
-        queue.push(OrderCloud.Addresses.Create(vm.address, SelectedBuyer.ID));
-        $q.all(queue).then(function() {
-                $state.go('customers.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
-                toastr.success('Address Created', 'Success');
-            })
-            .catch(function(ex) {
-                $exceptionHandler(ex);
-            });
+        var primaryAddress = null;
+        if(vm.address.xp && (vm.address.xp.primary === true)) {
+            OrderCloud.Addresses.List(null,null,null,null,null,null,SelectedBuyer.ID)
+                .then(function(resp) {
+                    primaryAddress = Underscore.find(resp.Items,function(item) {
+                        return item.xp.primary == true;
+                    });
+                    if (primaryAddress && (primaryAddress.ID !== vm.address.ID)) {
+                        primaryAddress.xp.primary = false;
+                        return OrderCloud.Addresses.Patch(primaryAddress.ID, primaryAddress, SelectedBuyer.ID)
+                            .then(toastr.success("Previous primary address unset.","Primary Address Changed"));
+                    } else {
+                        return resp;
+                    }
+                })
+                .then(function() {
+                    return CustomerService.CreateAddress(vm.address, SelectedBuyer.ID);
+                })
+                .then(function(resp) {
+                    $state.go('customers.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
+                    toastr.success('Address Created', 'Success');
+                    return resp;
+                })
+                .catch(function(ex) {
+                    $exceptionHandler(ex);
+                });
+        } else {
+            vm.address.xp = {};
+            vm.address.xp.primary = false;
+            CustomerService.CreateAddress(vm.address, SelectedBuyer.ID)
+                .then(function(resp) {
+                    $state.go('customers.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
+                    toastr.success('Address Created', 'Success');
+                    return resp;
+                })
+                .catch(function(ex) {
+                    $exceptionHandler(ex);
+                });
+        }
     }
 }
