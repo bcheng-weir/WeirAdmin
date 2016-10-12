@@ -543,11 +543,16 @@ function CustomerAssignCtrl($q, $exceptionHandler, $scope, $state, toastr, Under
     EndUsers.Items = Underscore.filter(EndUsers.Items, function(item) {
         return item.Active == true && item.xp.Type.id == 1 && item.xp.WeirGroup.id == vm.serviceCompany.xp.WeirGroup.id;
     });
-    vm.list = EndUsers;
+    vm.list = angular.copy(EndUsers);
+    vm.endUsers = angular.copy(EndUsers);
 
     $scope.$watchCollection(function() {
         return vm.list;
     }, function() {
+        EndUsers.Items = Underscore.filter(vm.list.Items, function(item) {
+            return item.Active == true && item.xp.Type.id == 1 && item.xp.WeirGroup.id == vm.serviceCompany.xp.WeirGroup.id;
+        });
+        vm.endUsers = EndUsers;
         setSelected();
     });
 
@@ -557,7 +562,6 @@ function CustomerAssignCtrl($q, $exceptionHandler, $scope, $state, toastr, Under
         angular.forEach(vm.list.Items, function(item) {
             if(assigned.indexOf(item.ID) > -1) {
                 item.selected = true;
-                //var assignmentItem = Underscore.where(vm.assignments, {ID: item.ID})[0];
             }
         })
     }
@@ -577,5 +581,8 @@ function CustomerAssignCtrl($q, $exceptionHandler, $scope, $state, toastr, Under
                 $state.reload($state.current);
                 toastr.success('Assignments updated.','Success');
             })
-    }
+            .catch(function(ex) {
+                $exceptionHandler(ex);
+            });
+    };
 }
