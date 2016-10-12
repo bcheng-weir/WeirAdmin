@@ -93,7 +93,7 @@ function CustomerConfig($stateProvider) {
 }
 
 function CustomerService($q, $state, OrderCloud, toastr, $exceptionHandler) {
-    var _weirGroups = [{id: "1", label: "UK"}, {id: "2", label: "France"}];
+    var _weirGroups = [{id: "1", label: "WCVUK"}, {id: "2", label: "WPIFR"}];
     var _customerTypes = [{id: "1", label: "End User"}, {id: "2", label: "Service Company"}];
 
     function AbortError() {}
@@ -328,6 +328,7 @@ function CustomerCreateCtrl($q, $exceptionHandler, $scope, $state, toastr, Order
         var newBuyerID = null;
         vm.address.xp = {};
         vm.address.xp.primary = true;
+        vm.buyer.xp.Assignments = [];
 
         var buyerPromise = CustomerService.CreateBuyer(vm.buyer);
         var addressPromise = buyerPromise.then(function(newBuyer) {
@@ -538,7 +539,7 @@ function CustomerAddressCreateCtrl($q, $exceptionHandler, $scope, $state, toastr
 
 function CustomerAssignCtrl($q, $exceptionHandler, $scope, $state, toastr, Underscore, OrderCloud, SelectedBuyer, EndUsers, Assignments) {
     var vm = this;
-    vm.assignments = SelectedBuyer.xp.Assignments;
+    vm.assignments = angular.copy(SelectedBuyer.xp.Assignments);
     vm.serviceCompany = SelectedBuyer;
     EndUsers.Items = Underscore.filter(EndUsers.Items, function(item) {
         return item.Active == true && item.xp.Type.id == 1 && item.xp.WeirGroup.id == vm.serviceCompany.xp.WeirGroup.id;
@@ -567,11 +568,25 @@ function CustomerAssignCtrl($q, $exceptionHandler, $scope, $state, toastr, Under
     }
 
     vm.saveAssignments = function() {
+        var assigned = Underscore.pluck(vm.assignments, 'ID');
         var selected = Underscore.pluck(Underscore.where(vm.list.Items, {selected: true}), 'ID');
+        var toAdd = Assignments.GetToAssign(vm.list.Items, vm.assignments, 'ID');
+        var toUpdate = Underscore.intersection(selected,assigned);
+        var toDelete = Assignments.GetToDelete(vm.list.Items,vm.assignments,'ID');
+
         vm.assignments = [];
 
-        angular.forEach(selected, function(item) {
+        angular.forEach(assigned, function(item) {
             vm.assignments.push({"ID":item});
+        });
+
+        angular.forEach(toAdd, function(item) {
+            vm.assignments.push({"ID":item});
+        });
+
+        angular.forEach(toDelete, function(value) {
+            var elementPosition = vm.assignments.map(function(x) {return x.ID;}).indexOf(value);
+            vm.assignments.splice(elementPosition, 1);
         });
 
         vm.serviceCompany.xp.Assignments = vm.assignments;
