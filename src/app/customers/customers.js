@@ -539,27 +539,28 @@ function CustomerAddressCreateCtrl($q, $exceptionHandler, $scope, $state, toastr
 
 function CustomerAssignCtrl($q, $exceptionHandler, $scope, $state, toastr, Underscore, OrderCloud, SelectedBuyer, EndUsers, Assignments) {
     var vm = this;
-    vm.assignments = angular.copy(SelectedBuyer.xp.Assignments);
+    vm.list = angular.copy(EndUsers);
+    vm.endUsers = angular.copy(EndUsers);
+    vm.assignments = angular.copy(SelectedBuyer.xp.Customers);
     vm.serviceCompany = SelectedBuyer;
     EndUsers.Items = Underscore.filter(EndUsers.Items, function(item) {
         return item.Active == true && item.xp.Type.id == 1 && item.xp.WeirGroup.id == vm.serviceCompany.xp.WeirGroup.id;
     });
-    vm.list = angular.copy(EndUsers);
-    vm.endUsers = angular.copy(EndUsers);
 
     $scope.$watchCollection(function() {
         return vm.list;
     }, function() {
-        EndUsers.Items = Underscore.filter(vm.list.Items, function(item) {
+        //EndUsers.Items = Underscore.filter(vm.list.Items, function(item) {
+        vm.endUsers.Items = Underscore.filter(vm.list.Items, function(item) {
             return item.Active == true && item.xp.Type.id == 1 && item.xp.WeirGroup.id == vm.serviceCompany.xp.WeirGroup.id;
         });
-        vm.endUsers = EndUsers;
+        //vm.endUsers = EndUsers;
         setSelected();
     });
 
     vm.setSelected = setSelected;
     function setSelected() {
-        var assigned = Assignments.GetAssigned(vm.assignments, 'ID');
+        var assigned = Assignments.GetAssigned(vm.assignments, 'id');
         angular.forEach(vm.list.Items, function(item) {
             if(assigned.indexOf(item.ID) > -1) {
                 item.selected = true;
@@ -568,30 +569,43 @@ function CustomerAssignCtrl($q, $exceptionHandler, $scope, $state, toastr, Under
     }
 
     vm.saveAssignments = function() {
-        var assigned = Underscore.pluck(vm.assignments, 'ID');
+        var assigned = Underscore.pluck(vm.assignments, 'id');
         var selected = Underscore.pluck(Underscore.where(vm.list.Items, {selected: true}), 'ID');
         var toAdd = Assignments.GetToAssign(vm.list.Items, vm.assignments, 'ID');
         var toUpdate = Underscore.intersection(selected,assigned);
-        var toDelete = Assignments.GetToDelete(vm.list.Items,vm.assignments,'ID');
+        var toDelete = Assignments.GetToDelete(vm.list.Items,vm.assignments,'id');
 
         vm.assignments = [];
 
-        angular.forEach(assigned, function(item) {
-            vm.assignments.push({"ID":item});
+        angular.forEach(EndUsers.Items, function(Item) {
+            console.log(Item);
+            if(toAdd.indexOf(Item.ID) > -1) {
+                vm.assignments.push({"id":Item.ID,"name":Item.Name});
+            } else if(assigned.indexOf(Item.ID) > -1) {
+                vm.assignments.push({"id":Item.ID,"name":Item.Name});
+            }
+        })
+
+/*        angular.forEach(assigned, function(item) {
+            var elementPosition = vm.list.Items.map(function(x) {return x.ID;}).indexOf(item);
+            console.log(elementPosition);
+            vm.assignments.push({"id":item,"name":vm.list.Items[elementPosition].Name});
         });
 
         angular.forEach(toAdd, function(item) {
-            vm.assignments.push({"ID":item});
-        });
+            var elementPosition = vm.list.Items.map(function(x) {return x.ID;}).indexOf(item);
+            console.log(elementPosition);
+            vm.assignments.push({"id":item,"name":vm.list.Items[elementPosition].Name});
+        });*/
 
         angular.forEach(toDelete, function(value) {
-            var elementPosition = vm.assignments.map(function(x) {return x.ID;}).indexOf(value);
+            var elementPosition = vm.assignments.map(function(x) {return x.id;}).indexOf(value);
             vm.assignments.splice(elementPosition, 1);
         });
 
-        vm.serviceCompany.xp.Assignments = vm.assignments;
+        vm.serviceCompany.xp.Customers = vm.assignments;
 
-        return OrderCloud.Buyers.Update(vm.serviceCompany, vm.serviceCompany.ID)
+        return OrderCloud.Buyers.Patch(vm.serviceCompany, vm.serviceCompany.ID)
             .then(function() {
                 $state.reload($state.current);
                 toastr.success('Assignments updated.','Success');
