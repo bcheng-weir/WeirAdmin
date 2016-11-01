@@ -75,7 +75,7 @@ function BaseConfig($stateProvider, $injector) {
             },
             ComponentList: function($state, $q, Underscore, CurrentUser) {
                 var deferred = $q.defer();
-                var nonSpecific = ['Customers', 'Buyers', 'Products', 'Specs', 'Price Schedules', 'Admin Users', 'Product Facets'];
+                var nonSpecific = ['Customers', 'Orders', 'Buyers', 'Products', 'Specs', 'Price Schedules', 'Admin Users', 'Product Facets'];
                 var components = {
                     nonSpecific: [],
                     buyerSpecific: []
@@ -131,6 +131,25 @@ function BaseController($rootScope, $ocMedia, Underscore, snapRemote, defaultErr
     vm.snapOptions = {
         disable: (!base.left && base.right) ? 'left' : ((base.left && !base.right) ? 'right' : 'none')
     };
+
+    var labels = {
+        en: {
+            admin: "Admin",
+            customers: "Customers",
+            orders: "Orders",
+            quotesForReview: "Quotes Submitted for Review",
+            revisedQuotes: "Revised Quotes",
+            confirmedQuotes: "Confirmed Quotes",
+            ordersSubmittedPO: "Orders Submitted with PO",
+            revisedOrders: "Revised Orders",
+            confirmedOrders: "Confirmed Orders",
+            dispatched: "Dispatched",
+            invoiced: "Invoiced",
+            allOrders: "All Orders"
+        }
+    };
+
+    vm.labels = labels.en;
 
     function _isMobile() {
         return $ocMedia('max-width:991px');
