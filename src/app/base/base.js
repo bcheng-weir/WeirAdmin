@@ -107,7 +107,7 @@ function BaseConfig($stateProvider, $injector) {
     $stateProvider.state('base', baseState);
 }
 
-function BaseController($rootScope, $ocMedia, Underscore, snapRemote, defaultErrorMessageResolver, CurrentUser, ComponentList, base) {
+function BaseController($rootScope, $ocMedia, $state, $sce, Underscore, snapRemote, defaultErrorMessageResolver, CurrentUser, ComponentList, base) {
     var vm = this;
     vm.left = base.left;
     vm.right = base.right;
@@ -143,7 +143,7 @@ function BaseController($rootScope, $ocMedia, Underscore, snapRemote, defaultErr
             ordersSubmittedPO: "Orders Submitted with PO",
             revisedOrders: "Revised Orders",
             confirmedOrders: "Confirmed Orders",
-            dispatched: "Dispatched",
+            despatched: "Despatched",
             invoiced: "Invoiced",
             allOrders: "All Orders"
         }
@@ -170,6 +170,22 @@ function BaseController($rootScope, $ocMedia, Underscore, snapRemote, defaultErr
         if (n === o) return;
         _initDrawers(n);
     });
+
+    vm.OrderAction = _actions;
+    function _actions(action) {
+        var filter = {
+            "ReviewQuotes":{"xp.Type":"Quote","xp.Status":"SB"},
+            "RevisedQuotes":{"xp.Type":"Quote","xp.Status":"SV"},
+            "ConfirmedQuotes":{"xp.Type":"Quote","xp.Status":"CP"},
+            "POOrders":{"xp.Type":"Order","xp.Status":"SP"},
+            "RevisedOrders":{"xp.Type":"Order","xp.Status":"RV"},
+            "ConfirmedOrders":{"xp.Type":"Order","xp.Status":"CF"},
+            "DespatchedOrders":{"xp.Type":"Order","xp.Status":"DP"},
+            "InvoicedOrders":{"xp.Type":"Order","xp.Status":"IV"},
+            "AllOrders":{"xp.Type":"Order"}
+        };
+        $state.go('orders', {filter:JSON.stringify(filter[action])},{reload:true});
+    }
 }
 
 function occomponents() {

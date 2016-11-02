@@ -29,15 +29,15 @@
                 <li uib-dropdown ng-if="!base.currentUser.Anonymous">
                     <a href="#" uib-dropdown-toggle role="button">{{base.labels.orders}} <span class="caret"></a>
                     <ul uib-dropdown-menu>
-                        <li><a href="">{{base.labels.quotesForReview}}</a></li>
-                        <li><a href="">{{base.labels.revisedQuotes}}</a></li>
-                        <li><a href="">{{base.labels.confirmedQuotes}}</a></li>
-                        <li><a href="">{{base.labels.ordersSubmittedPO}}</a></li>
-                        <li><a href="">{{base.labels.revisedOrders}}</a></li>
-                        <li><a href="">{{base.labels.confirmedOrders}}</a></li>
-                        <li><a href="">{{base.labels.dispatched}}</a></li>
-                        <li><a href="">{{base.labels.invoiced}}</a></li>
-                        <li><a href="" ui-sref="orders">{{base.labels.allOrders}}</a></li>
+                        <li><a href="" ng-click="base.OrderAction('ReviewQuotes')">{{base.labels.quotesForReview}}</a></li>
+                        <li><a href="" ng-click="base.OrderAction('RevisedQuotes')">{{base.labels.revisedQuotes}}</a></li>
+                        <li><a href="" ng-click="base.OrderAction('ConfirmedQuotes')">{{base.labels.confirmedQuotes}}</a></li>
+                        <li><a href="" ng-click="base.OrderAction('POOrders')">{{base.labels.ordersSubmittedPO}}</a></li>
+                        <li><a href="" ng-click="base.OrderAction('RevisedOrders')">{{base.labels.revisedOrders}}</a></li>
+                        <li><a href="" ng-click="base.OrderAction('ConfirmedOrders')">{{base.labels.confirmedOrders}}</a></li>
+                        <li><a href="" ng-click="base.OrderAction('DespatchedOrders')">{{base.labels.despatched}}</a></li>
+                        <li><a href="" ng-click="base.OrderAction('InvoicedOrders')">{{base.labels.invoiced}}</a></li>
+                        <li><a href="" ng-click="base.OrderAction('AllOrders')">{{base.labels.allOrders}}</a></li>
                     </ul>
                 </li>
                 <li uib-dropdown ng-if="!base.currentUser.Anonymous">

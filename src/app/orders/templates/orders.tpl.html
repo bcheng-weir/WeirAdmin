@@ -2,4 +2,55 @@
     <div class="page-header">
         <h3>Orders</h3>
     </div>
+    <div class="row">
+        <div class="col-md-2">
+            {{orders.labels.quoteID}}
+        </div>
+        <div class="col-md-1">
+            {{orders.labels.customerRef}}
+        </div>
+        <div class="col-md-2">
+            {{orders.labels.businessName}}
+        </div>
+        <div class="col-md-2">
+            {{orders.labels.submittedBy}}
+        </div>
+        <div class="col-md-1">
+            {{orders.labels.quoteValue}}
+        </div>
+        <div class="col-md-1">
+            {{orders.labels.dateSubmitted}}
+        </div>
+        <div class="col-md-2">
+            {{orders.labels.reviewer}}
+        </div>
+        <div class="col-md-1">
+        </div>
+    </div>
+    <div ng-repeat="order in orders.list.Items" class="row">
+        <div class="col-md-2">
+            {{order.ID}}
+        </div>
+        <div class="col-md-1">
+            {{order.xp.CustomerID}}
+        </div>
+        <div class="col-md-2">
+            {{order.xp.CustomerName}}
+        </div>
+        <div class="col-md-2">
+            {{order.FromUserFirstName}} {{order.FromUserLastName}}
+        </div>
+        <div class="col-md-1">
+            {{order.Total}}
+        </div>
+        <div class="col-md-1">
+            {{order.DateSubmitted}}
+        </div>
+        <div class="col-md-2">
+            Where is the reviewer data stored?
+        </div>
+        <div class="col-md-1">
+            <button>{{orders.labels.view}}</button>
+        </div>
+    </div>
 </article>
