@@ -478,7 +478,7 @@ function CustomerAddressEditCtrl($q, $exceptionHandler, $state, $scope, toastr, 
     };
 }
 
-function CustomerAddressCreateCtrl($q, $exceptionHandler, $scope, $state, toastr, OrderCloud, OCGeography, CustomerService, SelectedBuyer, Underscore) {
+function CustomerAddressCreateCtrl($q, $exceptionHandler, $scope, $state, toastr, OrderCloud, OCGeography, CustomerService, SelectedBuyer, Underscore, WeirService) {
     var vm = this;
     vm.address = {
         Country: 'US' // this is to default 'create' addresses to the country US
@@ -513,6 +513,9 @@ function CustomerAddressCreateCtrl($q, $exceptionHandler, $scope, $state, toastr
                 .then(function() {
                     return CustomerService.CreateAddress(vm.address, SelectedBuyer.ID);
                 })
+                .then(function(newAddress) {
+                    return WeirService.AssignAddressToGroups(newAddress.ID); //ToDo Test.
+                })
                 .then(function(resp) {
                     $state.go('customers.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
                     toastr.success('Address Created', 'Success');
@@ -525,6 +528,9 @@ function CustomerAddressCreateCtrl($q, $exceptionHandler, $scope, $state, toastr
             vm.address.xp = {};
             vm.address.xp.primary = false;
             CustomerService.CreateAddress(vm.address, SelectedBuyer.ID)
+                .then(function(newAddress) {
+                    return WeirService.AssignAddressToGroups(newAddress.ID); //ToDo Test.
+                })
                 .then(function(resp) {
                     $state.go('customers.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
                     toastr.success('Address Created', 'Success');

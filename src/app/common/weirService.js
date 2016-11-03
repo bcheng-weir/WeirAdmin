@@ -35,10 +35,49 @@ function WeirService( $q, $cookieStore, $sce, OrderCloud) {
 	return match;
     }
 
+	function assignAddressToGroups(addressId) {
+		var deferred = $q.defer();
+		var buyerAssignment = {
+			AddressID: addressId,
+			UserID: null,
+			UserGroupID: "Buyer",
+			IsShipping: true,
+			IsBilling: true
+		};
+		var shopperAssignment = {
+			AddressID: addressId,
+			UserID: null,
+			UserGroupID: "Shopper",
+			IsShipping: true,
+			IsBilling: true
+		};
+		var adminAssignment = {
+			AddressID: addressId,
+			UserID: null,
+			UserGroupID: "X6hpCL9v50GE_JG0tWD6vA",
+			IsShipping: true,
+			IsBilling: true
+		};
+		OrderCloud.Addresses.SaveAssignment(buyerAssignment)
+			.then(function() {
+				return OrderCloud.Addresses.SaveAssignment(shopperAssignment);
+			})
+			.then(function() {
+				return OrderCloud.Addresses.SaveAssignment(adminAssignment);
+			})
+			.catch(function(ex) {
+				return deferred.reject(ex);
+			});
+
+		return deferred.promise;
+	}
+
     var service = {
-	OrderStatus: orderStatuses,
-	OrderStatusList: orderStatusList,
-	LookupStatus: getStatus
+		OrderStatus: orderStatuses,
+		OrderStatusList: orderStatusList,
+		LookupStatus: getStatus,
+	    AssignAddressToGroups: assignAddressToGroups
+
     };
 
     return service;
