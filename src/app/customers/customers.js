@@ -584,7 +584,6 @@ function CustomerAssignCtrl($q, $exceptionHandler, $scope, $state, toastr, Under
         vm.assignments = [];
 
         angular.forEach(EndUsers.Items, function(Item) {
-            console.log(Item);
             if(toAdd.indexOf(Item.ID) > -1) {
                 vm.assignments.push({"id":Item.ID,"name":Item.Name});
             } else if(assigned.indexOf(Item.ID) > -1) {

@@ -3,36 +3,64 @@ angular.module('orderCloud')
 	.controller('OrderCtrl',OrderController);
 
 function OrderConfig($stateProvider,buyerid) {
-	$stateProvider.state('orders', {
+	$stateProvider.state('ordersMain', {
 		parent:'base',
 		templateUrl:'orders/templates/orders.tpl.html',
 		controller:'OrderCtrl',
 		controllerAs:'orders',
-		url:'/orders?from&to&search&page&pageSize&searchOn&sortBy&filter&buyerid',
+		url:'/orders?from&to&search&page&pageSize&searchOn&sortBy&sortByXp&filters&buyerid',
 		data:{componentName:'Orders'},
 		resolve: {
 			Parameters: function($stateParams,OrderCloudParameters) {
 				return OrderCloudParameters.Get($stateParams);
 			},
 			Orders: function(OrderCloud,Parameters) {
-				var f = JSON.parse(Parameters.filter);
-				return OrderCloud.Orders.ListOutgoing(Parameters.from,Parameters.to,Parameters.search,Parameters.page,Parameters.pageSize || 20,Parameters.searchOn,Parameters.sortBy,f,buyerid);
+				return OrderCloud.Orders.ListOutgoing(Parameters.from,Parameters.to,Parameters.search,Parameters.page,Parameters.pageSize || 20,Parameters.searchOn,Parameters.sortBy,Parameters.filters,buyerid);
+			},
+			xpOrders: function(OrderCloud, Parameters, Orders) {
+				return false;
 			}
 		}
-	});
+	})
+	.state('ordersMain.quotesRevised', {
+		url:'/quotesRevised',
+		templateUrl:'orders/templates/quote.revised.tpl.html',
+		parent:'ordersMain'
+	})
+	.state('ordersMain.quotesReview', {
+		url:'/quotesReview',
+		templateUrl:'orders/templates/quote.review.tpl.html',
+		parent:'ordersMain'
+	})
 }
 
-function OrderController($state, $sce, $ocMedia, OrderCloud, OrderCloudParameters, Orders, Parameters, buyerid) {
+function OrderController($scope, $state, $sce, $ocMedia, Underscore, OrderCloud, OrderCloudParameters, Orders, Parameters, buyerid) {
 	var vm = this;
-	vm.filterParam = JSON.parse(Parameters.filter);
-	vm.xpType = vm.filterParam["xp.Type"];
+	vm.xpType = Parameters.filters ? Parameters.filters["xp.Type"] : {};
 	vm.list = Orders;
 	vm.parameters = Parameters;
 	vm.sortSelection = Parameters.sortBy ? (Parameters.sortBy.indexOf('!') == 0 ? Parameters.sortBy.split('!')[1] : Parameters.sortBy) : null;
-
 	//Check if filters are applied
 	vm.filtersApplied = vm.parameters.filters || vm.parameters.from || vm.parameters.to || ($ocMedia('max-width:767px') && vm.sortSelection); //Sort by is a filter on mobile devices
 	vm.showFilters = vm.filtersApplied;
+
+	//Components cannot filter on xp in the OC. The filter must happen locally. Check for the xp filter. If it applies, conduct the filtering.
+	/*switch(vm.parameters.sortByXp) {
+		case vm.parameters.sortByXp:
+			vm.list.Items = Underscore.sortBy(vm.list.Items, function(item) {
+				//return item.xp[value];
+				return item.xp ? item.xp[vm.parameters.sortByXp] : -1;
+			});
+			break;
+		case '!'+vm.parameters.sortByXp:
+			vm.parameters.sortByXp = null;
+			break;
+		default:
+			vm.list.Items = Underscore.sortBy(vm.list.Items, function(item) {
+				//return item.xp[value];
+				return item.xp ? item.xp[vm.parameters.sortByXp] : -1;
+			}).reverse();
+	}*/
 
 	//Check if search was used
 	vm.searchResults = Parameters.search && Parameters.search.length > 0;
@@ -44,6 +72,7 @@ function OrderController($state, $sce, $ocMedia, OrderCloud, OrderCloudParameter
 
 	//Reload the state with new search parameter & reset the page
 	vm.search = function() {
+		vm.parameters.searchOn = '';
 		vm.filter(true);
 	};
 
@@ -76,6 +105,30 @@ function OrderController($state, $sce, $ocMedia, OrderCloud, OrderCloudParameter
 				vm.parameters.sortBy = value;
 		}
 		vm.filter(false);
+	};
+
+	//This does not cause a reload of the page.
+	vm.updateXpSort = function(value) {
+		return;
+		/*switch(vm.parameters.sortByXp) {
+			case value:
+				vm.parameters.sortByXp = '!'+value;
+				vm.list.Items = Underscore.sortBy(vm.list.Items, function(item) {
+					//return item.xp[value];
+					return item.xp ? item.xp[value] : -1;
+				});
+				break;
+			case '!'+value:
+				vm.parameters.sortByXp = null;
+				break;
+			default:
+				vm.parameters.sortByXp = value;
+				vm.list.Items = Underscore.sortBy(vm.list.Items, function(item) {
+					//return item.xp[value];
+					return item.xp ? item.xp[value] : -1;
+				}).reverse();
+		}
+		vm.filter(false);*/
 	};
 
 	//Used on mobile devices
@@ -132,6 +185,13 @@ function OrderController($state, $sce, $ocMedia, OrderCloud, OrderCloudParameter
 			loadMore:$sce.trustAsHtml("Load More")
 		}
 	};
-
 	vm.labels = labels.en;
+
+	vm.View = function() {
+		//ToDo
+	}
+
+	vm.Revisions = function() {
+		//ToDo
+	}
 }

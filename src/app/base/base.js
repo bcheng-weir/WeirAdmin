@@ -184,7 +184,18 @@ function BaseController($rootScope, $ocMedia, $state, $sce, Underscore, snapRemo
             "InvoicedOrders":{"xp.Type":"Order","xp.Status":"IV"},
             "AllOrders":{"xp.Type":"Order"}
         };
-        $state.go('orders', {filter:JSON.stringify(filter[action])},{reload:true});
+        var destination = {
+            "ReviewQuotes":"ordersMain.quotesReview",
+            "RevisedQuotes":"ordersMain.quotesRevised",
+            "ConfirmedQuotes":"ordersMain.quotesConfirmed",
+            "POOrders":"ordersMain.",
+            "RevisedOrders":"ordersMain.ordersRevised",
+            "ConfirmedOrders":"ordersMain.ordersConfirmed",
+            "DespatchedOrders":"ordersMain.ordersDespatched",
+            "InvoicedOrders":"ordersMain.ordersInvoiced",
+            "AllOrders":"ordersMain.ordersAll"
+        }
+        $state.go(destination[action], {filters:JSON.stringify(filter[action])},{reload:true});
     }
 }
 
