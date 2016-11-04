@@ -32,6 +32,11 @@ function OrderConfig($stateProvider,buyerid) {
 		templateUrl:'orders/templates/quote.review.tpl.html',
 		parent:'ordersMain'
 	})
+	.state('ordersMain.ordersRevised', {
+		url:'/ordersRevised',
+		templateUrl: 'orders/templates/order.revised.tpl.html',
+		parent:'ordersMain'
+	});
 }
 
 function OrderController($scope, $state, $sce, $ocMedia, Underscore, OrderCloud, OrderCloudParameters, Orders, Parameters, buyerid) {
@@ -166,7 +171,9 @@ function OrderController($scope, $state, $sce, $ocMedia, Underscore, OrderCloud,
 			view: "View",
 			revisions: "Revisions",
 			status: "Status",
-			loadMore:"Load More"
+			loadMore:"Load More",
+			poNumber:"PO Number",
+			orderedBy:"Ordered By"
 		},
 		fr: {
 			search:$sce.trustAsHtml("Search"),
@@ -182,7 +189,9 @@ function OrderController($scope, $state, $sce, $ocMedia, Underscore, OrderCloud,
 			view: $sce.trustAsHtml("View"),
 			revisions: $sce.trustAsHtml("Revisions"),
 			status: $sce.trustAsHtml("Status"),
-			loadMore:$sce.trustAsHtml("Load More")
+			loadMore:$sce.trustAsHtml("Load More"),
+			poNumber:$sce.trustAsHtml("PO Number"),
+			orderedBy:$sce.trustAsHtml("Ordered By")
 		}
 	};
 	vm.labels = labels.en;
