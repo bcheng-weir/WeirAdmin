@@ -107,7 +107,7 @@ function BaseConfig($stateProvider, $injector) {
     $stateProvider.state('base', baseState);
 }
 
-function BaseController($rootScope, $ocMedia, $state, $sce, Underscore, snapRemote, defaultErrorMessageResolver, CurrentUser, ComponentList, base) {
+function BaseController($rootScope, $ocMedia, $state, $sce, Underscore, snapRemote, defaultErrorMessageResolver, CurrentUser, ComponentList, base, WeirService) {
     var vm = this;
     vm.left = base.left;
     vm.right = base.right;
@@ -174,14 +174,14 @@ function BaseController($rootScope, $ocMedia, $state, $sce, Underscore, snapRemo
     vm.OrderAction = _actions;
     function _actions(action) {
         var filter = {
-            "ReviewQuotes":{"xp.Type":"Quote","xp.Status":"SB"},
-            "RevisedQuotes":{"xp.Type":"Quote","xp.Status":"SV"},
-            "ConfirmedQuotes":{"xp.Type":"Quote","xp.Status":"CP"},
-            "POOrders":{"xp.Type":"Order","xp.Status":"SP"},
-            "RevisedOrders":{"xp.Type":"Order","xp.Status":"RV"},
-            "ConfirmedOrders":{"xp.Type":"Order","xp.Status":"CF"},
-            "DespatchedOrders":{"xp.Type":"Order","xp.Status":"DP"},
-            "InvoicedOrders":{"xp.Type":"Order","xp.Status":"IV"},
+            "ReviewQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Submitted.id},
+            "RevisedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Saved.id},
+            "ConfirmedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.ConfirmedPending.id},
+            "POOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.SubmittedWithPO.id},
+            "RevisedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Review.id},
+            "ConfirmedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Confirmed.id},
+            "DespatchedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Despatched.id},
+            "InvoicedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Invoiced.id},
             "AllOrders":{"xp.Type":"Order"}
         };
         var destination = {
@@ -194,7 +194,7 @@ function BaseController($rootScope, $ocMedia, $state, $sce, Underscore, snapRemo
             "DespatchedOrders":"ordersMain.ordersDespatched",
             "InvoicedOrders":"ordersMain.ordersInvoiced",
             "AllOrders":"ordersMain.ordersAll"
-        }
+        };
         $state.go(destination[action], {filters:JSON.stringify(filter[action])},{reload:true});
     }
 }
