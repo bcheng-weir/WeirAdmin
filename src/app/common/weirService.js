@@ -33,15 +33,33 @@ function WeirService( $q, $cookieStore, $sce, OrderCloud) {
     ];
     // TODO - add localized label/description, include locale in selection
     function getStatus(id) {
-	var match = null;
-        angular.forEach(orderStatusList, function(status) {
-            if (status.id == id) {
-		    match = status;
-		    return;
-	    }
-        });
-	return match;
+		var match = null;
+	        angular.forEach(orderStatusList, function(status) {
+	            if (status.id == id) {
+			    match = status;
+			    return;
+		    }
+	        });
+		return match;
     }
+
+	function getLocale() {
+		var localeOfUser = $cookieStore.get('language');
+		if(localeOfUser == null || localeOfUser == false){
+			//set the expiration date of the cookie.
+			var now = new Date();
+			var exp = new Date(now.getFullYear(), now.getMonth()+6, now.getDate());
+			//getting the language of the user's browser
+			localeOfUser = navigator.language;
+			localeOfUser = localeOfUser.substr(0,2);
+			//setting the cookie.
+			$cookieStore.put('language', localeOfUser, {
+				expires: exp
+			});
+
+		}
+		return localeOfUser;
+	}
 
 	function assignAddressToGroups(addressId) {
 		var buyerAssignment = {
@@ -81,8 +99,8 @@ function WeirService( $q, $cookieStore, $sce, OrderCloud) {
 		OrderStatus: orderStatuses,
 		OrderStatusList: orderStatusList,
 		LookupStatus: getStatus,
-	    AssignAddressToGroups: assignAddressToGroups
-
+	    AssignAddressToGroups: assignAddressToGroups,
+		Locale: getLocale
     };
 
     return service;
