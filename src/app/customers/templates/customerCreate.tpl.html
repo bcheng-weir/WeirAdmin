@@ -97,16 +97,12 @@
             <label for="addressCityInput">City</label>
             <input id="addressCityInput" type="text" class="form-control" ng-model="customerCreate.address.City" required/>
         </div>
-        <div class="col-sm-3 form-group" ng-show="customerCreate.address.Country == 'US' || customerCreate.address.Country == 'CA'">
-            <label for="addressStateInput">State</label>
-            <select  id="addressStateInput" class="form-control" ng-options="state.value as state.label for state in customerCreate.states" ng-model="customerCreate.address.State" />
-        </div>
-        <div class="col-sm-3 form-group" ng-hide="customerCreate.address.Country == 'US' || customerCreate.address.Country == 'CA'">
-            <label for="addressStateInput">State</label>
+        <div class="col-sm-3 form-group">
+            <label for="addressStateInput">County</label>
             <input  id="addressStateInput" class="form-control" ng-model="customerCreate.address.State" />
         </div>
         <div class="col-sm-3 form-group">
-            <label for="addressZipInput">Zip</label>
+            <label for="addressZipInput">Post Code</label>
             <input id="addressZipInput" type="text" class="form-control" ng-model="customerCreate.address.Zip" required/>
         </div>
     </div>

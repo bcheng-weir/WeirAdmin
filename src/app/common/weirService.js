@@ -44,7 +44,6 @@ function WeirService( $q, $cookieStore, $sce, OrderCloud) {
     }
 
 	function assignAddressToGroups(addressId) {
-		var deferred = $q.defer();
 		var buyerAssignment = {
 			AddressID: addressId,
 			UserID: null,
@@ -62,7 +61,7 @@ function WeirService( $q, $cookieStore, $sce, OrderCloud) {
 		var adminAssignment = {
 			AddressID: addressId,
 			UserID: null,
-			UserGroupID: "X6hpCL9v50GE_JG0tWD6vA",
+			UserGroupID: "Weir Admin",
 			IsShipping: true,
 			IsBilling: true
 		};
@@ -74,10 +73,8 @@ function WeirService( $q, $cookieStore, $sce, OrderCloud) {
 				return OrderCloud.Addresses.SaveAssignment(adminAssignment);
 			})
 			.catch(function(ex) {
-				return deferred.reject(ex);
+				return ex
 			});
-
-		return deferred.promise;
 	}
 
     var service = {

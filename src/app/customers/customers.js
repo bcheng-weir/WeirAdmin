@@ -307,19 +307,8 @@ function CustomerCreateCtrl($q, $exceptionHandler, $scope, $state, toastr, Order
     var vm = this;
     vm.WeirGroups = CustomerService.WeirGroups;
     vm.types = CustomerService.CustomerTypes;
-    vm.address = {
-        Country: 'US' //This defaults create addresses to the US. Change to UK?
-    };
     vm.countries = OCGeography.Countries;
     vm.states = OCGeography.States;
-
-    //Watch the country.
-    $scope.$watch(function() {
-        return vm.address.Country
-    }, function() {
-        vm.address.State = null; //If the country changes, null the state.
-    });
-
     vm.Submit = _submit;
 
     function _submit() {
@@ -480,17 +469,8 @@ function CustomerAddressEditCtrl($q, $exceptionHandler, $state, $scope, toastr, 
 
 function CustomerAddressCreateCtrl($q, $exceptionHandler, $scope, $state, toastr, OrderCloud, OCGeography, CustomerService, SelectedBuyer, Underscore, WeirService) {
     var vm = this;
-    vm.address = {
-        Country: 'US' // this is to default 'create' addresses to the country US
-    };
     vm.countries = OCGeography.Countries;
     vm.states = OCGeography.States;
-
-    $scope.$watch(function() {
-        return vm.address.Country
-    }, function() {
-        vm.address.State = null;
-    });
 
     vm.Submit = _submit;
 
