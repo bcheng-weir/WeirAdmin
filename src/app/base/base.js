@@ -175,11 +175,11 @@ function BaseController($rootScope, $ocMedia, $state, $sce, Underscore, snapRemo
     function _actions(action) {
         var filter = {
             "ReviewQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Submitted.id},
-            "RevisedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Saved.id},
-            "ConfirmedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.ConfirmedPending.id},
+            "RevisedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.RevisedQuote.id},
+            "ConfirmedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.ConfirmedQuote.id},
             "POOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.SubmittedWithPO.id},
-            "RevisedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Review.id},
-            "ConfirmedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Confirmed.id},
+            "RevisedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.RevisedOrder.id},
+            "ConfirmedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.ConfirmedOrder.id},
             "DespatchedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Despatched.id},
             "InvoicedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Invoiced.id},
             "AllOrders":{"xp.Type":"Order"}
