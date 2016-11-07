@@ -196,10 +196,10 @@ function OrderController($scope, $state, $sce, $ocMedia, Underscore, OrderCloud,
 	};
 	vm.labels = labels.en;
 
-	vm.View = function() {
+	vm.View = function(orderId) {
 		//ToDo
-	}
-
+        $state.go('currentOrder', {orderid: orderId});
+	};
 	vm.Revisions = function() {
 		//ToDo
 	}
