@@ -6,7 +6,7 @@ angular.module('orderCloud')
 function currentOrderConfig($stateProvider, buyerid){
     $stateProvider.state('currentOrder', {
         parent: 'base',
-        templateUrl: 'currentOrder/template/current.order.tpl.html',
+        templateUrl: 'currentOrder/templates/current.order.tpl.html',
         controller: 'CurrentOrderCtrl',
         controllerAs: 'order',
         url: '/currentOrder/:orderid',
@@ -19,10 +19,10 @@ function currentOrderConfig($stateProvider, buyerid){
                 return OrderCloud.Orders.Get(Parameters.orderid, buyerid);
             },
             DeliveryAddress: function (OrderCloud, Order) {
-                return OrderCloud.Address.Get(Order.ShippingAddressID, buyerid);
+                return OrderCloud.Addresses.Get(Order.ShippingAddressID, buyerid);
             },
             LineItems: function(OrderCloud, Order){
-                return OrderCloud.LineItems.Get(Order.ID, null, null, null, null, null, null, buyerid);
+                return OrderCloud.LineItems.List(Order.ID, null, null, null, null, null, null, buyerid);
             }
         }
 
@@ -30,7 +30,7 @@ function currentOrderConfig($stateProvider, buyerid){
     })
 }
 
-function CurrentOrderController($scope, $state, $sce, OrderCloud, Parameters, Order, DelieveryAddress, LineItems, toastr, WeirService){
+function CurrentOrderController($scope, $state, $sce, OrderCloud, Parameters, Order, DeliveryAddress, LineItems, toastr, WeirService){
         var vm = this;
         var labels = {
             en: {
@@ -74,42 +74,42 @@ function CurrentOrderController($scope, $state, $sce, OrderCloud, Parameters, Or
 },
             fr: {
                 //header labels
-                status:$sce.trustasHtml( "Status"),
-                OrderDate:$sce.trustasHtml( "Order date;"),
-                Confirm:$sce.trustasHtml( "Confirm"),
-                Revise:$sce.trustasHtml( "Revise"),
-                ShareRevision:$sce.trustasHtml( "Share revision"),
-                Comments:$sce.trustasHtml( "Comments"),
-                Download:$sce.trustasHtml( "Download"),
-                Print:$sce.trustasHtml( "Print"),
+                status:$sce.trustAsHtml( "Status"),
+                OrderDate:$sce.trustAsHtml( "Order date;"),
+                Confirm:$sce.trustAsHtml( "Confirm"),
+                Revise:$sce.trustAsHtml( "Revise"),
+                ShareRevision:$sce.trustAsHtml( "Share revision"),
+                Comments:$sce.trustAsHtml( "Comments"),
+                Download:$sce.trustAsHtml( "Download"),
+                Print:$sce.trustAsHtml( "Print"),
                 //paragraph above table
-                WeirOrderNo:$sce.trustasHtml( "Weir Order No;"),
-                QuoteRef:$sce.trustasHtml( "Your quote ref;"),
-                PONumber:$sce.trustasHtml( "Your PO No;"),
+                WeirOrderNo:$sce.trustAsHtml( "Weir Order No;"),
+                QuoteRef:$sce.trustAsHtml( "Your quote ref;"),
+                PONumber:$sce.trustAsHtml( "Your PO No;"),
                 //table labels
-                SerialNum:$sce.trustasHtml( "Serial number"),
-                TagNum:$sce.trustasHtml( "Tag number(if available)"),
-                PartNum:$sce.trustasHtml( "Part Number"),
-                Description:$sce.trustasHtml( "Description of Part"),
-                RecReplacement:$sce.trustasHtml( "Recommended replacement"),
-                LeadTimeAvailability:$sce.trustasHtml( "Lead time / Availability"),
-                PricePerItem:$sce.trustasHtml( "PricePerItem"),
-                Quantity:$sce.trustasHtml( "Quantity"),
-                Total:$sce.trustasHtml( "Total"),
+                SerialNum:$sce.trustAsHtml( "Serial number"),
+                TagNum:$sce.trustAsHtml( "Tag number(if available)"),
+                PartNum:$sce.trustAsHtml( "Part Number"),
+                Description:$sce.trustAsHtml( "Description of Part"),
+                RecReplacement:$sce.trustAsHtml( "Recommended replacement"),
+                LeadTimeAvailability:$sce.trustAsHtml( "Lead time / Availability"),
+                PricePerItem:$sce.trustAsHtml( "PricePerItem"),
+                Quantity:$sce.trustAsHtml( "Quantity"),
+                Total:$sce.trustAsHtml( "Total"),
                 //labels to right of table
-                Edit:$sce.trustasHtml( "Edit"),
-                Removed:$sce.trustasHtml( "Removed"),
-                Updated:$sce.trustasHtml( "Updated"),
-                New:$sce.trustasHtml( "New"),
+                Edit:$sce.trustAsHtml( "Edit"),
+                Removed:$sce.trustAsHtml( "Removed"),
+                Updated:$sce.trustAsHtml( "Updated"),
+                New:$sce.trustAsHtml( "New"),
                 //buttons above table
-                BackToQuote:$sce.trustasHtml( "Back to Quotes"),
-                AddNewItems:$sce.trustasHtml( "Add new items"),
-                AddABlankItem:$sce.trustasHtml( "Add a blank item"),
+                BackToQuote:$sce.trustAsHtml( "Back to Quotes"),
+                AddNewItems:$sce.trustAsHtml( "Add new items"),
+                AddABlankItem:$sce.trustAsHtml( "Add a blank item"),
                 //footers
-                YourRefNo:$sce.trustasHtml( "Your Reference No;"),
-                DelieveryAddress:$sce.trustasHtml("Delievery Address"),
-                YourAttachments:$sce.trustasHtml( "Your attachments"),
-                YourComments:$sce.trustasHtml( "Your comments or instructions")
+                YourRefNo:$sce.trustAsHtml( "Your Reference No;"),
+                DelieveryAddress:$sce.trustAsHtml("Delievery Address"),
+                YourAttachments:$sce.trustAsHtml( "Your attachments"),
+                YourComments:$sce.trustAsHtml( "Your comments or instructions")
             }
         };
         vm.labels = labels[WeirService.Locale()];
