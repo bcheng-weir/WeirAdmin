@@ -1,5 +1,5 @@
 <h3 class="page-header">
-    Assignments for {{customerAssign.serviceCompany.Name}}
+    {{customerAssign.labels.AssignmentsFor}} {{customerAssign.serviceCompany.Name}}
 </h3>
 
 <ordercloud-search servicename="Buyers" controlleras="customerAssign"></ordercloud-search>
@@ -12,27 +12,27 @@
                 <col class="action-column"/>
             </colgroup>
             <thead>
-                <tr>
-                    <th></th>
-                    <th><div>ID</div></th>
-                    <th><div>Name</div></th>
-                </tr>
+            <tr>
+                <th></th>
+                <th><div>{{customerAssign.labels.ID}}</div></th>
+                <th><div>{{customerAssign.labels.Name}}</div></th>
+            </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="customer in customerAssign.endUsers.Items track by $index">
-                    <td>
-                        <input name="{{'customer_assign_' + $index}}" type="checkbox" ng-model="customer.selected" />
-                    </td>
-                    <td>
-                        {{customer.ID}}
-                    </td>
-                    <td>
-                        {{customer.Name}}
-                    </td>
-                </tr>
+            <tr ng-repeat="customer in customerAssign.endUsers.Items track by $index">
+                <td>
+                    <input name="{{'customer_assign_' + $index}}" type="checkbox" ng-model="customer.selected" />
+                </td>
+                <td>
+                    {{customer.ID}}
+                </td>
+                <td>
+                    {{customer.Name}}
+                </td>
+            </tr>
             </tbody>
         </table>
     </div>
 </section>
-<button type="button" class="btn btn-default" ui-sref="^"><i class="fa fa-arrow-left"></i> Back</button>
-<button type="button" class="btn btn-primary" ng-click="customerAssign.saveAssignments()">Update Assignments</button>
+<button type="button" class="btn btn-default" ui-sref="^"><i class="fa fa-arrow-left"></i> {{customerAssign.labels.Back}}</button>
+<button type="button" class="btn btn-primary" ng-click="customerAssign.saveAssignments()">{{customerAssign.labels.UpdateAssignments}}</button>
