@@ -1,12 +1,12 @@
 angular.module('orderCloud')
-	.config(OrderConfig)
-	.controller('OrderCtrl',OrderController);
+	.config(OrdersConfig)
+	.controller('OrdersCtrl',OrdersController);
 
-function OrderConfig($stateProvider,buyerid) {
+function OrdersConfig($stateProvider,buyerid) {
 	$stateProvider.state('ordersMain', {
 		parent:'base',
 		templateUrl:'orders/templates/orders.tpl.html',
-		controller:'OrderCtrl',
+		controller:'OrdersCtrl',
 		controllerAs:'orders',
 		url:'/orders?from&to&search&page&pageSize&searchOn&sortBy&sortByXp&filters&buyerid',
 		data:{componentName:'Orders'},
@@ -39,7 +39,7 @@ function OrderConfig($stateProvider,buyerid) {
 	});
 }
 
-function OrderController($scope, $state, $sce, $ocMedia, Underscore, OrderCloud, OrderCloudParameters, Orders, Parameters, buyerid) {
+function OrdersController($scope, $state, $sce, $ocMedia, Underscore, OrderCloud, OrderCloudParameters, Orders, Parameters, buyerid, CurrentOrder) {
 	var vm = this;
 	vm.xpType = Parameters.filters ? Parameters.filters["xp.Type"] : {};
 	vm.list = Orders;
@@ -197,8 +197,8 @@ function OrderController($scope, $state, $sce, $ocMedia, Underscore, OrderCloud,
 	vm.labels = labels.en;
 
 	vm.View = function(orderId) {
-		//ToDo
-        $state.go('currentOrder', {orderid: orderId});
+		CurrentOrder.Set(orderId);
+        $state.go('order');
 	};
 	vm.Revisions = function() {
 		//ToDo

@@ -1,28 +1,61 @@
 angular.module('orderCloud')
-    .config(currentOrderConfig)
-    .controller('CurrentOrderCtrl',CurrentOrderController);
+    .service( 'OrderShareService', OrderShareService)
+    .config(orderConfig)
+    .controller('OrderCtrl',OrderController);
 
-
-function currentOrderConfig($stateProvider, buyerid){
-    $stateProvider.state('currentOrder', {
+function OrderShareService() {
+    var svc = {
+        LineItems: [],
+        Payments: [],
+        Quote: null,
+        Me: null
+    };
+    return svc;
+}
+function orderConfig($stateProvider, buyerid){
+    $stateProvider.state('order', {
         parent: 'base',
-        templateUrl: 'currentOrder/templates/current.order.tpl.html',
-        controller: 'CurrentOrderCtrl',
+        templateUrl: 'order/templates/order.tpl.html',
+        controller: 'OrderCtrl',
         controllerAs: 'order',
-        url: '/currentOrder/:orderid',
-        data: {componentName: 'currentOrder'},
+        url: '/order',
+        data: {componentName: 'order'},
         resolve: {
-            Parameters: function($stateParams, OrderCloudParameters){
-                return OrderCloudParameters.Get($stateParams);
-            },
-            Order: function (OrderCloud, Parameters) {
-                return OrderCloud.Orders.Get(Parameters.orderid, buyerid);
+            Order: function(CurrentOrder){
+              return CurrentOrder.Get();
             },
             DeliveryAddress: function (OrderCloud, Order) {
-                return OrderCloud.Addresses.Get(Order.ShippingAddressID, buyerid);
+                if(Order.ShippingAddressID) {
+                    return OrderCloud.Addresses.Get(Order.ShippingAddressID, buyerid);
+                }
+                else{
+                    return null;
+                }
             },
-            LineItems: function(OrderCloud, Order){
-                return OrderCloud.LineItems.List(Order.ID, null, null, null, null, null, null, buyerid);
+            LineItems: function ($q, $state, toastr, Underscore, CurrentOrder, OrderCloud, LineItemHelpers, OrderShareService) {
+                OrderShareService.LineItems.length = 0;
+                var dfd = $q.defer();
+                CurrentOrder.GetID()
+                    .then(function (id) {
+                        OrderCloud.LineItems.List(id)
+                            .then(function (data) {
+                                if (!data.Items.length) {
+                                    toastr.error('Your quote does not contain any line items.', 'Error');
+                                    dfd.resolve({ Items: [] });
+                                } else {
+                                    LineItemHelpers.GetProductInfo(data.Items)
+                                        .then(function () { dfd.resolve(data); });
+                                }
+                            })
+                    })
+                    .catch(function () {
+                        toastr.error('Your quote does not contain any line items.', 'Error');
+                        dfd.resolve({ Items: [] });
+                    });
+                return dfd.promise;
+            },
+            Payments: function (Order, OrderCloud) {
+                return OrderCloud.Payments.List(Order.ID);
             }
         }
 
@@ -30,7 +63,7 @@ function currentOrderConfig($stateProvider, buyerid){
     })
 }
 
-function CurrentOrderController($scope, $state, $sce, OrderCloud, Parameters, Order, DeliveryAddress, LineItems, toastr, WeirService){
+function OrderController($scope, $state, $sce, OrderCloud, Order, DeliveryAddress, LineItems, Payments, toastr, WeirService){
         var vm = this;
         var labels = {
             en: {
@@ -113,7 +146,7 @@ function CurrentOrderController($scope, $state, $sce, OrderCloud, Parameters, Or
             }
         };
         vm.labels = labels[WeirService.Locale()];
-
+        vm.DeliveryAddress = DeliveryAddress;
 
 }
 
