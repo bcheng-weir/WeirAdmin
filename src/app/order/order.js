@@ -33,9 +33,9 @@ function orderConfig($stateProvider, buyerid){
                     return null;
                 }
             },
-            LineItems: function (OrderShareService, CurrentOrder) {
+            LineItems: function (OrderCloud, OrderShareService, Order) {
                 OrderShareService.LineItems.length = 0;
-                return CurrentOrder.GetLineItems();
+                return OrderCloud.LineItems.List(Order.ID);
             },
             Payments: function (Order, OrderCloud) {
                 return OrderCloud.Payments.List(Order.ID);
