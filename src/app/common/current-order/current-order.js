@@ -69,7 +69,7 @@ function CurrentOrderService($q, $localForage, OrderCloud, appname) {
         return $localForage.removeItem(StorageName);
     }
 
-    function _getLineItems() {
+    function _getLineItems(orderID) {
         var deferred = $q.defer();
         var lineItems = [];
         var queue = [];

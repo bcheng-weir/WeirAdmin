@@ -117,13 +117,30 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder) {
 		return deferred.promise;
 	}
 
+	var lastSearchType = "";
+	function setLastSearchType(type) {
+		lastSearchType = type;
+	}
+	function getLastSearchType() {
+		return lastSearchType;
+	}
+
+	function selectLocaleResources(resource) {
+		var tmp = resource[getLocale()];
+		return (tmp) ? tmp : resource["en"];
+	}
+
     var service = {
 		OrderStatus: orderStatuses,
 		OrderStatusList: orderStatusList,
 		LookupStatus: getStatus,
 	    AssignAddressToGroups: assignAddressToGroups,
 		Locale: getLocale,
-	    SetOrderAsCurrentOrder: setOrderAsCurrentOrder
+	    SetOrderAsCurrentOrder: setOrderAsCurrentOrder,
+	    SetLastSearchType: setLastSearchType,
+	    GetLastSearchType: getLastSearchType,
+	    LocaleResources: selectLocaleResources,
+	    SearchType: { Serial: "s", Part: "p", Tag: "t"}
     };
 
     return service;

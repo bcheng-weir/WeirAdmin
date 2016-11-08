@@ -39,7 +39,7 @@ function OrdersConfig($stateProvider,buyerid) {
 	});
 }
 
-function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, Underscore, OrderCloud, OrderCloudParameters, Orders, Parameters, buyerid, WeirService) {
+function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, $exceptionHandler, Underscore, OrderCloud, OrderCloudParameters, Orders, Parameters, buyerid, WeirService) {
 	var vm = this;
 	vm.xpType = Parameters.filters ? Parameters.filters["xp.Type"] : {};
 	vm.list = Orders;
@@ -196,11 +196,18 @@ function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, Underscore
 	};
 	vm.labels = labels.en;
 
-	vm.View = function(orderId) {
+	vm.View = function(orderId, customerId) {
+		var cid = customerId;
 		WeirService.SetOrderAsCurrentOrder(orderId)
+			.then(function() {
+				//return OrderCloud.BuyerID.Set(cid);
+			})
 			.then(function() {
 				$rootScope.$broadcast('SwitchCart');
 				$state.go('order');
+			})
+			.catch(function(ex) {
+				$exceptionHandler(ex)
 			})
 	};
 

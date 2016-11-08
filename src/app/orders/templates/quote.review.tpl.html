@@ -70,7 +70,7 @@
             </td>
             <td>{{order.DateSubmitted}}</td>
             <td>{{order.xp.Reviewer}}</td>
-            <td><button class="btn btn-primary" ng-click="orders.View(order.ID)">{{orders.labels.view}}</button></td>
+            <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.CustomerID)">{{orders.labels.view}}</button></td>
         </tr>
         </tbody>
     </table>
