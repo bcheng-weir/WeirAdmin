@@ -33,9 +33,27 @@ function orderConfig($stateProvider, buyerid){
                     return null;
                 }
             },
-            LineItems: function (OrderCloud, OrderShareService, Order) {
+            LineItems: function ($q, $state, toastr, OrderCloud, CurrentOrder, OrderShareService, Order, LineItemHelpers) {
                 OrderShareService.LineItems.length = 0;
-                return OrderCloud.LineItems.List(Order.ID);
+	            var dfd = $q.defer();
+	            CurrentOrder.GetID()
+		            .then(function(id) {
+			            OrderCloud.LineItems.List(Order.ID)
+				            .then(function(data) {
+					            if (!data.Items.length) {
+						            toastr.error('Your quote does not contain any line items.', 'Error');
+						            dfd.resolve({ Items: [] });
+					            } else {
+						            LineItemHelpers.GetProductInfo(data.Items)
+							            .then(function () { dfd.resolve(data); });
+					            }
+				            })
+		            })
+		            .catch(function () {
+		                toastr.error('Your quote does not contain any line items.', 'Error');
+		                dfd.resolve({ Items: [] });
+	                });
+	            return dfd.promise;
             },
             Payments: function (Order, OrderCloud) {
                 return OrderCloud.Payments.List(Order.ID);

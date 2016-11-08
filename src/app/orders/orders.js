@@ -201,6 +201,7 @@ function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, $exception
 		WeirService.SetOrderAsCurrentOrder(orderId)
 			.then(function() {
 				//return OrderCloud.BuyerID.Set(cid);
+				return true;
 			})
 			.then(function() {
 				$rootScope.$broadcast('SwitchCart');

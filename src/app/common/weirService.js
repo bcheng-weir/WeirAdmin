@@ -111,7 +111,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder) {
 				deferred.resolve();
 			})
 			.catch(function(ex) {
-				d.deferred.reject(ex);
+				deferred.reject(ex);
 			});
 
 		return deferred.promise;
@@ -130,7 +130,422 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder) {
 		return (tmp) ? tmp : resource["en"];
 	}
 
-    var service = {
+	function findCart(customer) {
+		var deferred = $q.defer();
+		OrderCloud.Me.Get()
+			.then(function(user) {
+				var filter = {
+					"FromUserId": user.ID,
+					"xp.Type": "Quote",
+					"xp.CustomerID": customer.id,
+					"xp.Status": "DR"
+				};
+				OrderCloud.Me.ListOutgoingOrders(null, 1, 50, null, null, filter)
+					.then(function(results) {
+						if (results.Items.length > 0) {
+							var ct = results.Items[0];
+							CurrentOrder.Set(ct.ID);
+							deferred.resolve(ct);
+						} else {
+							var cart = {
+								"Type": "Standard",
+								xp: {
+									"Type": "Quote",
+									"CustomerID": customer.id,
+									"CustomerName": customer.name,
+									"Status": "DR"
+								}
+							}
+							OrderCloud.Orders.Create(cart)
+								.then(function(ct) {
+									CurrentOrder.Set(ct.ID);
+									deferred.resolve(ct);
+								})
+								.catch(function(ex) {
+									deferred.reject(ex);
+								})
+						}
+					});
+			})
+			.catch(function(ex) {
+				d.reject(ex);
+			});
+		return deferred.promise;
+	}
+
+	function serialNumber(serialNumber) {
+		var deferred = $q.defer();
+		var result;
+
+		CurrentOrder.GetCurrentCustomer()
+			.then(function(cust) {
+				if (cust) {
+					//OrderCloud.Categories.List(null, 1, 50, null, null, {"xp.SN": serialNumber, "catalogID": cust.id})
+					OrderCloud.Categories.List(null, null, null, null, null, {"xp.SN": serialNumber}, null, cust.id)
+						.then(function(matches) {
+							if (matches.Items.length == 1) {
+								result = matches.Items[0];
+								getParts(result.ID, deferred, result);
+							} else if (matches.Items.length == 0) {
+								//throw { message: "No matches found for serial number " + serialNumber};
+								return deferred.resolve("No matches found for serial number " + serialNumber);
+							} else {
+								//throw { message: "Data error: Serial number " + serialNumber + " is not unique"};
+								return deferred.resolve("No matches found for serial number " + serialNumber);
+							}
+						});
+				} else {
+					throw { message: "Customer for search not set"};
+				}
+			})
+			.catch(function(ex) {
+				return deferred.reject(ex);
+			});
+
+		return deferred.promise;
+	}
+
+	function tagNumber(tagNumber) {
+		var deferred = $q.defer();
+		var result;
+		CurrentOrder.GetCurrentCustomer()
+			.then(function(cust) {
+				if (cust) {
+					OrderCloud.Categories.List(null, 1, 50, null, null, {"xp.TagNumber": tagNumber, "catalogID": cust.id})
+						.then(function(matches) {
+							if (matches.Items.length == 1) {
+								result = matches.Items[0];
+								getParts(result.ID, deferred, result);
+							} else if (matches.Items.length == 0) {
+								//throw { message: "No matches found for tag number " + tagNumber};
+								return deferred.resolve("No matches found for tag number " + tagNumber);
+							} else {
+								//throw { message: "Data error: Tag number " + tagNumber + " is not unique"};
+								return deferred.resolve("Data error: Tag number " + tagNumber + " is not unique");
+							}
+						});
+				}
+			})
+			.catch(function(ex) {
+				deferred.reject(ex);
+			});
+		return deferred.promise;
+	}
+
+	function getParts(catId, deferred, result) {
+		//OrderCloud.Me.ListProducts(null, 1, 100, null, null, null, catId)
+		OrderCloud.Products.List(null,null,null,null,null,null)
+			.then(function(products) {
+				result.Parts = [];
+				angular.forEach(products.Items, function(product) {
+					if(result.xp.Parts[product.ID]) {
+						result.Parts.push({Number: product.ID, Detail: product});
+					}
+				});
+				deferred.resolve(result);
+			})
+			.catch(function(ex) {
+				deferred.reject(ex);
+			})
+	}
+
+	function serialNumbers(serialNumbers) {
+		var deferred = $q.defer();
+		var results = [];
+		var queue = [];
+		CurrentOrder.GetCurrentCustomer()
+			.then(function(cust) {
+				if (cust) {
+					angular.forEach(serialNumbers, function(number) {
+						if (number) {
+							queue.push((function() {
+								var d = $q.defer();
+								//OrderCloud.Categories.List(null, 1, 50, null, null, {"xp.SN": number, "catalogID": cust.id})
+								OrderCloud.Categories.List(null, null, null, null, null, {"xp.SN": number}, 1, cust.id)
+									.then(function(matches) {
+										if (matches.Items.length == 1) {
+											results.push({Number: number, Detail: matches.Items[0]});
+										} else {
+											results.push({Number: number, Detail: null});
+										}
+										d.resolve();
+									})
+									.catch(function(ex) {
+										results.push({Number: number, Detail: null});
+										d.resolve();
+									});
+								return d.promise;
+							})());
+						}
+					});
+					$q.all(queue)
+						.then(function() {
+							deferred.resolve(results);
+						});
+				} else {
+					deferred.resolve(results);
+				}
+			})
+			.catch(function(ex) {
+				d.resolve();
+			});
+		return deferred.promise;
+	}
+
+	function tagNumbers(tagNumbers) {
+		var deferred = $q.defer();
+
+		var results = [];
+		var queue = [];
+		CurrentOrder.GetCurrentCustomer()
+			.then(function(cust) {
+				if (cust) {
+					angular.forEach(tagNumbers, function(number) {
+						if (number) {
+							queue.push((function() {
+								var d = $q.defer();
+								OrderCloud.Categories.List(null, 1, 50, null, null, {"xp.TagNumber": number, "catalogID": cust.id})
+									.then(function(matches) {
+										if (matches.Items.length == 1) {
+											results.push({Number: number, Detail: matches.Items[0]});
+										} else {
+											results.push({Number: number, Detail: null});
+										}
+										d.resolve();
+									})
+									.catch(function(ex) {
+										results.push({Number: number, Detail: null});
+										d.resolve();
+									});
+
+								return d.promise;
+							})());
+						}
+					});
+					$q.all(queue).then(function() {
+						deferred.resolve(results);
+					});
+				} else {
+					deferred.resolve(results);
+				}
+			})
+			.catch(function(ex) {});
+
+		return deferred.promise;
+	}
+
+	function partNumbers(partNumbers) {
+
+		var results = {
+			Parts: [],
+			Customer: ""
+		};
+		var categories = [];
+		var queue = [];
+		var q2 = [];
+		var q3 = [];
+		var deferred = $q.defer();
+
+		getParts(partNumbers);
+		$q.all(queue)
+			.then(function() {
+				getValvesForParts(results);
+				$q.all(q2)
+					.then(function() {
+						getCustomerForValves(categories);
+						$q.all(q3)
+							.then(function() {
+								deferred.resolve(results);
+							});
+					});
+			})
+			.catch (function(ex) {
+				deferred.resolve(results);
+			});
+		return deferred.promise;
+
+		function getParts(partNumbers) {
+			angular.forEach(partNumbers, function(number) {
+				if (number) {
+					queue.push((function() {
+						var d = $q.defer();
+
+						OrderCloud.Me.ListProducts(null, 1, 50, null, null, {"Name": number})
+							.then(function(products) {
+								if (products.Items.length == 0) {
+									results.Parts.push({Number: number, Detail: null});
+								} else {
+									angular.forEach(products.Items, function(product) {
+										var result = {Number: number, Detail: product};
+										results.Parts.push(result);
+									});
+								}
+								d.resolve();
+							})
+							.catch(function(ex) {
+								results.Parts.push({Number: number, Detail: null});
+								d.resolve();
+							});
+						return d.promise;
+					})());
+				}
+			});
+		}
+
+		function getValvesForParts(results) {
+			angular.forEach(results.Parts, function(result) {
+				if (result.Detail) {
+					q2.push((function() {
+						var d2 = $q.defer();
+						var part = result.Detail;
+						OrderCloud.Categories.ListProductAssignments(null, part.ID, 1, 50)
+							.then(function(valveIds) {
+								angular.forEach(valveIds.Items, function(entry) {
+									if (categories.indexOf(entry) < 0) categories.push(entry);
+								});
+								d2.resolve();
+							})
+							.catch (function(ex) {
+								d2.resolve();
+							});
+						return d2.promise;
+					})());
+				}
+			});
+		}
+
+		function getCustomerForValves(valves) {
+			var def3 = $q.defer();
+			angular.forEach(valves, function(entry) {
+				q3.push((function() {
+					var d3 = $q.defer();
+					OrderCloud.Categories.Get(entry.CategoryID)
+						.then(function(item) {
+							if (!results.Customer) {
+								results.Customer = item.xp.Customer;
+							} else if (results.Customer != item.xp.Customer) {
+								results.Customer = "*";
+							}
+							d3.resolve();
+						})
+						.catch(function(ex) {
+							d3.resolve();
+						});
+					return d3.promise;
+				})());
+			});
+		}
+	}
+
+	function addPartToQuote(part) {
+		var deferred = $q.defer();
+		var currentOrder = {};
+
+		CurrentOrder.Get()
+			.then(function(order) {
+				// order is the localforge order.
+				currentOrder = order;
+				return OrderCloud.LineItems.List(currentOrder.ID,null,null,null,null,null,null, buyerid);
+			})
+			.then(function(lineItems) {
+				// If the line items contains the current part, then update.
+				var elementPosition = lineItems.Items.map(function(x) {return x.ProductID;}).indexOf(part.Detail.ID);
+				if(elementPosition == -1) {
+					addLineItem(currentOrder);
+				} else {
+					updateLineItem(currentOrder, lineItems.Items[elementPosition]);
+				}
+			})
+			.catch(function() {
+				OrderCloud.Orders.Create({ID: randomQuoteID()})
+					.then(function(order) {
+						CurrentOrder.Set(order.ID);
+						addLineItem(order);
+					})
+			});
+
+		function updateLineItem(order, lineItem) {
+			// find the line item and update the quantity of the current order.
+			var qty = part.Quantity + lineItem.Quantity;
+			var li = {
+				ProductID: lineItem.ProductID,
+				Quantity: qty
+			}
+			OrderCloud.LineItems.Patch(order.ID, lineItem.ID, li, buyerid)
+				.then(function(lineItem) {
+					deferred.resolve({Order: order, LineItem: lineItem});
+				})
+		}
+
+		function addLineItem(order) {
+			var li = {
+				ProductID: part.Detail.ID,
+				Quantity: part.Quantity,
+				xp: {
+					SN: part.xp.SN,
+					TagNumber: part.xp.TagNumber
+				}
+			};
+
+			OrderCloud.LineItems.Create(order.ID, li)
+				.then(function(lineItem) {
+					deferred.resolve({Order: order, LineItem: lineItem});
+				})
+				.catch(function(ex) {
+					console.log(ex);
+				});
+		}
+
+		return deferred.promise;
+	}
+
+	function addPartsToQuote(parts) {
+		var deferred = $q.defer();
+
+		CurrentOrder.Get()
+			.then(function(order) {
+				addLineItems(order);
+			})
+			.catch(function() {
+				OrderCloud.Orders.Create({ID: randomQuoteID()})
+					.then(function(order) {
+						CurrentOrder.Set(order.ID);
+						addLineItems(order);
+					});
+			});
+
+		function addLineItems(order) {
+			var queue = [];
+
+			angular.forEach(parts, function(part) {
+				if (part.Quantity) {
+					queue.push((function() {
+						var d = $q.defer();
+
+						var li = {
+							ProductID: part.Detail.ID,
+							Quantity: part.Quantity
+						};
+
+						OrderCloud.LineItems.Create(order.ID, li)
+							.then(function(lineItem) {
+								d.resolve(lineItem);
+							});
+
+						return d.promise;
+					})());
+				}
+			});
+
+			$q.all(queue).then(function() {
+				deferred.resolve();
+			});
+		}
+
+		return deferred.promise;
+	}
+
+	var service = {
 		OrderStatus: orderStatuses,
 		OrderStatusList: orderStatusList,
 		LookupStatus: getStatus,
@@ -140,7 +555,15 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder) {
 	    SetLastSearchType: setLastSearchType,
 	    GetLastSearchType: getLastSearchType,
 	    LocaleResources: selectLocaleResources,
-	    SearchType: { Serial: "s", Part: "p", Tag: "t"}
+	    SearchType: { Serial: "s", Part: "p", Tag: "t"},
+	    FindCart: findCart,
+		SerialNumber: serialNumber,
+		SerialNumbers: serialNumbers,
+		PartNumbers: partNumbers,
+		TagNumber: tagNumber,
+		TagNumbers: tagNumbers,
+		AddPartToQuote: addPartToQuote,
+		AddPartsToQuote: addPartsToQuote
     };
 
     return service;

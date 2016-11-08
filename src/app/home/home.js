@@ -32,14 +32,16 @@ function HomeConfig($stateProvider, $sceDelegateProvider) {
 					return CurrentOrder.GetCurrentCustomer()
 						.then(function(cust) {
 							if (cust) {
-								return OrderCloud.Me.ListCategories(null, 1, 100, null, null, { "catalogID": cust.id});
+								//return OrderCloud.Me.ListCategories(null, 1, 100, null, null, { "catalogID": cust.id});
+								return OrderCloud.Categories.List(null, null, null, null, null, null, null, cust.id)
 							} else {
 								return { Items: []};
 							}
 						});
 				},
 				PartNumbers: function(OrderCloud) {
-					return OrderCloud.Me.ListProducts(null, 1, 100, null, null, null);
+					//return OrderCloud.Me.ListProducts(null, 1, 100, null, null, null);
+					return OrderCloud.Products.List(null, null, null, null, null, null);
 				},
 				MyOrg: function(OrderCloud) {
 					return OrderCloud.Buyers.Get(OrderCloud.BuyerID.Get());
@@ -165,7 +167,12 @@ function HomeController($sce, $state, $rootScope, OrderCloud, CurrentOrder, Weir
 		}
 		vm.SelectingCustomer = true;
 	};
-	vm.ClearFilter = function() { vm.customerFilter = null; $rootScope.$broadcast('OC:RemoveOrder', null, null); };
+
+	vm.ClearFilter = function() {
+		vm.customerFilter = null; $rootScope.$broadcast('OC:RemoveOrder', null, null);
+		CurrentOrder.Remove();
+	};
+
 	vm.CustomerSelected = function() {
 		var newCust = null;
 		if (vm.selfsearch) {

@@ -56,11 +56,9 @@ function CurrentOrderService($q, $localForage, OrderCloud, appname) {
         $localForage.setItem(StorageName, OrderID)
             .then(function(data) {
                 deferred.resolve(data);
-                //return data;
             })
             .catch(function(error) {
                 deferred.reject(error);
-                //return error;
             });
         return deferred.promise;
     }
@@ -73,6 +71,7 @@ function CurrentOrderService($q, $localForage, OrderCloud, appname) {
         var deferred = $q.defer();
         var lineItems = [];
         var queue = [];
+
         _getID()
             .then(function(OrderID) {
                 OrderCloud.LineItems.List(OrderID, 1, 100)

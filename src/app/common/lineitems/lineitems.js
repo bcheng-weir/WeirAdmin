@@ -73,7 +73,8 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
         var dfd = $q.defer();
         var queue = [];
         angular.forEach(productIDs, function (productid) {
-            queue.push(OrderCloud.Me.GetProduct(productid));
+            //queue.push(OrderCloud.Me.GetProduct(productid));
+            queue.push(OrderCloud.Products.Get(productid));
         });
         $q.all(queue)
             .then(function (results) {
