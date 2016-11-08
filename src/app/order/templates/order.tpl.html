@@ -63,7 +63,7 @@
                  </tr>
                  </thead>
                  <tbody>
-                 <tr ng-repeat="line in order.LineItems">
+                 <tr ng-repeat="line in order.LineItems.Items">
                      <td>{{line.xp.SN}}</td>
                      <td>{{line.xp.TagNumber}}</td>
                      <td>{{line.Product.Name}}</td>
@@ -75,16 +75,17 @@
                          <span ng-switch-when="GBP">{{line.UnitPrice | currency:'&#163; '}}</span>
                          <span ng-switch-default>{{line.UnitPrice | currency:'&#163; '}}</span>
                      </td>
-                     <td class="form-inline"><input type="number" class="form-control" ng-model="line.Quantity" ng-min="0"
+                     <td class="form-inline" ng-if="false"><input type="number" class="form-control" ng-model="line.Quantity" ng-min="0"
                                                     ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" style="width:50%"/>
                      </td>
+                     <td ng-if="true">{{line.Quantity}}</td>
                      <td> <button type="button" class="btn btn-primary btn-lg" style="background-color: gray;"><span ng-bind-html='order.labels.Edit'></span></button></td>
                      <td> <button type="button" class="btn btn-primary btn-lg" style="background-color: yellow;"><span ng-bind-html='order.labels.Updated'></span></button></td>
                      <td> <button type="button" class="btn btn-primary btn-lg" style="background-color: red;"><span ng-bind-html='order.labels.Removed'></span></button></td>
                      <td> <button type="button" class="btn btn-primary btn-lg" style="background-color: green;"><span ng-bind-html='order.labels.New'></span></button></td>
 
                  </tr>
-                 <tr ng-if="order.LineItems.length > 0">
+                 <tr ng-if="order.LineItems.Items.length > 0">
                      <td class="button-th" colspan="5"></td>
                      <td ng-bind-html='order.labels.Total'></td>
                      <td ng-switch on="order.Order.xp.Currency" class='text-right'>
