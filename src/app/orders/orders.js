@@ -39,7 +39,7 @@ function OrdersConfig($stateProvider,buyerid) {
 	});
 }
 
-function OrdersController($scope, $state, $sce, $ocMedia, Underscore, OrderCloud, OrderCloudParameters, Orders, Parameters, buyerid, CurrentOrder) {
+function OrdersController($scope, $state, $sce, $ocMedia, Underscore, OrderCloud, OrderCloudParameters, Orders, Parameters, buyerid, WeirService) {
 	var vm = this;
 	vm.xpType = Parameters.filters ? Parameters.filters["xp.Type"] : {};
 	vm.list = Orders;
@@ -197,9 +197,12 @@ function OrdersController($scope, $state, $sce, $ocMedia, Underscore, OrderCloud
 	vm.labels = labels.en;
 
 	vm.View = function(orderId) {
-		CurrentOrder.Set(orderId);
-        $state.go('order');
+		WeirService.SetOrderAsCurrentOrder(orderId)
+			.then(function() {
+				$state.go('order');
+			})
 	};
+
 	vm.Revisions = function() {
 		//ToDo
 	}

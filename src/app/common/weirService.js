@@ -2,7 +2,7 @@ angular.module( 'orderCloud' )
     .factory( 'WeirService', WeirService )
 ;
 
-function WeirService( $q, $cookieStore, $sce, OrderCloud) {
+function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder) {
     var orderStatuses = {
 	    Draft: {id: "DR", label: "Draft", desc: "This is the current quote under construction"},
 	    Saved: {id: "SV", label: "Saved", desc: "Quote has been saved but not yet submitted to weir as quote or order"},
@@ -94,12 +94,36 @@ function WeirService( $q, $cookieStore, $sce, OrderCloud) {
 			});
 	}
 
+	function setOrderAsCurrentOrder(quoteId) {
+		var deferred = $q.defer();
+
+		CurrentOrder.Set(quoteId)
+			.then(function() {
+				return CurrentOrder.Get();
+			})
+			.then(function(quote) {
+				return CurrentOrder.SetCurrentCustomer({
+					id: quote.xp.CustomerID,
+					name: quote.xp.CustomerName
+				});
+			})
+			.then(function() {
+				deferred.resolve();
+			})
+			.catch(function(ex) {
+				d.deferred.reject(ex);
+			});
+
+		return deferred.promise;
+	}
+
     var service = {
 		OrderStatus: orderStatuses,
 		OrderStatusList: orderStatusList,
 		LookupStatus: getStatus,
 	    AssignAddressToGroups: assignAddressToGroups,
-		Locale: getLocale
+		Locale: getLocale,
+	    SetOrderAsCurrentOrder: setOrderAsCurrentOrder
     };
 
     return service;

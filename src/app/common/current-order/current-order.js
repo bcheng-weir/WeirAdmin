@@ -4,12 +4,15 @@ angular.module('ordercloud-current-order', [])
 
 function CurrentOrderService($q, $localForage, OrderCloud, appname) {
     var StorageName = appname + '.CurrentOrderID';
+    var CustomerStorageName = appname + '.CurrentCustomer';
     return {
         Get: _get,
         GetID: _getID,
         Set: _set,
         Remove: _remove,
-        GetLineItems: _getLineItems
+        GetLineItems: _getLineItems,
+        GetCurrentCustomer: _getCurrentCustomer,
+        SetCurrentCustomer: _setCurrentCustomer
     };
 
     function _get() {
@@ -49,24 +52,27 @@ function CurrentOrderService($q, $localForage, OrderCloud, appname) {
     }
 
     function _set(OrderID) {
+        var deferred = $q.defer();
         $localForage.setItem(StorageName, OrderID)
             .then(function(data) {
-                return data;
+                deferred.resolve(data);
+                //return data;
             })
             .catch(function(error) {
-                return error;
+                deferred.reject(error);
+                //return error;
             });
+        return deferred.promise;
     }
 
     function _remove() {
         return $localForage.removeItem(StorageName);
     }
 
-    function _getLineItems(orderID) {
+    function _getLineItems() {
         var deferred = $q.defer();
         var lineItems = [];
         var queue = [];
-
         _getID()
             .then(function(OrderID) {
                 OrderCloud.LineItems.List(OrderID, 1, 100)
@@ -85,5 +91,34 @@ function CurrentOrderService($q, $localForage, OrderCloud, appname) {
             });
 
         return deferred.promise;
+    }
+
+    function _setCurrentCustomer(customer) {
+        var dfd = $q.defer();
+        $localForage.setItem(CustomerStorageName, customer)
+            .then(function(data) {
+                dfd.resolve(data);
+            })
+            .catch(function(error) {
+                dfd.reject(error);
+            });
+        return dfd.promise;
+    }
+
+    function _getCurrentCustomer() {
+        var dfd = $q.defer();
+        $localForage.getItem(CustomerStorageName)
+            .then(function(customer) {
+                if (customer)
+                    dfd.resolve(customer);
+                else {
+                    $localForage.removeItem(CustomerStorageName);
+                    dfd.resolve(null);
+                }
+            })
+            .catch(function() {
+                dfd.resolve(null);
+            });
+        return dfd.promise;
     }
 }

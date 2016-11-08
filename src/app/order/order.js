@@ -22,7 +22,7 @@ function orderConfig($stateProvider, buyerid){
         data: {componentName: 'order'},
         resolve: {
             Order: function(CurrentOrder){
-              return CurrentOrder.Get();
+                return CurrentOrder.Get();
             },
             DeliveryAddress: function (OrderCloud, Order) {
                 if(Order.ShippingAddressID) {
@@ -32,35 +32,15 @@ function orderConfig($stateProvider, buyerid){
                     return null;
                 }
             },
-            LineItems: function ($q, $state, toastr, Underscore, CurrentOrder, OrderCloud, LineItemHelpers, OrderShareService) {
+            LineItems: function (OrderShareService, CurrentOrder) {
                 OrderShareService.LineItems.length = 0;
-                var dfd = $q.defer();
-                CurrentOrder.GetID()
-                    .then(function (id) {
-                        OrderCloud.LineItems.List(id)
-                            .then(function (data) {
-                                if (!data.Items.length) {
-                                    toastr.error('Your quote does not contain any line items.', 'Error');
-                                    dfd.resolve({ Items: [] });
-                                } else {
-                                    LineItemHelpers.GetProductInfo(data.Items)
-                                        .then(function () { dfd.resolve(data); });
-                                }
-                            })
-                    })
-                    .catch(function () {
-                        toastr.error('Your quote does not contain any line items.', 'Error');
-                        dfd.resolve({ Items: [] });
-                    });
-                return dfd.promise;
+                return CurrentOrder.GetLineItems();
             },
             Payments: function (Order, OrderCloud) {
                 return OrderCloud.Payments.List(Order.ID);
             }
         }
-
-
-    })
+    });
 }
 
 function OrderController($scope, $state, $sce, OrderCloud, Order, DeliveryAddress, LineItems, Payments, toastr, WeirService){
@@ -147,6 +127,4 @@ function OrderController($scope, $state, $sce, OrderCloud, Order, DeliveryAddres
         };
         vm.labels = labels[WeirService.Locale()];
         vm.DeliveryAddress = DeliveryAddress;
-
 }
-
