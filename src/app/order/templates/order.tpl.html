@@ -34,7 +34,7 @@
                 <!--ToDo Confirm function-->
                 <button type="button" class="btn btn-primary btn-lg" style="background-color: darkgray;"><span ng-bind-html='order.labels.Comments'></span></button>
             </li>
-        <li ng-click="order.Download()" style="padding: 0px 10px 0px 0px;"><a href="#" ng-bind-html='order.labels.Download'></a></li>
+        <li style="padding: 0px 10px 0px 0px;"><button type="button" class="btn btn-primary btn-lg" ng-csv="order.ToCsvJson" filename="{{order.CsvFilename}}" ng-bind-html="order.labels.Download"></button></li>
         <li ng-click="order.Print()"><a href="#" ng-bind-html='order.labels.Print'></a></li>
         </ul>
     </ul>
