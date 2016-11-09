@@ -62,11 +62,12 @@ function orderConfig($stateProvider, buyerid){
     });
 }
 
-function OrderController($scope, $state, $sce, OrderCloud, Order, DeliveryAddress, LineItems, Payments, toastr, WeirService){
+function OrderController($scope, $state, $sce, OrderCloud, Order, DeliveryAddress, LineItems, Payments, toastr, WeirService, OrderToCsvService) {
     var vm = this;
     vm.Order = Order;
     vm.LineItems = LineItems;
     vm.DeliveryAddress = DeliveryAddress;
+    vm.Payments = Payments;
     var labels = {
         en: {
             //header labels
@@ -103,7 +104,7 @@ function OrderController($scope, $state, $sce, OrderCloud, Order, DeliveryAddres
             AddABlankItem: "Add a blank item",
             //footers
             YourRefNo: "Your Reference No;",
-            DelieveryAddress: "Delievery Address",
+            DelieveryAddress: "Delivery Address",
             YourAttachments: "Your attachments",
             YourComments: "Your comments or instructions"
         },
@@ -142,10 +143,15 @@ function OrderController($scope, $state, $sce, OrderCloud, Order, DeliveryAddres
             AddABlankItem:$sce.trustAsHtml( "Add a blank item"),
             //footers
             YourRefNo:$sce.trustAsHtml( "Your Reference No;"),
-            DelieveryAddress:$sce.trustAsHtml("Delievery Address"),
+            DelieveryAddress:$sce.trustAsHtml("Delivery Address"),
             YourAttachments:$sce.trustAsHtml( "Your attachments"),
             YourComments:$sce.trustAsHtml( "Your comments or instructions")
         }
     };
     vm.labels = labels[WeirService.Locale()];
+    function toCsv() {
+        return OrderToCsvService.ToCsvJson(vm.Order, vm.LineItems, vm.DeliveryAddress, vm.Payments, vm.labels);
+    }
+    vm.ToCsvJson = toCsv;
+    vm.CsvFilename = vm.Order.ID + ".csv";
 }
