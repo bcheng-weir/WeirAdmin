@@ -22,7 +22,7 @@
                     <!-- <td ng-if='tagResults.MultipleCustomers'>{{result.Detail.xp.Customer}}</td>-->
                     <td>{{result.Detail.xp.TagNumber}}</td>
                     <td ng-bind-html='result.Detail.Description'></td>
-                    <td class="button-td"><button class="btn btn-warning" ui-sref="home.tag.detail({number: result.Number, searchNumbers: tagResults.searchNumbers})" ng-bind-html='tagResults.labels.ViewDetails'></button></td>
+                    <td class="button-td"><button class="btn btn-warning" ui-sref="productSearch.tag.detail({number: result.Number, searchNumbers: tagResults.searchNumbers})" ng-bind-html='tagResults.labels.ViewDetails'></button></td>
                 </tr>
                 </tbody>
             </table>
@@ -32,7 +32,7 @@
         </div>
         <div class="col-md-4">
             <h2>
-                <button class="btn btn-primary" ui-sref="home.tag" ng-bind-html='tagResults.labels.SearchAgain'></button>
+                <button class="btn btn-primary" ui-sref="productSearch.tag" ng-bind-html='tagResults.labels.SearchAgain'></button>
             </h2>
         </div>
     </div>

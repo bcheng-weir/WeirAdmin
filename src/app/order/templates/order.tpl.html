@@ -48,9 +48,9 @@
      </div>
 
      <div class="row" style="width: 65%">
-         <div class="col-md-12">
-             <table class="table table-bordered oc-table-responsive weir-results-table" style="float: left">
-                 <thead>
+         <div class="col-lg-12">
+             <table class="table table-bordered oc-table-responsive weir-results-table" style="float: left;border-right: 0">
+                 <thead class="header-cell">
                  <tr style="background-color: blue; color: white;">
                      <th ng-bind-html='order.labels.SerialNum'></th>
                      <th ng-bind-html='order.labels.TagNum'></th>
@@ -60,10 +60,11 @@
                      <th ng-bind-html='order.labels.LeadTimeAvailability'></th>
                      <th ng-bind-html='order.labels.PricePerItem'></th>
                      <th ng-bind-html='order.labels.Quantity'></th>
+                     <th style="border:0;background-color: white;"></th>
                  </tr>
                  </thead>
                  <tbody>
-                 <tr ng-repeat="line in order.LineItems.Items">
+                 <tr ng-repeat="line in order.LineItems.Items" style="border-right-width: 0;">
                      <td>{{line.xp.SN}}</td>
                      <td>{{line.xp.TagNumber}}</td>
                      <td>{{line.Product.Name}}</td>
@@ -79,10 +80,12 @@
                                                     ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" style="width:50%"/>
                      </td>
                      <td ng-if="true">{{line.Quantity}}</td>
-                     <td> <button type="button" class="btn btn-primary btn-lg" style="background-color: gray;"><span ng-bind-html='order.labels.Edit'></span></button></td>
-                     <td> <button type="button" class="btn btn-primary btn-lg" style="background-color: yellow;"><span ng-bind-html='order.labels.Updated'></span></button></td>
-                     <td> <button type="button" class="btn btn-primary btn-lg" style="background-color: red;"><span ng-bind-html='order.labels.Removed'></span></button></td>
-                     <td> <button type="button" class="btn btn-primary btn-lg" style="background-color: green;"><span ng-bind-html='order.labels.New'></span></button></td>
+                     <td style="border:0">
+                         <button type="button" ng-show="order.Order.xp.Status=='SB'" class="btn btn-primary btn-lg" style="background-color: gray;"><span ng-bind-html='order.labels.Edit'></span></button>
+                         <button type="button" ng-show="order.Order.xp.Status=='RE'" class="btn btn-primary btn-lg" style="background-color: yellow;"><span ng-bind-html='order.labels.Updated'></span></button>
+                         <button type="button" ng-show="order.Order.xp.Status=='RE'" class="btn btn-primary btn-lg" style="background-color: red;"><span ng-bind-html='order.labels.Removed'></span></button>
+                         <button type="button" ng-show="order.Order.xp.Status=='RE'" class="btn btn-primary btn-lg" style="background-color: green;"><span ng-bind-html='order.labels.New'></span></button>
+                     </td>
 
                  </tr>
                  <tr ng-if="order.LineItems.Items.length > 0">
