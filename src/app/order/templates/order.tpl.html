@@ -1,12 +1,22 @@
 <article id="COMPONENT_order" class="container-fluid">
+    <div class="row" ng-show="order.Order.xp.Status=='RE'">
+        <div class="col-lg-2">About Batley</div>
+        <div class="col-lg-2">About Blakeborough</div>
+        <div class="col-lg-2">About Hopkinsons</div>
+        <div class="col-lg-2">Quick Quote</div>
+        <div class="col-lg-2"><a ui-sref="productSearch">Search</a></div>
+        <div class="col-lg-2"></div>
+    </div>
     <!-- header -->
-    <ul class="nav nav-tabs nav-justified" style="padding-top: 20px;">
+    <ul class="nav nav-tabs nav-justified" style="padding-top: 20px; background-color: lightgray">
         <ul class="nav navbar-nav navbar-left">
         <li style="padding: 10px 5px 0px 0px;">
             <!--ToDo need to make status function and concatenate date-->
-            <span ng-bind-html='order.labels.status'></span><br /><span ng-bind-html='order.Order.xp.Status'></span></a>
+            <span ng-bind-html='order.labels.status'></span><br />
+            <b><span ng-bind-html='order.Status.label'></span>
+            <span ng-bind-html='order.Order.xp.StatusDate'></span></b>
         </li>
-        <li style="padding: 10px 0px 0px 10px;">
+        <li style="padding: 10px 0px 0px 10px;" ng-show="order.Order.xp.Status=='RE'">
             <!--ToDo need to populate it with PONumber-->
             &nbsp;<span ng-bind-html='order.labels.PONumber'></span><br /><span ng-bind-html='order.Order.xp.PONumber'></span></a>
         </li>
@@ -30,7 +40,6 @@
     </ul>
     <!-- Table -->
      <div class="row">
-
          <div class="col-md-9">
              <p><b><span ng-bind-html='order.labels.WeirOrderNo'></span><br /><span class="text-danger">{{order.Order.ID}}</span></b></p>
              <p><b><span ng-bind-html='order.labels.QuoteRef'></span><br /><span class="text-danger">{{order.Order.xp.RefNum}}</span></b></p>
@@ -41,8 +50,8 @@
              <div class="pull-right" style="padding: 30px 25px 0px 0px; float: right;">
                  <p><a ng-if="order.Order.xp.Type == 'Order'" href="#" ui-sref="home">Back to Quotes</a></p>
                  <p><a ng-if="order.Order.xp.Type == 'Quote'" href="#" ui-sref="home">Back to Orders</a></p>
-                 <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ui-sref="home" ng-bind-html='order.labels.AddNewItems'></span></button></p>
-                 <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ui-sref="home" ng-bind-html='order.labels.AddABlankItem'></span></button></p>
+                 <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ui-sref="home" ng-bind-html='order.labels.AddNewItems' ng-show="order.Order.xp.Status=='RE'"></span></button></p>
+                 <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ui-sref="home" ng-bind-html='order.labels.AddABlankItem' ng-show="order.Order.xp.Status=='RE'"></span></button></p>
              </div>
          </div>
      </div>
@@ -81,7 +90,7 @@
                      </td>
                      <td ng-if="true">{{line.Quantity}}</td>
                      <td style="border:0">
-                         <button type="button" ng-show="order.Order.xp.Status=='SB'" class="btn btn-primary btn-lg" style="background-color: gray;"><span ng-bind-html='order.labels.Edit'></span></button>
+                         <button type="button" ng-show="order.Order.xp.Status=='RE'" class="btn btn-primary btn-lg" style="background-color: gray;"><span ng-bind-html='order.labels.Edit'></span></button>
                          <button type="button" ng-show="order.Order.xp.Status=='RE'" class="btn btn-primary btn-lg" style="background-color: yellow;"><span ng-bind-html='order.labels.Updated'></span></button>
                          <button type="button" ng-show="order.Order.xp.Status=='RE'" class="btn btn-primary btn-lg" style="background-color: red;"><span ng-bind-html='order.labels.Removed'></span></button>
                          <button type="button" ng-show="order.Order.xp.Status=='RE'" class="btn btn-primary btn-lg" style="background-color: green;"><span ng-bind-html='order.labels.New'></span></button>

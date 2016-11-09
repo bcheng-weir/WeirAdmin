@@ -62,11 +62,16 @@ function orderConfig($stateProvider, buyerid){
     });
 }
 
-function OrderController($scope, $state, $sce, OrderCloud, Order, DeliveryAddress, LineItems, Payments, toastr, WeirService){
+function OrderController($scope, $state, $sce, OrderCloud, Order, DeliveryAddress, LineItems, Payments, toastr, WeirService, Underscore) {
     var vm = this;
     vm.Order = Order;
     vm.LineItems = LineItems;
     vm.DeliveryAddress = DeliveryAddress;
+    vm.Status = Underscore.find(WeirService.OrderStatus, function(status) {
+    	console.log(status);
+        return status.id == vm.Order.xp.Status;
+    });
+
     var labels = {
         en: {
             //header labels
@@ -80,6 +85,7 @@ function OrderController($scope, $state, $sce, OrderCloud, Order, DeliveryAddres
             Print: "Print",
             //paragraph above table
             WeirOrderNo: "Weir Order No;",
+	        WeirQuoteNo: "Weir Quote No;",
             QuoteRef: "Your quote ref;",
             PONumber: "Your PO No;",
             //table labels
@@ -119,6 +125,7 @@ function OrderController($scope, $state, $sce, OrderCloud, Order, DeliveryAddres
             Print:$sce.trustAsHtml( "Print"),
             //paragraph above table
             WeirOrderNo:$sce.trustAsHtml( "Weir Order No;"),
+	        WeirQuoteNo: $sce.trustAsHtml( "Weir Quote No;"),
             QuoteRef:$sce.trustAsHtml( "Your quote ref;"),
             PONumber:$sce.trustAsHtml( "Your PO No;"),
             //table labels
