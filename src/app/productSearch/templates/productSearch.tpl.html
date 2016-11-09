@@ -1,0 +1,25 @@
+<article id="COMPONENT_ProductSearch" class="container-fluid">
+    <div ng-if="productSearch.IsServiceOrg && ['productSearch.serial', 'productSearch.part', 'productSearch.tag'].indexOf(application.$state.current.name) > -1" style="margin-left: 1em; margin-bottom: 1em;">
+        <!--<div ng-if="!productSearch.SelectingCustomer">
+            <div class="row" style="font-weight: bold;"><span ng-bind-html='productSearch.labels.CustomerFilter'></span> {{productSearch.Customer.name}}</div>
+            <div class="row"><a href="#" ng-click="productSearch.SelectCustomer()" ng-bind-html="productSearch.labels.SelectCustomer"></a></div>
+        </div>-->
+        <div ng-if="productSearch.SelectingCustomer" >
+            <div class="row"><span ng-bind-html="productSearch.labels.SearchMine"></span><input type="checkbox" style="margin-left: 1em;" ng-model="productSearch.selfsearch" ng-change="productSearch.ClearFilter()" /></div>
+            <div class="row"><span ng-bind-html="productSearch.labels.SearchOr"></span></div>
+            <div class="row"><span ng-bind-html="productSearch.labels.FilterEndUser"></span></div>
+            <div class="row col-md-3 input-group">
+                <input type="text" class="form-control" style="width: 12em;" ng-disabled='productSearch.selfsearch' ng-model="productSearch.customerFilter" typeahead-min-length="3" uib-typeahead="cust.name for cust in productSearch.AvailableCustomers | customerPresearch:$viewValue" />
+                <button style="margin-left: 1em;" ng-disabled="!productSearch.customerFilter && !productSearch.selfsearch" ng-click="productSearch.CustomerSelected()" ng-bind-html="productSearch.labels.Select"></input>
+            </div>
+        </div>
+    </div>
+    <ul class="nav nav-tabs nav-justified" ng-if="productSearch.Customer.id && ['productSearch.serial', 'productSearch.part', 'productSearch.tag'].indexOf(application.$state.current.name) > -1">
+        <li role="presentation" ui-sref-active="active" ui-sref="productSearch.serial"><a href="#" ng-bind-html='productSearch.labels.SerialSearch'></a></li>
+        <li role="presentation" ui-sref-active="active" ui-sref="productSearch.part"><a href="#" ng-bind-html='productSearch.labels.PartSearch'></a></li>
+        <li role="presentation" ui-sref-active="active" ui-sref="productSearch.tag"><a href="#" ng-bind-html='productSearch.labels.TagSearch'></a></li>
+    </ul>
+    <div ui-view ng-if='productSearch.Customer.id'></div>
+</article>
+
+

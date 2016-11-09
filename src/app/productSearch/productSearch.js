@@ -1,4 +1,5 @@
 angular.module('orderCloud')
+angular.module('orderCloud')
 	.config(ProductSearchConfig)
 	.controller('ProductSearchCtrl', ProductSearchController)
 	.controller('SerialCtrl', SerialController)

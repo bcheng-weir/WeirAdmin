@@ -113,7 +113,7 @@ function CartController($q, $rootScope, $timeout, OrderCloud, LineItemHelpers, O
 	});
 }
 
-function MiniCartController($q, $state, $rootScope,$uibModal, $ocMedia, OrderCloud, LineItemHelpers, CurrentOrder, Underscore) {
+function MiniCartController($q, $state, $rootScope,$uibModal, $ocMedia, OrderCloud, LineItemHelpers, CurrentOrder, Underscore, buyerid) {
 	var vm = this;
 	vm.LineItems = {};
 	vm.Order = null;
@@ -162,11 +162,12 @@ function MiniCartController($q, $state, $rootScope,$uibModal, $ocMedia, OrderClo
 		var dfd = $q.defer();
 		var queue = [];
 		vm.TotalItems = 0;
-		OrderCloud.LineItems.List(order.ID)
+		//OrderCloud.LineItems.List(order.ID)
+		OrderCloud.LineItems.List(order.ID,null,null,null,null,null,null,buyerid)
 			.then(function(li) {
 				vm.LineItems = li;
 				if (li.Meta.TotalPages > li.Meta.Page) {
-					queue.push(OrderCloud.LineItems.List(order.ID, null ,li.Meta.Page + 1));
+					queue.push(OrderCloud.LineItems.List(order.ID, null ,li.Meta.Page + 1, null, null, null, null, buyerid));
 				}
 				$q.all(queue)
 					.then(function(results) {
