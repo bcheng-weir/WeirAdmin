@@ -170,10 +170,9 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 		var orderCopy = angular.copy(vm.Order);
 		var lineItemsCopy = angular.copy(vm.LineItems); //a 'new line' would have original qty 0; a deleted line would have orig qty <> 0
 
-		// The copy will be the active version of the order.
-		orderCopy.xp.Active = true;
-		orderCopy.xp.Status = WeirService.OrderStatus.Review.id;
-		orderCopy.xp.ReviewerName = currentUser.FirstName + " " + currentUser.LastName;
+		// The copy will be the historical version of the order. This way we maintain the submission status in the original
+		orderCopy.xp.Active = false;
+		orderCopy.xp.Status = WeirService.OrderStatus.RevisedQuote.id;
 
 		function _determineRevision(orderID) {
 			var rev = null;
@@ -189,8 +188,8 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 			return rev;
 		}
 
-		vm.Order.ID = _determineRevision(vm.Order.ID);
-		orderCopy.ID = _determineRevision(vm.Order.ID);
+		orderCopy.ID = _determineRevision(orderCopy.ID); //Rev0 or current rev +1
+		vm.Order.ID = _determineRevision(orderCopy.ID); //ordercopy rev +1
 
 		//foreach lineitemcopy, set the xp.OriginalQty to the original line item quantity.
 		var originalItem = {};
@@ -203,8 +202,9 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 		var orderPatch = {
 			ID: vm.Order.ID,
 			xp: {
-				Active: false,
-				Status: WeirService.OrderStatus.RevisedQuote.id,
+				Active: true,
+				Status: WeirService.OrderStatus.Review.id,
+				ReviewerName: currentUser.FirstName + " " + currentUser.LastName,
 				OriginalOrderID: vm.Order.xp.OriginalOrderID
 			}
 		};
@@ -250,7 +250,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 			})
 			.then(function() {
 				// Set the current order so that the order details page is updated.
-				return WeirService.SetOrderAsCurrentOrder(orderCopy.ID);
+				return WeirService.SetOrderAsCurrentOrder(vm.Order.ID);
 			})
 			.then(function() {
 				// Update the mini-cart with the new order and refresh the page.
