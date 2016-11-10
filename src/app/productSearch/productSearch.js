@@ -133,7 +133,7 @@ function ProductSearchConfig($stateProvider, $sceDelegateProvider) {
 	;
 }
 
-function ProductSearchController($sce, $state, $rootScope, OrderCloud, CurrentOrder, WeirService, CurrentCustomer, SerialNumbers, PartNumbers, MyOrg) {
+function ProductSearchController($sce, $state, $rootScope, OrderCloud, CurrentOrder, WeirService, CurrentCustomer, SerialNumbers, PartNumbers, MyOrg, imageRoot) {
 	var vm = this;
 	vm.serialNumberList = SerialNumbers.Items;
 	vm.partNumberList = PartNumbers.Items;
@@ -141,6 +141,11 @@ function ProductSearchController($sce, $state, $rootScope, OrderCloud, CurrentOr
 	vm.IsServiceOrg = (MyOrg.xp.Type.id == 2);
 	vm.Customer = CurrentCustomer;
 	vm.AvailableCustomers = MyOrg.xp.Customers;
+	vm.ImageBaseUrl = imageRoot;
+	vm.GetValveImageUrl = function (img) {
+	    return vm.ImageBaseUrl + "Valves/" + img;
+	};
+
 
 	if (!vm.IsServiceOrg) {
 		if (!vm.Customer || vm.Customer.id != MyOrg.ID) {

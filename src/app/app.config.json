@@ -11,5 +11,6 @@
 		"right": false,
 		"top": true,
 		"bottom": false
-	}
+	},
+	"imageRoot": "https://weirwebhooks.azurewebsites.net/Content/Images/"
 }
