@@ -188,7 +188,7 @@ function BaseController($rootScope, $ocMedia, $state, $sce, Underscore, snapRemo
             "ReviewQuotes":"ordersMain.quotesReview",
             "RevisedQuotes":"ordersMain.quotesRevised",
             "ConfirmedQuotes":"ordersMain.quotesConfirmed",
-            "POOrders":"ordersMain.",
+            "POOrders":"ordersMain.POOrders",
             "RevisedOrders":"ordersMain.ordersRevised",
             "ConfirmedOrders":"ordersMain.ordersConfirmed",
             "DespatchedOrders":"ordersMain.ordersDespatched",
