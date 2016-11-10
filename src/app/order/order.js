@@ -61,7 +61,7 @@ function orderConfig($stateProvider, buyerid){
         }
     });
 }
-function OrderController($q, $scope, $state, $sce, $exceptionHandler, OrderCloud, Order, DeliveryAddress, LineItems, Payments, WeirService, Underscore, OrderToCsvService, buyerid, clientid) {
+function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler, OrderCloud, Order, DeliveryAddress, LineItems, Payments, WeirService, Underscore, OrderToCsvService, buyerid, buyernetwork) {
     var vm = this;
     vm.Order = Order;
     vm.LineItems = LineItems;
@@ -200,62 +200,41 @@ function OrderController($q, $scope, $state, $sce, $exceptionHandler, OrderCloud
 			item.xp.OriginalQty = originalItem.Quantity;
 		});
 
-		//1. Patch vm.Order.ID. This will move the line items under this new order id. This is Rev 0, active false.
-		//2. Create a new order with orderCopy, set the shipping address, and lineItemsCopy. This is Rev 1, active true.
-		//3. Set orderCopy as the current order and reload the state.
 		var orderPatch = {
 			ID: vm.Order.ID,
 			xp: {
 				Active: false,
-				Status: WeirService.OrderStatus.Review.id,
+				Status: WeirService.OrderStatus.RevisedQuote.id,
 				OriginalOrderID: vm.Order.xp.OriginalOrderID
 			}
 		};
 
 		var impersonation = {
-			ClientID: clientid,
+			ClientID: buyernetwork,
 			Claims: []
 		};
 
-		OrderCloud.Users.Get(vm.Order.FromUserID, vm.Order.xp.BuyerId)
-			.then(function(buyer) {
-				impersonation.Claims = buyer.AvailableRoles;
-				return OrderCloud.Users.GetAccessToken(vm.Order.FromUserID, impersonation, vm.Order.xp.BuyerId);
-			})
-			.then(function(data) {
-				//OrderCloud.Auth.SetImpersonationToken(data['access_token']);
-				console.log(data);
-				return OrderCloud.As(data['access_token']).Me.ListProducts();
-			})
-			.catch(function(ex) {
-				$exceptionHandler(ex);
-			});
-
-
-		/*OrderCloud.Orders.Patch(vm.Order.xp.OriginalOrderID, orderPatch, buyerid)
+		// Patch the current order with the updated status, ID and active state.
+		OrderCloud.Orders.Patch(vm.Order.xp.OriginalOrderID, orderPatch, buyerid)
 			.then(function(order) {
+				// Get the details of the user that placed the order.
                 return OrderCloud.Users.Get(order.FromUserID, order.xp.BuyerId);
 			})
             .then(function(buyer) {
+            	// Get an access token for impersonation.
 	            impersonation.Claims = buyer.AvailableRoles;
                 return OrderCloud.Users.GetAccessToken(vm.Order.FromUserID, impersonation, vm.Order.xp.BuyerId);
 			})
             .then(function(data) {
-                //OrderCloud.Auth.SetImpersonationToken(data['access_token']);
-	            console.log(data);
-	            return OrderCloud.As(data['access_token']).Me.ListProducts();
+            	// Set the local impersonation token so that As() can be used.
+                OrderCloud.Auth.SetImpersonationToken(data['access_token']);
             })
-			.then(function(products) {
-				console.log(products.Items);
-			})
 			.then(function() {
-				OrderCloud.Auth.RemoveImpersonationToken();
-			});
-			.then(function() {
-				//return OrderCloud.Orders.Create(orderCopy, buyerid);
-				return OrderCloud.Orders.Create(orderCopy, buyerid);
+				// Create the order as the impersonated user.
+				return OrderCloud.As().Orders.Create(orderCopy, buyerid);
 			})
 			.then(function(order) {
+				// Create the line items.
 				angular.forEach(lineItemsCopy.Items, function(value, key) {
 					queue.push(OrderCloud.LineItems.Create(orderCopy.ID, value, buyerid));
 				});
@@ -266,17 +245,20 @@ function OrderController($q, $scope, $state, $sce, $exceptionHandler, OrderCloud
 				return deferred.promise;
 			})
 			.then(function() {
+				// Remove the impersonation token.
 				return OrderCloud.Auth.RemoveImpersonationToken();
 			})
 			.then(function() {
+				// Set the current order so that the order details page is updated.
 				return WeirService.SetOrderAsCurrentOrder(orderCopy.ID);
 			})
 			.then(function() {
+				// Update the mini-cart with the new order and refresh the page.
 				$rootScope.$broadcast('SwitchCart');
 				$state.go('order');
 			})
 			.catch(function(ex) {
 				$exceptionHandler(ex);
-			});*/
+			});
 	}
 }
