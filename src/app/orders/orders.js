@@ -22,6 +22,7 @@ function OrdersConfig($stateProvider,buyerid) {
 			}
 		}
 	})
+	//Type Quote States
 	.state('ordersMain.quotesRevised', {
 		url:'/quotesRevised',
 		templateUrl:'orders/templates/quote.revised.tpl.html',
@@ -32,12 +33,42 @@ function OrdersConfig($stateProvider,buyerid) {
 		templateUrl:'orders/templates/quote.review.tpl.html',
 		parent:'ordersMain'
 	})
+	.state('ordersMain.quotesConfirmed', {
+		url:'/quotesConfirmed',
+		templateUrl:'orders/templates/quote.confirm.tpl.html',
+		parent:'ordersMain'
+	})
+		//Type Orders State
 	.state('ordersMain.ordersRevised', {
 		url:'/ordersRevised',
 		templateUrl: 'orders/templates/order.revised.tpl.html',
 		parent:'ordersMain'
-	});
-}
+	})
+	.state('ordersMain.POOrders', {
+		url:'/ordersSubmitted',
+		templateUrl:'orders/templates/order.submitted.tpl.html',
+		parent:'ordersMain'
+	})
+	.state('ordersMain.ordersConfirmed', {
+		url:'/orderConfirmed',
+		templateUrl:'orders/templates/order.confirmed.tpl.html',
+		parent:'ordersMain'
+	})
+	.state('ordersMain.ordersDespatched', {
+		url:'/orderDespatched',
+		templateUrl:'orders/templates/order.despatched.tpl.html',
+		parent:'ordersMain'
+	})
+	.state('ordersMain.ordersInvoiced', {
+		url:'/quotesReview',
+		templateUrl:'orders/templates/order.invoiced.tpl.html',
+		parent:'ordersMain'
+	})
+	.state('ordersMain.ordersAll', {
+		url:'/ordersAll',
+		templateUrl:'orders/templates/order.all.tpl.html',
+		parent:'ordersMain'
+	})};
 
 function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, $exceptionHandler, Underscore, OrderCloud, OrderCloudParameters, Orders, Parameters, buyerid, WeirService) {
 	var vm = this;
@@ -169,11 +200,20 @@ function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, $exception
 			dateRevised: "Date Revised",
 			reviewer: "Reviewer",
 			view: "View",
+			update: "Update",
 			revisions: "Revisions",
 			status: "Status",
 			loadMore:"Load More",
 			poNumber:"PO Number",
-			orderedBy:"Ordered By"
+			orderedBy:"Ordered By",
+			contractNo: "Contract number",
+			dateOrdered: "Order date",
+			dateConfirmed: "Date confirmed",
+			confirmedBy: "Confirmed by",
+			estimatedDelievery: "Estimated delievery date",
+			dateDespatched: "Estimated delievery date",
+			orderValue: "Order value",
+			invoiceValue: "Invoice Number"
 		},
 		fr: {
 			search:$sce.trustAsHtml("Search"),
@@ -213,6 +253,10 @@ function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, $exception
 	};
 
 	vm.Revisions = function() {
+		//ToDo
+	}
+
+	vm.Update = function() {
 		//ToDo
 	}
 }

@@ -9,16 +9,30 @@
         <tr>
             <th scope="col">
                 <a href="#" role="button" ng-click="orders.updateSort('ID')">
-                    {{orders.labels.Quote}}
+                    {{orders.labels.Order}}
                     <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'ID'"></i>
                     <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!ID'"></i>
                 </a>
             </th>
             <th scope="col">
-                <a href="#" role="button" ng-click="orders.updateXpSort('RefNum')">
-                    {{orders.labels.customerRef}}
-                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortByXp == 'RefNum'"></i>
-                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortByXp == '!RefNum'"></i>
+                <a href="#" role="button" ng-click="orders.updateXpSort('ContractNumber')">
+                    {{orders.labels.contractNo}}
+                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortByXp == 'ContractNumber'"></i>
+                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortByXp == '!ContractNumber'"></i>
+                </a>
+            </th>
+            <th scope="col">
+                <a href="#" role="button" ng-click="orders.updateXpSort('InvoiceNumber')">
+                    {{orders.labels.invoiceValue}}
+                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortByXp == 'InvoiceNumber'"></i>
+                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortByXp == '!InvoiceNumber'"></i>
+                </a>
+            </th>
+            <th scope="col">
+                <a href="#" role="button" ng-click="orders.updateXpSort('PONumber')">
+                    {{orders.labels.poNumber}}
+                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortByXp == 'PONumber'"></i>
+                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortByXp == '!PONumber'"></i>
                 </a>
             </th>
             <th scope="col">
@@ -27,50 +41,61 @@
                 </a>
             </th>
             <th scope="col">
-                <a href="#" role="button" ng-click="orders.updateSort('FromUserFirstName')">
-                    {{orders.labels.submittedBy}}
-                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'FromUserFirstName'"></i>
-                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!FromUserFirstName'"></i>
+                <a href="#" role="button" ng-click="orders.updateSort('OrderedBy')">
+                    {{orders.labels.orderedBy}}
+                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'OrderedBy'"></i>
+                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!OrderedBy'"></i>
                 </a>
             </th>
             <th scope="col">
                 <a href="#" role="button" ng-click="orders.updateSort('Total')">
-                    {{orders.labels.quoteValue}}
+                    {{orders.labels.orderValue}}
                     <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'Total'"></i>
                     <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!Total'"></i>
                 </a>
             </th>
             <th scope="col">
-                <a href="#" role="button" ng-click="orders.updateSort('DateSubmitted')">
-                    {{orders.labels.dateSubmitted}}
-                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'DateSubmitted'"></i>
-                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!DateSubmitted'"></i>
+                <a href="#" role="button" ng-click="orders.updateSort('OrderDate')">
+                    {{orders.labels.dateOrdered}}
+                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'OrderDate'"></i>
+                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!OrderDate'"></i>
                 </a>
             </th>
             <th scope="col">
                 <a href="#" role="button" ng-click="orders.updateSort('ID')">
-                    {{orders.labels.reviewer}}
+                    {{orders.labels.confirmedBy}}
                     <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'ID'"></i>
                     <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!ID'"></i>
                 </a>
             </th>
+            <th scope="col">
+                <a href="#" role="button" ng-click="orders.updateSort('ID')">
+                    {{orders.labels.dateDespatched}}
+                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'ID'"></i>
+                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!ID'"></i>
+                </a>
+            </th>
+            <th scope="col"></th>
             <th scope="col"></th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="order in orders.list.Items">
             <th scope="row">{{order.ID}}</th>
-            <td>{{order.xp.RefNum}}</td>
+            <td>{{order.xp.contractNo}}</td>
+            <td>{{order.xp.InvoiceNumber}}</td>
+            <td>{{order.xp.PONumber}}</td>
             <td>{{order.xp.CustomerName}}</td>
-            <td>{{order.FromUserFirstName}} {{order.FromUserLastName}}</td>
+            <td>{{order.xp.orderedBy}}</td>
             <td class="text-left" ng-switch on="order.xp.Currency">
                 <span ng-switch-when="EUR">{{order.Total | currency: '&euro;'}}</span>
                 <span ng-switch-when="GBP">{{order.Total | currency: '&#163;'}}</span>
                 <span ng-switch-default>{{order.Total | currency:'&#163;'}}</span>
             </td>
-            <td>{{order.DateSubmitted}}</td>
-            <td>{{order.xp.Reviewer}}</td>
-            <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.CustomerID)">{{orders.labels.view}}</button></td>
+
+
+            <td>{{order.xp.DateSubmitted}}</td>
+            <td>{{order.xp.dateDespatched}}</td>
         </tr>
         </tbody>
     </table>

@@ -9,16 +9,16 @@
         <tr>
             <th scope="col">
                 <a href="#" role="button" ng-click="orders.updateSort('ID')">
-                    {{orders.labels.Quote}}
+                    {{orders.labels.Order}}
                     <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'ID'"></i>
                     <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!ID'"></i>
                 </a>
             </th>
             <th scope="col">
-                <a href="#" role="button" ng-click="orders.updateXpSort('RefNum')">
-                    {{orders.labels.customerRef}}
-                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortByXp == 'RefNum'"></i>
-                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortByXp == '!RefNum'"></i>
+                <a href="#" role="button" ng-click="orders.updateXpSort('PONumber')">
+                    {{orders.labels.poNumber}}
+                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortByXp == 'PONumber'"></i>
+                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortByXp == '!PONumber'"></i>
                 </a>
             </th>
             <th scope="col">
@@ -27,10 +27,10 @@
                 </a>
             </th>
             <th scope="col">
-                <a href="#" role="button" ng-click="orders.updateSort('FromUserFirstName')">
-                    {{orders.labels.submittedBy}}
-                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'FromUserFirstName'"></i>
-                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!FromUserFirstName'"></i>
+                <a href="#" role="button" ng-click="orders.updateSort('OrderedBy')">
+                    {{orders.labels.orderedBy}}
+                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'OrderedBy'"></i>
+                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!OrderedBy'"></i>
                 </a>
             </th>
             <th scope="col">
@@ -55,12 +55,13 @@
                 </a>
             </th>
             <th scope="col"></th>
+            <th scope="col"></th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="order in orders.list.Items">
             <th scope="row">{{order.ID}}</th>
-            <td>{{order.xp.RefNum}}</td>
+            <td>{{order.xp.PONumber}}</td>
             <td>{{order.xp.CustomerName}}</td>
             <td>{{order.FromUserFirstName}} {{order.FromUserLastName}}</td>
             <td class="text-left" ng-switch on="order.xp.Currency">
@@ -68,9 +69,9 @@
                 <span ng-switch-when="GBP">{{order.Total | currency: '&#163;'}}</span>
                 <span ng-switch-default>{{order.Total | currency:'&#163;'}}</span>
             </td>
-            <td>{{order.DateSubmitted}}</td>
+            <td style="color: green">{{order.dateSubmitted}}</td>
             <td>{{order.xp.Reviewer}}</td>
-            <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.CustomerID)">{{orders.labels.view}}</button></td>
+            <td><button class="btn btn-primary" ng-click="orders.View()">{{orders.labels.view}}</button></td>
         </tr>
         </tbody>
     </table>
