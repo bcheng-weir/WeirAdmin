@@ -22,7 +22,6 @@ function OrdersConfig($stateProvider,buyerid) {
 			}
 		}
 	})
-	//Type Quote States
 	.state('ordersMain.quotesRevised', {
 		url:'/quotesRevised',
 		templateUrl:'orders/templates/quote.revised.tpl.html',
@@ -38,7 +37,6 @@ function OrdersConfig($stateProvider,buyerid) {
 		templateUrl:'orders/templates/quote.confirm.tpl.html',
 		parent:'ordersMain'
 	})
-		//Type Orders State
 	.state('ordersMain.ordersRevised', {
 		url:'/ordersRevised',
 		templateUrl: 'orders/templates/order.revised.tpl.html',
@@ -68,7 +66,7 @@ function OrdersConfig($stateProvider,buyerid) {
 		url:'/ordersAll',
 		templateUrl:'orders/templates/order.all.tpl.html',
 		parent:'ordersMain'
-	})};
+	});
 
 function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, $exceptionHandler, Underscore, OrderCloud, OrderCloudParameters, Orders, Parameters, buyerid, WeirService) {
 	var vm = this;
@@ -239,10 +237,6 @@ function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, $exception
 	vm.View = function(orderId, customerId) {
 		var cid = customerId;
 		WeirService.SetOrderAsCurrentOrder(orderId)
-			.then(function() {
-				//return OrderCloud.BuyerID.Set(cid);
-				return true;
-			})
 			.then(function() {
 				$rootScope.$broadcast('SwitchCart');
 				$state.go('order');
