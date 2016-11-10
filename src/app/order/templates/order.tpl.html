@@ -26,7 +26,7 @@
             <!--ToDo Confirm function-->
             <button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;"><span ng-bind-html='order.labels.Confirm'></span></button>
         </li>
-            <li ng-click="order.Revise()" style="padding: 0px 10px 0px 10px;">
+            <li ng-click="order.Revise(base.currentUser)" style="padding: 0px 10px 0px 10px;">
                 <!--ToDo Confirm function-->
                 <button type="button" class="btn btn-primary btn-lg" style="background-color: orangered;"><span ng-bind-html='order.labels.Revise'></span></button>
             </li>
@@ -41,9 +41,15 @@
     <!-- Table -->
      <div class="row">
          <div class="col-md-9">
-             <p><b><span ng-bind-html='order.labels.WeirOrderNo'></span><br /><span class="text-danger">{{order.Order.ID}}</span></b></p>
-             <p><b><span ng-bind-html='order.labels.QuoteRef'></span><br /><span class="text-danger">{{order.Order.xp.RefNum}}</span></b></p>
-             <p><b><span ng-bind-html='order.labels.PONumber'></span><br /><span class="text-danger">{{order.Order.xp.PONumber}}</span></b></p>
+             <p>
+                 <b><span ng-show="order.Order.xp.Type=='Order'" ng-bind-html='order.labels.WeirOrderNo'></span>
+                     <span ng-show="order.Order.xp.Type=='Quote'" ng-bind-html='order.labels.WeirQuoteNo'></span>
+                     <span class="text-danger">{{order.Order.ID}}</span></b>
+             </p>
+             <p><b><span ng-bind-html='order.labels.QuoteRef'></span><span class="text-danger">{{order.Order.xp.RefNum}}</span></b></p>
+             <p>
+                 <b><span ng-show="order.Order.xp.Type=='Order'" ng-bind-html='order.labels.PONumber'></span><span class="text-danger">{{order.Order.xp.PONumber}}</span></b>
+             </p>
          </div>
 
          <div class="col-md-3">

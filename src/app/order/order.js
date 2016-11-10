@@ -61,13 +61,12 @@ function orderConfig($stateProvider, buyerid){
         }
     });
 }
-function OrderController($scope, $state, $sce, OrderCloud, Order, DeliveryAddress, LineItems, Payments, toastr, WeirService, Underscore, OrderToCsvService) {
+function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler, OrderCloud, Order, DeliveryAddress, LineItems, Payments, WeirService, Underscore, OrderToCsvService, buyerid, buyernetwork) {
     var vm = this;
     vm.Order = Order;
     vm.LineItems = LineItems;
     vm.DeliveryAddress = DeliveryAddress;
     vm.Status = Underscore.find(WeirService.OrderStatus, function(status) {
-    	console.log(status);
         return status.id == vm.Order.xp.Status;
     });
     vm.Payments = Payments;
@@ -159,4 +158,107 @@ function OrderController($scope, $state, $sce, OrderCloud, Order, DeliveryAddres
     }
     vm.ToCsvJson = toCsv;
     vm.CsvFilename = vm.Order.ID + ".csv";
+
+	vm.Revise = _revise;
+	function _revise(currentUser) {
+		var deferred = $q.defer();
+		var queue = [];
+		// On the first revision there will be no original order id, so set it. This way we can see all related items in the revisions list view.
+		vm.Order.xp.OriginalOrderID = vm.Order.xp.OriginalOrderID ? vm.Order.xp.OriginalOrderID: vm.Order.ID;
+
+		// Make deep copies so changes to one do not change the other.
+		var orderCopy = angular.copy(vm.Order);
+		var lineItemsCopy = angular.copy(vm.LineItems); //a 'new line' would have original qty 0; a deleted line would have orig qty <> 0
+
+		// The copy will be the active version of the order.
+		orderCopy.xp.Active = true;
+		orderCopy.xp.Status = WeirService.OrderStatus.Review.id;
+		orderCopy.xp.ReviewerName = currentUser.FirstName + " " + currentUser.LastName;
+
+		function _determineRevision(orderID) {
+			var rev = null;
+			var pieces = orderID.split("-Rev");
+			angular.forEach(pieces, function(value, key) {
+				if(key==1) {
+					value++;
+					rev = pieces[0] + "-Rev" + value.toString();
+				} else {
+					rev = orderID + "-Rev0"; //There is no revision. Set it to 0.
+				}
+			});
+			return rev;
+		}
+
+		vm.Order.ID = _determineRevision(vm.Order.ID);
+		orderCopy.ID = _determineRevision(vm.Order.ID);
+
+		//foreach lineitemcopy, set the xp.OriginalQty to the original line item quantity.
+		var originalItem = {};
+		angular.forEach(lineItemsCopy.Items, function(item, key) {
+			item.xp = typeof(item.xp) == 'undefined' ? {} : item.xp;
+			originalItem = Underscore.findWhere(vm.LineItems.Items,{ID:item.ID});
+			item.xp.OriginalQty = originalItem.Quantity;
+		});
+
+		var orderPatch = {
+			ID: vm.Order.ID,
+			xp: {
+				Active: false,
+				Status: WeirService.OrderStatus.RevisedQuote.id,
+				OriginalOrderID: vm.Order.xp.OriginalOrderID
+			}
+		};
+
+		var impersonation = {
+			ClientID: buyernetwork,
+			Claims: []
+		};
+
+		// Patch the current order with the updated status, ID and active state.
+		OrderCloud.Orders.Patch(vm.Order.xp.OriginalOrderID, orderPatch, buyerid)
+			.then(function(order) {
+				// Get the details of the user that placed the order.
+                return OrderCloud.Users.Get(order.FromUserID, order.xp.BuyerId);
+			})
+            .then(function(buyer) {
+            	// Get an access token for impersonation.
+	            impersonation.Claims = buyer.AvailableRoles;
+                return OrderCloud.Users.GetAccessToken(vm.Order.FromUserID, impersonation, vm.Order.xp.BuyerId);
+			})
+            .then(function(data) {
+            	// Set the local impersonation token so that As() can be used.
+                OrderCloud.Auth.SetImpersonationToken(data['access_token']);
+            })
+			.then(function() {
+				// Create the order as the impersonated user.
+				return OrderCloud.As().Orders.Create(orderCopy, buyerid);
+			})
+			.then(function(order) {
+				// Create the line items.
+				angular.forEach(lineItemsCopy.Items, function(value, key) {
+					queue.push(OrderCloud.LineItems.Create(orderCopy.ID, value, buyerid));
+				});
+				$q.all(queue)
+					.then(function(results) {
+						deferred.resolve(results);
+					});
+				return deferred.promise;
+			})
+			.then(function() {
+				// Remove the impersonation token.
+				return OrderCloud.Auth.RemoveImpersonationToken();
+			})
+			.then(function() {
+				// Set the current order so that the order details page is updated.
+				return WeirService.SetOrderAsCurrentOrder(orderCopy.ID);
+			})
+			.then(function() {
+				// Update the mini-cart with the new order and refresh the page.
+				$rootScope.$broadcast('SwitchCart');
+				$state.go('order');
+			})
+			.catch(function(ex) {
+				$exceptionHandler(ex);
+			});
+	}
 }
