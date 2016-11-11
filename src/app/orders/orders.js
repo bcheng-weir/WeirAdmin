@@ -252,8 +252,11 @@ function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, $exception
 			});
 	};
 
-	vm.Revisions = function() {
-        $state.go("ordersMain.listOfRevisions", {filters:JSON.stringify({"ID": orderId})},{reload:true});
+	vm.Revisions = function(orderid) {
+		var filter = {
+			"xp.OriginalOrderID": orderid
+		};
+        $state.go("ordersMain.listOfRevisions", {filters:JSON.stringify(filter)},{reload:true});
 	};
 
 	vm.Update = function() {
