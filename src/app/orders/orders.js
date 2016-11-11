@@ -62,6 +62,11 @@ function OrdersConfig($stateProvider,buyerid) {
 			templateUrl: 'orders/templates/order.invoiced.tpl.html',
 			parent: 'ordersMain'
 		})
+        .state('ordersMain.listOfRevisions', {
+            url:'/listOfRevisions',
+            templateUrl:'orders/templates/order.revisions.tpl.html',
+            parent:'ordersMain'
+        })
 		.state('ordersMain.ordersAll', {
 			url: '/ordersAll',
 			templateUrl: 'orders/templates/order.all.tpl.html',
@@ -248,7 +253,7 @@ function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, $exception
 	};
 
 	vm.Revisions = function() {
-		//ToDo
+        $state.go("ordersMain.listOfRevisions", {filters:JSON.stringify({"ID": orderId})},{reload:true});
 	};
 
 	vm.Update = function() {
