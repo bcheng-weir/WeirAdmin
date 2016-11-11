@@ -1,8 +1,8 @@
 angular.module('orderCloud')
     .service( 'OrderShareService', OrderShareService)
     .config(orderConfig)
-    .controller('OrderCtrl', OrderController);
-.controller('FinalOrderInfoCtrl',FinalOrderInfoController);
+    .controller('OrderCtrl', OrderController)
+    .controller('FinalOrderInfoCtrl',FinalOrderInfoController);
 
 function OrderShareService() {
     var svc = {
