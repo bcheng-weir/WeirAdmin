@@ -28,8 +28,7 @@ function orderConfig($stateProvider, buyerid){
             DeliveryAddress: function (OrderCloud, Order) {
                 if(Order.ShippingAddressID) {
                     return OrderCloud.Addresses.Get(Order.ShippingAddressID, buyerid);
-                }
-                else{
+                } else {
                     return null;
                 }
             },
@@ -88,7 +87,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
             PONumber: "Your PO No;",
             //table labels
             SerialNum: "Serial number",
-            TagNum: "Tag number(if available)",
+            TagNum: "Tag number (if available)",
             PartNum: "Part Number",
             Description: "Description of Part",
             RecReplacement: "Recommended replacement",
@@ -128,7 +127,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
             PONumber:$sce.trustAsHtml( "Your PO No;"),
             //table labels
             SerialNum:$sce.trustAsHtml( "Serial number"),
-            TagNum:$sce.trustAsHtml( "Tag number(if available)"),
+            TagNum:$sce.trustAsHtml( "Tag number (if available)"),
             PartNum:$sce.trustAsHtml( "Part Number"),
             Description:$sce.trustAsHtml( "Description of Part"),
             RecReplacement:$sce.trustAsHtml( "Recommended replacement"),
@@ -159,6 +158,184 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
     vm.ToCsvJson = toCsv;
     vm.CsvFilename = vm.Order.ID + ".csv";
 
+	vm.ShowEdit = _showEdit;
+	function _showEdit(status, item) {
+		return status==WeirService.OrderStatus.Review.id;
+	}
+
+	vm.ShowUpdated = _showUpdated;
+	function _showUpdated(item) {
+		// return true if qty <> xp.originalQty and qty > 0
+		if(item.xp){
+			return item.Quantity > 0 && (item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty));
+		} else {
+			return false;
+		}
+	}
+
+	vm.ShowRemoved = _showRemoved;
+	function _showRemoved(line) {
+		if(line.xp) {
+			return line.Quantity == 0 && line.xp.OriginalQty != 0;
+		} else {
+			return false;
+		}
+	}
+
+	vm.ShowNew = _showNew;
+	function _showNew(line) {
+		if(line.xp) {
+			return line.xp.OriginalQty==0;
+		} else {
+			return false;
+		}
+	}
+
+	vm.ShowConfirm = _showConfirm;
+	function _showConfirm() {
+		var validStatus = {
+			SB: true,
+			SP: true
+		};
+		if(vm.Order.xp) {
+			return validStatus[vm.Order.xp.Status];
+		} else {
+			return false;
+		}
+	}
+
+	vm.ShowRevise = _showRevise;
+	function _showRevise() {
+		var validStatus = {
+			SB: true,
+			SP: true
+		};
+		if(vm.Order.xp) {
+			return validStatus[vm.Order.xp.Status];
+		} else {
+			return false;
+		}
+	}
+	vm.ShowShareRevision = _showShareRevision;
+	function _showShareRevision() {
+		var validStatus = {
+			RE: true
+		};
+		if(vm.Order.xp) {
+			return validStatus[vm.Order.xp.Status];
+		} else {
+			return false;
+		}
+	}
+
+	vm.ShowAddItems = _showAddItems;
+	function _showAddItems() {
+		var validStatus = {
+			RE: true
+		};
+		if(vm.Order.xp) {
+			return validStatus[vm.Order.xp.Status];
+		} else {
+			return false;
+		}
+	}
+
+	vm.AddNewItem = _addNewItem;
+	function _addNewItem() {
+		var newItem = {
+			"ProductID": "",
+			"Quantity": 0,
+			"DateAdded": "",
+			"QuantityShipped": 0,
+			"UnitPrice": 0,
+			"LineTotal": 0,
+			"CostCenter": null,
+			"DateNeeded": null,
+			"ShippingAccount": null,
+			"ShippingAddressID": null,
+			"ShippingAddress": null,
+			"ShipFromAddressID": null,
+			"ShipFromAddress": null,
+			"Specs": [],
+			"xp": {
+				"SN": "",
+				"TagNumber": "",
+				"OriginalQty": 0
+			}
+		};
+		vm.LineItems.Items.push(newItem);
+	}
+
+	vm.EditLineItem = _editLineItem;
+	function _editLineItem(line) {
+		var patch = {
+			Quantity: line.Quantity
+		};
+		OrderCloud.LineItems.Patch(vm.Order.ID, line.ID, patch, buyerid)
+			.then(function() {
+				$rootScope.$broadcast('SwitchCart');
+				$state.go($state.current,{}, {reload:true});
+			})
+			.catch(function(ec) {
+				$exceptionHandler(ex);
+			})
+	}
+
+	vm.ShareRevision = _shareRevision;
+	function _shareRevision(currentUser) {
+		//Set the status to revised. set the status date. set the ReviewerName.
+		var orderType = {
+			Quote: WeirService.OrderStatus.RevisedQuote.id,
+			Order: WeirService.OrderStatus.RevisedOrder.id
+		};
+
+		var patch = {
+			xp: {
+				Status: orderType[vm.Order.xp.Type],
+				StatusDate: new Date(),
+				ReviewerName: currentUser.FirstName + " " + currentUser.LastName
+			}
+		};
+
+		if(patch.xp.Status) {
+			OrderCloud.Orders.Patch(vm.Order.ID, patch, buyerid)
+				.then(function() {
+					$state.go($state.current,{}, {reload:true});
+				})
+				.catch(function(ex) {
+					$exceptionHandler(ex);
+				})
+		}
+	}
+
+	vm.Confirm = _confirm;
+	function _confirm(currentUser) {
+		var confirmedStatus = {
+			SB:WeirService.OrderStatus.ConfirmedQuote.id,
+			SP:WeirService.OrderStatus.ConfirmedOrder.id
+		};
+
+		var patch = {
+			xp: {
+				Status: confirmedStatus[vm.Order.xp.Status],
+				StatusDate: new Date(),
+				ReviewerName: currentUser.FirstName + " " + currentUser.LastName
+			}
+		};
+
+		if(patch.xp.Status) {
+			OrderCloud.Orders.Patch(vm.Order.ID, patch, buyerid)
+				.then(function() {
+					$state.go($state.current,{}, {reload:true});
+				})
+				.catch(function(ex) {
+					$exceptionHandler(ex);
+				});
+		} else {
+			return; //invlaid status for confirming. should not have shown the button.
+		}
+	}
+
 	vm.Revise = _revise;
 	function _revise(currentUser) {
 		var deferred = $q.defer();
@@ -172,7 +349,15 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 
 		// The copy will be the historical version of the order. This way we maintain the submission status in the original
 		orderCopy.xp.Active = false;
-		orderCopy.xp.Status = WeirService.OrderStatus.RevisedQuote.id;
+		if(vm.Order.xp.Type == "Quote") {
+			orderCopy.xp.Status = WeirService.OrderStatus.RevisedQuote.id;
+		} else if (vm.Order.xp.Type == "Order") {
+			orderCopy.xp.Status = WeirService.OrderStatus.RevisedOrder.id;
+		} else {
+			return; //shouldn't have an order with no xp.Type
+		}
+
+		orderCopy.xp.StatusDate = new Date();
 
 		function _determineRevision(orderID) {
 			var rev = null;
@@ -204,6 +389,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 			xp: {
 				Active: true,
 				Status: WeirService.OrderStatus.Review.id,
+				StatusDate: new Date(),
 				ReviewerName: currentUser.FirstName + " " + currentUser.LastName,
 				OriginalOrderID: vm.Order.xp.OriginalOrderID
 			}
@@ -245,6 +431,10 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 				return deferred.promise;
 			})
 			.then(function() {
+				// lock in the price on the line items. don't want them changing.
+				return OrderCloud.Orders.Submit(orderCopy.ID, orderCopy.xp.BuyerId);
+			})
+			.then(function() {
 				// Remove the impersonation token.
 				return OrderCloud.Auth.RemoveImpersonationToken();
 			})
@@ -255,7 +445,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 			.then(function() {
 				// Update the mini-cart with the new order and refresh the page.
 				$rootScope.$broadcast('SwitchCart');
-				$state.go('order');
+				$state.go($state.current,{}, {reload:true});
 			})
 			.catch(function(ex) {
 				$exceptionHandler(ex);

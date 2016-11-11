@@ -8,36 +8,44 @@
         <div class="col-lg-2"></div>
     </div>
     <!-- header -->
-    <ul class="nav nav-tabs nav-justified" style="padding-top: 20px; background-color: lightgray">
-        <ul class="nav navbar-nav navbar-left">
-        <li style="padding: 10px 5px 0px 0px;">
-            <!--ToDo need to make status function and concatenate date-->
-            <span ng-bind-html='order.labels.status'></span><br />
-            <b><span ng-bind-html='order.Status.label'></span>
-            <span ng-bind-html='order.Order.xp.StatusDate'></span></b>
-        </li>
-        <li style="padding: 10px 0px 0px 10px;" ng-show="order.Order.xp.Status=='RE'">
-            <!--ToDo need to populate it with PONumber-->
-            &nbsp;<span ng-bind-html='order.labels.PONumber'></span><br /><span ng-bind-html='order.Order.xp.PONumber'></span></a>
-        </li>
-        </ul>
-        <ul class="nav navbar-nav navbar-right">
-        <li ng-click="order.Confirm()" style="padding: 0px 10px 0px 0px;">
-            <!--ToDo Confirm function-->
-            <button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;"><span ng-bind-html='order.labels.Confirm'></span></button>
-        </li>
-            <li ng-click="order.Revise(base.currentUser)" style="padding: 0px 10px 0px 10px;">
-                <!--ToDo Confirm function-->
-                <button type="button" class="btn btn-primary btn-lg" style="background-color: orangered;"><span ng-bind-html='order.labels.Revise'></span></button>
-            </li>
-            <li ng-click="order.Comments()" style="padding: 0px 10px 0px 5px;">
-                <!--ToDo Confirm function-->
-                <button type="button" class="btn btn-primary btn-lg" style="background-color: darkgray;"><span ng-bind-html='order.labels.Comments'></span></button>
-            </li>
-        <li style="padding: 0px 10px 0px 0px;"><button type="button" class="btn btn-primary btn-lg" ng-csv="order.ToCsvJson" filename="{{order.CsvFilename}}" ng-bind-html="order.labels.Download"></button></li>
-        <li ng-click="order.Print()"><a href="#" ng-bind-html='order.labels.Print'></a></li>
-        </ul>
-    </ul>
+    <div class="row">
+        <div class="col-lg-12">
+            <ul class="nav nav-tabs nav-justified" style="padding-top: 20px; background-color: lightgray">
+                <ul class="nav navbar-nav navbar-left">
+                <li style="padding: 10px 5px 0px 0px;">
+                    <!--ToDo need to make status function and concatenate date-->
+                    <span ng-bind-html='order.labels.status'></span><br />
+                    <b><span ng-bind-html='order.Status.label'></span>
+                    <span ng-bind-html='order.Order.xp.StatusDate'></span></b>
+                </li>
+                <li style="padding: 10px 0px 0px 10px;" ng-show="order.Order.xp.Status=='RE'">
+                    <!--ToDo need to populate it with PONumber-->
+                    &nbsp;<span ng-bind-html='order.labels.PONumber'></span><br /><span ng-bind-html='order.Order.xp.PONumber'></span></a>
+                </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li ng-click="order.Confirm(base.currentUser)" style="padding: 0px 10px 0px 0px;" ng-if="order.ShowConfirm()">
+                        <!--ToDo Confirm function-->
+                        <button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;"><span ng-bind-html='order.labels.Confirm'></span></button>
+                    </li>
+                    <li ng-click="order.Revise(base.currentUser)" style="padding: 0px 10px 0px 10px;" ng-if="order.ShowRevise()">
+                        <button type="button" class="btn btn-primary btn-lg" style="background-color: orangered;"><span ng-bind-html='order.labels.Revise'></span></button>
+                    </li>
+                    <li ng-click="order.ShareRevision(base.currentUser)" style="padding: 0px 10px 0px 10px;" ng-if="order.ShowShareRevision()">
+                        <button type="button" class="btn btn-primary btn-lg" style="background-color: orangered;"><span ng-bind-html='order.labels.ShareRevision'></span></button>
+                    </li>
+                    <li ng-click="order.Comments()" style="padding: 0px 10px 0px 5px;">
+                        <!--ToDo Confirm function-->
+                        <button type="button" class="btn btn-primary btn-lg" style="background-color: darkgray;"><span ng-bind-html='order.labels.Comments'></span></button>
+                    </li>
+                    <li style="padding: 0px 10px 0px 0px;"><button type="button" class="btn btn-primary btn-lg" ng-csv="order.ToCsvJson" filename="{{order.CsvFilename}}" ng-bind-html="order.labels.Download"></button></li>
+                    <li ng-click="order.Print()">
+                        <button type="button" class="btn btn-primary btn-lg"><span ng-bind-html='order.labels.Print'></span></button>
+                    </li>
+                </ul>
+            </ul>
+        </div>
+    </div>
     <!-- Table -->
      <div class="row">
          <div class="col-md-9">
@@ -51,13 +59,12 @@
                  <b><span ng-show="order.Order.xp.Type=='Order'" ng-bind-html='order.labels.PONumber'></span><span class="text-danger">{{order.Order.xp.PONumber}}</span></b>
              </p>
          </div>
-
          <div class="col-md-3">
              <div class="pull-right" style="padding: 30px 25px 0px 0px; float: right;">
                  <p><a ng-if="order.Order.xp.Type == 'Order'" href="#" ui-sref="home">Back to Quotes</a></p>
                  <p><a ng-if="order.Order.xp.Type == 'Quote'" href="#" ui-sref="home">Back to Orders</a></p>
-                 <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ui-sref="home" ng-bind-html='order.labels.AddNewItems' ng-show="order.Order.xp.Status=='RE'"></span></button></p>
-                 <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ui-sref="home" ng-bind-html='order.labels.AddABlankItem' ng-show="order.Order.xp.Status=='RE'"></span></button></p>
+                 <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ui-sref="productSearch" ng-bind-html='order.labels.AddNewItems' ng-show="order.Order.xp.Status=='RE'" ng-if="order.ShowAddItems()"></button></p>
+                 <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ng-click="order.AddNewItem()" ng-bind-html='order.labels.AddABlankItem' ng-show="order.Order.xp.Status=='RE'" ng-if="order.ShowAddItems()"></button></p>
              </div>
          </div>
      </div>
@@ -91,17 +98,18 @@
                          <span ng-switch-when="GBP">{{line.UnitPrice | currency:'&#163; '}}</span>
                          <span ng-switch-default>{{line.UnitPrice | currency:'&#163; '}}</span>
                      </td>
-                     <td class="form-inline" ng-if="false"><input type="number" class="form-control" ng-model="line.Quantity" ng-min="0"
+                     <td class="form-inline" ng-if="order.Order.xp.Status=='RE'"><input type="number" class="form-control" ng-model="line.Quantity" ng-min="0"
                                                     ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" style="width:50%"/>
                      </td>
-                     <td ng-if="true">{{line.Quantity}}</td>
-                     <td style="border:0">
-                         <button type="button" ng-show="order.Order.xp.Status=='RE'" class="btn btn-primary btn-lg" style="background-color: gray;"><span ng-bind-html='order.labels.Edit'></span></button>
-                         <button type="button" ng-show="order.Order.xp.Status=='RE'" class="btn btn-primary btn-lg" style="background-color: yellow;"><span ng-bind-html='order.labels.Updated'></span></button>
-                         <button type="button" ng-show="order.Order.xp.Status=='RE'" class="btn btn-primary btn-lg" style="background-color: red;"><span ng-bind-html='order.labels.Removed'></span></button>
-                         <button type="button" ng-show="order.Order.xp.Status=='RE'" class="btn btn-primary btn-lg" style="background-color: green;"><span ng-bind-html='order.labels.New'></span></button>
+                     <td ng-if="order.Order.xp.Status!='RE'">
+                         {{line.Quantity}}
                      </td>
-
+                     <td style="border:0;width:100px;">
+                         <button type="button" ng-show="order.ShowEdit(order.Order.xp.Status, line)" class="btn btn-primary btn-lg" style="background-color: gray;"><span ng-bind-html='order.labels.Edit'></span></button>
+                         <button type="button" ng-show="order.ShowUpdated(line)" class="btn btn-primary btn-lg" style="background-color: yellow;"><span ng-bind-html='order.labels.Updated'></span></button>
+                         <button type="button" ng-show="order.ShowRemoved(line)" class="btn btn-primary btn-lg" style="background-color: red;"><span ng-bind-html='order.labels.Removed'></span></button>
+                         <button type="button" ng-show="order.ShowNew(line)" class="btn btn-primary btn-lg" style="background-color: green;"><span ng-bind-html='order.labels.New'></span></button>
+                     </td>
                  </tr>
                  <tr ng-if="order.LineItems.Items.length > 0">
                      <td class="button-th" colspan="5"></td>

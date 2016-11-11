@@ -85,7 +85,7 @@
             <td>{{order.xp.contractNo}}</td>
             <td>{{order.xp.PONumber}}</td>
             <td>{{order.xp.CustomerName}}</td>
-            <td>{{order.xp.orderedBy}}</td>
+            <td>{{order.FromUserID}}</td>
             <td class="text-left" ng-switch on="order.xp.Currency">
                 <span ng-switch-when="EUR">{{order.Total | currency: '&euro;'}}</span>
                 <span ng-switch-when="GBP">{{order.Total | currency: '&#163;'}}</span>
@@ -93,10 +93,10 @@
             </td>
 
 
-            <td>{{order.xp.dateSubmitted}}</td>
-            <td>{{order.FromUserID}}</td>
-            <td>{{order.xp.dateConfirmed}}</td>
-            <td>{{order.xp.estimatedDelieveryDate}}</td>
+            <td>{{order.DateSubmitted}}</td>
+            <td>{{order.xp.ReviewerName}}</td>
+            <td>{{order.xp.StatusDate}}</td>
+            <td>{{order.xp.estimatedDeliveryDate}}</td>
             <td><button class="btn btn-primary" ng-click="orders.Update()">{{orders.labels.update}}</button></td>
         </tr>
         </tbody>
