@@ -182,7 +182,7 @@ function BaseController($rootScope, $ocMedia, $state, $sce, Underscore, snapRemo
             "ConfirmedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.ConfirmedOrder.id},
             "DespatchedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Despatched.id},
             "InvoicedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Invoiced.id},
-            "AllOrders":{"xp.Type":"Order","xp'Active":"true"}
+            "AllOrders":{"xp.Type":"Order|Quote","xp.Active":"true"}
         };
         var destination = {
             "ReviewQuotes":"ordersMain.quotesReview",

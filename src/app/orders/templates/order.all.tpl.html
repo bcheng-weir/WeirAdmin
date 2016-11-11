@@ -69,7 +69,7 @@
                 <span ng-switch-default>{{order.Total | currency:'&#163;'}}</span>
             </td>
             <td>{{order.DateSubmitted}}</td>
-            <td>{{order.xp.Reviewer}}</td>
+            <td>{{order.xp.ReviewerName}}</td>
             <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.CustomerID)">{{orders.labels.view}}</button></td>
         </tr>
         </tbody>

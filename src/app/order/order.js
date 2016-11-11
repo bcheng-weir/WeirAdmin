@@ -221,7 +221,9 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 	function _showRevise() {
 		var validStatus = {
 			SB: true,
-			SP: true
+			SP: true,
+			RQ: true,
+			RR: true
 		};
 		if(vm.Order.xp) {
 			return validStatus[vm.Order.xp.Status];
@@ -229,6 +231,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 			return false;
 		}
 	}
+
 	vm.ShowShareRevision = _showShareRevision;
 	function _showShareRevision() {
 		var validStatus = {
@@ -353,6 +356,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 	function _revise(currentUser) {
 		var deferred = $q.defer();
 		var queue = [];
+		var OrderID = null; //Need this to be able to patch to the new ID.
 		// On the first revision there will be no original order id, so set it. This way we can see all related items in the revisions list view.
 		vm.Order.xp.OriginalOrderID = vm.Order.xp.OriginalOrderID ? vm.Order.xp.OriginalOrderID: vm.Order.ID;
 
@@ -380,22 +384,29 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 					value++;
 					rev = pieces[0] + "-Rev" + value.toString();
 				} else {
+					rev = orderID + "-Rev1"; //There is no revision. Set it to 1.
+				}
+			});
+			return rev;
+		}
+
+		function _determineCopyRevision(orderID) {
+			var rev = null;
+			var pieces = orderID.split("-Rev");
+			angular.forEach(pieces, function(value, key) {
+				if(key==1) {
+					rev = pieces[0] + "-Rev" + value.toString();
+				} else {
 					rev = orderID + "-Rev0"; //There is no revision. Set it to 0.
 				}
 			});
 			return rev;
 		}
 
-		orderCopy.ID = _determineRevision(orderCopy.ID); //Rev0 or current rev +1
-		vm.Order.ID = _determineRevision(orderCopy.ID); //ordercopy rev +1
-
-		//foreach lineitemcopy, set the xp.OriginalQty to the original line item quantity.
-		var originalItem = {};
-		angular.forEach(lineItemsCopy.Items, function(item, key) {
-			item.xp = item.xp ? item.xp : {};
-			originalItem = Underscore.findWhere(vm.LineItems.Items,{ID:item.ID});
-			item.xp.OriginalQty = originalItem.Quantity;
-		});
+		// pass in the copy order id. Use that to set the copy and the order.
+		orderCopy.ID = _determineCopyRevision(orderCopy.ID); //Rev0 or current rev
+		OrderID = angular.copy(vm.Order.ID);
+		vm.Order.ID = _determineRevision(vm.Order.ID);
 
 		var orderPatch = {
 			ID: vm.Order.ID,
@@ -414,10 +425,20 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 		};
 
 		// Patch the current order with the updated status, ID and active state.
-		OrderCloud.Orders.Patch(vm.Order.xp.OriginalOrderID, orderPatch, buyerid)
+		OrderCloud.Orders.Patch(OrderID, orderPatch, buyerid)
 			.then(function(order) {
+				angular.forEach(vm.LineItems.Items, function(value, key) {
+					queue.push(OrderCloud.LineItems.Patch(order.ID, value.ID, {xp:{OriginalQty:value.Quantity}}, buyerid));
+				});
+				$q.all(queue)
+					.then(function(results) {
+						deferred.resolve(results);
+					});
+				return deferred.promise;
+			})
+			.then(function() {
 				// Get the details of the user that placed the order.
-                return OrderCloud.Users.Get(order.FromUserID, order.xp.BuyerId);
+                return OrderCloud.Users.Get(vm.Order.FromUserID, vm.Order.xp.BuyerId);
 			})
             .then(function(buyer) {
             	// Get an access token for impersonation.
@@ -438,14 +459,9 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 					queue.push(OrderCloud.LineItems.Create(orderCopy.ID, value, buyerid));
 				});
 				$q.all(queue)
-					.then(function(results) {
-						deferred.resolve(results);
-					});
-				return deferred.promise;
-			})
-			.then(function() {
-				// lock in the price on the line items. don't want them changing.
-				return OrderCloud.Orders.Submit(orderCopy.ID, orderCopy.xp.BuyerId);
+					.then(function() {
+						return OrderCloud.Orders.Submit(orderCopy.ID, orderCopy.xp.BuyerId);
+					})
 			})
 			.then(function() {
 				// Remove the impersonation token.
