@@ -174,21 +174,21 @@ function BaseController($rootScope, $ocMedia, $state, $sce, Underscore, snapRemo
     vm.OrderAction = _actions;
     function _actions(action) {
         var filter = {
-            "ReviewQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Submitted.id},
-            "RevisedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.RevisedQuote.id},
+            "ReviewQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Submitted.id + "|" + WeirService.OrderStatus.Review.id},
+            "RevisedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.RevisedQuote.id, "xp.Active":"true"},
             "ConfirmedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.ConfirmedQuote.id},
-            "POOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.SubmittedWithPO.id},
-            "RevisedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.RevisedOrder.id},
+            "POOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.SubmittedWithPO.id + "|" + WeirService.OrderStatus.Review.id},
+            "RevisedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.RevisedOrder.id, "xp.Active":"true"},
             "ConfirmedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.ConfirmedOrder.id},
             "DespatchedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Despatched.id},
             "InvoicedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Invoiced.id},
-            "AllOrders":{"xp.Type":"Order"}
+            "AllOrders":{"xp.Type":"Order","xp'Active":"true"}
         };
         var destination = {
             "ReviewQuotes":"ordersMain.quotesReview",
             "RevisedQuotes":"ordersMain.quotesRevised",
             "ConfirmedQuotes":"ordersMain.quotesConfirmed",
-            "POOrders":"ordersMain.",
+            "POOrders":"ordersMain.POOrders",
             "RevisedOrders":"ordersMain.ordersRevised",
             "ConfirmedOrders":"ordersMain.ordersConfirmed",
             "DespatchedOrders":"ordersMain.ordersDespatched",

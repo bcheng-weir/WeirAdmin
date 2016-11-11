@@ -42,7 +42,7 @@
             </th>
             <th scope="col">
                 <a href="#" role="button" ng-click="orders.updateSort('DateSubmitted')">
-                    {{orders.labels.dateSubmitted}}
+                    {{orders.labels.dateRevised}}
                     <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'DateSubmitted'"></i>
                     <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!DateSubmitted'"></i>
                 </a>
@@ -54,6 +54,12 @@
                     <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!ID'"></i>
                 </a>
             </th>
+            <th scope="col">
+                <a href="#" role="button" ng-click="orders.updateXpSort('Status')">
+                    {{orders.labels.status}}
+                </a>
+            </th>
+            <th scope="col"></th>
             <th scope="col"></th>
         </tr>
         </thead>
@@ -68,9 +74,10 @@
                 <span ng-switch-when="GBP">{{order.Total | currency: '&#163;'}}</span>
                 <span ng-switch-default>{{order.Total | currency:'&#163;'}}</span>
             </td>
-            <td>{{order.DateSubmitted}}</td>
+            <td>{{order.xp.DateRevised}}</td>
             <td>{{order.xp.Reviewer}}</td>
-            <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.CustomerID)">{{orders.labels.view}}</button></td>
+            <td>{{order.Status}}</td>
+            <td><button class="btn btn-primary" ng-click="orders.View(order.ID)">{{orders.labels.view}}</button></td>
         </tr>
         </tbody>
     </table>

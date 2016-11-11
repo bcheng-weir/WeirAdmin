@@ -4,39 +4,74 @@ angular.module('orderCloud')
 
 function OrdersConfig($stateProvider,buyerid) {
 	$stateProvider.state('ordersMain', {
-		parent:'base',
-		templateUrl:'orders/templates/orders.tpl.html',
-		controller:'OrdersCtrl',
-		controllerAs:'orders',
-		url:'/orders?from&to&search&page&pageSize&searchOn&sortBy&sortByXp&filters&buyerid',
-		data:{componentName:'Orders'},
+		parent: 'base',
+		templateUrl: 'orders/templates/orders.tpl.html',
+		controller: 'OrdersCtrl',
+		controllerAs: 'orders',
+		url: '/orders?from&to&search&page&pageSize&searchOn&sortBy&sortByXp&filters&buyerid',
+		data: {componentName: 'Orders'},
 		resolve: {
-			Parameters: function($stateParams,OrderCloudParameters) {
+			Parameters: function ($stateParams, OrderCloudParameters) {
 				return OrderCloudParameters.Get($stateParams);
 			},
-			Orders: function(OrderCloud,Parameters) {
-				return OrderCloud.Orders.ListOutgoing(Parameters.from,Parameters.to,Parameters.search,Parameters.page,Parameters.pageSize || 20,Parameters.searchOn,Parameters.sortBy,Parameters.filters,buyerid);
+			Orders: function (OrderCloud, Parameters) {
+				return OrderCloud.Orders.ListOutgoing(Parameters.from, Parameters.to, Parameters.search, Parameters.page, Parameters.pageSize || 20, Parameters.searchOn, Parameters.sortBy, Parameters.filters, buyerid);
 			},
-			xpOrders: function(OrderCloud, Parameters, Orders) {
+			xpOrders: function (OrderCloud, Parameters, Orders) {
 				return false;
 			}
 		}
 	})
-	.state('ordersMain.quotesRevised', {
-		url:'/quotesRevised',
-		templateUrl:'orders/templates/quote.revised.tpl.html',
-		parent:'ordersMain'
-	})
-	.state('ordersMain.quotesReview', {
-		url:'/quotesReview',
-		templateUrl:'orders/templates/quote.review.tpl.html',
-		parent:'ordersMain'
-	})
-	.state('ordersMain.ordersRevised', {
-		url:'/ordersRevised',
-		templateUrl: 'orders/templates/order.revised.tpl.html',
-		parent:'ordersMain'
-	});
+		.state('ordersMain.quotesRevised', {
+			url: '/quotesRevised',
+			templateUrl: 'orders/templates/quote.revised.tpl.html',
+			parent: 'ordersMain'
+		})
+		.state('ordersMain.quotesReview', {
+			url: '/quotesReview',
+			templateUrl: 'orders/templates/quote.review.tpl.html',
+			parent: 'ordersMain'
+		})
+		.state('ordersMain.quotesConfirmed', {
+			url: '/quotesConfirmed',
+			templateUrl: 'orders/templates/quote.confirm.tpl.html',
+			parent: 'ordersMain'
+		})
+		.state('ordersMain.ordersRevised', {
+			url: '/ordersRevised',
+			templateUrl: 'orders/templates/order.revised.tpl.html',
+			parent: 'ordersMain'
+		})
+		.state('ordersMain.POOrders', {
+			url: '/ordersSubmitted',
+			templateUrl: 'orders/templates/order.submitted.tpl.html',
+			parent: 'ordersMain'
+		})
+		.state('ordersMain.ordersConfirmed', {
+			url: '/orderConfirmed',
+			templateUrl: 'orders/templates/order.confirmed.tpl.html',
+			parent: 'ordersMain'
+		})
+		.state('ordersMain.ordersDespatched', {
+			url: '/orderDespatched',
+			templateUrl: 'orders/templates/order.despatched.tpl.html',
+			parent: 'ordersMain'
+		})
+		.state('ordersMain.ordersInvoiced', {
+			url: '/quotesReview',
+			templateUrl: 'orders/templates/order.invoiced.tpl.html',
+			parent: 'ordersMain'
+		})
+        .state('ordersMain.listOfRevisions', {
+            url:'/listOfRevisions',
+            templateUrl:'orders/templates/order.revisions.tpl.html',
+            parent:'ordersMain'
+        })
+		.state('ordersMain.ordersAll', {
+			url: '/ordersAll',
+			templateUrl: 'orders/templates/order.all.tpl.html',
+			parent: 'ordersMain'
+		});
 }
 
 function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, $exceptionHandler, Underscore, OrderCloud, OrderCloudParameters, Orders, Parameters, buyerid, WeirService) {
@@ -169,11 +204,20 @@ function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, $exception
 			dateRevised: "Date Revised",
 			reviewer: "Reviewer",
 			view: "View",
+			update: "Update",
 			revisions: "Revisions",
 			status: "Status",
 			loadMore:"Load More",
 			poNumber:"PO Number",
-			orderedBy:"Ordered By"
+			orderedBy:"Ordered By",
+			contractNo: "Contract number",
+			dateOrdered: "Order date",
+			dateConfirmed: "Date confirmed",
+			confirmedBy: "Confirmed by",
+			estimatedDelievery: "Estimated delievery date",
+			dateDespatched: "Estimated delievery date",
+			orderValue: "Order value",
+			invoiceValue: "Invoice Number"
 		},
 		fr: {
 			search:$sce.trustAsHtml("Search"),
@@ -200,19 +244,19 @@ function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, $exception
 		var cid = customerId;
 		WeirService.SetOrderAsCurrentOrder(orderId)
 			.then(function() {
-				//return OrderCloud.BuyerID.Set(cid);
-				return true;
-			})
-			.then(function() {
 				$rootScope.$broadcast('SwitchCart');
 				$state.go('order');
 			})
 			.catch(function(ex) {
-				$exceptionHandler(ex)
-			})
+				$exceptionHandler(ex);
+			});
 	};
 
 	vm.Revisions = function() {
+        $state.go("ordersMain.listOfRevisions", {filters:JSON.stringify({"ID": orderId})},{reload:true});
+	};
+
+	vm.Update = function() {
 		//ToDo
-	}
+	};
 }

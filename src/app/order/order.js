@@ -1,9 +1,8 @@
 angular.module('orderCloud')
     .service( 'OrderShareService', OrderShareService)
     .config(orderConfig)
-    .controller('OrderCtrl', OrderController)
-    .controller('FinalOrderInfoCtrl', FinalOrderInfoController)
-;
+    .controller('OrderCtrl', OrderController);
+.controller('FinalOrderInfoCtrl',FinalOrderInfoController);
 
 function OrderShareService() {
     var svc = {
@@ -22,60 +21,59 @@ function orderConfig($stateProvider, buyerid){
         controller: 'OrderCtrl',
         controllerAs: 'order',
         url: '/order',
-        data: { componentName: 'order' },
+        data: {componentName: 'order'},
         resolve: {
-            Order: function (CurrentOrder) {
+            Order: function(CurrentOrder){
                 return CurrentOrder.Get();
             },
             DeliveryAddress: function (OrderCloud, Order) {
-                if (Order.ShippingAddressID) {
+                if(Order.ShippingAddressID) {
                     return OrderCloud.Addresses.Get(Order.ShippingAddressID, buyerid);
-                }
-                else {
+                } else {
                     return null;
                 }
             },
             LineItems: function ($q, $state, toastr, OrderCloud, CurrentOrder, OrderShareService, Order, LineItemHelpers) {
                 OrderShareService.LineItems.length = 0;
-                var dfd = $q.defer();
-                CurrentOrder.GetID()
-		            .then(function (id) {
-		                OrderCloud.LineItems.List(Order.ID)
-				            .then(function (data) {
-				                if (!data.Items.length) {
-				                    toastr.error('Your quote does not contain any line items.', 'Error');
-				                    dfd.resolve({ Items: [] });
-				                } else {
-				                    LineItemHelpers.GetProductInfo(data.Items)
+	            var dfd = $q.defer();
+	            CurrentOrder.GetID()
+		            .then(function(id) {
+			            OrderCloud.LineItems.List(Order.ID)
+				            .then(function(data) {
+					            if (!data.Items.length) {
+						            toastr.error('Your quote does not contain any line items.', 'Error');
+						            dfd.resolve({ Items: [] });
+					            } else {
+						            LineItemHelpers.GetProductInfo(data.Items)
 							            .then(function () { dfd.resolve(data); });
-				                }
+					            }
 				            })
 		            })
 		            .catch(function () {
 		                toastr.error('Your quote does not contain any line items.', 'Error');
 		                dfd.resolve({ Items: [] });
-		            });
-                return dfd.promise;
+	                });
+	            return dfd.promise;
             },
             Payments: function (Order, OrderCloud) {
                 return OrderCloud.Payments.List(Order.ID);
             }
         }
     })
-    .state('order.addinfo', {
-        url: '/addinfo',
-    	templateUrl: 'order/templates/order.addinfo.tpl.html',
-    	controller: 'FinalOrderInfoCtrl',
-    	controllerAs: 'info',
-    	resolve: {
-    	    Order: function (CurrentOrder) {
-    	        return CurrentOrder.Get();
-    	    }
-    	}
-    })
+        .state('order.addinfo', {
+            url: '/addinfo',
+            templateUrl: 'order/templates/order.addinfo.tpl.html',
+            controller: 'FinalOrderInfoCtrl',
+            controllerAs: 'info',
+            resolve: {
+                Order: function (CurrentOrder) {
+                    return CurrentOrder.Get();
+                }
+            }
+        })
     ;
 }
-function OrderController($q, $scope, $state, $sce, $exceptionHandler, OrderCloud, Order, DeliveryAddress, LineItems, Payments, WeirService, Underscore, OrderToCsvService, buyerid, clientid) {
+function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler, OrderCloud, Order, DeliveryAddress, LineItems, Payments, WeirService, Underscore, OrderToCsvService, buyerid, buyernetwork) {
     var vm = this;
     vm.Order = Order;
     vm.LineItems = LineItems;
@@ -102,7 +100,7 @@ function OrderController($q, $scope, $state, $sce, $exceptionHandler, OrderCloud
             PONumber: "Your PO No;",
             //table labels
             SerialNum: "Serial number",
-            TagNum: "Tag number(if available)",
+            TagNum: "Tag number (if available)",
             PartNum: "Part Number",
             Description: "Description of Part",
             RecReplacement: "Recommended replacement",
@@ -142,7 +140,7 @@ function OrderController($q, $scope, $state, $sce, $exceptionHandler, OrderCloud
             PONumber:$sce.trustAsHtml( "Your PO No;"),
             //table labels
             SerialNum:$sce.trustAsHtml( "Serial number"),
-            TagNum:$sce.trustAsHtml( "Tag number(if available)"),
+            TagNum:$sce.trustAsHtml( "Tag number (if available)"),
             PartNum:$sce.trustAsHtml( "Part Number"),
             Description:$sce.trustAsHtml( "Description of Part"),
             RecReplacement:$sce.trustAsHtml( "Recommended replacement"),
@@ -173,6 +171,184 @@ function OrderController($q, $scope, $state, $sce, $exceptionHandler, OrderCloud
     vm.ToCsvJson = toCsv;
     vm.CsvFilename = vm.Order.ID + ".csv";
 
+	vm.ShowEdit = _showEdit;
+	function _showEdit(status, item) {
+		return status==WeirService.OrderStatus.Review.id;
+	}
+
+	vm.ShowUpdated = _showUpdated;
+	function _showUpdated(item) {
+		// return true if qty <> xp.originalQty and qty > 0
+		if(item.xp){
+			return item.Quantity > 0 && (item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty));
+		} else {
+			return false;
+		}
+	}
+
+	vm.ShowRemoved = _showRemoved;
+	function _showRemoved(line) {
+		if(line.xp) {
+			return line.Quantity == 0 && line.xp.OriginalQty != 0;
+		} else {
+			return false;
+		}
+	}
+
+	vm.ShowNew = _showNew;
+	function _showNew(line) {
+		if(line.xp) {
+			return line.xp.OriginalQty==0;
+		} else {
+			return false;
+		}
+	}
+
+	vm.ShowConfirm = _showConfirm;
+	function _showConfirm() {
+		var validStatus = {
+			SB: true,
+			SP: true
+		};
+		if(vm.Order.xp) {
+			return validStatus[vm.Order.xp.Status];
+		} else {
+			return false;
+		}
+	}
+
+	vm.ShowRevise = _showRevise;
+	function _showRevise() {
+		var validStatus = {
+			SB: true,
+			SP: true
+		};
+		if(vm.Order.xp) {
+			return validStatus[vm.Order.xp.Status];
+		} else {
+			return false;
+		}
+	}
+	vm.ShowShareRevision = _showShareRevision;
+	function _showShareRevision() {
+		var validStatus = {
+			RE: true
+		};
+		if(vm.Order.xp) {
+			return validStatus[vm.Order.xp.Status];
+		} else {
+			return false;
+		}
+	}
+
+	vm.ShowAddItems = _showAddItems;
+	function _showAddItems() {
+		var validStatus = {
+			RE: true
+		};
+		if(vm.Order.xp) {
+			return validStatus[vm.Order.xp.Status];
+		} else {
+			return false;
+		}
+	}
+
+	vm.AddNewItem = _addNewItem;
+	function _addNewItem() {
+		var newItem = {
+			"ProductID": "",
+			"Quantity": 0,
+			"DateAdded": "",
+			"QuantityShipped": 0,
+			"UnitPrice": 0,
+			"LineTotal": 0,
+			"CostCenter": null,
+			"DateNeeded": null,
+			"ShippingAccount": null,
+			"ShippingAddressID": null,
+			"ShippingAddress": null,
+			"ShipFromAddressID": null,
+			"ShipFromAddress": null,
+			"Specs": [],
+			"xp": {
+				"SN": "",
+				"TagNumber": "",
+				"OriginalQty": 0
+			}
+		};
+		vm.LineItems.Items.push(newItem);
+	}
+
+	vm.EditLineItem = _editLineItem;
+	function _editLineItem(line) {
+		var patch = {
+			Quantity: line.Quantity
+		};
+		OrderCloud.LineItems.Patch(vm.Order.ID, line.ID, patch, buyerid)
+			.then(function() {
+				$rootScope.$broadcast('SwitchCart');
+				$state.go($state.current,{}, {reload:true});
+			})
+			.catch(function(ec) {
+				$exceptionHandler(ex);
+			})
+	}
+
+	vm.ShareRevision = _shareRevision;
+	function _shareRevision(currentUser) {
+		//Set the status to revised. set the status date. set the ReviewerName.
+		var orderType = {
+			Quote: WeirService.OrderStatus.RevisedQuote.id,
+			Order: WeirService.OrderStatus.RevisedOrder.id
+		};
+
+		var patch = {
+			xp: {
+				Status: orderType[vm.Order.xp.Type],
+				StatusDate: new Date(),
+				ReviewerName: currentUser.FirstName + " " + currentUser.LastName
+			}
+		};
+
+		if(patch.xp.Status) {
+			OrderCloud.Orders.Patch(vm.Order.ID, patch, buyerid)
+				.then(function() {
+					$state.go($state.current,{}, {reload:true});
+				})
+				.catch(function(ex) {
+					$exceptionHandler(ex);
+				})
+		}
+	}
+
+	vm.Confirm = _confirm;
+	function _confirm(currentUser) {
+		var confirmedStatus = {
+			SB:WeirService.OrderStatus.ConfirmedQuote.id,
+			SP:WeirService.OrderStatus.ConfirmedOrder.id
+		};
+
+		var patch = {
+			xp: {
+				Status: confirmedStatus[vm.Order.xp.Status],
+				StatusDate: new Date(),
+				ReviewerName: currentUser.FirstName + " " + currentUser.LastName
+			}
+		};
+
+		if(patch.xp.Status) {
+			OrderCloud.Orders.Patch(vm.Order.ID, patch, buyerid)
+				.then(function() {
+					$state.go($state.current,{}, {reload:true});
+				})
+				.catch(function(ex) {
+					$exceptionHandler(ex);
+				});
+		} else {
+			return; //invlaid status for confirming. should not have shown the button.
+		}
+	}
+
 	vm.Revise = _revise;
 	function _revise(currentUser) {
 		var deferred = $q.defer();
@@ -184,10 +360,17 @@ function OrderController($q, $scope, $state, $sce, $exceptionHandler, OrderCloud
 		var orderCopy = angular.copy(vm.Order);
 		var lineItemsCopy = angular.copy(vm.LineItems); //a 'new line' would have original qty 0; a deleted line would have orig qty <> 0
 
-		// The copy will be the active version of the order.
-		orderCopy.xp.Active = true;
-		orderCopy.xp.Status = WeirService.OrderStatus.Review.id;
-		orderCopy.xp.ReviewerName = currentUser.FirstName + " " + currentUser.LastName;
+		// The copy will be the historical version of the order. This way we maintain the submission status in the original
+		orderCopy.xp.Active = false;
+		if(vm.Order.xp.Type == "Quote") {
+			orderCopy.xp.Status = WeirService.OrderStatus.RevisedQuote.id;
+		} else if (vm.Order.xp.Type == "Order") {
+			orderCopy.xp.Status = WeirService.OrderStatus.RevisedOrder.id;
+		} else {
+			return; //shouldn't have an order with no xp.Type
+		}
+
+		orderCopy.xp.StatusDate = new Date();
 
 		function _determineRevision(orderID) {
 			var rev = null;
@@ -203,8 +386,8 @@ function OrderController($q, $scope, $state, $sce, $exceptionHandler, OrderCloud
 			return rev;
 		}
 
-		vm.Order.ID = _determineRevision(vm.Order.ID);
-		orderCopy.ID = _determineRevision(vm.Order.ID);
+		orderCopy.ID = _determineRevision(orderCopy.ID); //Rev0 or current rev +1
+		vm.Order.ID = _determineRevision(orderCopy.ID); //ordercopy rev +1
 
 		//foreach lineitemcopy, set the xp.OriginalQty to the original line item quantity.
 		var originalItem = {};
@@ -214,62 +397,43 @@ function OrderController($q, $scope, $state, $sce, $exceptionHandler, OrderCloud
 			item.xp.OriginalQty = originalItem.Quantity;
 		});
 
-		//1. Patch vm.Order.ID. This will move the line items under this new order id. This is Rev 0, active false.
-		//2. Create a new order with orderCopy, set the shipping address, and lineItemsCopy. This is Rev 1, active true.
-		//3. Set orderCopy as the current order and reload the state.
 		var orderPatch = {
 			ID: vm.Order.ID,
 			xp: {
-				Active: false,
+				Active: true,
 				Status: WeirService.OrderStatus.Review.id,
+				StatusDate: new Date(),
+				ReviewerName: currentUser.FirstName + " " + currentUser.LastName,
 				OriginalOrderID: vm.Order.xp.OriginalOrderID
 			}
 		};
 
 		var impersonation = {
-			ClientID: clientid,
+			ClientID: buyernetwork,
 			Claims: []
 		};
 
-		OrderCloud.Users.Get(vm.Order.FromUserID, vm.Order.xp.BuyerId)
-			.then(function(buyer) {
-				impersonation.Claims = buyer.AvailableRoles;
-				return OrderCloud.Users.GetAccessToken(vm.Order.FromUserID, impersonation, vm.Order.xp.BuyerId);
-			})
-			.then(function(data) {
-				//OrderCloud.Auth.SetImpersonationToken(data['access_token']);
-				console.log(data);
-				return OrderCloud.As(data['access_token']).Me.ListProducts();
-			})
-			.catch(function(ex) {
-				$exceptionHandler(ex);
-			});
-
-
-		/*OrderCloud.Orders.Patch(vm.Order.xp.OriginalOrderID, orderPatch, buyerid)
+		// Patch the current order with the updated status, ID and active state.
+		OrderCloud.Orders.Patch(vm.Order.xp.OriginalOrderID, orderPatch, buyerid)
 			.then(function(order) {
+				// Get the details of the user that placed the order.
                 return OrderCloud.Users.Get(order.FromUserID, order.xp.BuyerId);
 			})
             .then(function(buyer) {
+            	// Get an access token for impersonation.
 	            impersonation.Claims = buyer.AvailableRoles;
                 return OrderCloud.Users.GetAccessToken(vm.Order.FromUserID, impersonation, vm.Order.xp.BuyerId);
 			})
             .then(function(data) {
-                //OrderCloud.Auth.SetImpersonationToken(data['access_token']);
-	            console.log(data);
-	            return OrderCloud.As(data['access_token']).Me.ListProducts();
+            	// Set the local impersonation token so that As() can be used.
+                OrderCloud.Auth.SetImpersonationToken(data['access_token']);
             })
-			.then(function(products) {
-				console.log(products.Items);
-			})
 			.then(function() {
-				OrderCloud.Auth.RemoveImpersonationToken();
-			});
-			.then(function() {
-				//return OrderCloud.Orders.Create(orderCopy, buyerid);
-				return OrderCloud.Orders.Create(orderCopy, buyerid);
+				// Create the order as the impersonated user.
+				return OrderCloud.As().Orders.Create(orderCopy, buyerid);
 			})
 			.then(function(order) {
+				// Create the line items.
 				angular.forEach(lineItemsCopy.Items, function(value, key) {
 					queue.push(OrderCloud.LineItems.Create(orderCopy.ID, value, buyerid));
 				});
@@ -280,62 +444,67 @@ function OrderController($q, $scope, $state, $sce, $exceptionHandler, OrderCloud
 				return deferred.promise;
 			})
 			.then(function() {
+				// lock in the price on the line items. don't want them changing.
+				return OrderCloud.Orders.Submit(orderCopy.ID, orderCopy.xp.BuyerId);
+			})
+			.then(function() {
+				// Remove the impersonation token.
 				return OrderCloud.Auth.RemoveImpersonationToken();
 			})
 			.then(function() {
-				return WeirService.SetOrderAsCurrentOrder(orderCopy.ID);
+				// Set the current order so that the order details page is updated.
+				return WeirService.SetOrderAsCurrentOrder(vm.Order.ID);
 			})
 			.then(function() {
+				// Update the mini-cart with the new order and refresh the page.
 				$rootScope.$broadcast('SwitchCart');
-				$state.go('order');
+				$state.go($state.current,{}, {reload:true});
 			})
 			.catch(function(ex) {
 				$exceptionHandler(ex);
-			});*/
+			});
 	}
 }
-    
-function FinalOrderInfoController($state, $sce, WeirService, Order) {
-    var vm = this;
-    vm.Order = Order;
+function FinalOrderInfoController($sce, $state, WeirService, Order) {
+        var vm = this;
+        vm.Order = Order;
 
-    var labels = {
-        en: {
-            OrderNumber: "Order Number",
-            BackToOrders: "Back to Orders",
-            ContractNumber: "Contract number",
-            DeliveryDate: "Delivery date",
-            DespatchDate: "Date despatched",
-            InvoiceNum: "Invoice Number",
-            NotificationText: "Your customer will be sent a notification when you save details on this page.",
-            Save: "Save",
-            Cancel: "Cancel"
-        }, fr: {
-            OrderNumber: $sce.trustAsHtml("FR: Order Number"),
-            BackToOrders: $sce.trustAsHtml("FR: Back to Orders"),
-            ContractNumber: $sce.trustAsHtml("FR: Contract number"),
-            DeliveryDate: $sce.trustAsHtml("FR: Delivery date"),
-            DespatchDate: $sce.trustAsHtml("FR: Date despatched"),
-            InvoiceNum: $sce.trustAsHtml("FR: Invoice Number"),
-            NotificationText: $sce.trustAsHtml("FR: Your customer will be sent a notification when you save details on this page."),
-            Save: $sce.trustAsHtml("FR: Save"),
-            Cancel: $sce.trustAsHtml("FR: Cancel")
+        var labels = {
+            en: {
+                OrderNumber: "Order Number",
+                BackToOrders: "Back to Orders",
+                ContractNumber: "Contract number",
+                DeliveryDate: "Delivery date",
+                DespatchDate: "Date despatched",
+                InvoiceNum: "Invoice Number",
+                NotificationText: "Your customer will be sent a notification when you save details on this page.",
+                Save: "Save",
+                Cancel: "Cancel"
+            }, fr: {
+                OrderNumber: $sce.trustAsHtml("FR: Order Number"),
+                BackToOrders: $sce.trustAsHtml("FR: Back to Orders"),
+                ContractNumber: $sce.trustAsHtml("FR: Contract number"),
+                DeliveryDate: $sce.trustAsHtml("FR: Delivery date"),
+                DespatchDate: $sce.trustAsHtml("FR: Date despatched"),
+                InvoiceNum: $sce.trustAsHtml("FR: Invoice Number"),
+                NotificationText: $sce.trustAsHtml("FR: Your customer will be sent a notification when you save details on this page."),
+                Save: $sce.trustAsHtml("FR: Save"),
+                Cancel: $sce.trustAsHtml("FR: Cancel")
+            }
+        };
+        function save() {
+            console.log("update order info and back to order");
+            $state.go('order');
         }
-    };
-    function save() {
-        console.log("update order info and back to order");
-        $state.go('order');
-    }
-    function cancel() {
-        console.log("Back to order");
-        $state.go('order');
-    }
-    function backToOrders() {
-        $state.go('ordersMain');
-    }
-    vm.labels = WeirService.LocaleResources(labels);
-    vm.Save = save;
-    vm.Cancel = cancel;
-    vm.BackToOrders = backToOrders;
-
+        function cancel() {
+            console.log("Back to order");
+            $state.go('order');
+        }
+        function backToOrders() {
+            $state.go('ordersMain');
+        }
+        vm.labels = WeirService.LocaleResources(labels);
+        vm.Save = save;
+        vm.Cancel = cancel;
+        vm.BackToOrders = backToOrders;
 }
