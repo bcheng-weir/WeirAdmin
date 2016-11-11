@@ -1,7 +1,9 @@
 angular.module('orderCloud')
     .service( 'OrderShareService', OrderShareService)
     .config(orderConfig)
-    .controller('OrderCtrl',OrderController);
+    .controller('OrderCtrl', OrderController)
+    .controller('FinalOrderInfoCtrl', FinalOrderInfoController)
+;
 
 function OrderShareService() {
     var svc = {
@@ -20,46 +22,58 @@ function orderConfig($stateProvider, buyerid){
         controller: 'OrderCtrl',
         controllerAs: 'order',
         url: '/order',
-        data: {componentName: 'order'},
+        data: { componentName: 'order' },
         resolve: {
-            Order: function(CurrentOrder){
+            Order: function (CurrentOrder) {
                 return CurrentOrder.Get();
             },
             DeliveryAddress: function (OrderCloud, Order) {
-                if(Order.ShippingAddressID) {
+                if (Order.ShippingAddressID) {
                     return OrderCloud.Addresses.Get(Order.ShippingAddressID, buyerid);
                 }
-                else{
+                else {
                     return null;
                 }
             },
             LineItems: function ($q, $state, toastr, OrderCloud, CurrentOrder, OrderShareService, Order, LineItemHelpers) {
                 OrderShareService.LineItems.length = 0;
-	            var dfd = $q.defer();
-	            CurrentOrder.GetID()
-		            .then(function(id) {
-			            OrderCloud.LineItems.List(Order.ID)
-				            .then(function(data) {
-					            if (!data.Items.length) {
-						            toastr.error('Your quote does not contain any line items.', 'Error');
-						            dfd.resolve({ Items: [] });
-					            } else {
-						            LineItemHelpers.GetProductInfo(data.Items)
+                var dfd = $q.defer();
+                CurrentOrder.GetID()
+		            .then(function (id) {
+		                OrderCloud.LineItems.List(Order.ID)
+				            .then(function (data) {
+				                if (!data.Items.length) {
+				                    toastr.error('Your quote does not contain any line items.', 'Error');
+				                    dfd.resolve({ Items: [] });
+				                } else {
+				                    LineItemHelpers.GetProductInfo(data.Items)
 							            .then(function () { dfd.resolve(data); });
-					            }
+				                }
 				            })
 		            })
 		            .catch(function () {
 		                toastr.error('Your quote does not contain any line items.', 'Error');
 		                dfd.resolve({ Items: [] });
-	                });
-	            return dfd.promise;
+		            });
+                return dfd.promise;
             },
             Payments: function (Order, OrderCloud) {
                 return OrderCloud.Payments.List(Order.ID);
             }
         }
-    });
+    })
+    .state('order.addinfo', {
+        url: '/addinfo',
+    	templateUrl: 'order/templates/order.addinfo.tpl.html',
+    	controller: 'FinalOrderInfoCtrl',
+    	controllerAs: 'info',
+    	resolve: {
+    	    Order: function (CurrentOrder) {
+    	        return CurrentOrder.Get();
+    	    }
+    	}
+    })
+    ;
 }
 function OrderController($q, $scope, $state, $sce, $exceptionHandler, OrderCloud, Order, DeliveryAddress, LineItems, Payments, WeirService, Underscore, OrderToCsvService, buyerid, clientid) {
     var vm = this;
@@ -279,4 +293,49 @@ function OrderController($q, $scope, $state, $sce, $exceptionHandler, OrderCloud
 				$exceptionHandler(ex);
 			});*/
 	}
+}
+    
+function FinalOrderInfoController($state, $sce, WeirService, Order) {
+    var vm = this;
+    vm.Order = Order;
+
+    var labels = {
+        en: {
+            OrderNumber: "Order Number",
+            BackToOrders: "Back to Orders",
+            ContractNumber: "Contract number",
+            DeliveryDate: "Delivery date",
+            DespatchDate: "Date despatched",
+            InvoiceNum: "Invoice Number",
+            NotificationText: "Your customer will be sent a notification when you save details on this page.",
+            Save: "Save",
+            Cancel: "Cancel"
+        }, fr: {
+            OrderNumber: $sce.trustAsHtml("FR: Order Number"),
+            BackToOrders: $sce.trustAsHtml("FR: Back to Orders"),
+            ContractNumber: $sce.trustAsHtml("FR: Contract number"),
+            DeliveryDate: $sce.trustAsHtml("FR: Delivery date"),
+            DespatchDate: $sce.trustAsHtml("FR: Date despatched"),
+            InvoiceNum: $sce.trustAsHtml("FR: Invoice Number"),
+            NotificationText: $sce.trustAsHtml("FR: Your customer will be sent a notification when you save details on this page."),
+            Save: $sce.trustAsHtml("FR: Save"),
+            Cancel: $sce.trustAsHtml("FR: Cancel")
+        }
+    };
+    function save() {
+        console.log("update order info and back to order");
+        $state.go('order');
+    }
+    function cancel() {
+        console.log("Back to order");
+        $state.go('order');
+    }
+    function backToOrders() {
+        $state.go('ordersMain');
+    }
+    vm.labels = WeirService.LocaleResources(labels);
+    vm.Save = save;
+    vm.Cancel = cancel;
+    vm.BackToOrders = backToOrders;
+
 }
