@@ -1,7 +1,8 @@
 angular.module('orderCloud')
     .service( 'OrderShareService', OrderShareService)
     .config(orderConfig)
-    .controller('OrderCtrl',OrderController);
+    .controller('OrderCtrl', OrderController)
+    .controller('FinalOrderInfoCtrl',FinalOrderInfoController);
 
 function OrderShareService() {
     var svc = {
@@ -58,7 +59,19 @@ function orderConfig($stateProvider, buyerid){
                 return OrderCloud.Payments.List(Order.ID);
             }
         }
-    });
+    })
+        .state('order.addinfo', {
+            url: '/addinfo',
+            templateUrl: 'order/templates/order.addinfo.tpl.html',
+            controller: 'FinalOrderInfoCtrl',
+            controllerAs: 'info',
+            resolve: {
+                Order: function (CurrentOrder) {
+                    return CurrentOrder.Get();
+                }
+            }
+        })
+    ;
 }
 function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler, OrderCloud, Order, DeliveryAddress, LineItems, Payments, WeirService, Underscore, OrderToCsvService, buyerid, buyernetwork) {
     var vm = this;
@@ -451,4 +464,47 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 				$exceptionHandler(ex);
 			});
 	}
+}
+function FinalOrderInfoController($sce, $state, WeirService, Order) {
+        var vm = this;
+        vm.Order = Order;
+
+        var labels = {
+            en: {
+                OrderNumber: "Order Number",
+                BackToOrders: "Back to Orders",
+                ContractNumber: "Contract number",
+                DeliveryDate: "Delivery date",
+                DespatchDate: "Date despatched",
+                InvoiceNum: "Invoice Number",
+                NotificationText: "Your customer will be sent a notification when you save details on this page.",
+                Save: "Save",
+                Cancel: "Cancel"
+            }, fr: {
+                OrderNumber: $sce.trustAsHtml("FR: Order Number"),
+                BackToOrders: $sce.trustAsHtml("FR: Back to Orders"),
+                ContractNumber: $sce.trustAsHtml("FR: Contract number"),
+                DeliveryDate: $sce.trustAsHtml("FR: Delivery date"),
+                DespatchDate: $sce.trustAsHtml("FR: Date despatched"),
+                InvoiceNum: $sce.trustAsHtml("FR: Invoice Number"),
+                NotificationText: $sce.trustAsHtml("FR: Your customer will be sent a notification when you save details on this page."),
+                Save: $sce.trustAsHtml("FR: Save"),
+                Cancel: $sce.trustAsHtml("FR: Cancel")
+            }
+        };
+        function save() {
+            console.log("update order info and back to order");
+            $state.go('order');
+        }
+        function cancel() {
+            console.log("Back to order");
+            $state.go('order');
+        }
+        function backToOrders() {
+            $state.go('ordersMain');
+        }
+        vm.labels = WeirService.LocaleResources(labels);
+        vm.Save = save;
+        vm.Cancel = cancel;
+        vm.BackToOrders = backToOrders;
 }
