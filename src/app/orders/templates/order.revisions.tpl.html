@@ -69,7 +69,7 @@
             <td>{{order.xp.RefNum}}</td>
             <td>{{order.xp.CustomerName}}</td>
             <td>{{order.FromUserFirstName}} {{order.FromUserLastName}}</td>
-            <td class="text-right" ng-switch on="order.xp.Currency">
+            <td class="text-left" ng-switch on="order.xp.Currency">
                 <span ng-switch-when="EUR">{{order.Total | currency: '&euro;'}}</span>
                 <span ng-switch-when="GBP">{{order.Total | currency: '&#163;'}}</span>
                 <span ng-switch-default>{{order.Total | currency:'&#163;'}}</span>
@@ -78,7 +78,6 @@
             <td>{{order.xp.Reviewer}}</td>
             <td>{{order.Status}}</td>
             <td><button class="btn btn-primary" ng-click="orders.View(order.ID)">{{orders.labels.view}}</button></td>
-            <td><button class="btn btn-primary" ng-click="orders.Revisions()">{{orders.labels.revisions}}</button></td>
         </tr>
         </tbody>
     </table>
