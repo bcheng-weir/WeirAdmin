@@ -392,7 +392,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 		//foreach lineitemcopy, set the xp.OriginalQty to the original line item quantity.
 		var originalItem = {};
 		angular.forEach(lineItemsCopy.Items, function(item, key) {
-			item.xp = typeof(item.xp) == 'undefined' ? {} : item.xp;
+			item.xp = item.xp ? item.xp : {};
 			originalItem = Underscore.findWhere(vm.LineItems.Items,{ID:item.ID});
 			item.xp.OriginalQty = originalItem.Quantity;
 		});
