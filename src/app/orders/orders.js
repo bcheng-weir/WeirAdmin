@@ -259,7 +259,14 @@ function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, $exception
         $state.go("ordersMain.listOfRevisions", {filters:JSON.stringify(filter)},{reload:true});
 	};
 
-	vm.Update = function() {
-		//ToDo
+	vm.Update = function(orderId) {
+		WeirService.SetOrderAsCurrentOrder(orderId)
+			.then(function() {
+				$rootScope.$broadcast('SwitchCart');
+				$state.go('order.addinfo');
+			})
+			.catch(function(ex) {
+				$exceptionHandler(ex);
+			});
 	};
 }

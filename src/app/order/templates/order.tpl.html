@@ -1,4 +1,4 @@
-<article id="COMPONENT_order" class="container-fluid">
+<article id="COMPONENT_order" ui-view class="container-fluid">
     <div class="row" ng-show="order.Order.xp.Status=='RE'">
         <div class="col-lg-2">About Batley</div>
         <div class="col-lg-2">About Blakeborough</div>
@@ -10,37 +10,35 @@
     <!-- header -->
     <div class="row">
         <div class="col-lg-12">
-            <ul class="nav nav-tabs nav-justified" style="padding-top: 20px; background-color: lightgray">
+            <ul class="nav nav-tabs nav-justified" style="padding-top: 20px; background-color: rgb(248, 248, 248)">
                 <ul class="nav navbar-nav navbar-left">
-                <li style="padding: 10px 5px 0px 0px;">
-                    <!--ToDo need to make status function and concatenate date-->
-                    <span ng-bind-html='order.labels.status'></span><br />
-                    <b><span ng-bind-html='order.Status.label'></span>
-                    <span ng-bind-html='order.Order.xp.StatusDate'></span></b>
-                </li>
-                <li style="padding: 10px 0px 0px 10px;" ng-show="order.Order.xp.Status=='RE'">
-                    <!--ToDo need to populate it with PONumber-->
-                    &nbsp;<span ng-bind-html='order.labels.PONumber'></span><br /><span ng-bind-html='order.Order.xp.PONumber'></span></a>
-                </li>
+                    <li style="padding: 10px 5px 0px 0px;">
+                        <span ng-bind-html='order.labels.status'></span><br />
+                        <b><span ng-bind-html='order.Status.label'></span>
+                        <span ng-bind-html='order.Order.xp.StatusDate'></span></b>
+                    </li>
+                    <li style="padding: 10px 0px 0px 10px;" ng-show="order.Order.xp.Status=='RE'">
+                        &nbsp;<span ng-bind-html='order.labels.PONumber'></span><br /><span ng-bind-html='order.Order.xp.PONumber'></span>
+                    </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li ng-click="order.Confirm(base.currentUser)" style="padding: 0px 10px 0px 0px;" ng-if="order.ShowConfirm()">
-                        <!--ToDo Confirm function-->
-                        <button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;"><span ng-bind-html='order.labels.Confirm'></span></button>
+                        <button type="button" class="btn btn-lg btn-success"><span ng-bind-html='order.labels.Confirm'></span></button>
                     </li>
                     <li ng-click="order.Revise(base.currentUser)" style="padding: 0px 10px 0px 10px;" ng-if="order.ShowRevise()">
-                        <button type="button" class="btn btn-primary btn-lg" style="background-color: orangered;"><span ng-bind-html='order.labels.Revise'></span></button>
+                        <button type="button" class="btn btn-lg btn-warning"><span ng-bind-html='order.labels.Revise'></span></button>
                     </li>
                     <li ng-click="order.ShareRevision(base.currentUser)" style="padding: 0px 10px 0px 10px;" ng-if="order.ShowShareRevision()">
-                        <button type="button" class="btn btn-primary btn-lg" style="background-color: orangered;"><span ng-bind-html='order.labels.ShareRevision'></span></button>
+                        <button type="button" class="btn btn-lg btn-primary"><span ng-bind-html='order.labels.ShareRevision'></span></button>
                     </li>
                     <li ng-click="order.Comments()" style="padding: 0px 10px 0px 5px;">
-                        <!--ToDo Confirm function-->
-                        <button type="button" class="btn btn-primary btn-lg" style="background-color: darkgray;"><span ng-bind-html='order.labels.Comments'></span></button>
+                        <button type="button" class="btn btn-lg btn-default"><span ng-bind-html='order.labels.Comments'></span></button>
                     </li>
-                    <li style="padding: 0px 10px 0px 0px;"><button type="button" class="btn btn-primary btn-lg" ng-csv="order.ToCsvJson" filename="{{order.CsvFilename}}" ng-bind-html="order.labels.Download"></button></li>
+                    <li style="padding: 0px 10px 0px 0px;">
+                        <button type="button" class="btn btn-lg btn-default" ng-csv="order.ToCsvJson" filename="{{order.CsvFilename}}" ng-bind-html="order.labels.Download"></button>
+                    </li>
                     <li ng-click="order.Print()">
-                        <button type="button" class="btn btn-primary btn-lg"><span ng-bind-html='order.labels.Print'></span></button>
+                        <button type="button" class="btn btn-lg btn-default"><span ng-bind-html='order.labels.Print'></span></button>
                     </li>
                 </ul>
             </ul>
@@ -105,10 +103,12 @@
                          {{line.Quantity}}
                      </td>
                      <td style="border:0;width:100px;">
-                         <button type="button" ng-show="order.ShowEdit(order.Order.xp.Status, line)" class="btn btn-primary btn-lg" style="background-color: gray;" ng-click="order.EditLineItem(line)"><span ng-bind-html='order.labels.Edit'></span></button>
-                         <button type="button" ng-show="order.ShowUpdated(line)" class="btn btn-primary btn-xs" style="background-color: yellow;"><span ng-bind-html='order.labels.Updated'></span></button>
-                         <button type="button" ng-show="order.ShowRemoved(line)" class="btn btn-primary btn-xs" style="background-color: red;"><span ng-bind-html='order.labels.Removed'></span></button>
-                         <button type="button" ng-show="order.ShowNew(line)" class="btn btn-primary btn-xs" style="background-color: green;"><span ng-bind-html='order.labels.New'></span></button>
+                         <h4>
+                             <span class="label label-default" ng-show="order.ShowEdit(order.Order.xp.Status, line)" ng-bind-html="order.labels.Edit" ng-click="order.EditLineItem(line)"></span>
+                             <span class="label label-warning" ng-show="order.ShowUpdated(line)" ng-bind-html="order.labels.Updated"></span>
+                             <span class="label label-danger" ng-show="order.ShowRemoved(line)" ng-bind-html="order.labels.Removed"></span>
+                             <span class="label label-success" ng-show="order.ShowNew(line)" ng-bind-html="order.labels.New"></span>
+                         </h4>
                      </td>
                  </tr>
                  <tr ng-if="order.LineItems.Items.length > 0">

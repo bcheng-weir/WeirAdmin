@@ -97,7 +97,7 @@
             <td>{{order.xp.ReviewerName}}</td>
             <td>{{order.xp.StatusDate}}</td>
             <td>{{order.xp.estimatedDeliveryDate}}</td>
-            <td><button class="btn btn-primary" ng-click="orders.Update()">{{orders.labels.update}}</button></td>
+            <td><button class="btn btn-primary" ng-click="orders.Update(order.ID)">{{orders.labels.update}}</button></td>
         </tr>
         </tbody>
     </table>

@@ -14,65 +14,66 @@ function OrderShareService() {
     return svc;
 }
 
-function orderConfig($stateProvider, buyerid){
-    $stateProvider.state('order', {
-        parent: 'base',
-        templateUrl: 'order/templates/order.tpl.html',
-        controller: 'OrderCtrl',
-        controllerAs: 'order',
-        url: '/order',
-        data: {componentName: 'order'},
-        resolve: {
-            Order: function(CurrentOrder){
-                return CurrentOrder.Get();
-            },
-            DeliveryAddress: function (OrderCloud, Order) {
-                if(Order.ShippingAddressID) {
-                    return OrderCloud.Addresses.Get(Order.ShippingAddressID, buyerid);
-                } else {
-                    return null;
-                }
-            },
-            LineItems: function ($q, $state, toastr, OrderCloud, CurrentOrder, OrderShareService, Order, LineItemHelpers) {
-                OrderShareService.LineItems.length = 0;
-	            var dfd = $q.defer();
-	            CurrentOrder.GetID()
-		            .then(function(id) {
-			            OrderCloud.LineItems.List(Order.ID)
-				            .then(function(data) {
-					            if (!data.Items.length) {
-						            toastr.error('Your quote does not contain any line items.', 'Error');
-						            dfd.resolve({ Items: [] });
-					            } else {
-						            LineItemHelpers.GetProductInfo(data.Items)
-							            .then(function () { dfd.resolve(data); });
-					            }
-				            })
-		            })
-		            .catch(function () {
-		                toastr.error('Your quote does not contain any line items.', 'Error');
-		                dfd.resolve({ Items: [] });
-	                });
-	            return dfd.promise;
-            },
-            Payments: function (Order, OrderCloud) {
-                return OrderCloud.Payments.List(Order.ID);
-            }
-        }
-    })
-        .state('order.addinfo', {
-            url: '/addinfo',
-            templateUrl: 'order/templates/order.addinfo.tpl.html',
-            controller: 'FinalOrderInfoCtrl',
-            controllerAs: 'info',
-            resolve: {
-                Order: function (CurrentOrder) {
-                    return CurrentOrder.Get();
-                }
-            }
+function orderConfig($stateProvider, buyerid) {
+    $stateProvider
+	    .state('order', {
+	        parent: 'base',
+	        templateUrl: 'order/templates/order.tpl.html',
+	        controller: 'OrderCtrl',
+	        controllerAs: 'order',
+	        url: '/order',
+	        data: {componentName: 'order'},
+	        resolve: {
+	            Order: function(CurrentOrder){
+	                return CurrentOrder.Get();
+	            },
+	            DeliveryAddress: function (OrderCloud, Order) {
+	                if(Order.ShippingAddressID) {
+	                    return OrderCloud.Addresses.Get(Order.ShippingAddressID, buyerid);
+	                } else {
+	                    return null;
+	                }
+	            },
+	            LineItems: function ($q, $state, toastr, OrderCloud, CurrentOrder, OrderShareService, Order, LineItemHelpers) {
+	                OrderShareService.LineItems.length = 0;
+		            var dfd = $q.defer();
+		            CurrentOrder.GetID()
+			            .then(function(id) {
+				            OrderCloud.LineItems.List(Order.ID)
+					            .then(function(data) {
+						            if (!data.Items.length) {
+							            toastr.error('Your quote does not contain any line items.', 'Error');
+							            dfd.resolve({ Items: [] });
+						            } else {
+							            LineItemHelpers.GetProductInfo(data.Items)
+								            .then(function () { dfd.resolve(data); });
+						            }
+					            })
+			            })
+			            .catch(function () {
+			                toastr.error('Your quote does not contain any line items.', 'Error');
+			                dfd.resolve({ Items: [] });
+		                });
+		            return dfd.promise;
+	            },
+	            Payments: function (Order, OrderCloud) {
+	                return OrderCloud.Payments.List(Order.ID);
+	            }
+	        }
         })
-    ;
+	    .state('order.addinfo', {
+	        url: '/addinfo',
+	        templateUrl: 'order/templates/order.addinfo.tpl.html',
+	        controller: 'FinalOrderInfoCtrl',
+	        controllerAs: 'info',
+	        resolve: {
+	            Order: function (CurrentOrder) {
+	                return CurrentOrder.Get();
+	            }
+	        }
+	    });
 }
+
 function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler, OrderCloud, Order, DeliveryAddress, LineItems, Payments, WeirService, Underscore, OrderToCsvService, buyerid, buyernetwork) {
     var vm = this;
     vm.Order = Order;
