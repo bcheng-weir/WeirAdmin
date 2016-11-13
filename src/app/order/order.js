@@ -221,7 +221,8 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 	function _showUpdated(item) {
 		// return true if qty <> xp.originalQty and qty > 0
 		if(item.xp){
-			return item.Quantity > 0 && item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty)   ;
+			return (item.Quantity > 0 && item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty))
+				|| item.UnitPrice;
 		} else {
 			return false;
 		}
@@ -328,6 +329,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 		// ToDo If the qty is 0, then delete the line item. The prior revision will display a removed.
 		if(line.Quantity > 0) {
 			var patch = {
+				UnitPrice: line.UnitPrice,
 				Quantity: line.Quantity
 			};
 			OrderCloud.LineItems.Patch(vm.Order.ID, line.ID, patch, buyerid)
@@ -488,6 +490,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 				Status: WeirService.OrderStatus.Review.id,
 				StatusDate: new Date(),
 				ReviewerName: currentUser.FirstName + " " + currentUser.LastName,
+				RevisedDate: new Date(),
 				OriginalOrderID: vm.Order.xp.OriginalOrderID
 			}
 		};
