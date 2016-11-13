@@ -70,7 +70,7 @@ function OrdersConfig($stateProvider,buyerid) {
 		.state('ordersMain.ordersAll', {
 			url: '/ordersAll',
 			templateUrl: 'orders/templates/order.all.tpl.html',
-			parent: 'ordersMain'
+			parent: 'ordersMain.ordersConfirmed'
 		});
 }
 
@@ -259,7 +259,15 @@ function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, $exception
         $state.go("ordersMain.listOfRevisions", {filters:JSON.stringify(filter)},{reload:true});
 	};
 
-	vm.Update = function() {
+	vm.Update = function(orderId) {
 		//ToDo
+		WeirService.SetOrderAsCurrentOrder(orderId)
+			.then(function(){
+				$rootScope.$broadcast('SwitchCart');
+				$state.go('order.addinfo');
+			})
+				.catch(function(ex){
+				$exceptionHandler(ex);
+		});
 	};
 }
