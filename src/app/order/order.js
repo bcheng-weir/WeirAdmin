@@ -558,7 +558,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 	}
 }
 
-function FinalOrderInfoController($sce, $state, WeirService, Order) {
+function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, OrderCloud, WeirService, Order) {
         var vm = this;
         vm.Order = Order;
 
@@ -585,10 +585,26 @@ function FinalOrderInfoController($sce, $state, WeirService, Order) {
                 Cancel: $sce.trustAsHtml("FR: Cancel")
             }
         };
-        function save() {
+        function save(Order) {
             console.log("update order info and back to order");
-            $state.go('order');
-        }
+			console.log(vm.Order.xp.ContractNumber +  "\n" + Order.xp.DelieveryDate +  "\n" + Order.xp.DateDespatched +  "\n" + vm.Order.xp.InvoiceNumber);
+			var patch = {
+			xp: {
+				ContractNumber: vm.Order.xp.ContractNumber,
+				DelieveryDate: vm.Order.xp.DelieveryDate,
+				DateDespatched: vm.Order.xp.DateDespatched,
+				InvoiceNumber: vm.Order.xp.InvoiceNumber
+			}
+			};
+			OrderCloud.Orders.Patch(Order.ID, patch, vm.Order.BuyerID)
+				.then(function() {
+					$rootScope.$broadcast('SwitchCart');
+					$state.go($state.current,{}, {reload:true});
+				})
+				.catch(function(ec) {
+					$exceptionHandler(ex);
+				});
+        };
         function cancel() {
             console.log("Back to order");
             $state.go('order');
