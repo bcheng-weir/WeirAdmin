@@ -56,6 +56,32 @@ function orderConfig($stateProvider, buyerid) {
 		                });
 		            return dfd.promise;
 	            },
+		        PreviousLineItems: function($q, toastr, OrderCloud, Order, LineItemHelpers) {
+	            	// We can't have a quantity of 0 on a line item. With show previous line items
+			        // Split the current order ID. If a rec exists, get, else do nothing.
+			        var pieces = Order.ID.split('-Rev');
+			        if(pieces.length > 1) {
+				        var prevId = pieces[0] + "-Rev" + (pieces[1] - 1).toString();
+				        var dfd = $q.defer();
+				        OrderCloud.LineItems.List(prevId)
+					        .then(function(data) {
+						        if (!data.Items.length) {
+							        toastr.error('Previous quote does not contain any line items.', 'Error');
+							        dfd.resolve({ Items: [] });
+						        } else {
+							        LineItemHelpers.GetProductInfo(data.Items)
+								        .then(function () { dfd.resolve(data); });
+						        }
+					        })
+					        .catch(function () {
+						        toastr.error('Previous quote does not contain any line items.', 'Error');
+						        dfd.resolve({ Items: [] });
+					        });
+				        return dfd.promise;
+			        } else {
+			        	return null;
+			        }
+		        },
 	            Payments: function (Order, OrderCloud) {
 	                return OrderCloud.Payments.List(Order.ID);
 	            }
@@ -74,10 +100,24 @@ function orderConfig($stateProvider, buyerid) {
 	    });
 }
 
-function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler, OrderCloud, Order, DeliveryAddress, LineItems, Payments, WeirService, Underscore, OrderToCsvService, buyerid, buyernetwork) {
+function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler, OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, WeirService, Underscore, OrderToCsvService, buyerid, buyernetwork) {
     var vm = this;
+	vm.Zero = 0;
     vm.Order = Order;
     vm.LineItems = LineItems;
+
+	if(PreviousLineItems) {
+		vm.PreviousLineItems = Underscore.filter(PreviousLineItems.Items, function (item) {
+			if (Underscore.findWhere(LineItems.Items, {ProductID: item.ProductID})) {
+				return
+			} else {
+				return item;
+			}
+		});
+	} else {
+		vm.PreviousLineItems = null;
+	}
+
     vm.DeliveryAddress = DeliveryAddress;
     vm.Status = Underscore.find(WeirService.OrderStatus, function(status) {
         return status.id == vm.Order.xp.Status;
@@ -181,7 +221,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 	function _showUpdated(item) {
 		// return true if qty <> xp.originalQty and qty > 0
 		if(item.xp){
-			return item.Quantity > 0 && (item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty));
+			return item.Quantity > 0 && item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty)   ;
 		} else {
 			return false;
 		}
@@ -285,17 +325,49 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 
 	vm.EditLineItem = _editLineItem;
 	function _editLineItem(line) {
-		var patch = {
-			Quantity: line.Quantity
-		};
-		OrderCloud.LineItems.Patch(vm.Order.ID, line.ID, patch, buyerid)
-			.then(function() {
-				$rootScope.$broadcast('SwitchCart');
-				$state.go($state.current,{}, {reload:true});
-			})
-			.catch(function(ec) {
-				$exceptionHandler(ex);
-			})
+		// ToDo If the qty is 0, then delete the line item. The prior revision will display a removed.
+		if(line.Quantity > 0) {
+			var patch = {
+				Quantity: line.Quantity
+			};
+			OrderCloud.LineItems.Patch(vm.Order.ID, line.ID, patch, buyerid)
+				.then(function () {
+					$rootScope.$broadcast('SwitchCart');
+					$state.go($state.current, {}, {reload: true});
+				})
+				.catch(function (ex) {
+					$exceptionHandler(ex);
+				});
+		} else {
+			OrderCloud.LineItems.Delete(vm.Order.ID, line.ID, buyerid)
+				.then(function () {
+					$rootScope.$broadcast('SwitchCart');
+					$state.go($state.current, {}, {reload: true});
+				})
+				.catch(function (ex) {
+					$exceptionHandler(ex);
+				});
+		}
+	}
+
+	vm.AddLineItem = _addLineItem;
+	function _addLineItem(line) {
+		if(vm.Zero > 0) {
+			line.ID = null;
+			line.Quantity = vm.Zero;
+			line.DateAdded = new Date();
+			line.xp.OriginalQty = line.xp.OriginalQty ? line.xp.OriginalQty : 0;
+			OrderCloud.LineItems.Create(vm.Order.ID, line, buyerid)
+				.then(function () {
+					$rootScope.$broadcast('SwitchCart');
+					$state.go($state.current, {}, {reload: true});
+				})
+				.catch(function (ex) {
+					$exceptionHandler(ex);
+					$rootScope.$broadcast('SwitchCart');
+					$state.go($state.current, {}, {reload: true});
+				});
+		}
 	}
 
 	vm.ShareRevision = _shareRevision;
@@ -316,7 +388,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 
 		if(patch.xp.Status) {
 			OrderCloud.Orders.Patch(vm.Order.ID, patch, buyerid)
-				.then(function() {
+				.then(function(order) {
 					$state.go($state.current,{}, {reload:true});
 				})
 				.catch(function(ex) {
@@ -482,6 +554,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 			});
 	}
 }
+
 function FinalOrderInfoController($sce, $state, WeirService, Order) {
         var vm = this;
         vm.Order = Order;

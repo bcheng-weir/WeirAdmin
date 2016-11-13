@@ -59,8 +59,8 @@
          </div>
          <div class="col-md-3">
              <div class="pull-right" style="padding: 30px 25px 0px 0px; float: right;">
-                 <p><a ng-if="order.Order.xp.Type == 'Order'" href="#" ui-sref="home">Back to Quotes</a></p>
-                 <p><a ng-if="order.Order.xp.Type == 'Quote'" href="#" ui-sref="home">Back to Orders</a></p>
+                 <p><a ng-if="order.Order.xp.Type == 'Quote' && order.Order.xp.Status!='SB' && order.Order.xp.Status!='SP'" href="#" ui-sref="home">Back to Quotes</a></p>
+                 <p><a ng-if="order.Order.xp.Type == 'Order'" href="#" ui-sref="home">Back to Orders</a></p>
                  <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ui-sref="productSearch" ng-bind-html='order.labels.AddNewItems' ng-show="order.Order.xp.Status=='RE'" ng-if="order.ShowAddItems()"></button></p>
                  <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ng-click="order.AddNewItem()" ng-bind-html='order.labels.AddABlankItem' ng-show="order.Order.xp.Status=='RE'" ng-if="order.ShowAddItems()"></button></p>
              </div>
@@ -90,18 +90,27 @@
                      <td>{{line.Product.Name}}</td>
                      <td>{{line.Product.Description}}</td>
                      <td>{{line.Product.xp.ReplacementSchedule}}</td>
-                     <td>{{line.Product.xp.LeadTime}}</td>
-                     <td ng-switch on="myquote.Quote.xp.Currency" class='text-right'>
+
+                     <td ng-if="order.Order.xp.Status!='RE'">{{line.Product.xp.LeadTime}}</td>
+                     <td ng-switch on="myquote.Quote.xp.Currency" class='text-right' ng-if="order.Order.xp.Status!='RE'">
                          <span ng-switch-when="EUR">{{line.UnitPrice | currency:'&euro; '}}</span>
                          <span ng-switch-when="GBP">{{line.UnitPrice | currency:'&#163; '}}</span>
                          <span ng-switch-default>{{line.UnitPrice | currency:'&#163; '}}</span>
                      </td>
-                     <td class="form-inline" ng-if="order.Order.xp.Status=='RE'"><input type="number" class="form-control" ng-model="line.Quantity" ng-min="0"
-                                                    ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" style="width:50%"/>
-                     </td>
                      <td ng-if="order.Order.xp.Status!='RE'">
                          {{line.Quantity}}
                      </td>
+
+                     <td ng-if="order.Order.xp.Status=='RE'">
+                         <input type="text" class="form-control" ng-model="line.Product.xp.LeadTime" />
+                     </td>
+                     <td ng-if="order.Order.xp.Status=='RE'">
+                         <input type="" class="form-control" ng-model="line.UnitPrice" />
+                     </td>
+                     <td ng-if="order.Order.xp.Status=='RE'">
+                        <input type="number" class="form-control" ng-model="line.Quantity" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" style="width:50%"/>
+                     </td>
+
                      <td style="border:0;width:100px;">
                          <h4>
                              <span class="label label-default" ng-show="order.ShowEdit(order.Order.xp.Status, line)" ng-bind-html="order.labels.Edit" ng-click="order.EditLineItem(line)"></span>
@@ -111,6 +120,43 @@
                          </h4>
                      </td>
                  </tr>
+
+                 <tr ng-repeat="line in order.PreviousLineItems">
+                     <td>{{line.xp.SN}}</td>
+                     <td>{{line.xp.TagNumber}}</td>
+                     <td>{{line.Product.Name}}</td>
+                     <td>{{line.Product.Description}}</td>
+                     <td>{{line.Product.xp.ReplacementSchedule}}</td>
+
+                     <td ng-if="order.Order.xp.Status!='RE'">{{line.Product.xp.LeadTime}}</td>
+                     <td ng-switch on="myquote.Quote.xp.Currency" class='text-right' ng-if="order.Order.xp.Status!='RE'">
+                         <span ng-switch-when="EUR">{{line.UnitPrice | currency:'&euro; '}}</span>
+                         <span ng-switch-when="GBP">{{line.UnitPrice | currency:'&#163; '}}</span>
+                         <span ng-switch-default>{{line.UnitPrice | currency:'&#163; '}}</span>
+                     </td>
+                     <td ng-if="order.Order.xp.Status!='RE'">
+                         {{order.Zero}}
+                     </td>
+
+                     <td ng-if="order.Order.xp.Status=='RE'">
+                         <input type="text" class="form-control" ng-model="line.Product.xp.LeadTime" />
+                     </td>
+                     <td>
+                         <input type="" class="form-control" ng-model="line.UnitPrice" />
+                     </td>
+                     <td ng-if="order.Order.xp.Status=='RE'">
+                         <input type="number" class="form-control" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" style="width:50%" ng-model="order.Zero" />
+                     </td>
+
+                     <td style="border:0;width:100px;">
+                         <h4>
+                             <span class="label label-default" ng-show="order.ShowEdit(order.Order.xp.Status, line)" ng-bind-html="order.labels.Edit" ng-click="order.AddLineItem(line)"></span>
+                             <span class="label label-danger" ng-bind-html="order.labels.Removed"></span>
+                             <span class="label label-warning" ng-show="order.ShowUpdated(line)" ng-bind-html="order.labels.Updated"></span>
+                         </h4>
+                     </td>
+                 </tr>
+
                  <tr ng-if="order.LineItems.Items.length > 0">
                      <td class="button-th" colspan="5"></td>
                      <td ng-bind-html='order.labels.Total'></td>
