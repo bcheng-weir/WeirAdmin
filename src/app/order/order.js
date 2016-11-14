@@ -46,7 +46,6 @@ function orderConfig($stateProvider, buyerid) {
 							            dfd.resolve({ Items: [] });
 						            } else {
 							            LineItemHelpers.GetBlankProductInfo(data.Items);
-							            console.log(data.Items);
 							            LineItemHelpers.GetProductInfo(data.Items)
 								            .then(function() { dfd.resolve(data); });
 						            }
@@ -71,6 +70,7 @@ function orderConfig($stateProvider, buyerid) {
 							        toastr.error('Previous quote does not contain any line items.', 'Error');
 							        dfd.resolve({ Items: [] });
 						        } else {
+							        LineItemHelpers.GetBlankProductInfo(data.Items);
 							        LineItemHelpers.GetProductInfo(data.Items)
 								        .then(function () { dfd.resolve(data); });
 						        }
@@ -303,7 +303,6 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 	vm.AddBlankItem = _addBlankItem;
 	function _addBlankItem(line) {
 		if(line) {
-			//ToDo add the line item to the order.
 			var item = {
 				ProductID: line.ProductID,
 				UnitPrice: line.UnitPrice,
@@ -330,7 +329,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 		} else {
 			var newItem = {
 				"ProductID": "PLACEHOLDER",
-				"Quantity": 0,
+				"Quantity": 1,
 				"DateAdded": "",
 				"QuantityShipped": 0,
 				"UnitPrice": 0,
@@ -363,10 +362,12 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 		// ToDo If the qty is 0, then delete the line item. The prior revision will display a removed.
 		if(line.Quantity > 0) {
 			// Is this a placeholder item?
-
 			var patch = {
 				UnitPrice: line.UnitPrice,
-				Quantity: line.Quantity
+				Quantity: line.Quantity,
+				xp: {
+					LeadTime: line.Product.xp.LeadTime
+				}
 			};
 			OrderCloud.LineItems.Patch(vm.Order.ID, line.ID, patch, buyerid)
 				.then(function () {
