@@ -45,8 +45,10 @@ function orderConfig($stateProvider, buyerid) {
 							            toastr.error('Your quote does not contain any line items.', 'Error');
 							            dfd.resolve({ Items: [] });
 						            } else {
+							            LineItemHelpers.GetBlankProductInfo(data.Items);
+							            console.log(data.Items);
 							            LineItemHelpers.GetProductInfo(data.Items)
-								            .then(function () { dfd.resolve(data); });
+								            .then(function() { dfd.resolve(data); });
 						            }
 					            })
 			            })
@@ -105,7 +107,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 	vm.Zero = 0;
     vm.Order = Order;
     vm.LineItems = LineItems;
-
+	vm.BlankItems = [];
 	if(PreviousLineItems) {
 		vm.PreviousLineItems = Underscore.filter(PreviousLineItems.Items, function (item) {
 			if (Underscore.findWhere(LineItems.Items, {ProductID: item.ProductID})) {
@@ -298,36 +300,70 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 		}
 	}
 
-	vm.AddNewItem = _addNewItem;
-	function _addNewItem() {
-		var newItem = {
-			"ProductID": "",
-			"Quantity": 0,
-			"DateAdded": "",
-			"QuantityShipped": 0,
-			"UnitPrice": 0,
-			"LineTotal": 0,
-			"CostCenter": null,
-			"DateNeeded": null,
-			"ShippingAccount": null,
-			"ShippingAddressID": null,
-			"ShippingAddress": null,
-			"ShipFromAddressID": null,
-			"ShipFromAddress": null,
-			"Specs": [],
-			"xp": {
-				"SN": "",
-				"TagNumber": "",
-				"OriginalQty": 0
-			}
-		};
-		vm.LineItems.Items.push(newItem);
+	vm.AddBlankItem = _addBlankItem;
+	function _addBlankItem(line) {
+		if(line) {
+			//ToDo add the line item to the order.
+			var item = {
+				ProductID: line.ProductID,
+				UnitPrice: line.UnitPrice,
+				Quantity: line.Quantity,
+				xp: {
+					SN: line.xp.SN,
+					TagNumber: line.xp.TagNumber,
+					ProductName: line.xp.ProductName,
+					Description: line.xp.Description,
+					ReplacementSchedule: line.xp.ReplacementSchedule,
+					LeadTime: line.xp.LeadTime
+				}
+			};
+			console.log(item);
+			OrderCloud.LineItems.Create(vm.Order.ID, item, buyerid)
+				.then(function () {
+					$rootScope.$broadcast('SwitchCart');
+					$state.go($state.current, {}, {reload: true});
+				})
+				.catch(function (ex) {
+					$exceptionHandler(ex);
+					$state.go($state.current, {}, {reload: true});
+				});
+		} else {
+			var newItem = {
+				"ProductID": "PLACEHOLDER",
+				"Quantity": 0,
+				"DateAdded": "",
+				"QuantityShipped": 0,
+				"UnitPrice": 0,
+				"LineTotal": 0,
+				"CostCenter": null,
+				"DateNeeded": null,
+				"ShippingAccount": null,
+				"ShippingAddressID": null,
+				"ShippingAddress": null,
+				"ShipFromAddressID": null,
+				"ShipFromAddress": null,
+				"Specs": [],
+				"xp": {
+					"OriginalQty": null,
+					"OriginalUnitPrice": null,
+					"SN": null,
+					"TagNumber": null,
+					"ProductName": null,
+					"Description": null,
+					"ReplacementSchedule": null,
+					"LeadTime": null
+				}
+			};
+			vm.BlankItems.push(newItem);
+		}
 	}
 
 	vm.EditLineItem = _editLineItem;
 	function _editLineItem(line) {
 		// ToDo If the qty is 0, then delete the line item. The prior revision will display a removed.
 		if(line.Quantity > 0) {
+			// Is this a placeholder item?
+
 			var patch = {
 				UnitPrice: line.UnitPrice,
 				Quantity: line.Quantity
@@ -504,7 +540,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 		OrderCloud.Orders.Patch(OrderID, orderPatch, buyerid)
 			.then(function(order) {
 				angular.forEach(vm.LineItems.Items, function(value, key) {
-					queue.push(OrderCloud.LineItems.Patch(order.ID, value.ID, {xp:{OriginalQty:value.Quantity}}, buyerid));
+					queue.push(OrderCloud.LineItems.Patch(order.ID, value.ID, {xp:{OriginalQty:value.Quantity,OriginalPrice:value.UnitPrice,LeadTime:value.Product.xp.LeadTime}}, buyerid));
 				});
 				$q.all(queue)
 					.then(function(results) {
