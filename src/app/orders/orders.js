@@ -3,25 +3,23 @@ angular.module('orderCloud')
 	.controller('OrdersCtrl',OrdersController);
 
 function OrdersConfig($stateProvider,buyerid) {
-	$stateProvider.state('ordersMain', {
-		parent: 'base',
-		templateUrl: 'orders/templates/orders.tpl.html',
-		controller: 'OrdersCtrl',
-		controllerAs: 'orders',
-		url: '/orders?from&to&search&page&pageSize&searchOn&sortBy&sortByXp&filters&buyerid',
-		data: {componentName: 'Orders'},
-		resolve: {
-			Parameters: function ($stateParams, OrderCloudParameters) {
-				return OrderCloudParameters.Get($stateParams);
-			},
-			Orders: function (OrderCloud, Parameters) {
-				return OrderCloud.Orders.ListOutgoing(Parameters.from, Parameters.to, Parameters.search, Parameters.page, Parameters.pageSize || 20, Parameters.searchOn, Parameters.sortBy, Parameters.filters, buyerid);
-			},
-			xpOrders: function (OrderCloud, Parameters, Orders) {
-				return false;
+	$stateProvider
+		.state('ordersMain', {
+			parent: 'base',
+			templateUrl: 'orders/templates/orders.tpl.html',
+			controller: 'OrdersCtrl',
+			controllerAs: 'orders',
+			url: '/orders?from&to&search&page&pageSize&searchOn&sortBy&sortByXp&filters&buyerid',
+			data: {componentName: 'Orders'},
+			resolve: {
+				Parameters: function ($stateParams, OrderCloudParameters) {
+					return OrderCloudParameters.Get($stateParams);
+				},
+				Orders: function (OrderCloud, Parameters) {
+					return OrderCloud.Orders.ListOutgoing(Parameters.from, Parameters.to, Parameters.search, Parameters.page, Parameters.pageSize || 20, Parameters.searchOn, Parameters.sortBy, Parameters.filters, buyerid);
+				}
 			}
-		}
-	})
+		})
 		.state('ordersMain.quotesRevised', {
 			url: '/quotesRevised',
 			templateUrl: 'orders/templates/quote.revised.tpl.html',
@@ -84,24 +82,6 @@ function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, $exception
 	vm.filtersApplied = vm.parameters.filters || vm.parameters.from || vm.parameters.to || ($ocMedia('max-width:767px') && vm.sortSelection); //Sort by is a filter on mobile devices
 	vm.showFilters = vm.filtersApplied;
 
-	//Components cannot filter on xp in the OC. The filter must happen locally. Check for the xp filter. If it applies, conduct the filtering.
-	/*switch(vm.parameters.sortByXp) {
-		case vm.parameters.sortByXp:
-			vm.list.Items = Underscore.sortBy(vm.list.Items, function(item) {
-				//return item.xp[value];
-				return item.xp ? item.xp[vm.parameters.sortByXp] : -1;
-			});
-			break;
-		case '!'+vm.parameters.sortByXp:
-			vm.parameters.sortByXp = null;
-			break;
-		default:
-			vm.list.Items = Underscore.sortBy(vm.list.Items, function(item) {
-				//return item.xp[value];
-				return item.xp ? item.xp[vm.parameters.sortByXp] : -1;
-			}).reverse();
-	}*/
-
 	//Check if search was used
 	vm.searchResults = Parameters.search && Parameters.search.length > 0;
 
@@ -145,30 +125,6 @@ function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, $exception
 				vm.parameters.sortBy = value;
 		}
 		vm.filter(false);
-	};
-
-	//This does not cause a reload of the page.
-	vm.updateXpSort = function(value) {
-		return;
-		/*switch(vm.parameters.sortByXp) {
-			case value:
-				vm.parameters.sortByXp = '!'+value;
-				vm.list.Items = Underscore.sortBy(vm.list.Items, function(item) {
-					//return item.xp[value];
-					return item.xp ? item.xp[value] : -1;
-				});
-				break;
-			case '!'+value:
-				vm.parameters.sortByXp = null;
-				break;
-			default:
-				vm.parameters.sortByXp = value;
-				vm.list.Items = Underscore.sortBy(vm.list.Items, function(item) {
-					//return item.xp[value];
-					return item.xp ? item.xp[value] : -1;
-				}).reverse();
-		}
-		vm.filter(false);*/
 	};
 
 	//Used on mobile devices
