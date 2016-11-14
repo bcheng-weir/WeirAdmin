@@ -47,6 +47,11 @@
     <!-- Table -->
      <div class="row">
          <div class="col-md-9">
+             <p class="directions" ng-show="order.Order.xp.Status=='RE'">
+                 <span ng-bind-html="order.labels.Directions"></span>
+                 <br>
+                 <span ng-bind-html="order.labels.DirectionsCont"></span>
+             </p>
              <p>
                  <b><span ng-show="order.Order.xp.Type=='Order'" ng-bind-html='order.labels.WeirOrderNo'></span>
                      <span ng-show="order.Order.xp.Type=='Quote'" ng-bind-html='order.labels.WeirQuoteNo'></span>
@@ -91,6 +96,7 @@
                      <td>{{line.Product.Description}}</td>
                      <td>{{line.Product.xp.ReplacementSchedule}}</td>
 
+                     <!-- Non-review fields -->
                      <td ng-if="order.Order.xp.Status!='RE'">{{line.Product.xp.LeadTime}}</td>
                      <td ng-switch on="myquote.Quote.xp.Currency" class='text-right' ng-if="order.Order.xp.Status!='RE'">
                          <span ng-switch-when="EUR">{{line.UnitPrice | currency:'&euro; '}}</span>
@@ -101,6 +107,7 @@
                          {{line.Quantity}}
                      </td>
 
+                     <!-- review mode fields -->
                      <td ng-if="order.Order.xp.Status=='RE'">
                          <input type="text" class="form-control" ng-model="line.Product.xp.LeadTime" />
                      </td>
@@ -115,7 +122,7 @@
                          <h4>
                              <span class="label label-default" ng-show="order.ShowEdit(order.Order.xp.Status, line)" ng-bind-html="order.labels.Edit" ng-click="order.EditLineItem(line)"></span>
                              <span class="label label-warning" ng-show="order.ShowUpdated(line)" ng-bind-html="order.labels.Updated"></span>
-                             <span class="label label-danger" ng-show="order.ShowRemoved(line)" ng-bind-html="order.labels.Removed"></span>
+                             <!--<span class="label label-danger" ng-show="order.ShowRemoved(line)" ng-bind-html="order.labels.Removed"></span>-->
                              <span class="label label-success" ng-show="order.ShowNew(line)" ng-bind-html="order.labels.New"></span>
                          </h4>
                      </td>
@@ -171,7 +178,6 @@
                          <h4>
                              <span class="label label-default" ng-show="order.ShowEdit(order.Order.xp.Status, line)" ng-bind-html="order.labels.Edit" ng-click="order.AddLineItem(line)"></span>
                              <span class="label label-danger" ng-bind-html="order.labels.Removed"></span>
-                             <span class="label label-warning" ng-show="order.ShowUpdated(line)" ng-bind-html="order.labels.Updated"></span>
                          </h4>
                      </td>
                  </tr>

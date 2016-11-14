@@ -164,7 +164,9 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
             YourRefNo: "Your Reference No;",
             DelieveryAddress: "Delivery Address",
             YourAttachments: "Your attachments",
-            YourComments: "Your comments or instructions"
+            YourComments: "Your comments or instructions",
+	        Directions: "Select Edit to update lead time, price or quantity.",
+	        DirectionsCont: "You can also add new items from the search or you can add blank items which you can complete with the required details."
         },
         fr: {
             //header labels
@@ -204,7 +206,9 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
             YourRefNo:$sce.trustAsHtml( "Your Reference No;"),
             DelieveryAddress:$sce.trustAsHtml("Delivery Address"),
             YourAttachments:$sce.trustAsHtml( "Your attachments"),
-            YourComments:$sce.trustAsHtml( "Your comments or instructions")
+            YourComments:$sce.trustAsHtml( "Your comments or instructions"),
+	        Directions: $sce.trustAsHtml("Select Edit to update lead time, price or quantity."),
+	        DirectionsCont: $sce.trustAsHtml("You can also add new items from the search or you can add blank items which you can complete with the required details.")
         }
     };
     vm.labels = labels[WeirService.Locale()];
@@ -223,8 +227,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 	function _showUpdated(item) {
 		// return true if qty <> xp.originalQty and qty > 0
 		if(item.xp){
-			return (item.Quantity > 0 && item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty))
-				|| item.UnitPrice;
+			return item.Quantity != item.xp.OriginalQty | item.UnitPrice != item.xp.OriginalUnitPrice | item.xp.LeadTime != item.xp.OriginalLeadTime;
 		} else {
 			return false;
 		}
@@ -313,7 +316,9 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 					ProductName: line.xp.ProductName,
 					Description: line.xp.Description,
 					ReplacementSchedule: line.xp.ReplacementSchedule,
-					LeadTime: line.xp.LeadTime
+					LeadTime: line.xp.LeadTime,
+					OriginalUnitPrice: line.xp.OriginalUnitPrice,
+					OriginalQty: line.xp.OriginalQty
 				}
 			};
 			console.log(item);
@@ -343,8 +348,8 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 				"ShipFromAddress": null,
 				"Specs": [],
 				"xp": {
-					"OriginalQty": null,
-					"OriginalUnitPrice": null,
+					"OriginalQty": 0,
+					"OriginalUnitPrice": 0,
 					"SN": null,
 					"TagNumber": null,
 					"ProductName": null,
@@ -464,6 +469,11 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 		}
 	}
 
+	vm.AddComment = _addComment;
+	function _addComment() {
+		//Add a comment from Weir, POC-255
+	};
+
 	vm.Revise = _revise;
 	function _revise(currentUser) {
 		var deferred = $q.defer();
@@ -526,7 +536,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 				Active: true,
 				Status: WeirService.OrderStatus.Review.id,
 				StatusDate: new Date(),
-				ReviewerName: currentUser.FirstName + " " + currentUser.LastName,
+				ReviewerName: currentUser.Username,
 				RevisedDate: new Date(),
 				OriginalOrderID: vm.Order.xp.OriginalOrderID
 			}
@@ -541,7 +551,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 		OrderCloud.Orders.Patch(OrderID, orderPatch, buyerid)
 			.then(function(order) {
 				angular.forEach(vm.LineItems.Items, function(value, key) {
-					queue.push(OrderCloud.LineItems.Patch(order.ID, value.ID, {xp:{OriginalQty:value.Quantity,OriginalPrice:value.UnitPrice,LeadTime:value.Product.xp.LeadTime}}, buyerid));
+					queue.push(OrderCloud.LineItems.Patch(order.ID, value.ID, {xp:{OriginalQty:value.Quantity,OriginalUnitPrice:value.UnitPrice,OriginalLeadTime:value.Product.xp.LeadTime}}, buyerid));
 				});
 				$q.all(queue)
 					.then(function(results) {
@@ -565,6 +575,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 			.then(function() {
 				// Create the order as the impersonated user.
 				return OrderCloud.As().Orders.Create(orderCopy, buyerid);
+				//ToDo make another then in order to set the shipping address.
 			})
 			.then(function(order) {
 				// Create the line items.
@@ -591,6 +602,8 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 			})
 			.catch(function(ex) {
 				$exceptionHandler(ex);
+				$rootScope.$broadcast('SwitchCart');
+				$state.go($state.current,{}, {reload:true});
 			});
 	}
 }
