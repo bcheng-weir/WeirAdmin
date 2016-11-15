@@ -76,7 +76,7 @@
             <td>{{order.xp.Reviewer}}</td>
             <td>{{order.Status}}</td>
             <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.CustomerID)">{{orders.labels.view}}</button></td>
-            <td><button class="btn btn-primary" ng-click="orders.Revisions(order.xp.OriginalOrderID)">{{orders.labels.revisions}}</button></td>
+            <td><button class="btn btn-primary" ng-click="orders.Revisions(order.xp.OriginalOrderID, order.xp.Type)">{{orders.labels.revisions}}</button></td>
         </tr>
         </tbody>
     </table>

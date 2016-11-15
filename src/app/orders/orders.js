@@ -72,9 +72,10 @@ function OrdersConfig($stateProvider,buyerid) {
 		});
 }
 
-function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, $exceptionHandler, Underscore, OrderCloud, OrderCloudParameters, Orders, Parameters, buyerid, WeirService) {
+function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler, OrderCloud, OrderCloudParameters, Orders, Parameters, buyerid, WeirService) {
 	var vm = this;
 	vm.xpType = Parameters.filters ? Parameters.filters["xp.Type"] : {};
+	vm.StateName = $state.current.name;
 	vm.list = Orders;
 	vm.parameters = Parameters;
 	vm.sortSelection = Parameters.sortBy ? (Parameters.sortBy.indexOf('!') == 0 ? Parameters.sortBy.split('!')[1] : Parameters.sortBy) : null;
@@ -173,7 +174,24 @@ function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, $exception
 			estimatedDelievery: "Estimated delievery date",
 			dateDespatched: "Estimated delievery date",
 			orderValue: "Order value",
-			invoiceValue: "Invoice Number"
+			invoiceValue: "Invoice Number",
+			SearchPlaceholder: "Search " + vm.xpType + "s...",
+			quotesForReview: "Quotes Submitted for Review",
+			revisedQuotes: "Revised Quotes",
+			confirmedQuotes: "Confirmed Quotes",
+			ordersSubmittedPO: "Orders Submitted with PO",
+			revisedOrders: "Revised Orders",
+			confirmedOrders: "Confirmed Orders",
+			despatched: "Despatched Orders",
+			invoiced: "Invoiced Orders",
+			allOrders: "All Orders",
+			viewQuote: "Select ‘view’ to review quote and revise or confirm the quote",
+			viewOrder: "Select ‘view’ to review order and to revise or confirm order",
+			viewQuoteRevisions: "Select ‘revisions’ to view list of quote revisions",
+			viewOrderRevisions: "Select ‘revisions’ to view list of order revisions",
+			revisionsList: vm.xpType + " revisions for " + vm.xpType + "; " + Parameters.filters["xp.OriginalOrderID"],
+			selectRevision:"Select ‘view’ to view previous revisions for reference",
+			viewRevision: "You can view and update the current revision"
 		},
 		fr: {
 			search:$sce.trustAsHtml("Search"),
@@ -191,10 +209,40 @@ function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, $exception
 			status: $sce.trustAsHtml("Status"),
 			loadMore:$sce.trustAsHtml("Load More"),
 			poNumber:$sce.trustAsHtml("PO Number"),
-			orderedBy:$sce.trustAsHtml("Ordered By")
+			orderedBy:$sce.trustAsHtml("Ordered By"),
+			SearchPlaceholder: $sce.trustAsHtml("Search " + vm.xpType + "s..."),
+			quotesForReview: $sce.trustAsHtml("Quotes Submitted for Review"),
+			revisedQuotes: $sce.trustAsHtml("Revised Quotes"),
+			confirmedQuotes: $sce.trustAsHtml("Confirmed Quotes"),
+			ordersSubmittedPO: $sce.trustAsHtml("Orders Submitted with PO"),
+			revisedOrders: $sce.trustAsHtml("Revised Orders"),
+			confirmedOrders: $sce.trustAsHtml("Confirmed Orders"),
+			despatched: $sce.trustAsHtml("Despatched Orders"),
+			invoiced: $sce.trustAsHtml("Invoiced Orders"),
+			allOrders: $sce.trustAsHtml("All Orders"),
+			viewQuote: $sce.trustAsHtml("Select ‘view’ to review quote and revise or confirm the quote"),
+			viewOrder: $sce.trustAsHtml("Select ‘view’ to review order and to revise or confirm order"),
+			viewQuoteRevision: $sce.trustAsHtml("Select ‘revisions’ to view list of quote revisions"),
+			viewOrderRevision: $sce.trustAsHtml("Select ‘revisions’ to view list of order revisions"),
+			revisionsList: $sce.trustAsHtml(vm.xpType + " revisions for " + vm.xpType + "; " + Parameters.filters["xp.OriginalOrderID"]),
+			selectRevision:$sce.trustAsHtml("Select ‘view’ to view previous revisions for reference"),
+			viewRevision: $sce.trustAsHtml("You can view and update the current revision")
 		}
 	};
 	vm.labels = labels.en;
+
+	vm.titles = {
+		"ordersMain.quotesReview":"quotesForReview",
+		"ordersMain.quotesRevised":"revisedQuotes",
+		"ordersMain.quotesConfirmed":"confirmedQuotes",
+		"ordersMain.POOrders":"ordersSubmittedPO",
+		"ordersMain.ordersRevised":"revisedOrders",
+		"ordersMain.ordersConfirmed":"confirmedOrders",
+		"ordersMain.ordersDespatched":"despatched",
+		"ordersMain.ordersInvoiced":"invoiced",
+		"ordersMain.ordersAll":"allOrders",
+		"ordersMain.listOfRevisions":"revisionsList"
+	};
 
 	vm.View = function(orderId, customerId) {
 		var cid = customerId;
@@ -208,8 +256,9 @@ function OrdersController($rootScope, $scope, $state, $sce, $ocMedia, $exception
 			});
 	};
 
-	vm.Revisions = function(orderid) {
+	vm.Revisions = function(orderid, orderType) {
 		var filter = {
+			"xp.Type":orderType,
 			"xp.OriginalOrderID": orderid
 		};
         $state.go("ordersMain.listOfRevisions", {filters:JSON.stringify(filter)},{reload:true});

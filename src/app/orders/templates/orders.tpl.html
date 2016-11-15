@@ -1,12 +1,21 @@
 <article id="COMPONENT_Orders" class="container-fluid">
     <div class="page-header">
-        <h3>Orders</h3>
+        <h3>{{orders.labels[orders.titles[orders.StateName]]}}</h3>
+        <p ng-if="orders.StateName!='ordersMain.listOfRevisions' || orders.StateName!='ordersMain.listOfRevisions'">
+            <span>{{orders.labels['view'+orders.xpType]}}</span><br>
+            <span ng-if="orders.StateName=='ordersMain.quotesRevised' || orders.StateName=='ordersMain.ordersRevised'">{{orders.labels['view'+orders.xpType+'Revisions']}}</span>
+        </p>
+        <p ng-if="orders.StateName=='ordersMain.listOfRevisions' || orders.StateName=='ordersMain.listOfRevisions'">
+            {{orders.labels.selectRevision}}
+            <br>
+            {{orders.labels.viewRevision}}
+        </p>
     </div>
 
     <!--====== SEARCH/FILTERS ======-->
     <form name="OrderSearchForm" class="form-inline" ng-submit="orders.search()">
         <fieldset class="form-group">
-            <input type="search" placeholder="Search Orders..." ng-model="orders.parameters.search" class="form-control">
+            <input type="search" placeholder="{{orders.labels.SearchPlaceholder}}" ng-model="orders.parameters.search" class="form-control">
         </fieldset>
         <fieldset class="form-group" ng-class="{'text-center':application.$ocMedia('max-width:767px')}">
             <span ng-class="{'btn-group':orders.searchResults}">
