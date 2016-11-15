@@ -598,6 +598,8 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, OrderCloud, WeirService, Order) {
         var vm = this;
         vm.Order = Order;
+    	vm.Order.xp.DateDespatched = new Date(vm.Order.xp.DateDespatched);
+    	vm.Order.xp.DelieveryDate = new Date(vm.Order.xp.DelieveryDate);
 
         var labels = {
             en: {
@@ -623,16 +625,26 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, O
             }
         };
         function save(Order) {
-            console.log("update order info and back to order");
-			console.log(vm.Order.xp.ContractNumber +  "\n" + Order.xp.DelieveryDate +  "\n" + Order.xp.DateDespatched +  "\n" + vm.Order.xp.InvoiceNumber);
+			var orderStatus;
+			console.log("update order info and back to order");
+			console.log(vm.Order.xp.ContractNumber +  "\n" + Order.xp.DelieveryDate +  "\n" + vm.Order.xp.DateDespatched +  "\n" + vm.Order.xp.InvoiceNumber);
+            //if it has a despatch date- it is despatched. if it has an invoice it is in the final stage and is invoiced.
+			if(vm.Order.xp.DateDespatched){
+				orderStatus = 'DP';
+			}
+			if(vm.Order.xp.InvoiceNumber){
+				orderStatus = 'IV';
+			}
 			var patch = {
 			xp: {
 				ContractNumber: vm.Order.xp.ContractNumber,
 				DelieveryDate: vm.Order.xp.DelieveryDate,
 				DateDespatched: vm.Order.xp.DateDespatched,
-				InvoiceNumber: vm.Order.xp.InvoiceNumber
+				InvoiceNumber: vm.Order.xp.InvoiceNumber,
+				Status: orderStatus
 			}
 			};
+			console.log(orderStatus);
 			OrderCloud.Orders.Patch(Order.ID, patch, vm.Order.BuyerID)
 				.then(function() {
 					$rootScope.$broadcast('SwitchCart');
