@@ -538,6 +538,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 				StatusDate: new Date(),
 				ReviewerName: currentUser.Username,
 				RevisedDate: new Date(),
+				Revised: true,
 				OriginalOrderID: vm.Order.xp.OriginalOrderID
 			}
 		};

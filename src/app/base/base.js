@@ -141,6 +141,7 @@ function BaseController($rootScope, $ocMedia, $state, $sce, Underscore, snapRemo
             revisedQuotes: "Revised Quotes",
             confirmedQuotes: "Confirmed Quotes",
             ordersSubmittedPO: "Orders Submitted with PO",
+            pendingPO: "Orders submitted pending PO",
             revisedOrders: "Revised Orders",
             confirmedOrders: "Confirmed Orders",
             despatched: "Despatched",
@@ -174,14 +175,15 @@ function BaseController($rootScope, $ocMedia, $state, $sce, Underscore, snapRemo
     vm.OrderAction = _actions;
     function _actions(action) {
         var filter = {
-            "ReviewQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Submitted.id + "|" + WeirService.OrderStatus.Review.id},
+            "ReviewQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Submitted.id + "|" + WeirService.OrderStatus.Review.id, "xp.Active":"true"},
             "RevisedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.RevisedQuote.id + "|" + WeirService.OrderStatus.RejectedQuote.id, "xp.Active":"true"},
-            "ConfirmedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.ConfirmedQuote.id},
-            "POOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.SubmittedWithPO.id + "|" + WeirService.OrderStatus.Review.id},
+            "ConfirmedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.ConfirmedQuote.id, "xp.Active":"true"},
+            "POOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.SubmittedWithPO.id + "|" + WeirService.OrderStatus.Review.id, "xp.Active":"true"},
+            "PendingPO":{"xp.Type":"Order","xp.PendingPO":"true", "xp.Active":"true"},
             "RevisedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.RevisedOrder.id, "xp.Active":"true"},
-            "ConfirmedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.ConfirmedOrder.id},
-            "DespatchedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Despatched.id},
-            "InvoicedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Invoiced.id},
+            "ConfirmedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.ConfirmedOrder.id, "xp.Active":"true"},
+            "DespatchedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Despatched.id, "xp.Active":"true"},
+            "InvoicedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Invoiced.id, "xp.Active":"true"},
             "AllOrders":{"xp.Type":"Order|Quote","xp.Active":"true"}
         };
         var destination = {
@@ -189,6 +191,7 @@ function BaseController($rootScope, $ocMedia, $state, $sce, Underscore, snapRemo
             "RevisedQuotes":"ordersMain.quotesRevised",
             "ConfirmedQuotes":"ordersMain.quotesConfirmed",
             "POOrders":"ordersMain.POOrders",
+            "PendingPO":"ordersMain.pendingPO",
             "RevisedOrders":"ordersMain.ordersRevised",
             "ConfirmedOrders":"ordersMain.ordersConfirmed",
             "DespatchedOrders":"ordersMain.ordersDespatched",

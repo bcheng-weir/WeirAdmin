@@ -45,6 +45,11 @@ function OrdersConfig($stateProvider,buyerid) {
 			templateUrl: 'orders/templates/order.submitted.tpl.html',
 			parent: 'ordersMain'
 		})
+		.state('ordersMain.pendingPO', {
+			url:'/PendingPO',
+			templateUrl:'orders/templates/order.pending.tpl.html',
+			parent: 'ordersMain'
+		})
 		.state('ordersMain.ordersConfirmed', {
 			url: '/orderConfirmed',
 			templateUrl: 'orders/templates/order.confirmed.tpl.html',
