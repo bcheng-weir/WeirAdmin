@@ -152,7 +152,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
             Quantity: "Quantity",
             Total: "Total",
             //labels to right of table
-            Edit: "Edit",
+            Edit: "Save",
             Removed: "Removed",
             Updated: "Updated",
             New: "New",
@@ -165,7 +165,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
             DelieveryAddress: "Delivery Address",
             YourAttachments: "Your attachments",
             YourComments: "Your comments or instructions",
-	        Directions: "Select Edit to update lead time, price or quantity.",
+	        Directions: "Select Save to update lead time, price or quantity.",
 	        DirectionsCont: "You can also add new items from the search or you can add blank items which you can complete with the required details."
         },
         fr: {
@@ -194,7 +194,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
             Quantity:$sce.trustAsHtml( "Quantity"),
             Total:$sce.trustAsHtml( "Total"),
             //labels to right of table
-            Edit:$sce.trustAsHtml( "Edit"),
+            Edit:$sce.trustAsHtml( "Save"),
             Removed:$sce.trustAsHtml( "Removed"),
             Updated:$sce.trustAsHtml( "Updated"),
             New:$sce.trustAsHtml( "New"),
@@ -207,7 +207,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
             DelieveryAddress:$sce.trustAsHtml("Delivery Address"),
             YourAttachments:$sce.trustAsHtml( "Your attachments"),
             YourComments:$sce.trustAsHtml( "Your comments or instructions"),
-	        Directions: $sce.trustAsHtml("Select Edit to update lead time, price or quantity."),
+	        Directions: $sce.trustAsHtml("Select Save to update lead time, price or quantity."),
 	        DirectionsCont: $sce.trustAsHtml("You can also add new items from the search or you can add blank items which you can complete with the required details.")
         }
     };
