@@ -1,3 +1,51 @@
 <article id="COMPONENT_Home" class="container-fluid">
-    <div>Home</div>
+    <div class="row">
+        <div class="col-xs-4">
+            <h3 ng-bind-html="home.labels.Welcome"></h3>
+        </div>
+        <div class="col-xs-8"></div>
+    </div>
+    <div class="row">
+        <div class="col-xs-4">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        {{home.labels.Orders}}
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    <ul class="list-group">
+                        <li class="list-group-item"><a ui-sref="ordersMain.quotesReview({filters:home.OrderAction('ordersMain.quotesReview')})" ng-bind-html="home.labels.SubmittedQuotes"></a></li>
+                        <li class="list-group-item"><a ui-sref="ordersMain.quotesRevised({filters:home.OrderAction('ordersMain.quotesRevised')})" ng-bind-html="home.labels.RevisedQuotes"></a></li>
+                        <li class="list-group-item"><a ui-sref="ordersMain.quotesConfirmed({filters:home.OrderAction('ordersMain.quotesConfirmed')})" ng-bind-html="home.labels.ConfirmedQuotes"></a></li>
+                        <li class="list-group-item"><a ui-sref="ordersMain.POOrders({filters:home.OrderAction('ordersMain.POOrders')})" ng-bind-html="home.labels.SubmittedOrders"></a></li>
+                        <li class="list-group-item"><a ui-sref="ordersMain.pendingPO({filters:home.OrderAction('ordersMain.pendingPO')})" ng-bind-html="home.labels.PendingOrders"></a></li>
+                        <li class="list-group-item"><a ui-sref="ordersMain.ordersRevised({filters:home.OrderAction('ordersMain.ordersRevised')})" ng-bind-html="home.labels.RevisedOrders"></a></li>
+                        <li class="list-group-item"><a ui-sref="ordersMain.ordersConfirmed({filters:home.OrderAction('ordersMain.ordersConfirmed')})" ng-bind-html="home.labels.ConfirmedOrders"></a></li>
+                        <li class="list-group-item"><a ui-sref="ordersMain.ordersDespatched({filters:home.OrderAction('ordersMain.ordersDespatched')})" ng-bind-html="home.labels.Despatched"></a></li>
+                        <li class="list-group-item"><a ui-sref="ordersMain.ordersInvoiced({filters:home.OrderAction('ordersMain.ordersInvoiced')})" ng-bind-html="home.labels.Invoiced"></a></li>
+                        <li class="list-group-item"><a ui-sref="ordersMain.ordersAll({filters:home.OrderAction('ordersMain.ordersAll')})" ng-bind-html="home.labels.All"></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-4">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title" ng-bind-html="home.labels.Admin"></h3>
+                </div>
+                <div class="panel-body">
+                    <span><a ui-sref="adminUsers" ng-bind-html="home.labels.ManageAdmins"></a></span>
+                </div>
+            </div>
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title" ng-bind-html="home.labels.Customers"></h3>
+                </div>
+                <div class="panel-body">
+                    <span><a ui-sref="customers" ng-bind-html="home.labels.CustomerManage"></a></span>
+                </div>
+            </div>
+        </div>
+    </div>
 </article>
