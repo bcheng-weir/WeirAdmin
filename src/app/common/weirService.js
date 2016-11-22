@@ -97,17 +97,17 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyerid) 
 			});
 	}
 
-	function setOrderAsCurrentOrder(quoteId) {
+	function setOrderAsCurrentOrder(orderId) {
 		var deferred = $q.defer();
 
-		CurrentOrder.Set(quoteId)
+		CurrentOrder.Set(orderId)
 			.then(function() {
 				return CurrentOrder.Get();
 			})
-			.then(function(quote) {
+			.then(function(order) {
 				return CurrentOrder.SetCurrentCustomer({
-					id: quote.xp.CustomerID,
-					name: quote.xp.CustomerName
+					id: order.xp.CustomerID,
+					name: order.xp.CustomerName
 				});
 			})
 			.then(function() {
