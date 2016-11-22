@@ -16,7 +16,8 @@ function OrdersConfig($stateProvider,buyerid) {
 					return OrderCloudParameters.Get($stateParams);
 				},
 				Orders: function (OrderCloud, Parameters) {
-					return OrderCloud.Orders.ListOutgoing(Parameters.from, Parameters.to, Parameters.search, Parameters.page, Parameters.pageSize || 20, Parameters.searchOn, Parameters.sortBy, Parameters.filters, buyerid);
+					OrderCloud.BuyerID.Set(null);
+					return OrderCloud.Orders.ListIncoming(Parameters.from, Parameters.to, Parameters.search, Parameters.page, Parameters.pageSize || 20, Parameters.searchOn, Parameters.sortBy, Parameters.filters, null);
 				}
 			}
 		})
@@ -77,7 +78,7 @@ function OrdersConfig($stateProvider,buyerid) {
 		});
 }
 
-function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler, OrderCloud, OrderCloudParameters, Orders, Parameters, buyerid, WeirService) {
+function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler, OrderCloud, OrderCloudParameters, Orders, Parameters, buyerid, CurrentOrder, WeirService) {
 	var vm = this;
 	vm.xpType = Parameters.filters ? Parameters.filters["xp.Type"] : {};
 	vm.StateName = $state.current.name;
@@ -249,9 +250,16 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 		"ordersMain.listOfRevisions":"revisionsList"
 	};
 
-	vm.View = function(orderId, customerId) {
-		var cid = customerId;
-		WeirService.SetOrderAsCurrentOrder(orderId)
+	vm.View = function(orderId, customerId, customerName) {
+		OrderCloud.BuyerID.Set(customerId);
+
+		CurrentOrder.Set(orderId)
+			.then(function() {
+				CurrentOrder.SetCurrentCustomer({
+					id: customerId,
+					name: customerName
+				})
+			})
 			.then(function() {
 				$rootScope.$broadcast('SwitchCart');
 				$state.go('order');
@@ -269,7 +277,9 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
         $state.go("ordersMain.listOfRevisions", {filters:JSON.stringify(filter)},{reload:true});
 	};
 
-	vm.Update = function(orderId) {
+	vm.Update = function(orderId, customerId) {
+		OrderCloud.BuyerID.Set(customerId);
+
 		WeirService.SetOrderAsCurrentOrder(orderId)
 			.then(function(){
 				$rootScope.$broadcast('SwitchCart');
