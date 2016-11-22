@@ -34,7 +34,7 @@ function ProductSearchConfig($stateProvider, $sceDelegateProvider) {
 						.then(function(cust) {
 							if (cust) {
 								//return OrderCloud.Me.ListCategories(null, 1, 100, null, null, { "catalogID": cust.id});
-								return OrderCloud.Categories.List(null, null, null, null, null, null, null, cust.id)
+								return OrderCloud.Categories.List(null, 1, 100, null, null, {"ParentID": cust.id}, 2, cust.id.substring(0,5))
 							} else {
 								return { Items: []};
 							}
@@ -42,7 +42,7 @@ function ProductSearchConfig($stateProvider, $sceDelegateProvider) {
 				},
 				PartNumbers: function(OrderCloud) {
 					//return OrderCloud.Me.ListProducts(null, 1, 100, null, null, null);
-					return OrderCloud.Products.List(null, null, null, null, null, null);
+					return OrderCloud.Products.List(null, 1, 100, null, null, null);
 				},
 				MyOrg: function(OrderCloud) {
 					return OrderCloud.Buyers.Get(OrderCloud.BuyerID.Get());
@@ -198,7 +198,7 @@ function ProductSearchController($sce, $state, $rootScope, OrderCloud, CurrentOr
 					vm.serialNumberList.length = 0;
 					WeirService.FindCart(vm.Customer)
 						.then(function() {
-							OrderCloud.Me.ListCategories(null, 1, 100, null, null, { "catalogID": vm.Customer.id})
+                            OrderCloud.Categories.List(null, 1, 100, null, null, { "catalogID": vm.Customer.xp.WeirGroup.label, "ParentID" : vm.Customer.id})
 								.then(function(results) {
 									vm.serialNumberList.push.apply(vm.serialNumberList, results.Items);
 								});
@@ -251,7 +251,7 @@ function ProductSearchController($sce, $state, $rootScope, OrderCloud, CurrentOr
 
 }
 
-function SerialController(WeirService, $state, $sce, toastr ) {
+function SerialController(WeirService, $scope, $q, OrderCloud, $state, $sce, toastr ) {
 	var vm = this;
 
 	var labels = {
@@ -307,6 +307,22 @@ function SerialController(WeirService, $state, $sce, toastr ) {
 	vm.goToArticle = function(article) {
 		$state.go('news', {id: article.ID});
 	};
+    vm.updateSerialList = function(input) {
+        var deferred = $q.defer();
+        if (input.length >= 3) {
+            WeirService.SerialNumber(input).then(function(data) {
+                $scope.productSearch.serialNumberList = (data.Items) ? data.Items : [];
+                deferred.resolve();
+                return;
+            })
+                .catch(function(ex) {
+                    deferred.resolve("No Tags with this id");
+                    return;
+                });
+        }
+
+        else return;
+    };
 }
 
 function SerialResultsController(WeirService, $stateParams, $state, SerialNumberResults, $sce ) {
@@ -454,7 +470,7 @@ function SerialDetailController( $stateParams, $rootScope, $state, $sce, WeirSer
 	};
 }
 
-function PartController( $state, $sce, WeirService ) {
+function PartController( $state, $sce, $scope, $q, OrderCloud, WeirService ) {
 	var vm = this;
 
 	vm.partNumbers = [null];
@@ -504,6 +520,22 @@ function PartController( $state, $sce, WeirService ) {
 		}
 	};
 	vm.labels = WeirService.LocaleResources(labels);
+
+    vm.updatePartList = function(input) {
+        if (input.length >= 3) {
+            var deferred = $q.defer();
+            WeirService.PartNumbers(input).then(function (data) {
+                $scope.productSearch.partNumberList = (data.Items) ? data.Items : [];
+                deferred.resolve();
+                return;
+            })
+                .catch(function(ex) {
+                    deferred.resolve("No Tags with this id");
+                    return;
+                });
+        }
+    };
+
 }
 
 function PartResultsController( $rootScope, $sce, $state, WeirService, PartNumberResults ) {
@@ -561,7 +593,7 @@ function PartResultsController( $rootScope, $sce, $state, WeirService, PartNumbe
 	};
 }
 
-function TagController(WeirService, $state, $sce, toastr) {
+function TagController(WeirService,$scope, $q, OrderCloud, $state, $sce, toastr) {
 	var vm = this;
 
 	var labels = {
@@ -615,6 +647,21 @@ function TagController(WeirService, $state, $sce, toastr) {
 		});
 		return count > 0;
 	};
+    vm.updateTagList = function(input) {
+        if (input.length >= 3) {
+            var deferred = $q.defer();
+            WeirService.TagNumber(input).then(function (data) {
+                $scope.productSearch.serialNumberList = (data.Items) ? data.Items : [];
+                deferred.resolve();
+                return;
+            })
+                .catch(function(ex) {
+                    deferred.resolve();
+                    return;
+                });
+        }
+    };
+
 }
 
 function TagResultsController(WeirService, $stateParams, $state, TagNumberResults, $sce ) {
@@ -670,7 +717,7 @@ function TagDetailController( $stateParams, $rootScope, $sce, $state, WeirServic
 	var vm = this;
 	vm.tagNumber = TagNumberDetail;
 	vm.searchNumbers = $stateParams.searchNumbers;
-	if(typeof vm.serialNumber != 'object') {
+	if(typeof vm.tagNumber != 'object') {
 		$state.go('productSearch.noresults', {}, {reload:true});
 	}
 	vm.PartQuantity = function(partId) {

@@ -2,7 +2,7 @@ angular.module( 'orderCloud' )
     .factory( 'WeirService', WeirService )
 ;
 
-function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyerid) {
+function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetwork, buyerid) {
     var orderStatuses = {
 	    Draft: {id: "DR", label: "Draft", desc: "This is the current quote under construction"},
 	    Saved: {id: "SV", label: "Saved", desc: "Quote has been saved but not yet submitted to weir as quote or order"},
@@ -176,166 +176,250 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyerid) 
 		return deferred.promise;
 	}
 
-	function serialNumber(serialNumber) {
-		var deferred = $q.defer();
-		var result;
+    function serialNumber(serialNumber) {
+        var deferred = $q.defer();
+        var result;
 
-		CurrentOrder.GetCurrentCustomer()
-			.then(function(cust) {
-				if (cust) {
-					//OrderCloud.Categories.List(null, 1, 50, null, null, {"xp.SN": serialNumber, "catalogID": cust.id})
-					OrderCloud.Categories.List(null, null, null, null, null, {"xp.SN": serialNumber}, null, cust.id)
-						.then(function(matches) {
-							if (matches.Items.length == 1) {
-								result = matches.Items[0];
-								getParts(result.ID, deferred, result);
-							} else if (matches.Items.length == 0) {
-								//throw { message: "No matches found for serial number " + serialNumber};
-								return deferred.resolve("No matches found for serial number " + serialNumber);
-							} else {
-								//throw { message: "Data error: Serial number " + serialNumber + " is not unique"};
-								return deferred.resolve("No matches found for serial number " + serialNumber);
-							}
-						});
-				} else {
-					throw { message: "Customer for search not set"};
-				}
-			})
-			.catch(function(ex) {
-				return deferred.reject(ex);
-			});
+        var impersonation = {
+            ClientID: buyernetwork,
+            Claims: []
+        };
+        var miniCartBuyer = {};
+        CurrentOrder.Get().then(function (co) {
+            miniCartBuyer = {"FromUserID": co.FromUserID, "BuyerID": co.xp.BuyerId};
+            return OrderCloud.Users.Get(co.FromUserID, co.xp.BuyerId)
+        }).then(function (buyer) {
+            // Get an access token for impersonation.
+            impersonation.Claims = buyer.AvailableRoles;
+            return OrderCloud.Users.GetAccessToken(miniCartBuyer.FromUserID, impersonation, miniCartBuyer.BuyerID);
+        })
+            .then(function (data) {
+                // Set the local impersonation token so that As() can be used.
+                OrderCloud.Auth.SetImpersonationToken(data['access_token']);
+            }).then(function () {
+             return OrderCloud.As().Me.ListCategories(null, 1, 50, "ParentID", null, {
+                "xp.SN": serialNumber,
+                "ParentID": miniCartBuyer.BuyerID
+            }, null, miniCartBuyer.BuyerID.substring(0, 5))
+                .then(function (matches) {
+                    if (matches.Items.length == 1) {
+                        result = matches.Items[0];
+                        getParts(result.ID, deferred, result);
+                    } else if (matches.Items.length == 0) {
+                        //throw { message: "No matches found for serial number " + serialNumber};
+                        return deferred.resolve("No matches found for serial number " + serialNumber);
+                    } else {
+                        //throw { message: "Data error: Serial number " + serialNumber + " is not unique"};
+                        return deferred.resolve("No matches found for serial number " + serialNumber);
+                    }
+                });
+        })
+            .then(function () {
+                // Remove the impersonation token.
+                return OrderCloud.Auth.RemoveImpersonationToken();
+            });
 
-		return deferred.promise;
-	}
+        return deferred.promise;
+    }
 
-	function tagNumber(tagNumber) {
-		var deferred = $q.defer();
-		var result;
-		CurrentOrder.GetCurrentCustomer()
-			.then(function(cust) {
-				if (cust) {
-					OrderCloud.Categories.List(null, 1, 50, null, null, {"xp.TagNumber": tagNumber, "catalogID": cust.id})
-						.then(function(matches) {
-							if (matches.Items.length == 1) {
-								result = matches.Items[0];
-								getParts(result.ID, deferred, result);
-							} else if (matches.Items.length == 0) {
-								//throw { message: "No matches found for tag number " + tagNumber};
-								return deferred.resolve("No matches found for tag number " + tagNumber);
-							} else {
-								//throw { message: "Data error: Tag number " + tagNumber + " is not unique"};
-								return deferred.resolve("Data error: Tag number " + tagNumber + " is not unique");
-							}
-						});
-				}
-			})
-			.catch(function(ex) {
-				deferred.reject(ex);
-			});
-		return deferred.promise;
-	}
+    function tagNumber(tagNumber) {
+        var deferred = $q.defer();
+        var result;
+        var impersonation = {
+            ClientID: buyernetwork,
+            Claims: []
+        };
+        var miniCartBuyer = {};
+        CurrentOrder.Get().then(function (co) {
+            miniCartBuyer = {"FromUserID": co.FromUserID, "BuyerID": co.xp.BuyerId};
+            return OrderCloud.Users.Get(co.FromUserID, co.xp.BuyerId)
+        }).then(function (buyer) {
+            // Get an access token for impersonation.
+            impersonation.Claims = buyer.AvailableRoles;
+            return OrderCloud.Users.GetAccessToken(miniCartBuyer.FromUserID, impersonation, miniCartBuyer.BuyerID);
+        })
+            .then(function (data) {
+                // Set the local impersonation token so that As() can be used.
+               return OrderCloud.Auth.SetImpersonationToken(data['access_token']);
+            }).then(function () {
+            return OrderCloud.As().Me.ListCategories(null, 1, 50, "ParentID", null, {
+                "xp.TagNumber": tagNumber,
+                "ParentID": miniCartBuyer.BuyerID
+            }, null, miniCartBuyer.BuyerID.substring(0, 5))
+        })
+            .then(function (matches) {
+                if (matches.Items.length == 1) {
+                    result = matches.Items[0];
+                    getParts(result.ID, deferred, result);
+                } else if (matches.Items.length == 0) {
+                    //throw { message: "No matches found for tag number " + tagNumber};
+                    return deferred.resolve("No matches found for tag number " + tagNumber);
+                } else {
+                    //throw { message: "Data error: Tag number " + tagNumber + " is not unique"};
+                    return deferred.resolve("Data error: Tag number " + tagNumber + " is not unique");
+                }
+            })
+            .then(function () {
+                // Remove the impersonation token.
+                return OrderCloud.Auth.RemoveImpersonationToken();
+            })
+            .catch(function (ex) {
+                deferred.reject(ex);
+            });
+        return deferred.promise;
+    }
 
-	function getParts(catId, deferred, result) {
-		//OrderCloud.Me.ListProducts(null, 1, 100, null, null, null, catId)
-		OrderCloud.Products.List(null,null,null,null,null,null)
-			.then(function(products) {
-				result.Parts = [];
-				angular.forEach(products.Items, function(product) {
-					if(result.xp.Parts[product.ID]) {
-						result.Parts.push({Number: product.ID, Detail: product});
-					}
-				});
-				deferred.resolve(result);
-			})
-			.catch(function(ex) {
-				deferred.reject(ex);
-			})
-	}
+    function getParts(catId, deferred, result) {
+        var impersonation = {
+            ClientID: buyernetwork,
+            Claims: []
+        };
+        var miniCartBuyer = {};
+        CurrentOrder.Get().then(function (co) {
+            miniCartBuyer = {"FromUserID": co.FromUserID, "BuyerID": co.xp.BuyerId};
+            return OrderCloud.Users.Get(co.FromUserID, co.xp.BuyerId)
+        }).then(function (buyer) {
+            // Get an access token for impersonation.
+            impersonation.Claims = buyer.AvailableRoles;
+            return OrderCloud.Users.GetAccessToken(miniCartBuyer.FromUserID, impersonation, miniCartBuyer.BuyerID);
+        })
+            .then(function (data) {
+                // Set the local impersonation token so that As() can be used.
+                OrderCloud.Auth.SetImpersonationToken(data['access_token']);
+            }).then(function () {
+            return OrderCloud.As().Me.ListProducts(null, 1, 100, null, null, null, catId, result.ParentID.substring(0, 5))
+        })
+            .then(function (products) {
+                result.Parts = [];
+                angular.forEach(products.Items, function (product) {
+                    result.Parts.push({Number: product.ID, Detail: product});
+                });
+                deferred.resolve(result);
+            })
+            .then(function () {
+                // Remove the impersonation token.
+                return OrderCloud.Auth.RemoveImpersonationToken();
+            })
+			.catch(function (ex) {
+            deferred.reject(ex);
+        });
+    }
 
-	function serialNumbers(serialNumbers) {
-		var deferred = $q.defer();
-		var results = [];
-		var queue = [];
-		CurrentOrder.GetCurrentCustomer()
-			.then(function(cust) {
-				if (cust) {
-					angular.forEach(serialNumbers, function(number) {
-						if (number) {
-							queue.push((function() {
-								var d = $q.defer();
-								//OrderCloud.Categories.List(null, 1, 50, null, null, {"xp.SN": number, "catalogID": cust.id})
-								OrderCloud.Categories.List(null, null, null, null, null, {"xp.SN": number}, 1, cust.id)
-									.then(function(matches) {
-										if (matches.Items.length == 1) {
-											results.push({Number: number, Detail: matches.Items[0]});
-										} else {
-											results.push({Number: number, Detail: null});
-										}
-										d.resolve();
-									})
-									.catch(function(ex) {
-										results.push({Number: number, Detail: null});
-										d.resolve();
-									});
-								return d.promise;
-							})());
-						}
-					});
-					$q.all(queue)
-						.then(function() {
-							deferred.resolve(results);
-						});
-				} else {
-					deferred.resolve(results);
-				}
-			})
-			.catch(function(ex) {
-				d.resolve();
-			});
-		return deferred.promise;
-	}
 
-	function tagNumbers(tagNumbers) {
-		var deferred = $q.defer();
+    function serialNumbers(serialNumbers) {
+        var deferred = $q.defer();
+        var results = [];
+        var queue = [];
+        var impersonation = {
+            ClientID: buyernetwork,
+            Claims: []
+        };
+        var miniCartBuyer = {};
+        CurrentOrder.Get().then(function(co) {
+            miniCartBuyer = {"FromUserID" : co.FromUserID, "BuyerID": co.xp.BuyerId };
+            return OrderCloud.Users.Get(co.FromUserID, co.xp.BuyerId)
+        }).then(function(buyer) {
+            // Get an access token for impersonation.
+            impersonation.Claims = buyer.AvailableRoles;
+            return OrderCloud.Users.GetAccessToken(miniCartBuyer.FromUserID, impersonation, miniCartBuyer.BuyerID);
+        })
+            .then(function(data) {
+                // Set the local impersonation token so that As() can be used.
+                OrderCloud.Auth.SetImpersonationToken(data['access_token']);
+            })
+            .then(function(){
+                    angular.forEach(serialNumbers, function(number) {
+                        if (number) {
+                            queue.push((function () {
+                                var d = $q.defer();
+                                return OrderCloud.As().Me.ListCategories(null, 1, 50, "ParentID", null, {
+                                    "xp.SN": number,
+                                    "ParentID": miniCartBuyer.BuyerID
+                                }, null, miniCartBuyer.BuyerID.substring(0,5))
+                                    .then(function (matches) {
+                                        if (matches.Items.length == 1) {
+                                            results.push({Number: number, Detail: matches.Items[0]});
+                                        } else {
+                                            results.push({Number: number, Detail: null});
+                                        }
+                                        d.resolve();
+                                    })
+                                    .catch(function (ex) {
+                                        results.push({Number: number, Detail: null});
+                                        d.resolve();
+                                    });
+                                return d.promise;
+                            })());
+                        }
+                    });
+                    $q.all(queue)
+                        .then(function() {
+                            deferred.resolve(results);
+                        });
+            })
+            .catch(function(ex) {
+                d.resolve();
+            });
+        return deferred.promise;
+    }
 
-		var results = [];
-		var queue = [];
-		CurrentOrder.GetCurrentCustomer()
-			.then(function(cust) {
-				if (cust) {
-					angular.forEach(tagNumbers, function(number) {
-						if (number) {
-							queue.push((function() {
-								var d = $q.defer();
-								OrderCloud.Categories.List(null, 1, 50, null, null, {"xp.TagNumber": number, "catalogID": cust.id})
-									.then(function(matches) {
-										if (matches.Items.length == 1) {
-											results.push({Number: number, Detail: matches.Items[0]});
-										} else {
-											results.push({Number: number, Detail: null});
-										}
-										d.resolve();
-									})
-									.catch(function(ex) {
-										results.push({Number: number, Detail: null});
-										d.resolve();
-									});
+    function tagNumbers(tagNumbers) {
+        var deferred = $q.defer();
 
-								return d.promise;
-							})());
-						}
-					});
-					$q.all(queue).then(function() {
-						deferred.resolve(results);
-					});
-				} else {
-					deferred.resolve(results);
-				}
-			})
-			.catch(function(ex) {});
+        var results = [];
+        var queue = [];
+        var impersonation = {
+            ClientID: buyernetwork,
+            Claims: []
+        };
+        var miniCartBuyer = {};
+        CurrentOrder.Get().then(function(co) {
+            miniCartBuyer = {"FromUserID" : co.FromUserID, "BuyerID": co.xp.BuyerId };
+            return OrderCloud.Users.Get(co.FromUserID, co.xp.BuyerId)
+        }).then(function(buyer) {
+            // Get an access token for impersonation.
+            impersonation.Claims = buyer.AvailableRoles;
+            return OrderCloud.Users.GetAccessToken(miniCartBuyer.FromUserID, impersonation, miniCartBuyer.BuyerID);
+        })
+            .then(function(data) {
+                // Set the local impersonation token so that As() can be used.
+                OrderCloud.Auth.SetImpersonationToken(data['access_token']);
+            })
+            .then(function(){
+                    angular.forEach(tagNumbers, function(number) {
+                        if (number) {
+                            queue.push((function () {
 
-		return deferred.promise;
-	}
+                                var d = $q.defer();
+                                return OrderCloud.As().Me.ListCategories(null, 1, 50, "ParentID", null, {
+                                    "xp.TagNumber": number,
+                                    "ParentID": miniCartBuyer.BuyerID
+                                }, null, miniCartBuyer.BuyerID.substring(0, 5))
+                                    .then(function (matches) {
+                                        if (matches.Items.length == 1) {
+                                            results.push({Number: number, Detail: matches.Items[0]});
+                                        } else {
+                                            results.push({Number: number, Detail: null});
+                                        }
+                                        d.resolve();
+                                    })
+                                    .catch(function (ex) {
+                                        results.push({Number: number, Detail: null});
+                                        d.resolve();
+                                    });
+
+                                return d.promise;
+                            })());
+                        }
+                    });
+                    $q.all(queue).then(function() {
+                        deferred.resolve(results);
+                    });
+            })
+            .catch(function(ex) {});
+
+        return deferred.promise;
+    }
 
 	function partNumbers(partNumbers) {
 
@@ -368,32 +452,54 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyerid) 
 		return deferred.promise;
 
 		function getParts(partNumbers) {
-			angular.forEach(partNumbers, function(number) {
-				if (number) {
-					queue.push((function() {
-						var d = $q.defer();
+            var impersonation = {
+                ClientID: buyernetwork,
+                Claims: []
+            };
+            angular.forEach(partNumbers, function (number) {
+                if (number) {
+                    var d = $q.defer();
+                    queue.push((function () {
+                        var miniCartBuyer = {};
+                        CurrentOrder.Get().then(function (co) {
+                            miniCartBuyer = {"FromUserID": co.FromUserID, "BuyerID": co.xp.BuyerId};
+                            return OrderCloud.Users.Get(co.FromUserID, co.xp.BuyerId)
+                        }).then(function (buyer) {
+                            // Get an access token for impersonation.
+                            impersonation.Claims = buyer.AvailableRoles;
+                            return OrderCloud.Users.GetAccessToken(miniCartBuyer.FromUserID, impersonation, miniCartBuyer.BuyerID);
+                        })
+                            .then(function (data) {
+                                // Set the local impersonation token so that As() can be used.
+                                OrderCloud.Auth.SetImpersonationToken(data['access_token']);
+                            }).then(function () {
+                            return OrderCloud.As().Me.ListProducts(null, 1, 50, null, null, {"Name": number}, null, miniCartBuyer.BuyerID.substring(0, 5))
+                        })
+                            .then(function (products) {
+                                if (products.Items.length == 0) {
+                                    results.Parts.push({Number: number, Detail: null});
+                                } else {
+                                    angular.forEach(products.Items, function (product) {
+                                        var result = {Number: number, Detail: product};
+                                        results.Parts.push(result);
+                                    });
+                                }
+                                d.resolve();
+                            })
+                            .then(function () {
+                                // Remove the impersonation token.
+                                return OrderCloud.Auth.RemoveImpersonationToken();
+                            })
+                            .catch(function (ex) {
+                                results.Parts.push({Number: number, Detail: null});
+                                d.resolve();
+                            });
+                        return d.promise;
+                    })());
+                }
+            })
+        }
 
-						OrderCloud.Me.ListProducts(null, 1, 50, null, null, {"Name": number})
-							.then(function(products) {
-								if (products.Items.length == 0) {
-									results.Parts.push({Number: number, Detail: null});
-								} else {
-									angular.forEach(products.Items, function(product) {
-										var result = {Number: number, Detail: product};
-										results.Parts.push(result);
-									});
-								}
-								d.resolve();
-							})
-							.catch(function(ex) {
-								results.Parts.push({Number: number, Detail: null});
-								d.resolve();
-							});
-						return d.promise;
-					})());
-				}
-			});
-		}
 
 		function getValvesForParts(results) {
 			angular.forEach(results.Parts, function(result) {
@@ -547,6 +653,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyerid) 
 
 		return deferred.promise;
 	}
+
 
 	var service = {
 		OrderStatus: orderStatuses,
