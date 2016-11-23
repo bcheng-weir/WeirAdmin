@@ -316,7 +316,9 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 					ProductName: line.xp.ProductName,
 					Description: line.xp.Description,
 					ReplacementSchedule: line.xp.ReplacementSchedule,
-					LeadTime: line.xp.LeadTime
+					LeadTime: line.xp.LeadTime,
+					OriginalUnitPrice: line.xp.OriginalUnitPrice,
+					OriginalQty: line.xp.OriginalQty
 				}
 			};
 			OrderCloud.LineItems.Create(vm.Order.ID, item, vm.Order.xp.CustomerID)
@@ -345,6 +347,8 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 				"ShipFromAddress": null,
 				"Specs": [],
 				"xp": {
+					"OriginalQty": 0,
+					"OriginalUnitPrice": 0,
 					"SN": null,
 					"TagNumber": null,
 					"ProductName": null,

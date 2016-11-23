@@ -166,7 +166,7 @@
                      <td ng-if="order.Order.xp.Status=='RE'">
                          <input type="text" class="form-control" ng-model="line.Product.xp.LeadTime" />
                      </td>
-                     <td>
+                     <td ng-if="order.Order.xp.Status=='RE'">
                          <input type="" class="form-control" ng-model="line.UnitPrice" />
                      </td>
                      <td ng-if="order.Order.xp.Status=='RE'">
