@@ -6,6 +6,44 @@ angular.module('orderCloud')
     .controller('UserCreateCtrl', UserCreateController)
 ;
 
+function UserService($q, $state, OrderCloud) {
+    var _userTypes = [{ value: 1, label: "Buyer" }, { value: 2, label: "Shopper" }];
+
+    function _updateUserGroup(userID, oldGroupID, newGroupID) {
+        var d = $q.defer();
+        if (oldGroupID) {
+            if (newGroupID && (newGroupID != oldGroupID)) {
+                OrderCloud.UserGroups.DeleteUserAssignment(oldGroupID, userID)
+                .then(function () {
+                    OrderCloud.UserGroups.SaveUserAssignment({ UserGroupID: newGroupID, UserID: userID })
+                    .then(function () {
+                        d.resolve();
+                    });
+                })
+                .catch(function (ex) {
+                    d.reject(ex);
+                });
+            } else {
+                d.resolve();
+            }
+        } else if (newGroupID) {
+            OrderCloud.UserGroups.SaveUserAssignment({ UserGroupID: newGroupID, UserID: userID })
+            .then(function () {
+                d.resolve();
+            })
+            .catch(function (ex) {
+                d.reject(ex);
+            });
+        }
+        return d.promise;
+    }
+
+    return {
+        UserTypes: _userTypes,
+        UpdateGroup: _updateUserGroup
+    };
+}
+
 function UsersConfig($stateProvider) {
     $stateProvider
         .state('users', {
@@ -33,8 +71,11 @@ function UsersConfig($stateProvider) {
                 SelectedUser: function($stateParams, OrderCloud) {
                     return OrderCloud.Users.Get($stateParams.userid);
                 },
-                SecurityProfilesAvailable: function(OrderCloud) {
-                    return OrderCloud.SecurityProfiles.List(null, 1, 20, null, "Name", { IsDevProfile: false });
+                GroupsAvailable: function (OrderCloud) {
+                    return OrderCloud.UserGroups.List();
+                },
+                CurrentGroups: function ($stateParams, OrderCloud) {
+                    return OrderCloud.UserGroups.ListUserAssignments(null, $stateParams.userid)
                 }
             }
         })
@@ -44,21 +85,14 @@ function UsersConfig($stateProvider) {
             controller: 'UserCreateCtrl',
             controllerAs: 'userCreate',
             resolve: {
-                SecurityProfilesAvailable: function(OrderCloud) {
-                    return OrderCloud.SecurityProfiles.List(null, 1, 20, null, "Name", { IsDevProfile: false });
+                GroupsAvailable: function (OrderCloud) {
+                    return OrderCloud.UserGroups.List();
                 }
             }
         })
     ;
 }
 
-function UserService($q, $state, OrderCloud) {
-    var _userTypes = [{value: 1, label: "Buyer"}, {value: 2, label: "Shopper"}];
-
-    return {
-        UserTypes: _userTypes
-    };
-}
 
 function UsersController($state, $ocMedia, OrderCloud, OrderCloudParameters, UserList, Parameters) {
     var vm = this;
@@ -135,12 +169,16 @@ function UsersController($state, $ocMedia, OrderCloud, OrderCloudParameters, Use
     };
 }
 
-function UserEditController($exceptionHandler, $state, toastr, OrderCloud, SelectedUser, SecurityProfilesAvailable, UserService) {
+function UserEditController($exceptionHandler, $state, toastr, OrderCloud, SelectedUser, GroupsAvailable, CurrentGroups, UserService) {
     var vm = this,
         userid = SelectedUser.ID;
     vm.userName = SelectedUser.Username;
     vm.user = SelectedUser;
-    vm.securityProfilesAvailable = SecurityProfilesAvailable.Items;
+    vm.groupsAvailable = GroupsAvailable.Items;
+    vm.user.UserGroupID = (CurrentGroups.Items.length > 0) ? CurrentGroups.Items[0].UserGroupID : null;
+    vm.oldGroupId = vm.user.UserGroupID;
+
+    vm.groupsAvailable = GroupsAvailable.Items;
     vm.userTypes = UserService.UserTypes;
     if (vm.user.TermsAccepted != null) {
         vm.TermsAccepted = true;
@@ -150,9 +188,12 @@ function UserEditController($exceptionHandler, $state, toastr, OrderCloud, Selec
         var today = new Date();
         vm.user.TermsAccepted = today;
         OrderCloud.Users.Update(userid, vm.user)
-            .then(function() {
-                $state.go('users', {}, {reload: true});
-                toastr.success('User Updated', 'Success');
+            .then(function (user) {
+                UserService.UpdateGroup(user.ID, vm.oldGroupId, vm.user.UserGroupID)
+                .then(function () {
+                    $state.go('users', {}, { reload: true });
+                    toastr.success('User Updated', 'Success');
+                });
             })
             .catch(function(ex) {
                 $exceptionHandler(ex)
@@ -171,15 +212,16 @@ function UserEditController($exceptionHandler, $state, toastr, OrderCloud, Selec
     };
 }
 
-function UserCreateController($exceptionHandler, $state, toastr, OrderCloud, SecurityProfilesAvailable, UserService) {
+function UserCreateController($exceptionHandler, $state, toastr, OrderCloud, GroupsAvailable, UserService) {
     var vm = this;
     vm.user = {
         Active: false,
         Email: '',
         Password: '',
+        UserGroupID: '',
         xp: {}
     };
-    vm.securityProfilesAvailable = SecurityProfilesAvailable.Items;
+    vm.groupsAvailable = GroupsAvailable.Items;
     vm.languageOptions = UserService.Languages;
     vm.userTypes = UserService.UserTypes;
 
@@ -187,9 +229,12 @@ function UserCreateController($exceptionHandler, $state, toastr, OrderCloud, Sec
         vm.user.TermsAccepted = new Date();
         vm.user.Username = vm.user.Email;
         OrderCloud.Users.Create(vm.user)
-            .then(function() {
-                $state.go('users', {}, {reload: true});
-                toastr.success('User Created', 'Success');
+            .then(function (user) {
+                UserService.UpdateGroup(user.ID, null, vm.user.UserGroupID)
+                .then(function() {
+                    $state.go('users', {}, {reload: true});
+                    toastr.success('User Created', 'Success');
+                });
             })
             .catch(function(ex) {
                 $exceptionHandler(ex)

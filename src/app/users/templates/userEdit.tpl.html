@@ -39,8 +39,8 @@
             <input id="userPasswordInput" type="password" pattern='^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!$%@#£€*?&]{8,}$' pattern-err-type="customPassword" class="form-control" ng-model="userEdit.user.Password" confirmpassword="{{userEdit.PasswordConfirm}}"/>
         </div>
         <div class="col-sm-6 form-group">
-            <label for="securityProfile">Security Profile</label>
-            <select id="securityProfile" class="form-control" ng-model="userEdit.user.xp.SecurityProfileID" ng-options="sp.ID as sp.Name for sp in userEdit.securityProfilesAvailable" required></select>
+            <label for="securityProfile">User Group</label>
+            <select id="securityProfile" class="form-control" ng-model="userEdit.user.UserGroupID" ng-options="sp.ID as sp.Name for sp in userEdit.groupsAvailable" required></select>
         </div>
     </div>
     <div class="row">
