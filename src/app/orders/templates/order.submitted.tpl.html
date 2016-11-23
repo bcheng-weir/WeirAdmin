@@ -69,7 +69,7 @@
             </td>
             <td style="color: green">{{order.DateSubmitted}}</td>
             <td>{{order.xp.ReviewerName}}</td>
-            <td><button class="btn btn-primary" ng-click="orders.View(order.ID, {id:order.xp.CustomerID, name:order.xp.CustomerName})">{{orders.labels.view}}</button></td>
+            <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.CustomerID, order.xp.CustomerName)">{{orders.labels.view}}</button></td>
         </tr>
         </tbody>
     </table>

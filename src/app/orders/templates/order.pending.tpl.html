@@ -52,19 +52,19 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="order in orders.list.Items">
-            <th scope="row">{{order.ID}}</th>
-            <td>{{order.xp.CustomerName}}</td>
-            <td>{{order.FromUserFirstName}} {{order.FromUserLastName}}</td>
-            <td class="text-left" ng-switch on="order.xp.Currency">
-                <span ng-switch-when="EUR">{{order.Total | currency: '&euro;'}}</span>
-                <span ng-switch-when="GBP">{{order.Total | currency: '&#163;'}}</span>
-                <span ng-switch-default>{{order.Total | currency:'&#163;'}}</span>
-            </td>
-            <td style="color: green">{{order.DateSubmitted}}</td>
-            <td>{{order.xp.ReviewerName}}</td>
-            <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.CustomerID)">{{orders.labels.view}}</button></td>
-        </tr>
+            <tr ng-repeat="order in orders.list.Items">
+                <th scope="row">{{order.ID}}</th>
+                <td>{{order.xp.CustomerName}}</td>
+                <td>{{order.FromUserFirstName}} {{order.FromUserLastName}}</td>
+                <td class="text-left" ng-switch on="order.xp.Currency">
+                    <span ng-switch-when="EUR">{{order.Total | currency: '&euro;'}}</span>
+                    <span ng-switch-when="GBP">{{order.Total | currency: '&#163;'}}</span>
+                    <span ng-switch-default>{{order.Total | currency:'&#163;'}}</span>
+                </td>
+                <td style="color: green">{{order.DateSubmitted}}</td>
+                <td>{{order.xp.ReviewerName}}</td>
+                <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.CustomerID, order.xp.CustomerName)">{{orders.labels.view}}</button></td>
+            </tr>
         </tbody>
     </table>
     <div class="text-center" ng-if="application.$ocMedia('min-width:768px') && orders.list.Meta.TotalPages > 1">
