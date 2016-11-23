@@ -34,7 +34,7 @@ function UsersConfig($stateProvider) {
                     return OrderCloud.Users.Get($stateParams.userid);
                 },
                 SecurityProfilesAvailable: function(OrderCloud) {
-                    return OrderCloud.SecurityProfiles.List();
+                    return OrderCloud.SecurityProfiles.List(null, 1, 20, null, "Name", { IsDevProfile: false });
                 }
             }
         })
@@ -45,7 +45,7 @@ function UsersConfig($stateProvider) {
             controllerAs: 'userCreate',
             resolve: {
                 SecurityProfilesAvailable: function(OrderCloud) {
-                    return OrderCloud.SecurityProfiles.List();
+                    return OrderCloud.SecurityProfiles.List(null, 1, 20, null, "Name", { IsDevProfile: false });
                 }
             }
         })
