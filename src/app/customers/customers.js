@@ -579,7 +579,7 @@ function CustomerAddressCreateCtrl($q, $exceptionHandler, $scope, $state, toastr
                     return CustomerService.CreateAddress(vm.address, SelectedBuyer.ID);
                 })
                 .then(function(newAddress) {
-                    return WeirService.AssignAddressToGroups(newAddress.ID); //ToDo Test.
+                    return WeirService.AssignAddressToGroups(newAddress.ID, SelectedBuyer.ID); //ToDo Test.
                 })
                 .then(function(resp) {
                     $state.go('customers.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
@@ -593,7 +593,7 @@ function CustomerAddressCreateCtrl($q, $exceptionHandler, $scope, $state, toastr
             vm.address.xp.primary = false;
             CustomerService.CreateAddress(vm.address, SelectedBuyer.ID)
                 .then(function(newAddress) {
-                    return WeirService.AssignAddressToGroups(newAddress.ID);
+                    return WeirService.AssignAddressToGroups(newAddress.ID, SelectedBuyer.ID);
                 })
                 .then(function(resp) {
                     $state.go('customers.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});

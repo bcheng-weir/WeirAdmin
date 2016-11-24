@@ -14,7 +14,7 @@ function OrderShareService() {
     return svc;
 }
 
-function orderConfig($stateProvider, buyerid) {
+function orderConfig($stateProvider) {
     $stateProvider
 	    .state('order', {
 	        parent: 'base',
@@ -67,7 +67,6 @@ function orderConfig($stateProvider, buyerid) {
 				        OrderCloud.LineItems.List(prevId,null,null,null,null,null,null,Order.xp.CustomerID)
 					        .then(function(data) {
 						        if (!data.Items.length) {
-							        toastr.error('Previous quote does not contain any line items.', 'Error');
 							        dfd.resolve({ Items: [] });
 						        } else {
 							        LineItemHelpers.GetBlankProductInfo(data.Items);
@@ -76,7 +75,6 @@ function orderConfig($stateProvider, buyerid) {
 						        }
 					        })
 					        .catch(function () {
-						        toastr.error('Previous quote does not contain any line items.', 'Error');
 						        dfd.resolve({ Items: [] });
 					        });
 				        return dfd.promise;
@@ -102,7 +100,7 @@ function orderConfig($stateProvider, buyerid) {
 	    });
 }
 
-function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler, OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, WeirService, Underscore, OrderToCsvService, buyerid, buyernetwork) {
+function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler, OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, WeirService, Underscore, OrderToCsvService, buyernetwork) {
     var vm = this;
 	vm.Zero = 0;
     vm.Order = Order;
@@ -133,6 +131,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
             Confirm: "Confirm",
             Revise: "Revise",
             ShareRevision: "Share revision",
+	        Update: "Update",
             Comments: "Comments",
             Download: "Download",
             Print: "Print",
@@ -175,6 +174,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
             Confirm:$sce.trustAsHtml( "Confirm"),
             Revise:$sce.trustAsHtml( "Revise"),
             ShareRevision:$sce.trustAsHtml( "Share revision"),
+	        Update: $sce.trustAsHtml("Update"),
             Comments:$sce.trustAsHtml( "Comments"),
             Download:$sce.trustAsHtml( "Download"),
             Print:$sce.trustAsHtml( "Print"),
@@ -283,6 +283,20 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 	function _showShareRevision() {
 		var validStatus = {
 			RE: true
+		};
+		if(vm.Order.xp) {
+			return validStatus[vm.Order.xp.Status];
+		} else {
+			return false;
+		}
+	}
+
+	vm.ShowUpdate = _showUpdate;
+	function _showUpdate() {
+		var validStatus = {
+			CO: true,
+			DP: true,
+			IV: true
 		};
 		if(vm.Order.xp) {
 			return validStatus[vm.Order.xp.Status];
@@ -471,6 +485,11 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 	vm.AddComment = _addComment;
 	function _addComment() {
 		//Add a comment from Weir, POC-255
+	}
+
+	vm.Update = _update;
+	function _update() {
+		$state.go('order.addinfo');
 	}
 
 	vm.Revise = _revise;

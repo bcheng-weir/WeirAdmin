@@ -113,7 +113,7 @@ function CartController($q, $rootScope, $timeout, OrderCloud, LineItemHelpers, O
 	});
 }
 
-function MiniCartController($q, $state, $rootScope,$uibModal, $ocMedia, OrderCloud, LineItemHelpers, CurrentOrder, Underscore, buyerid) {
+function MiniCartController($q, $state, $rootScope,$uibModal, $ocMedia, $sce, OrderCloud, LineItemHelpers, CurrentOrder, Underscore, WeirService) {
 	var vm = this;
 	vm.LineItems = {};
 	vm.Order = null;
@@ -154,8 +154,7 @@ function MiniCartController($q, $state, $rootScope,$uibModal, $ocMedia, OrderClo
 	};
 
 	vm.goToCart = function() {
-		//$state.go('cart', {}, {reload: true});
-		$state.go('order');
+		$state.go('order', {}, { reload: true });
 	};
 
 	vm.lineItemCall = function /*getLineItems*/(order) {
@@ -163,11 +162,11 @@ function MiniCartController($q, $state, $rootScope,$uibModal, $ocMedia, OrderClo
 		var queue = [];
 		vm.TotalItems = 0;
 		//OrderCloud.LineItems.List(order.ID)
-		OrderCloud.LineItems.List(order.ID,null,null,null,null,null,null,buyerid)
+		OrderCloud.LineItems.List(order.ID,null,null,null,null,null,null,order.xp.CustomerID)
 			.then(function(li) {
 				vm.LineItems = li;
 				if (li.Meta.TotalPages > li.Meta.Page) {
-					queue.push(OrderCloud.LineItems.List(order.ID, null ,li.Meta.Page + 1, null, null, null, null, buyerid));
+					queue.push(OrderCloud.LineItems.List(order.ID, null ,li.Meta.Page + 1, null, null, null, null, order.xp.CustomerID));
 				}
 				$q.all(queue)
 					.then(function(results) {
@@ -235,6 +234,16 @@ function MiniCartController($q, $state, $rootScope,$uibModal, $ocMedia, OrderClo
 			}
 		});
 	};
+
+	var labels = {
+		en: {
+			Details: "Details"
+		},
+		fr: {
+			Details: $sce.trustAsHtml("Details")
+		}
+	};
+	vm.labels = WeirService.LocaleResources(labels);
 }
 
 function OrderCloudMiniCartDirective() {

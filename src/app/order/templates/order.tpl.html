@@ -31,6 +31,9 @@
                     <li ng-click="order.ShareRevision(base.currentUser)" style="padding: 0px 10px 0px 10px;" ng-if="order.ShowShareRevision()">
                         <button type="button" class="btn btn-lg btn-primary"><span ng-bind-html='order.labels.ShareRevision'></span></button>
                     </li>
+                    <li ng-click="order.Update()" style="padding: 0px 10px 0px 10px;" ng-if="order.ShowUpdate()">
+                        <button type="button" class="btn btn-lg btn-primary"><span ng-bind-html="order.labels.Update"></span></button>
+                    </li>
                     <li ng-click="order.Comments()" style="padding: 0px 10px 0px 5px;">
                         <button type="button" class="btn btn-lg btn-default"><span ng-bind-html='order.labels.Comments'></span></button>
                     </li>
