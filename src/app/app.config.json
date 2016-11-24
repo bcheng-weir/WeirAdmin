@@ -1,11 +1,11 @@
 {
 	"appname": "Weir B2B Site Administration",
 	"scope": "CategoryAdmin ProductAdmin ProductAssignmentAdmin FullAccess ",
-	"clientid": "35C0B8D9-4FAD-4544-902B-3AA1B8DC5630",
-  "buyernetwork": "290DD50B-0085-4AB4-94F4-57F315AB9BE0",
-  "qaclientid": "BA7B6918-DDA0-42E3-806D-FE01FCACA5B6",
-  "qabuyernetwork":  "267E3A43-7997-4DAA-BF76-C6520CDA383C",
-	"buyerid": "weir",
+	"devclientid": "35C0B8D9-4FAD-4544-902B-3AA1B8DC5630",
+  "devbuyernetwork": "290DD50B-0085-4AB4-94F4-57F315AB9BE0",
+  "clientid": "BA7B6918-DDA0-42E3-806D-FE01FCACA5B6",
+  "buyernetwork":  "267E3A43-7997-4DAA-BF76-C6520CDA383C",
+	"buyerid": "WVCUK-1352",
 	"environment": "prod",
 	"anonymous": false,
 	"base": {
