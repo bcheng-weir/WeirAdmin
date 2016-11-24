@@ -137,6 +137,7 @@ function CustomerService($q, $state, $sce, OrderCloud, $exceptionHandler) {
             NoMatch: "No matches found.",
             LoadMore: "Load More",
             Customers: "Customers",
+            Users: "Users",
             Search: "Search"
         },
         fr: {
@@ -179,6 +180,7 @@ function CustomerService($q, $state, $sce, OrderCloud, $exceptionHandler) {
             NoMatch: $sce.trustAsHtml("No matches found."),
             LoadMore: $sce.trustAsHtml("Load More"),
             Customers: $sce.trustAsHtml("Customers"),
+            Users: $sce.trustAsHtml("Users"),
             Search: $sce.trustAsHtml("Search")
         }
     };
@@ -250,7 +252,10 @@ function CustomerCtrl($state, $ocMedia, OrderCloud, OrderCloudParameters, Parame
         $ocMedia('max-width:767px') ? vm.parameters.sortBy = null : angular.noop(); //Clear out sort by on mobile devices.
         vm.filter(true);
     };
-
+    vm.users = function (buyerID) {
+        OrderCloud.BuyerID.Set(buyerID);
+        $state.go('users');
+    };
     //Conditionally set, reverse, remove the sortBy parameter & reload the state.
     vm.updateSort = function(value) {
         value ? angular.noop() : value = vm.sortSelection;

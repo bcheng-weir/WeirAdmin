@@ -1,9 +1,44 @@
 angular.module('orderCloud')
     .config(AdminUsersConfig)
+    .service('AdminGroupService', AdminGroupService)
     .controller('AdminUsersCtrl', AdminUsersController)
     .controller('AdminUserEditCtrl', AdminUserEditController)
     .controller('AdminUserCreateCtrl', AdminUserCreateController)
 ;
+function AdminGroupService($q, OrderCloud) {
+    return {
+        UpdateAdminGroup: _updateAdminGroup
+    };
+    function _updateAdminGroup(userID, oldGroupID, newGroupID) {
+        var d = $q.defer();
+        if (oldGroupID) {
+            if (newGroupID && (newGroupID != oldGroupID)) {
+                OrderCloud.AdminUserGroups.DeleteUserAssignment(oldGroupID, userID)
+                .then(function () {
+                    OrderCloud.AdminUserGroups.SaveUserAssignment({ UserGroupID: newGroupID, UserID: userID })
+                    .then(function () {
+                        d.resolve();
+                    });
+                })
+                .catch(function (ex) {
+                    d.reject(ex);
+                });
+            } else {
+                d.resolve();
+            }
+        } else if (newGroupID) {
+            OrderCloud.AdminUserGroups.SaveUserAssignment({ UserGroupID: newGroupID, UserID: userID })
+            .then(function () {
+                d.resolve();
+            })
+            .catch(function(ex) {
+                d.reject(ex);
+            });
+        }
+        return d.promise;
+    }
+
+}
 
 function AdminUsersConfig($stateProvider) {
     $stateProvider
@@ -39,8 +74,12 @@ function AdminUsersConfig($stateProvider) {
                 SelectedAdminUser: function($stateParams, OrderCloud) {
                     return OrderCloud.AdminUsers.Get($stateParams.adminuserid);
                 },
-                SecurityProfilesAvailable : function(OrderCloud) {
-                    return OrderCloud.SecurityProfiles.List();
+                AdminGroupsAvailable : function(OrderCloud) {
+                    // return OrderCloud.AdminUserGroups.List(null, 1, 20, null, "Name");
+                    return OrderCloud.AdminUserGroups.List();
+                },
+                CurrentGroups: function ($stateParams, OrderCloud) {
+                    return OrderCloud.AdminUserGroups.ListUserAssignments(null, $stateParams.adminuserid)
                 }
             }
         })
@@ -50,8 +89,9 @@ function AdminUsersConfig($stateProvider) {
             controller: 'AdminUserCreateCtrl',
             controllerAs: 'adminUserCreate',
             resolve: {
-                SecurityProfilesAvailable: function(OrderCloud) {
-                   return OrderCloud.SecurityProfiles.List();
+                AdminGroupsAvailable: function (OrderCloud) {
+                    return OrderCloud.AdminUserGroups.List();
+                    // return OrderCloud.AdminUserGroups.List(null, 1, 20, null, "Name");
                 }
             }
         })
@@ -130,22 +170,27 @@ function AdminUsersController($state, $ocMedia, OrderCloud, OrderCloudParameters
     };
 }
 
-function AdminUserEditController($exceptionHandler, $state, toastr, OrderCloud, SelectedAdminUser, SecurityProfilesAvailable) {
+function AdminUserEditController(AdminGroupService, $exceptionHandler, $state, toastr, OrderCloud, SelectedAdminUser, AdminGroupsAvailable, CurrentGroups) {
     var vm = this,
         adminuserid = SelectedAdminUser.ID;
     vm.adminUserName = SelectedAdminUser.Username;
     vm.adminUser = SelectedAdminUser;
-    vm.securityProfilesAvailable = SecurityProfilesAvailable.Items;
+    vm.adminGroupsAvailable = AdminGroupsAvailable.Items;
+    vm.adminUser.UserGroupID = (CurrentGroups.Items.length > 0) ? CurrentGroups.Items[0].UserGroupID : null;
+    vm.oldGroupId = vm.adminUser.UserGroupID;
 
     if (vm.adminUser.TermsAccepted != null) {
         vm.TermsAccepted = true;
     }
 
-    vm.Submit = function() {
+    vm.Submit = function () {
         OrderCloud.AdminUsers.Update(adminuserid, vm.adminUser)
-            .then(function() {
-                $state.go('adminUsers', {}, {reload: true});
-                toastr.success('User Updated', 'Success');
+            .then(function (user) {
+                AdminGroupService.UpdateAdminGroup(user.ID, vm.oldGroupId, vm.adminUser.UserGroupID)
+                .then(function () {
+                    $state.go('adminUsers', {}, { reload: true });
+                    toastr.success('User Updated', 'Success');
+                });
             })
             .catch(function(ex) {
                 $exceptionHandler(ex)
@@ -164,19 +209,22 @@ function AdminUserEditController($exceptionHandler, $state, toastr, OrderCloud, 
     };
 }
 
-function AdminUserCreateController($exceptionHandler, $state, toastr, OrderCloud, SecurityProfilesAvailable) {
+function AdminUserCreateController(AdminGroupService, $exceptionHandler, $state, toastr, OrderCloud, AdminGroupsAvailable) {
     var vm = this;
-    vm.adminUser = {Email: '', Password: ''};
-    vm.securityProfilesAvailable = SecurityProfilesAvailable.Items;
+    vm.adminUser = {Email: '', Password: '', UserGroupID: '', Active: false};
+    vm.adminGroupsAvailable = AdminGroupsAvailable.Items;
 
     vm.Submit = function() {
         vm.adminUser.TermsAccepted = new Date();
         OrderCloud.AdminUsers.Create(vm.adminUser)
-            .then(function() {
-                $state.go('adminUsers', {}, {reload: true});
-                toastr.success('User Created', 'Success');
+            .then(function (user) {
+                AdminGroupService.UpdateAdminGroup(user.ID, null, vm.adminUser.UserGroupID)
+                .then(function () {
+                    $state.go('adminUsers', {}, { reload: true });
+                    toastr.success('User Created', 'Success');
+                });
             })
-            .catch(function(ex) {
+            .catch(function (ex) {
                 $exceptionHandler(ex)
             });
     };

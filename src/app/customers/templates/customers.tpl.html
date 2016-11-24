@@ -67,6 +67,9 @@
                     </button>
                     <button type="button" ui-sref="customers.edit({buyerid: buyer.ID})" class="btn btn-default btn-sm">{{customers.labels.Edit}}
                     </button>
+                    <button type="button" ng-click="customers.users(buyer.ID)" class="btn btn-default btn-sm">
+                        {{customers.labels.Users}}
+                    </button>
                 </td>
             </tr>
             </tbody>
