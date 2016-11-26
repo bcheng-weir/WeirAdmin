@@ -35,7 +35,7 @@
                         <button type="button" class="btn btn-lg btn-primary"><span ng-bind-html="order.labels.Update"></span></button>
                     </li>
                     <li ng-click="order.Comments()" style="padding: 0px 10px 0px 5px;">
-                        <button type="button" class="btn btn-lg btn-default"><span ng-bind-html='order.labels.Comments'></span></button>
+                        <a role="button" class="btn btn-lg btn-default" href="#Comments"><span ng-bind-html="order.labels.Comments"></span></a>
                     </li>
                     <li style="padding: 0px 10px 0px 0px;">
                         <button type="button" class="btn btn-lg btn-default" ng-csv="order.ToCsvJson" filename="{{order.CsvFilename}}" ng-bind-html="order.labels.Download"></button>
@@ -220,7 +220,47 @@
         </div>
         <div class="col-md-6" style="float: right">
             <!-- ToDo footer stuff -->
-            <strong><span ng-bind-html='order.labels.YourComments'></span></strong> <br /><span ng-bind-html='order.Order.xp.CommentsToWeir'></span>
+            <strong><span ng-bind-html='order.labels.YourComments'></span></strong> <br /><span ng-bind-html='order.Order.Comments'></span>
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="row">
+                <div class="col-lg-12">
+                    <ul class="nav nav-tabs">
+                        <li class="active comments"><a href="#" id="Comments" ng-bind-html="order.labels.Comments"></a></li>
+                    </ul>
+                </div>
+            </div>
+            <br>
+            <div class="row" ng-repeat="comment in order.Order.xp.CommentsToWeir"> <!-- ng-repeat comment in comments to weir -->
+                <div class="col-lg-12">
+                    <div>
+                        <span ng-bind-html="comment.by"></span>
+                        <span ng-bind-html="order.labels.AddedComment"></span>
+                        <span ng-bind-html="comment.date"></span>
+                    </div>
+                    <br>
+                    <div>
+                        <span ng-bind-html="comment.val"></span>
+                    </div>
+                    <hr>
+                </div>
+            </div>
+            <div class="row" ng-hide="order.ShowCommentBox">
+                <div class="col-lg-12">
+                    <button class="btn btn-lg btn-default" ng-bind-html="order.labels.Comment" ng-click="order.ShowCommentBox=true"></button>
+                </div>
+            </div>
+            <div class="row" ng-show="order.ShowCommentBox">
+                <div class="col-lg-12">
+                    <textarea cols="100" rows="6" ng-model="order.CommentToWeir"></textarea>
+                    <br>
+                    <button class="btn btn-lg btn-primary" ng-bind-html="order.labels.Add" ng-click="order.AddNewComment()"></button>
+                    <button class="btn btn-lg btn-default" ng-bind-html="order.labels.Cancel" ng-click="order.ShowCommentBox=false"></button>
+                </div>
+            </div>
         </div>
     </div>
 </article>

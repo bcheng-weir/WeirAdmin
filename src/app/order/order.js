@@ -24,6 +24,9 @@ function orderConfig($stateProvider) {
 	        url: '/order',
 	        data: {componentName: 'order'},
 	        resolve: {
+	        	Me: function(OrderCloud) {
+	        	    return OrderCloud.Me.Get();
+		        },
 	            Order: function(CurrentOrder){
 	                return CurrentOrder.Get();
 	            },
@@ -100,7 +103,7 @@ function orderConfig($stateProvider) {
 	    });
 }
 
-function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler, OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, WeirService, Underscore, OrderToCsvService, buyernetwork) {
+function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler, OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService, Underscore, OrderToCsvService, buyernetwork) {
     var vm = this;
 	vm.Zero = 0;
     vm.Order = Order;
@@ -122,6 +125,8 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
         return status.id == vm.Order.xp.Status;
     });
     vm.Payments = Payments;
+	vm.ShowCommentBox = false;
+	vm.CommentToWeir = "";
 
     var labels = {
         en: {
@@ -165,7 +170,12 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
             YourAttachments: "Your attachments",
             YourComments: "Your comments or instructions",
 	        Directions: "Select Save to update lead time, price or quantity.",
-	        DirectionsCont: "You can also add new items from the search or you can add blank items which you can complete with the required details."
+	        DirectionsCont: "You can also add new items from the search or you can add blank items which you can complete with the required details.",
+	        Comments: "Comments",
+	        Comment: "Comment",
+	        AddedComment: " added a comment - ",
+	        Add: "Add",
+	        Cancel: "Cancel"
         },
         fr: {
             //header labels
@@ -208,7 +218,12 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
             YourAttachments:$sce.trustAsHtml( "Your attachments"),
             YourComments:$sce.trustAsHtml( "Your comments or instructions"),
 	        Directions: $sce.trustAsHtml("Select Save to update lead time, price or quantity."),
-	        DirectionsCont: $sce.trustAsHtml("You can also add new items from the search or you can add blank items which you can complete with the required details.")
+	        DirectionsCont: $sce.trustAsHtml("You can also add new items from the search or you can add blank items which you can complete with the required details."),
+	        Comments: $sce.trustAsHtml("Comments"),
+	        Comment: $sce.trustAsHtml("Comment"),
+	        AddedComment: $sce.trustAsHtml(" added a comment - "),
+	        Add: $sce.trustAsHtml("Add"),
+	        Cancel: $sce.trustAsHtml("Cancel")
         }
     };
     vm.labels = labels[WeirService.Locale()];
@@ -454,6 +469,23 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 		}
 	}
 
+	vm.AddNewComment = function() {
+		var comment = {
+			date: new Date(),
+			by: Me.FirstName + " " + Me.LastName,
+			val: vm.CommentToWeir
+		};
+		vm.Order.xp.CommentsToWeir.push(comment);
+		OrderCloud.Orders.Patch(vm.Order.ID, {xp:{CommentsToWeir: vm.Order.xp.CommentsToWeir}}, vm.Order.xp.CustomerID)
+			.then(function(order) {
+				vm.CommentToWeir = "";
+				$state.go($state.current,{}, {reload:true});
+			})
+			.catch(function(ex) {
+				$exceptionHandler(ex);
+			})
+	};
+
 	vm.Confirm = _confirm;
 	function _confirm(currentUser) {
 		var confirmedStatus = {
@@ -480,11 +512,6 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 		} else {
 			return; //invlaid status for confirming. should not have shown the button.
 		}
-	}
-
-	vm.AddComment = _addComment;
-	function _addComment() {
-		//Add a comment from Weir, POC-255
 	}
 
 	vm.Update = _update;
