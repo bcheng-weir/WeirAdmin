@@ -103,7 +103,8 @@ function orderConfig($stateProvider) {
 	    });
 }
 
-function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler, OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService, Underscore, OrderToCsvService, buyernetwork) {
+function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler, OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems,
+                         Payments, Me, WeirService, Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr) {
     var vm = this;
 	vm.Zero = 0;
     vm.Order = Order;
@@ -127,6 +128,15 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
     vm.Payments = Payments;
 	vm.ShowCommentBox = false;
 	vm.CommentToWeir = "";
+	vm.fileStore = fileStore;
+	vm.country = function (c) {
+		var result = Underscore.findWhere(OCGeography.Countries, { value: c });
+		return result ? result.label : '';
+	};
+
+	/*vm.PONumber = "";
+	var payment = (vm.Payments.Items.length > 0) ? vm.Payments.Items[0] : null;
+	if (payment && payment.xp && payment.xp.PONumber) vm.PONumber = payment.xp.PONumber;*/
 
     var labels = {
         en: {
@@ -171,11 +181,13 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
             YourComments: "Your comments or instructions",
 	        Directions: "Select Save to update lead time, price or quantity.",
 	        DirectionsCont: "You can also add new items from the search or you can add blank items which you can complete with the required details.",
-	        Comments: "Comments",
 	        Comment: "Comment",
 	        AddedComment: " added a comment - ",
 	        Add: "Add",
-	        Cancel: "Cancel"
+	        Cancel: "Cancel",
+	        POSaveTitle: "PO Number Updated",
+	        POSaveMessage: "PO Number saved as: ",
+	        DragAndDrop: "Drag and drop files here to upload"
         },
         fr: {
             //header labels
@@ -219,14 +231,50 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
             YourComments:$sce.trustAsHtml( "Your comments or instructions"),
 	        Directions: $sce.trustAsHtml("Select Save to update lead time, price or quantity."),
 	        DirectionsCont: $sce.trustAsHtml("You can also add new items from the search or you can add blank items which you can complete with the required details."),
-	        Comments: $sce.trustAsHtml("Comments"),
 	        Comment: $sce.trustAsHtml("Comment"),
 	        AddedComment: $sce.trustAsHtml(" added a comment - "),
 	        Add: $sce.trustAsHtml("Add"),
-	        Cancel: $sce.trustAsHtml("Cancel")
+	        Cancel: $sce.trustAsHtml("Cancel"),
+	        POSaveTitle: $sce.trustAsHtml("PO Number Updated"),
+	        POSaveMessage: $sce.trustAsHtml("PO Number saved as: "),
+	        DragAndDrop: $sce.trustAsHtml("FR: Drag and drop files here to upload")
         }
     };
     vm.labels = labels[WeirService.Locale()];
+
+	vm.UpdatePO = function() {
+		if(vm.Order.xp.PONumber != "Pending") {
+			var data = {
+				xp: {
+					Status: WeirService.OrderStatus.SubmittedWithPO.id,
+					StatusDate: new Date(),
+					ReviewerName: Me.FirstName + " " + Me.LastName,
+					PONumber: vm.Order.xp.PONumber,
+					PendingPO: false
+				}
+			};
+
+			OrderCloud.Orders.Patch(vm.Order.ID, data, vm.Order.xp.CustomerID)
+				.then(function (order) {
+					toastr.success(vm.labels.POSaveMessage + order.xp.PONumber, vm.labels.POSaveTitle);
+					$state.go($state.current, {}, {reload: true});
+				})
+				.catch(function (ex) {
+					$exceptionHandler(ex);
+				});
+		}
+	};
+
+	vm.GetFileUrl = function(fileName) {
+		var encodedFileName = encodeURIComponent(fileName);
+		var orderid = null;
+		if(vm.Order.xp.OriginalOrderID == null) {
+			orderid = vm.Order.ID;
+		} else {
+			orderid = vm.Order.xp.OriginalOrderID
+		}
+		return vm.fileStore.location + orderid + encodedFileName;
+	};
 
     vm.ToCsvJson = toCsv;
 	function toCsv() {
@@ -475,6 +523,9 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 			by: Me.FirstName + " " + Me.LastName,
 			val: vm.CommentToWeir
 		};
+		if(vm.Order.xp.CommentsToWeir == null) {
+			vm.Order.xp.CommentsToWeir = [];
+		}
 		vm.Order.xp.CommentsToWeir.push(comment);
 		OrderCloud.Orders.Patch(vm.Order.ID, {xp:{CommentsToWeir: vm.Order.xp.CommentsToWeir}}, vm.Order.xp.CustomerID)
 			.then(function(order) {

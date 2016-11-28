@@ -554,7 +554,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
 			.then(function(order) {
 				// order is the localforge order.
 				currentOrder = order;
-				return OrderCloud.LineItems.List(currentOrder.ID,null,null,null,null,null,null, buyerid);
+				return OrderCloud.LineItems.List(currentOrder.ID,null,null,null,null,null,null, currentOrder.xp.CustomerID);
 			})
 			.then(function(lineItems) {
 				// If the line items contains the current part, then update.
@@ -565,12 +565,14 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
 					updateLineItem(currentOrder, lineItems.Items[elementPosition]);
 				}
 			})
-			.catch(function() {
-				OrderCloud.Orders.Create({ID: randomQuoteID()})
+			.catch(function(ex) {
+				$exceptionHandler(ex);
+				// TODO are we starting orders from the admin app?
+				/*OrderCloud.Orders.Create({ID: randomQuoteID()})
 					.then(function(order) {
 						CurrentOrder.Set(order.ID);
 						addLineItem(order);
-					})
+					})*/
 			});
 
 		function updateLineItem(order, lineItem) {
@@ -579,8 +581,8 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
 			var li = {
 				ProductID: lineItem.ProductID,
 				Quantity: qty
-			}
-			OrderCloud.LineItems.Patch(order.ID, lineItem.ID, li, buyerid)
+			};
+			OrderCloud.LineItems.Patch(order.ID, lineItem.ID, li, order.xp.CustomerID)
 				.then(function(lineItem) {
 					deferred.resolve({Order: order, LineItem: lineItem});
 				})
@@ -596,7 +598,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
 				}
 			};
 
-			OrderCloud.LineItems.Create(order.ID, li)
+			OrderCloud.LineItems.Create(order.ID, li, order.xp.CustomerID)
 				.then(function(lineItem) {
 					deferred.resolve({Order: order, LineItem: lineItem});
 				})
@@ -636,7 +638,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
 							Quantity: part.Quantity
 						};
 
-						OrderCloud.LineItems.Create(order.ID, li)
+						OrderCloud.LineItems.Create(order.ID, li, order.xp.CustomerID)
 							.then(function(lineItem) {
 								d.resolve(lineItem);
 							});

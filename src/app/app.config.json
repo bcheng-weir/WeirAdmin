@@ -2,9 +2,9 @@
 	"appname": "Weir B2B Site Administration",
 	"scope": "CategoryAdmin ProductAdmin ProductAssignmentAdmin FullAccess ",
 	"clientid": "35C0B8D9-4FAD-4544-902B-3AA1B8DC5630",
-  "buyernetwork": "290DD50B-0085-4AB4-94F4-57F315AB9BE0",
-  "qaclientid": "BA7B6918-DDA0-42E3-806D-FE01FCACA5B6",
-  "qabuyernetwork":  "267E3A43-7997-4DAA-BF76-C6520CDA383C",
+  	"buyernetwork": "290DD50B-0085-4AB4-94F4-57F315AB9BE0",
+  	"qaclientid": "BA7B6918-DDA0-42E3-806D-FE01FCACA5B6",
+  	"qabuyernetwork":  "267E3A43-7997-4DAA-BF76-C6520CDA383C",
 	"buyerid": "weir",
 	"environment": "prod",
 	"anonymous": false,
@@ -14,5 +14,12 @@
 		"top": true,
 		"bottom": false
 	},
-	"imageRoot": "https://weirwebhooks.azurewebsites.net/Content/Images/"
+	"imageRoot": "https://weirwebhooks.azurewebsites.net/Content/Images/",
+	"fileStore": {
+		"akid":"AKIAIDJEBSBD44ECHPAQ",
+		"sak":"vals+hHD4gvcnZpOgzS8j1C1ixRrLOjl+yINYbzN",
+		"awsRegion":"us-east-2",
+		"bucket": "ordercloudtest",
+		"location": "https://s3.us-east-2.amazonaws.com/ordercloudtest/"
+	}
 }

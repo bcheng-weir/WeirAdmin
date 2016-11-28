@@ -61,8 +61,14 @@
                      <span class="text-danger">{{order.Order.ID}}</span></b>
              </p>
              <p><b><span ng-bind-html='order.labels.QuoteRef'></span><span class="text-danger">{{order.Order.xp.RefNum}}</span></b></p>
-             <p>
-                 <b><span ng-show="order.Order.xp.Type=='Order'" ng-bind-html='order.labels.PONumber'></span><span class="text-danger">{{order.Order.xp.PONumber}}</span></b>
+             <p ng-show="order.Order.xp.Type=='Order'">
+                 <b>
+                     <span ng-bind-html='order.labels.PONumber'></span>
+                     <span class="text-danger" ng-hide="order.Order.xp.Status=='SE'">{{order.Order.xp.PONumber}}</span>
+                     <span ng-show="order.Order.xp.Status=='SE'">
+                         <input type="text" ng-model="order.Order.xp.PONumber" /> <button class="btn btn-sm btn-primary" ng-bind-html="order.labels.Add" ng-click="order.UpdatePO()"></button>
+                    </span>
+                 </b>
              </p>
          </div>
          <div class="col-md-3">
@@ -205,18 +211,47 @@
          </div>
          <div class="col-md-6" style="float: right">
              <!-- ToDo footer stuff -->
-             <strong><span ng-bind-html='order.labels.YourAttachments'></span></strong><br /><span ng-bind-html='order.Order.xp.Files.toString().replace("," , "<br />")'></span>
+             <strong><span ng-bind-html='order.labels.YourAttachments'></span></strong><br />
+             <p ng-repeat="fileName in order.Order.xp.Files">
+                 <a href="{{order.GetFileUrl(fileName)}}" target="_blank">{{fileName}}</a>
+             </p>
+             <p ng-hide="order.Order.xp.Status=='SE'">
+                 <a href="{{order.GetFileUrl(order.Order.xp.PODocument)}}" target="_blank">{{order.Order.xp.PODocument}}</a>
+             </p>
+             <p ng-show="order.Order.xp.Status=='SE'">
+                 <ordercloud-po-upload model="order.Order" keyname="PODocument" label=''></ordercloud-po-upload>
+             </p>
          </div>
      </div>
     <div class="row" style="padding: 5px 5px 5px 5px;">
         <div class="col-md-6">
             <!-- ToDo footer stuff -->
             <strong><span ng-bind-html='order.labels.DelieveryAddress'></span></strong><br />
-            <span ng-bind-html='order.DeliveryAddress.FirstName + " " + order.DeliveryAddress.LastName'></span><br />
-            <span ng-bind-html='order.DeliveryAddress.CompanyName'></span><br />
-            <span ng-bind-html='order.DeliveryAddress.Street1'></span><br />
-            <span ng-bind-html='order.DeliveryAddress.Street2'></span><br />
-            <span ng-bind-html='order.DeliveryAddress.City'></span>
+            <div ng-if="order.DeliveryAddress.Country=='FR'">
+                <!--{{order.DeliveryAddress.CompanyName}}<br>-->
+                <span ng-bind-html='order.DeliveryAddress.FirstName + " " + order.DeliveryAddress.LastName'></span><br />
+                {{order.DeliveryAddress.Street1}}<br>
+                {{order.DeliveryAddress.Street2}}<br>
+                {{order.DeliveryAddress.Zip}} {{order.DeliveryAddress.City}}<br>
+                {{order.country(order.DeliveryAddress.Country)}}
+            </div>
+            <div ng-if="order.DeliveryAddress.Country=='GB'">
+                <!--{{order.DeliveryAddress.CompanyName}}<br>-->
+                <span ng-bind-html='order.DeliveryAddress.FirstName + " " + order.DeliveryAddress.LastName'></span><br />
+                {{order.DeliveryAddress.Street1}}<br>
+                {{order.DeliveryAddress.Street2}}<br>
+                {{order.DeliveryAddress.City}}<br>
+                {{order.DeliveryAddress.Zip}}<br>
+                {{order.country(order.DeliveryAddress.Country)}}
+            </div>
+            <div ng-if="order.DeliveryAddress.Country!='GB' && order.DeliveryAddress.Country!='FR'">
+                <!--{{order.DeliveryAddress.CompanyName}}<br>-->
+                <span ng-bind-html='order.DeliveryAddress.FirstName + " " + order.DeliveryAddress.LastName'></span><br />
+                {{order.DeliveryAddress.Street1}}<br>
+                {{order.DeliveryAddress.Street2}}<br>
+                {{order.DeliveryAddress.City}}, {{order.DeliveryAddress.State}} {{order.DeliveryAddress.Zip}}<br>
+                {{order.country(order.DeliveryAddress.Country)}}
+            </div>
         </div>
         <div class="col-md-6" style="float: right">
             <!-- ToDo footer stuff -->
