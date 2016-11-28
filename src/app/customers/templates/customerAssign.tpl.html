@@ -1,9 +1,7 @@
 <h3 class="page-header">
     {{customerAssign.labels.AssignmentsFor}} {{customerAssign.serviceCompany.Name}}
 </h3>
-
 <ordercloud-search servicename="Buyers" controlleras="customerAssign"></ordercloud-search>
-
 <section class="table-fixed-header" ng-if="customerAssign.endUsers.Items.length">
     <div class="table-header-bg"></div>
     <div class="table-container" ordercloud-infinite-scroll controlleras="customerAssign" servicename="Buyers" idname="ID" disable-dynamic-validation>

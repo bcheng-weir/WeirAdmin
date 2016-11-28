@@ -40,7 +40,7 @@ function CustomerConfig($stateProvider) {
                     var f = {
                         "xp.active":"true"
                     };
-                    return OrderCloud.Addresses.List(Parameters.search,Parameters.page,Parameters.pageSize,Parameters.searchOn,Parameters.sortBy,f,SelectedBuyer.xp.CustomerID);
+                    return OrderCloud.Addresses.List(Parameters.search,Parameters.page,Parameters.pageSize,Parameters.searchOn,Parameters.sortBy,f,SelectedBuyer.ID);
                 }
             }
         })
@@ -54,7 +54,7 @@ function CustomerConfig($stateProvider) {
                     return OrderCloud.Buyers.Get($stateParams.buyerid)
                 },
                 SelectedAddress: function($stateParams, $state, OrderCloud) {
-                    return OrderCloud.Addresses.Get($stateParams.addressid,$stateParams.buyerid).catch(function() {
+                    return OrderCloud.Addresses.Get($stateParams.addressid,SelectedBuyer.ID).catch(function() {
                         console.writeline("failed to get address");
                     });
                 }
@@ -87,6 +87,7 @@ function CustomerConfig($stateProvider) {
                     return OrderCloud.Buyers.Get($stateParams.buyerid);
                 },
                 EndUsers: function($stateParams, OrderCloud) {
+                    //TODO filter xp.Type.ID
                     return OrderCloud.Buyers.List();
                 }
             }
@@ -613,6 +614,7 @@ function CustomerAddressCreateCtrl($q, $exceptionHandler, $scope, $state, toastr
 }
 
 function CustomerAssignCtrl($q, $exceptionHandler, $scope, $state, toastr, Underscore, OrderCloud, SelectedBuyer, EndUsers, Assignments, WeirService, CustomerService) {
+    // ToDo: This needs to page!
     var vm = this;
     vm.list = angular.copy(EndUsers);
     vm.endUsers = angular.copy(EndUsers);
