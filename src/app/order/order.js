@@ -667,14 +667,14 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 			})
             .then(function(data) {
             	// Set the local impersonation token so that As() can be used.
-                OrderCloud.Auth.SetImpersonationToken(data['access_token']);
+                return OrderCloud.Auth.SetImpersonationToken(data['access_token']);
             })
 			.then(function() {
 				// Create the order as the impersonated user.
 				return OrderCloud.As().Orders.Create(orderCopy, vm.Order.xp.CustomerID);
 				//ToDo make another then in order to set the shipping address.
 			})
-			.then(function(order) {
+			.then(function() {
 				// Create the line items.
 				angular.forEach(lineItemsCopy.Items, function(value, key) {
 					queue.push(OrderCloud.LineItems.Create(orderCopy.ID, value, vm.Order.xp.CustomerID));
@@ -682,7 +682,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 				$q.all(queue)
 					.then(function() {
 						return OrderCloud.Orders.Submit(orderCopy.ID, vm.Order.xp.CustomerID);
-					})
+					});
 			})
 			.then(function() {
 				// Remove the impersonation token.

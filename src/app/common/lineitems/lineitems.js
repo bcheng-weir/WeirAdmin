@@ -42,14 +42,15 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
         OrderCloud.LineItems.Delete(Order.ID, LineItem.ID)
             .then(function () {
                 // If all line items are removed delete the order.
-                OrderCloud.LineItems.List(Order.ID)
+                OrderCloud.LineItems.List(Order.ID,null,null,null,null,null,null,Order.xp.CustomerID)
                     .then(function (data) {
                         if (!data.Items.length) {
                             CurrentOrder.Remove();
-                            OrderCloud.Orders.Delete(Order.ID).then(function () {
-                                $state.reload();
-                                $rootScope.$broadcast('OC:RemoveOrder');
-                            });
+                            OrderCloud.Orders.Delete(Order.ID, Order.xp.CustomerID)
+                                .then(function () {
+                                    $state.reload();
+                                    $rootScope.$broadcast('OC:RemoveOrder');
+                                });
                         }
                         else {
                             $state.reload();
@@ -60,7 +61,7 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
 
     function _updateQuantity(Order, LineItem) {
         if (LineItem.Quantity > 0) {
-            OrderCloud.LineItems.Patch(Order.ID, LineItem.ID, {Quantity: LineItem.Quantity})
+            OrderCloud.LineItems.Patch(Order.ID, LineItem.ID, {Quantity: LineItem.Quantity}, Order.xp.CustomerID)
                 .then(function () {
                     $rootScope.$broadcast('OC:UpdateOrder', Order.ID);
                     $rootScope.$broadcast('OC:UpdateLineItem',Order);
@@ -121,7 +122,7 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
         modalInstance.result
             .then(function (address) {
                 address.ID = Math.floor(Math.random() * 1000000).toString();
-                OrderCloud.LineItems.SetShippingAddress(Order.ID, LineItem.ID, address)
+                OrderCloud.LineItems.SetShippingAddress(Order.ID, LineItem.ID, address, Order.xp.CustomerID)
                     .then(function () {
                         $rootScope.$broadcast('LineItemAddressUpdated', LineItem.ID, address);
                     });
@@ -131,23 +132,23 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
     function _updateShipping(Order, LineItem, AddressID) {
         OrderCloud.Addresses.Get(AddressID)
             .then(function (address) {
-                OrderCloud.LineItems.SetShippingAddress(Order.ID, LineItem.ID, address);
+                OrderCloud.LineItems.SetShippingAddress(Order.ID, LineItem.ID, address, Order.xp.CustomerID);
                 $rootScope.$broadcast('LineItemAddressUpdated', LineItem.ID, address);
             });
     }
 
-    function _listAll(orderID) {
+    function _listAll(orderID, buyerID) {
         var li;
         var dfd = $q.defer();
         var queue = [];
-        OrderCloud.LineItems.List(orderID, null, 1, 100)
+        OrderCloud.LineItems.List(orderID, null, 1, 100, null, null, null, buyerID)
             .then(function (data) {
                 li = data;
                 if (data.Meta.TotalPages > data.Meta.Page) {
                     var page = data.Meta.Page;
                     while (page < data.Meta.TotalPages) {
                         page += 1;
-                        queue.push(OrderCloud.LineItems.List(orderID, null, page, 100));
+                        queue.push(OrderCloud.LineItems.List(orderID, null, page, 100, null, null, null, buyerID));
                     }
                 }
                 $q.all(queue)

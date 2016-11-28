@@ -36,11 +36,11 @@ function CustomerConfig($stateProvider) {
                 SelectedBuyer: function($stateParams, OrderCloud){
                     return OrderCloud.Buyers.Get($stateParams.buyerid)
                 },
-                AddressList: function(OrderCloud, $stateParams, Parameters) {
+                AddressList: function(OrderCloud, $stateParams, Parameters, SelectedBuyer) {
                     var f = {
                         "xp.active":"true"
                     };
-                    return OrderCloud.Addresses.List(Parameters.search,Parameters.page,Parameters.pageSize,Parameters.searchOn,Parameters.sortBy,f,$stateParams.buyerid);
+                    return OrderCloud.Addresses.List(Parameters.search,Parameters.page,Parameters.pageSize,Parameters.searchOn,Parameters.sortBy,f,SelectedBuyer.xp.CustomerID);
                 }
             }
         })
