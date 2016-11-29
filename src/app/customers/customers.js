@@ -95,7 +95,7 @@ function CustomerConfig($stateProvider) {
 }
 
 function CustomerService($q, $state, $sce, OrderCloud, $exceptionHandler) {
-    var _weirGroups = [{id: "1", label: "WCVUK"}, {id: "2", label: "WPIFR"}];
+    var _weirGroups = [{id: "1", label: "WVCUK"}, {id: "2", label: "WPIFR"}];
     var _customerTypes = [{id: "1", label: "End User"}, {id: "2", label: "Service Company"}];
     var _componentLabels = {
         en: {
