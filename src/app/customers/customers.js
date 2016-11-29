@@ -110,8 +110,9 @@ function CustomerService($q, $state, $sce, OrderCloud, $exceptionHandler) {
             NewAddress: "New Address",
             AddressId:"Address ID",
             AddressName:"Address Name",
-            CompanyName:"Company Name",
-            FirstName:"First Name",
+            CompanyName: "Company Name",
+            CustomerNumber: "Customer Number",
+            FirstName: "First Name",
             LastName:"Last Name",
             StreetOne: "Street 1",
             StreetTwo: "Street 2",
@@ -154,6 +155,7 @@ function CustomerService($q, $state, $sce, OrderCloud, $exceptionHandler) {
             AddressId: $sce.trustAsHtml("Address ID"),
             AddressName: $sce.trustAsHtml("Address Name"),
             CompanyName: $sce.trustAsHtml("Company Name"),
+            CustomerNumber: $sce.trustAsHtml("Customer Number"),
             FirstName: $sce.trustAsHtml("First Name"),
             LastName: $sce.trustAsHtml("Last Name"),
             StreetOne: $sce.trustAsHtml("Street 1"),
@@ -204,13 +206,44 @@ function CustomerService($q, $state, $sce, OrderCloud, $exceptionHandler) {
         return OrderCloud.Addresses.Update(address.ID, address, buyerID)
             .catch(function(ex) {
                 $exceptionHandler(ex);
+            });
+    }
+
+    function _createGroup(groupName, buyerID) {
+        var group = {
+            ID: groupName,
+            Name: groupName,
+            Description: "Standard user group",
+            xp:  { }
+        };
+        var assignment = {
+            BuyerID: buyerID,
+            SecurityProfileID: groupName,
+            UserGroupID: groupName
+        };
+        return OrderCloud.UserGroups.Create(group, buyerID)
+            .then(function(grp) {
+                OrderCloud.SecurityProfiles.SaveAssignment(assignment);
             })
+            .catch(function(ex) {
+                $exceptionHandler(ex);
+            });
+    }
+    function _assignPlaceholder(buyerID) {
+        var assign = {
+            BuyerID: buyerID,
+            ProductID: "PLACEHOLDER",
+            PriceScheduleID: "PLACEHOLDER"
+        };
+        return OrderCloud.Products.SaveAssignment(assign);
     }
 
     return {
         WeirGroups: _weirGroups,
         CustomerTypes: _customerTypes,
         CreateBuyer: _createBuyer,
+        CreateGroup: _createGroup,
+        AssignPlaceholderProduct: _assignPlaceholder,
         CreateAddress: _createAddress,
         UpdateAddress: _updateAddress,
         Labels: _componentLabels
@@ -374,7 +407,7 @@ function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, O
     vm.types = CustomerService.CustomerTypes;
 
     vm.Submit = function() {
-        OrderCloud.Buyers.Update(vm.buyer, SelectedBuyer.ID)
+        OrderCloud.Buyers.Patch(vm.buyer, vm.buyer.ID)
             .then(function() {
                 $state.go('customers', {}, {reload: true});
                 toastr.success('Buyer Updated', 'Success');
@@ -414,15 +447,19 @@ function CustomerCreateCtrl($q, $exceptionHandler, $scope, $state, toastr, Order
         vm.address.xp.primary = true;
         vm.address.xp.active = true;
         vm.buyer.xp.Assignments = [];
-
+        vm.buyer.xp = vm.buyer.xp || {};
+        vm.buyer.xp.CustomerNumber = vm.CustomerNumber;
+        vm.buyer.ID = vm.buyer.xp.WeirGroup.label + "-" + vm.CustomerNumber;
         var buyerPromise = CustomerService.CreateBuyer(vm.buyer);
-        var addressPromise = buyerPromise.then(function(newBuyer) {
+        buyerPromise.then(function(newBuyer) {
             newBuyerID = newBuyer.ID;
-            return CustomerService.CreateAddress(vm.address, newBuyerID)
+            queue.push(CustomerService.CreateAddress(vm.address, newBuyerID));
+            queue.push(CustomerService.CreateGroup("BuyerAdmin", newBuyerID));
+            queue.push(CustomerService.CreateGroup("Buyers", newBuyerID));
+            queue.push(CustomerService.CreateGroup("Shoppers", newBuyerID));
+            queue.push(CustomerService.AssignPlaceholderProduct(newBuyerID));
         });
-
         queue.push(buyerPromise);
-        queue.push(addressPromise);
 
         $q.all(queue).then(function() {
             dfd.resolve();

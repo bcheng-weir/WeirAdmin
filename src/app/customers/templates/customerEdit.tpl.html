@@ -4,13 +4,13 @@
     </h3>
     <form ng-submit="customerEdit.Submit()" name="CustomerEditForm" novalidate>
         <div class="row">
-            <div class="form-group col-md-6">
-                <label for="buyer_id">{{customerEdit.labels.ID}}</label>
-                <input id="buyer_id" type="text" pattern="([A-Za-z0-9\-\_]+)" pattern-err-type="ID_Name" ng-model="customerEdit.buyer.ID" class="form-control">
-            </div>
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-3">
                 <label for="buyer_name">{{customerEdit.labels.Name}}</label>
                 <input id="buyer_name" type="text" ng-model="customerEdit.buyer.Name" class="form-control" required>
+            </div>
+            <div class="form-group col-md-3">
+                <label for="customernumber">{{customerEdit.labels.CustomerNumber}}</label>
+                <input id="customernumber" type="text" ng-model="customerEdit.buyer.xp.CustomerNumber" class="form-control" readonly ng-disabled="true">
             </div>
         </div>
         <div class="row">
