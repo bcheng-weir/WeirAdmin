@@ -100,6 +100,12 @@ function BaseConfig($stateProvider, $injector) {
                 });
                 deferred.resolve(components);
                 return deferred.promise;
+            },
+            IsAdmin: function(UserGroupsService) {
+                return UserGroupsService.IsUserInGroup([UserGroupsService.Groups.SuperAdmin]);
+            },
+            IsInternalSales: function (UserGroupsService) {
+                return UserGroupsService.IsUserInGroup([UserGroupsService.Groups.InternalSales]);
             }
         }
     };
@@ -107,14 +113,16 @@ function BaseConfig($stateProvider, $injector) {
     $stateProvider.state('base', baseState);
 }
 
-function BaseController($rootScope, $ocMedia, $state, $sce, Underscore, snapRemote, defaultErrorMessageResolver, CurrentUser, ComponentList, base, WeirService) {
+function BaseController($rootScope, $ocMedia, $state, $sce, Underscore, snapRemote, defaultErrorMessageResolver, CurrentUser, ComponentList, base, WeirService, IsAdmin, IsInternalSales) {
     var vm = this;
     vm.left = base.left;
     vm.right = base.right;
     vm.currentUser = CurrentUser;
     vm.catalogItems = ComponentList.nonSpecific;
     vm.organizationItems = ComponentList.buyerSpecific;
-    vm.registrationAvailable = Underscore.filter(vm.organizationItems, function(item) { return item.StateRef == 'registration' }).length;
+    vm.IsAdmin = IsAdmin;
+    vm.CanEditCustomers = IsAdmin || IsInternalSales;
+    vm.registrationAvailable = Underscore.filter(vm.organizationItems, function (item) { return item.StateRef == 'registration' }).length;
 
     defaultErrorMessageResolver.getErrorMessages().then(function (errorMessages) {
         errorMessages['customPassword'] = 'Password must be at least eight characters long and include at least one letter and one number';

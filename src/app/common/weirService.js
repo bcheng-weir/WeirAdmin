@@ -1,6 +1,43 @@
-angular.module( 'orderCloud' )
+angular.module('orderCloud')
+    .service('UserGroupsService', UserGroupsService)
     .factory( 'WeirService', WeirService )
 ;
+function UserGroupsService($q, OrderCloud) {
+    var groups = null;
+    function _isUserInGroup(groupList) {
+        var d = $q.defer();
+        var isInGroup = false;
+        if (!groups) {
+            OrderCloud.Me.Get()
+            .then(function(usr) {
+                OrderCloud.AdminUserGroups.ListUserAssignments(null, usr.ID, 1, 50)
+                .then(function (results) {
+                    groups = [];
+                    for (var i = 0; i < results.Items.length; i++) {
+                        var id = results.Items[i].UserGroupID;
+                        groups.push(id);
+                        if (groupList.indexOf(id) > -1) isInGroup = true;
+                    }
+                    d.resolve(isInGroup);
+                })
+            })
+        } else {
+            for (var i = 0; i < groups.length; i++) {
+                if (groupList.indexOf(groups[i]) > -1) isInGroup = true;
+            }
+            d.resolve(isInGroup);
+        }
+        return d.promise;
+    }
+    return {
+        IsUserInGroup: _isUserInGroup,
+        Groups: {
+            SuperAdmin: 'SuperAdmin',
+            InternalSales: 'InternalSales',
+            ExternalSales: 'ExternalSales'
+        }
+    }
+}
 
 function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetwork, buyerid) {
     var orderStatuses = {

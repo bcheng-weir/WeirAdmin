@@ -30,7 +30,7 @@
             </div>
         </div>
         <div class="col-xs-4">
-            <div class="panel panel-primary">
+            <div class="panel panel-primary" ng-if="home.IsAdmin">
                 <div class="panel-heading">
                     <h3 class="panel-title" ng-bind-html="home.labels.Admin"></h3>
                 </div>
@@ -38,7 +38,7 @@
                     <span><a ui-sref="adminUsers" ng-bind-html="home.labels.ManageAdmins"></a></span>
                 </div>
             </div>
-            <div class="panel panel-primary">
+            <div class="panel panel-primary" ng-if="home.CanEditCustomers">
                 <div class="panel-heading">
                     <h3 class="panel-title" ng-bind-html="home.labels.Customers"></h3>
                 </div>
