@@ -14,11 +14,14 @@
                 <ul class="nav navbar-nav navbar-left">
                     <li style="padding: 10px 5px 0px 0px;">
                         <span ng-bind-html='order.labels.status'></span><br />
-                        <b><span ng-bind-html='order.Status.label'></span>;
-                        <span ng-bind-html='order.Order.xp.StatusDate | weirdate'></span></b>
+                        <h4>
+                            <span ng-bind-html='order.Status.label'></span>;
+                            <span ng-bind-html='order.Order.xp.StatusDate | weirdate'></span>
+                        </h4>
                     </li>
-                    <li style="padding: 10px 0px 0px 10px;" ng-show="order.Order.xp.Status=='RE'">
-                        &nbsp;<span ng-bind-html='order.labels.PONumber'></span><br /><span ng-bind-html='order.Order.xp.PONumber'></span>
+                    <li style="padding: 10px 0px 0px 10px;" ng-show="order.Order.xp.PONumber!=null">
+                        <span ng-bind-html='order.labels.PONumber'></span><br />
+                        <h4><span ng-bind-html='order.Order.xp.PONumber'></span></h4>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
