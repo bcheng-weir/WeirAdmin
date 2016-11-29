@@ -186,8 +186,8 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
         };
         var miniCartBuyer = {};
         CurrentOrder.Get().then(function (co) {
-            miniCartBuyer = {"FromUserID": co.FromUserID, "BuyerID": co.xp.CustomerID};
-            return OrderCloud.Users.Get(co.FromUserID, co.xp.CustomerID)
+            miniCartBuyer = {"FromUserID": co.FromUserID, "BuyerID": co.xp.BuyerID};
+            return OrderCloud.Users.Get(co.FromUserID, co.xp.BuyerID)
         }).then(function (buyer) {
             // Get an access token for impersonation.
             impersonation.Claims = buyer.AvailableRoles;
@@ -231,8 +231,8 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
         };
         var miniCartBuyer = {};
         CurrentOrder.Get().then(function (co) {
-            miniCartBuyer = {"FromUserID": co.FromUserID, "BuyerID": co.xp.CustomerID};
-            return OrderCloud.Users.Get(co.FromUserID, co.xp.CustomerID)
+            miniCartBuyer = {"FromUserID": co.FromUserID, "BuyerID": co.xp.BuyerID};
+            return OrderCloud.Users.Get(co.FromUserID, co.xp.BuyerID)
         }).then(function (buyer) {
             // Get an access token for impersonation.
             impersonation.Claims = buyer.AvailableRoles;
@@ -276,8 +276,8 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
         };
         var miniCartBuyer = {};
         CurrentOrder.Get().then(function (co) {
-            miniCartBuyer = {"FromUserID": co.FromUserID, "BuyerID": co.xp.CustomerID};
-            return OrderCloud.Users.Get(co.FromUserID, co.xp.CustomerID)
+            miniCartBuyer = {"FromUserID": co.FromUserID, "BuyerID": co.xp.BuyerID};
+            return OrderCloud.Users.Get(co.FromUserID, co.xp.BuyerID)
         }).then(function (buyer) {
             // Get an access token for impersonation.
             impersonation.Claims = buyer.AvailableRoles;
@@ -316,8 +316,8 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
         };
         var miniCartBuyer = {};
         CurrentOrder.Get().then(function(co) {
-            miniCartBuyer = {"FromUserID" : co.FromUserID, "BuyerID": co.xp.CustomerID };
-            return OrderCloud.Users.Get(co.FromUserID, co.xp.CustomerID)
+            miniCartBuyer = {"FromUserID" : co.FromUserID, "BuyerID": co.xp.BuyerID };
+            return OrderCloud.Users.Get(co.FromUserID, co.xp.BuyerID)
         }).then(function(buyer) {
             // Get an access token for impersonation.
             impersonation.Claims = buyer.AvailableRoles;
@@ -374,8 +374,8 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
         };
         var miniCartBuyer = {};
         CurrentOrder.Get().then(function(co) {
-            miniCartBuyer = {"FromUserID" : co.FromUserID, "BuyerID": co.xp.CustomerID };
-            return OrderCloud.Users.Get(co.FromUserID, co.xp.CustomerID)
+            miniCartBuyer = {"FromUserID" : co.FromUserID, "BuyerID": co.xp.BuyerID };
+            return OrderCloud.Users.Get(co.FromUserID, co.xp.BuyerID)
         }).then(function(buyer) {
             // Get an access token for impersonation.
             impersonation.Claims = buyer.AvailableRoles;
@@ -462,8 +462,8 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
                     queue.push((function () {
                         var miniCartBuyer = {};
                         CurrentOrder.Get().then(function (co) {
-                            miniCartBuyer = {"FromUserID": co.FromUserID, "BuyerID": co.xp.CustomerID};
-                            return OrderCloud.Users.Get(co.FromUserID, co.xp.CustomerID)
+                            miniCartBuyer = {"FromUserID": co.FromUserID, "BuyerID": co.xp.BuyerID};
+                            return OrderCloud.Users.Get(co.FromUserID, co.xp.BuyerID)
                         }).then(function (buyer) {
                             // Get an access token for impersonation.
                             impersonation.Claims = buyer.AvailableRoles;
@@ -554,7 +554,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
 			.then(function(order) {
 				// order is the localforge order.
 				currentOrder = order;
-				return OrderCloud.LineItems.List(currentOrder.ID,null,null,null,null,null,null,currentOrder.xp.CustomerID);
+				return OrderCloud.LineItems.List(currentOrder.ID,null,null,null,null,null,null,currentOrder.xp.BuyerID);
 			})
 			.then(function(lineItems) {
 				// If the line items contains the current part, then update.
@@ -582,7 +582,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
 				ProductID: lineItem.ProductID,
 				Quantity: qty
 			};
-			OrderCloud.LineItems.Patch(order.ID, lineItem.ID, li, order.xp.CustomerID)
+			OrderCloud.LineItems.Patch(order.ID, lineItem.ID, li, order.xp.BuyerID)
 				.then(function(lineItem) {
 					deferred.resolve({Order: order, LineItem: lineItem});
 				})
@@ -606,16 +606,16 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
 				Claims: []
 			};
 
-			OrderCloud.Users.Get(order.FromUserID, order.xp.CustomerID)
+			OrderCloud.Users.Get(order.FromUserID, order.xp.BuyerID)
 				.then(function(buyer) {
 					impersonation.Claims = buyer.AvailableRoles;
-					return OrderCloud.Users.GetAccessToken(order.FromUserID, impersonation, order.xp.CustomerID);
+					return OrderCloud.Users.GetAccessToken(order.FromUserID, impersonation, order.xp.BuyerID);
 				})
 				.then(function(data) {
 					return OrderCloud.Auth.SetImpersonationToken(data['access_token']);
 				})
 				.then(function() {
-					return OrderCloud.As().LineItems.Create(order.ID, li, order.xp.CustomerID);
+					return OrderCloud.As().LineItems.Create(order.ID, li, order.xp.BuyerID);
 				})
 				.then(function(lineItem) {
 					deferred.resolve({Order: order, LineItem: lineItem});
@@ -659,7 +659,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
 							Quantity: part.Quantity
 						};
 
-						OrderCloud.LineItems.Create(order.ID, li, order.xp.CustomerID)
+						OrderCloud.LineItems.Create(order.ID, li, order.xp.BuyerID)
 							.then(function(lineItem) {
 								d.resolve(lineItem);
 							});

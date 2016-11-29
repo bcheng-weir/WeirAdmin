@@ -161,11 +161,11 @@ function MiniCartController($q, $state, $rootScope,$uibModal, $ocMedia, $sce, Or
 		var dfd = $q.defer();
 		var queue = [];
 		vm.TotalItems = 0;
-		OrderCloud.LineItems.List(order.ID,null,null,null,null,null,null,order.xp.CustomerID)
+		OrderCloud.LineItems.List(order.ID,null,null,null,null,null,null,order.xp.BuyerID)
 			.then(function(li) {
 				vm.LineItems = li;
 				if (li.Meta.TotalPages > li.Meta.Page) {
-					queue.push(OrderCloud.LineItems.List(order.ID, null ,li.Meta.Page + 1, null, null, null, null, order.xp.CustomerID));
+					queue.push(OrderCloud.LineItems.List(order.ID, null ,li.Meta.Page + 1, null, null, null, null, order.xp.BuyerID));
 				}
 				$q.all(queue)
 					.then(function(results) {

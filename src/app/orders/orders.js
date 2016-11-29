@@ -272,9 +272,8 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 		"ordersMain.listOfRevisions":"revisionsList"
 	};
 
-	vm.View = function(orderId, customerId, customerName) {
-		OrderCloud.BuyerID.Set(customerId);
-
+	vm.View = function(orderId, buyerId, customerId, customerName) {
+		OrderCloud.BuyerID.Set(buyerId);
 		CurrentOrder.Set(orderId)
 			.then(function() {
 				CurrentOrder.SetCurrentCustomer({
@@ -299,9 +298,8 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
         $state.go("ordersMain.listOfRevisions", {filters:JSON.stringify(filter)},{reload:true});
 	};
 
-	vm.Update = function(orderId, customerId) {
-		OrderCloud.BuyerID.Set(customerId);
-
+	vm.Update = function(orderId, buyerId) {
+		OrderCloud.BuyerID.Set(buyerId);
 		WeirService.SetOrderAsCurrentOrder(orderId)
 			.then(function(){
 				$rootScope.$broadcast('SwitchCart');
@@ -314,13 +312,13 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 }
 function RouteToOrderController($rootScope, $state, OrderCloud, CurrentOrder, toastr, Order) {
     if (Order) {
-            reviewOrder(Order.ID, Order.xp.Status, Order.xp.CustomerID, Order.xp.CustomerName);
+            reviewOrder(Order.ID, Order.xp.Status, Order.xp.BuyerID, Order.xp.CustomerID, Order.xp.CustomerName);
     } else {
         toastr.error("Order not found");
         $state.go('ordersMain.ordersAll');
     }
-    function reviewOrder(orderId, status, customerId, customerName) {
-        OrderCloud.BuyerID.Set(customerId);
+    function reviewOrder(orderId, status, buyerId, customerId, customerName) {
+        OrderCloud.BuyerID.Set(buyerId);
         CurrentOrder.Set(orderId)
 			.then(function () {
 			    CurrentOrder.SetCurrentCustomer({
