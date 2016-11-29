@@ -304,7 +304,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 	vm.ShowUpdated = function (item) {
 		// return true if qty <> xp.originalQty and qty > 0
 		if(item.xp) {
-			return (item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty)) || (item.xp.OriginalUnitPrice && (item.UnitPrice != item.xp.OriginalUnitPrice)) || (item.xp.OriginalLeadTime && (item.Product.xp.LeadTime != item.xp.OriginalLeadTime));
+			return (item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty)) || (item.xp.OriginalUnitPrice && (item.UnitPrice != item.xp.OriginalUnitPrice)) || (item.xp.OriginalLeadTime && ((item.Product.xp.LeadTime != item.xp.OriginalLeadTime) || (item.xp.LeadTime != item.xp.OriginalLeadTime)));
 		} else {
 			return false;
 		}
@@ -322,7 +322,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 	vm.ShowNew = _showNew;
 	function _showNew(line) {
 		if(line.xp) {
-			return line.xp.OriginalQty==0 || (vm.Order.ID.indexOf("Rev") !== -1 && line.xp.OriginalQty==null); //Second part matches items added in admin saeach.
+			return line.xp.OriginalQty==0 || (vm.Order.ID.indexOf("Rev") != -1 && line.xp.OriginalQty==null); //Second part matches items added in admin saeach.
 		} else {
 			return false;
 		}
@@ -461,7 +461,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 				UnitPrice: line.UnitPrice,
 				Quantity: line.Quantity,
 				xp: {
-					LeadTime: line.Product.xp.LeadTime
+					LeadTime: line.xp.LeadTime ? line.xp.LeadTime : line.Product.xp.LeadTime
 				}
 			};
 			OrderCloud.LineItems.Patch(vm.Order.ID, line.ID, patch, vm.Order.xp.CustomerID)

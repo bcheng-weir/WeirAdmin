@@ -172,15 +172,20 @@ function AdminUsersController($state, $ocMedia, OrderCloud, OrderCloudParameters
 
 function AdminUserEditController(AdminGroupService, $exceptionHandler, $state, toastr, OrderCloud, SelectedAdminUser, AdminGroupsAvailable, CurrentGroups) {
     var vm = this,
-        adminuserid = SelectedAdminUser.ID;
+    adminuserid = SelectedAdminUser.ID;
     vm.adminUserName = SelectedAdminUser.Username;
     vm.adminUser = SelectedAdminUser;
     vm.adminGroupsAvailable = AdminGroupsAvailable.Items;
     vm.adminUser.UserGroupID = (CurrentGroups.Items.length > 0) ? CurrentGroups.Items[0].UserGroupID : null;
+    vm.WeirGroup = [{id: 1, label: 'WCVUK'}, {id: 2, label: 'WPIFR'}];
+    if(!(vm.adminUser.xp && vm.adminUser.xp.WeirGroup)){
+        vm.adminUser.xp = {};
+        vm.adminUser.xp.WeirGroup = {};
+    }
     vm.oldGroupId = vm.adminUser.UserGroupID;
 
     if (vm.adminUser.TermsAccepted != null) {
-        vm.TermsAccepted = true;
+        vm.adminUser.TermsAccepted = true;
     }
 
     vm.Submit = function () {
@@ -211,8 +216,9 @@ function AdminUserEditController(AdminGroupService, $exceptionHandler, $state, t
 
 function AdminUserCreateController(AdminGroupService, $exceptionHandler, $state, toastr, OrderCloud, AdminGroupsAvailable) {
     var vm = this;
-    vm.adminUser = {Email: '', Password: '', UserGroupID: '', Active: false};
+    vm.adminUser = {Email: '', Password: '', UserGroupID: '', Active: false, TermsAccepted: false};
     vm.adminGroupsAvailable = AdminGroupsAvailable.Items;
+    vm.WeirGroup = [{id: 1, label: 'WCVUK'}, {id: 2, label: 'WPIFR'}];
 
     vm.Submit = function() {
         vm.adminUser.TermsAccepted = new Date();
