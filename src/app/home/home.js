@@ -33,13 +33,21 @@ function HomeConfig($stateProvider) {
 
                         }
                     });
+                },
+                IsAdmin: function (UserGroupsService) {
+                    return UserGroupsService.IsUserInGroup([UserGroupsService.Groups.SuperAdmin]);
+                },
+                IsInternalSales: function (UserGroupsService) {
+                    return UserGroupsService.IsUserInGroup([UserGroupsService.Groups.InternalSales]);
                 }
             }
 		});
 }
 
-function HomeController($sce, WeirService) {
-	var vm = this;
+function HomeController($sce, WeirService, IsAdmin, IsInternalSales) {
+    var vm = this;
+    vm.IsAdmin = IsAdmin;
+    vm.CanEditCustomers = IsAdmin || IsInternalSales;
 
 	var labels = {
 		en: {
