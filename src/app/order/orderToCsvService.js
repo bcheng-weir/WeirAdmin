@@ -29,7 +29,7 @@ function OrderToCsvService($sce, WeirService) {
         });
         data.push(["", "", "", "", "", "", Labels.Total, Order.Total]);
         data.push(["", ""]);
-        data.push([Labels.DelieveryAddress, "", "", Labels.YourComments]);
+        data.push([Labels.DeliveryAddress, "", "", Labels.YourComments]);
         data.push([DeliveryAddress.FirstName + " " + DeliveryAddress.LastName, "", "", Order.xp.CommentsToWeir]);
         data.push([DeliveryAddress.CompanyName]);
         data.push([DeliveryAddress.Street1]);

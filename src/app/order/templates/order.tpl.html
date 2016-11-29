@@ -179,7 +179,7 @@
                          <input type="" class="form-control" ng-model="line.UnitPrice" />
                      </td>
                      <td ng-if="order.Order.xp.Status=='RE'">
-                         <input type="number" class="form-control" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" style="width:50%" ng-model="order.Zero" />
+                         <input type="number" class="form-control" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" style="width:50%" ng-model="line.TempQty" />
                      </td>
 
                      <td style="border:0;width:100px;">

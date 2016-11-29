@@ -554,7 +554,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
 			.then(function(order) {
 				// order is the localforge order.
 				currentOrder = order;
-				return OrderCloud.LineItems.List(currentOrder.ID,null,null,null,null,null,null, currentOrder.xp.CustomerID);
+				return OrderCloud.LineItems.List(currentOrder.ID,null,null,null,null,null,null,currentOrder.xp.CustomerID);
 			})
 			.then(function(lineItems) {
 				// If the line items contains the current part, then update.
@@ -589,18 +589,39 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
 		}
 
 		function addLineItem(order) {
+			// Impersonation is not getting the price added to the item as in the buyer app. Setting it manually in the admin app.
+			var price = part && part.Detail && part.Detail.StandardPriceSchedule && part.Detail.StandardPriceSchedule.PriceBreaks && part.Detail.StandardPriceSchedule.PriceBreaks.length ? part.Detail.StandardPriceSchedule.PriceBreaks[0].Price : 0;
 			var li = {
 				ProductID: part.Detail.ID,
 				Quantity: part.Quantity,
+				UnitPrice: price,
 				xp: {
 					SN: part.xp.SN,
 					TagNumber: part.xp.TagNumber
 				}
 			};
 
-			OrderCloud.LineItems.Create(order.ID, li, order.xp.CustomerID)
+			var impersonation = {
+				ClientID: buyernetwork,
+				Claims: []
+			};
+
+			OrderCloud.Users.Get(order.FromUserID, order.xp.CustomerID)
+				.then(function(buyer) {
+					impersonation.Claims = buyer.AvailableRoles;
+					return OrderCloud.Users.GetAccessToken(order.FromUserID, impersonation, order.xp.CustomerID);
+				})
+				.then(function(data) {
+					return OrderCloud.Auth.SetImpersonationToken(data['access_token']);
+				})
+				.then(function() {
+					return OrderCloud.As().LineItems.Create(order.ID, li, order.xp.CustomerID);
+				})
 				.then(function(lineItem) {
 					deferred.resolve({Order: order, LineItem: lineItem});
+				})
+				.then(function() {
+					return OrderCloud.Auth.RemoveImpersonationToken();
 				})
 				.catch(function(ex) {
 					console.log(ex);

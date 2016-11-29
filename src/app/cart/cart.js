@@ -161,7 +161,6 @@ function MiniCartController($q, $state, $rootScope,$uibModal, $ocMedia, $sce, Or
 		var dfd = $q.defer();
 		var queue = [];
 		vm.TotalItems = 0;
-		//OrderCloud.LineItems.List(order.ID)
 		OrderCloud.LineItems.List(order.ID,null,null,null,null,null,null,order.xp.CustomerID)
 			.then(function(li) {
 				vm.LineItems = li;
@@ -174,6 +173,7 @@ function MiniCartController($q, $state, $rootScope,$uibModal, $ocMedia, $sce, Or
 							vm.LineItems.Items = [].concat(vm.LineItems.Items, result.Items);
 							vm.LineItems.Meta = result.Meta;
 						});
+						LineItemHelpers.GetBlankProductInfo(vm.LineItems.Items);
 						dfd.resolve(LineItemHelpers.GetProductInfo(vm.LineItems.Items.reverse()));
 					});
 				Underscore.map(vm.LineItems.Items, function(value, key){

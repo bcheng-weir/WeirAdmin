@@ -106,16 +106,30 @@ function orderConfig($stateProvider) {
 function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler, OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems,
                          Payments, Me, WeirService, Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr) {
     var vm = this;
-	vm.Zero = 0;
     vm.Order = Order;
     vm.LineItems = LineItems;
 	vm.BlankItems = [];
 	if(PreviousLineItems) {
 		vm.PreviousLineItems = Underscore.filter(PreviousLineItems.Items, function (item) {
-			if (Underscore.findWhere(LineItems.Items, {ProductID: item.ProductID})) {
-				return
+			if(item.ProductID == "PLACEHOLDER") {
+				var found = false;
+				angular.forEach(LineItems.Items, function(value, key) {
+					if(value.xp.SN == item.xp.SN) {
+						found = true;
+						return;
+					}
+				});
+				if(found) {
+					return;
+				} else {
+					return item;
+				}
 			} else {
-				return item;
+				if (Underscore.findWhere(LineItems.Items, {ProductID:item.ProductID})) {
+					return;
+				} else {
+					return item;
+				}
 			}
 		});
 	} else {
@@ -176,7 +190,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
             AddABlankItem: "Add a blank item",
             //footers
             YourRefNo: "Your Reference No;",
-            DelieveryAddress: "Delivery Address",
+            DeliveryAddress: "Delivery Address",
             YourAttachments: "Your attachments",
             YourComments: "Your comments or instructions",
 	        Directions: "Select Save to update lead time, price or quantity.",
@@ -226,7 +240,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
             AddABlankItem:$sce.trustAsHtml( "Add a blank item"),
             //footers
             YourRefNo:$sce.trustAsHtml( "Your Reference No;"),
-            DelieveryAddress:$sce.trustAsHtml("Delivery Address"),
+            DeliveryAddress:$sce.trustAsHtml("Delivery Address"),
             YourAttachments:$sce.trustAsHtml( "Your attachments"),
             YourComments:$sce.trustAsHtml( "Your comments or instructions"),
 	        Directions: $sce.trustAsHtml("Select Save to update lead time, price or quantity."),
@@ -308,7 +322,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 	vm.ShowNew = _showNew;
 	function _showNew(line) {
 		if(line.xp) {
-			return line.xp.OriginalQty==0;
+			return line.xp.OriginalQty==0 || (vm.Order.ID.indexOf("Rev") !== -1 && line.xp.OriginalQty==null); //Second part matches items added in admin saeach.
 		} else {
 			return false;
 		}
@@ -472,9 +486,9 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 
 	vm.AddLineItem = _addLineItem;
 	function _addLineItem(line) {
-		if(vm.Zero > 0) {
+		if(line.TempQty > 0) {
 			line.ID = null;
-			line.Quantity = vm.Zero;
+			line.Quantity = line.TempQty;
 			line.DateAdded = new Date();
 			line.xp.OriginalQty = line.xp.OriginalQty ? line.xp.OriginalQty : 0;
 			OrderCloud.LineItems.Create(vm.Order.ID, line, vm.Order.xp.CustomerID)
@@ -708,8 +722,8 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, OrderCloud, WeirService, Order) {
         var vm = this;
         vm.Order = Order;
-    	vm.Order.xp.DateDespatched = new Date(vm.Order.xp.DateDespatched);
-    	vm.Order.xp.DelieveryDate = new Date(vm.Order.xp.DelieveryDate);
+    	vm.Order.xp.DateDespatched = vm.Order.xp.DateDespatched == null ? null : new Date(vm.Order.xp.DateDespatched);
+    	vm.Order.xp.DeliveryDate = vm.Order.xp.DeliveryDate == null ? null : new Date(vm.Order.xp.DeliveryDate);
 
         var labels = {
             en: {
@@ -735,8 +749,8 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, O
             }
         };
         function save(Order) {
-			var orderStatus;
-			//console.log(vm.Order.xp.ContractNumber +  "\n" + Order.xp.DelieveryDate +  "\n" + vm.Order.xp.DateDespatched +  "\n" + vm.Order.xp.InvoiceNumber);
+			var orderStatus = vm.Order.xp.Status;
+			//console.log(vm.Order.xp.ContractNumber +  "\n" + Order.xp.DeliveryDate +  "\n" + vm.Order.xp.DateDespatched +  "\n" + vm.Order.xp.InvoiceNumber);
             //if it has a despatch date- it is despatched. if it has an invoice it is in the final stage and is invoiced.
 			if(vm.Order.xp.DateDespatched){
 				orderStatus = 'DP';
@@ -747,7 +761,7 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, O
 			var patch = {
 			xp: {
 				ContractNumber: vm.Order.xp.ContractNumber,
-				DelieveryDate: vm.Order.xp.DelieveryDate,
+				DeliveryDate: vm.Order.xp.DeliveryDate,
 				DateDespatched: vm.Order.xp.DateDespatched,
 				InvoiceNumber: vm.Order.xp.InvoiceNumber,
 				Status: orderStatus
