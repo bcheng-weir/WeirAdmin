@@ -49,6 +49,10 @@
             <label for="userPasswordConfirmInput">Confirm Password</label>
             <input id="userPasswordConfirmInput" type="password" pattern='^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!$%@#£€*?&]{8,}$' pattern-err-type="customPassword"  class="form-control" ng-model="adminUserCreate.PasswordConfirm" confirmpassword="{{adminUserCreate.adminUser.Password}}" required/>
         </div>
+        <div class="col-sm-6 form-group">
+            <label for="weirgroup">Weir Group</label>
+            <select id="weirgroup"  class="form-control" ng-model="adminUserCreate.adminUser.xp.WeirGroup" ng-options="item as item.label for item in adminUserCreate.WeirGroup track by item.label" required></select>
+        </div>
     </div>
     <div class="row">
         <div class="col-sm-6 form-group">
