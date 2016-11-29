@@ -1,5 +1,5 @@
 <article id="COMPONENT_order" ui-view class="container-fluid">
-    <div class="row" ng-show="order.Order.xp.Status=='RE'">
+    <div class="row" ng-show="false">
         <div class="col-lg-2">About Batley</div>
         <div class="col-lg-2">About Blakeborough</div>
         <div class="col-lg-2">About Hopkinsons</div>
@@ -14,8 +14,8 @@
                 <ul class="nav navbar-nav navbar-left">
                     <li style="padding: 10px 5px 0px 0px;">
                         <span ng-bind-html='order.labels.status'></span><br />
-                        <b><span ng-bind-html='order.Status.label'></span>
-                        <span ng-bind-html='order.Order.xp.StatusDate'></span></b>
+                        <b><span ng-bind-html='order.Status.label'></span>;
+                        <span ng-bind-html='order.Order.xp.StatusDate | weirdate'></span></b>
                     </li>
                     <li style="padding: 10px 0px 0px 10px;" ng-show="order.Order.xp.Status=='RE'">
                         &nbsp;<span ng-bind-html='order.labels.PONumber'></span><br /><span ng-bind-html='order.Order.xp.PONumber'></span>
@@ -106,7 +106,10 @@
                      <td>{{line.Product.xp.ReplacementSchedule}}</td>
 
                      <!-- Non-review fields -->
-                     <td ng-if="order.Order.xp.Status!='RE'">{{line.Product.xp.LeadTime}}</td>
+                     <td ng-if="order.Order.xp.Status!='RE'">
+                         <span ng-show="line.xp.LeadTime==null">{{line.Product.xp.LeadTime}}</span>
+                         <span ng-show="line.xp.LeadTime!=null">{{line.xp.LeadTime}}</span>
+                     </td>
                      <td ng-switch on="myquote.Quote.xp.Currency" class='text-right' ng-if="order.Order.xp.Status!='RE'">
                          <span ng-switch-when="EUR">{{line.UnitPrice | currency:'&euro; '}}</span>
                          <span ng-switch-when="GBP">{{line.UnitPrice | currency:'&#163; '}}</span>
@@ -118,7 +121,8 @@
 
                      <!-- review mode fields -->
                      <td ng-if="order.Order.xp.Status=='RE'">
-                         <input type="text" class="form-control" ng-model="line.Product.xp.LeadTime" />
+                         <input type="text" class="form-control" ng-show="line.xp.LeadTime==null" ng-model="line.Product.xp.LeadTime" />
+                         <input type="text" class="form-control" ng-show="line.xp.LeadTime!=null" ng-model="line.xp.LeadTime" />
                      </td>
                      <td ng-if="order.Order.xp.Status=='RE'">
                          <input type="" class="form-control" ng-model="line.UnitPrice" />
