@@ -15,13 +15,34 @@ function LoginConfig($stateProvider) {
     ;
 }
 
-function LoginService($q, $window, $state, toastr, OrderCloud, TokenRefresh, clientid, buyerid, anonymous) {
+function LoginService($q, $window, $state, toastr, OrderCloud, TokenRefresh, clientid, buyerid, anonymous, appname, $localForage) {
     return {
         SendVerificationCode: _sendVerificationCode,
         ResetPassword: _resetPassword,
         RememberMe: _rememberMe,
-        Logout: _logout
+        Logout: _logout,
+        RouteAfterLogin: _routeAfterLogin
     };
+
+    function _routeAfterLogin() {
+        var storageName = appname + '.routeto';
+        $localForage.getItem(storageName)
+        .then(function (rte) {
+            $localForage.removeItem(storageName);
+            if (rte && rte.state) {
+                if (rte.state == 'gotoOrder') {
+                    $state.go('gotoOrder', { orderID: rte.id, buyerID: rte.buyer });
+                } else {
+                    $state.go('home');
+                }
+            } else {
+                $state.go('home');
+            }
+        })
+        .catch(function () {
+            $state.go('home');
+        });
+    }
 
     function _sendVerificationCode(email) {
         var deferred = $q.defer();
@@ -79,7 +100,7 @@ function LoginService($q, $window, $state, toastr, OrderCloud, TokenRefresh, cli
                         .then(function(token) {
                             OrderCloud.BuyerID.Set(buyerid);
                             OrderCloud.Auth.SetToken(token.access_token);
-                            $state.go('home');
+                            _routeAfterLogin();
                         })
                         .catch(function () {
                             toastr.error('Your token has expired, please log in again.');
@@ -110,7 +131,7 @@ function LoginController($state, $stateParams, $exceptionHandler, OrderCloud, Lo
                 vm.rememberStatus ? TokenRefresh.SetToken(data['refresh_token']) : angular.noop();
                 OrderCloud.BuyerID.Set(buyerid);
                 OrderCloud.Auth.SetToken(data['access_token']);
-                $state.go('home');
+                LoginService.RouteAfterLogin();
             })
             .catch(function(ex) {
                 if(ex.data.error == "Username not found or password incorrect") {

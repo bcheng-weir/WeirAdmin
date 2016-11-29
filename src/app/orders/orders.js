@@ -1,81 +1,103 @@
 angular.module('orderCloud')
 	.config(OrdersConfig)
-	.controller('OrdersCtrl',OrdersController);
+	.controller('OrdersCtrl', OrdersController)
+    .controller('RouteToOrderCtrl', RouteToOrderController)
+;
 
 function OrdersConfig($stateProvider,buyerid) {
-	$stateProvider
-		.state('ordersMain', {
-			parent: 'base',
-			templateUrl: 'orders/templates/orders.tpl.html',
-			controller: 'OrdersCtrl',
-			controllerAs: 'orders',
-			url: '/orders?from&to&search&page&pageSize&searchOn&sortBy&sortByXp&filters&buyerid',
-			data: {componentName: 'Orders'},
-			resolve: {
-				Parameters: function ($stateParams, OrderCloudParameters) {
-					return OrderCloudParameters.Get($stateParams);
-				},
-				Orders: function (OrderCloud, Parameters) {
-					OrderCloud.BuyerID.Set(null);
-					return OrderCloud.Orders.ListIncoming(Parameters.from, Parameters.to, Parameters.search, Parameters.page, Parameters.pageSize || 20, Parameters.searchOn, Parameters.sortBy, Parameters.filters, null);
-				}
-			}
-		})
+    $stateProvider
+        .state('ordersMain', {
+            parent: 'base',
+            templateUrl: 'orders/templates/orders.tpl.html',
+            controller: 'OrdersCtrl',
+            controllerAs: 'orders',
+            url: '/orders?from&to&search&page&pageSize&searchOn&sortBy&sortByXp&filters&buyerid',
+            data: { componentName: 'Orders' },
+            resolve: {
+                Parameters: function ($stateParams, OrderCloudParameters) {
+                    return OrderCloudParameters.Get($stateParams);
+                },
+                Orders: function (OrderCloud, Parameters) {
+                    OrderCloud.BuyerID.Set(null);
+                    return OrderCloud.Orders.ListIncoming(Parameters.from, Parameters.to, Parameters.search, Parameters.page, Parameters.pageSize || 20, Parameters.searchOn, Parameters.sortBy, Parameters.filters, null);
+                }
+            }
+        })
 		.state('ordersMain.quotesRevised', {
-			url: '/quotesRevised',
-			templateUrl: 'orders/templates/quote.revised.tpl.html',
-			parent: 'ordersMain'
+		    url: '/quotesRevised',
+		    templateUrl: 'orders/templates/quote.revised.tpl.html',
+		    parent: 'ordersMain'
 		})
 		.state('ordersMain.quotesReview', {
-			url: '/quotesReview',
-			templateUrl: 'orders/templates/quote.review.tpl.html',
-			parent: 'ordersMain'
+		    url: '/quotesReview',
+		    templateUrl: 'orders/templates/quote.review.tpl.html',
+		    parent: 'ordersMain'
 		})
 		.state('ordersMain.quotesConfirmed', {
-			url: '/quotesConfirmed',
-			templateUrl: 'orders/templates/quote.confirm.tpl.html',
-			parent: 'ordersMain'
+		    url: '/quotesConfirmed',
+		    templateUrl: 'orders/templates/quote.confirm.tpl.html',
+		    parent: 'ordersMain'
 		})
 		.state('ordersMain.ordersRevised', {
-			url: '/ordersRevised',
-			templateUrl: 'orders/templates/order.revised.tpl.html',
-			parent: 'ordersMain'
+		    url: '/ordersRevised',
+		    templateUrl: 'orders/templates/order.revised.tpl.html',
+		    parent: 'ordersMain'
 		})
 		.state('ordersMain.POOrders', {
-			url: '/ordersSubmitted',
-			templateUrl: 'orders/templates/order.submitted.tpl.html',
-			parent: 'ordersMain'
+		    url: '/ordersSubmitted',
+		    templateUrl: 'orders/templates/order.submitted.tpl.html',
+		    parent: 'ordersMain'
 		})
 		.state('ordersMain.pendingPO', {
-			url:'/PendingPO',
-			templateUrl:'orders/templates/order.pending.tpl.html',
-			parent: 'ordersMain'
+		    url: '/PendingPO',
+		    templateUrl: 'orders/templates/order.pending.tpl.html',
+		    parent: 'ordersMain'
 		})
 		.state('ordersMain.ordersConfirmed', {
-			url: '/orderConfirmed',
-			templateUrl: 'orders/templates/order.confirmed.tpl.html',
-			parent: 'ordersMain'
+		    url: '/orderConfirmed',
+		    templateUrl: 'orders/templates/order.confirmed.tpl.html',
+		    parent: 'ordersMain'
 		})
 		.state('ordersMain.ordersDespatched', {
-			url: '/orderDespatched',
-			templateUrl: 'orders/templates/order.despatched.tpl.html',
-			parent: 'ordersMain'
+		    url: '/orderDespatched',
+		    templateUrl: 'orders/templates/order.despatched.tpl.html',
+		    parent: 'ordersMain'
 		})
 		.state('ordersMain.ordersInvoiced', {
-			url: '/quotesReview',
-			templateUrl: 'orders/templates/order.invoiced.tpl.html',
-			parent: 'ordersMain'
+		    url: '/quotesReview',
+		    templateUrl: 'orders/templates/order.invoiced.tpl.html',
+		    parent: 'ordersMain'
 		})
         .state('ordersMain.listOfRevisions', {
-            url:'/listOfRevisions',
-            templateUrl:'orders/templates/order.revisions.tpl.html',
-            parent:'ordersMain'
+            url: '/listOfRevisions',
+            templateUrl: 'orders/templates/order.revisions.tpl.html',
+            parent: 'ordersMain'
         })
 		.state('ordersMain.ordersAll', {
-			url: '/ordersAll',
-			templateUrl: 'orders/templates/order.all.tpl.html',
-			parent: 'ordersMain.ordersConfirmed'
-		});
+		    url: '/ordersAll',
+		    templateUrl: 'orders/templates/order.all.tpl.html',
+		    parent: 'ordersMain.ordersConfirmed'
+		})
+    	.state('gotoOrder', {
+    	    url: '/orders/:buyerID/:orderID',
+    	    controller: 'RouteToOrderCtrl',
+    	    resolve: {
+    	        Order: function ($q, appname, $localForage, $stateParams, OrderCloud) {
+    	            var d = $q.defer();
+    	            var storageName = appname + '.routeto';
+    	            $localForage.setItem(storageName, { state: 'gotoOrder', id: $stateParams.orderID, buyer: $stateParams.buyerID })
+                    .then(function () {
+                        OrderCloud.Orders.Get($stateParams.orderID, $stateParams.buyerID)
+                        .then(function (order) {
+                            $localForage.removeItem(storageName);
+                            d.resolve(order);
+                        });
+                    });
+    	            return d.promise;
+    	        }
+    	    }
+    	})
+    ;
 }
 
 function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler, OrderCloud, OrderCloudParameters, Orders, Parameters, buyerid, CurrentOrder, WeirService) {
@@ -289,4 +311,29 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 				$exceptionHandler(ex);
 		});
 	};
+}
+function RouteToOrderController($rootScope, $state, OrderCloud, CurrentOrder, toastr, Order) {
+    if (Order) {
+            reviewOrder(Order.ID, Order.xp.Status, Order.xp.CustomerID, Order.xp.CustomerName);
+    } else {
+        toastr.error("Order not found");
+        $state.go('ordersMain.ordersAll');
+    }
+    function reviewOrder(orderId, status, customerId, customerName) {
+        OrderCloud.BuyerID.Set(customerId);
+        CurrentOrder.Set(orderId)
+			.then(function () {
+			    CurrentOrder.SetCurrentCustomer({
+			        id: customerId,
+			        name: customerName
+			    })
+			})
+			.then(function () {
+			    $rootScope.$broadcast('SwitchCart');
+			    $state.go('order');
+			})
+			.catch(function (ex) {
+			    $exceptionHandler(ex);
+			});
+    }
 }
