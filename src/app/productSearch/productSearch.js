@@ -310,7 +310,7 @@ function SerialController(WeirService, $scope, $q, OrderCloud, $state, $sce, toa
         	// Why do we do this?
             WeirService.SerialNumber(input)
 	            .then(function(data) {
-                    $scope.productSearch.serialNumberList = (data.Items) ? data.Items : [];
+                    $scope.productSearch.serialNumberList = (data && data.Items) ? data.Items : [];
                     deferred.resolve();
                     return;
                 })
@@ -592,7 +592,7 @@ function PartResultsController( $rootScope, $sce, $state, WeirService, PartNumbe
 	};
 }
 
-function TagController(WeirService,$scope, $q, OrderCloud, $state, $sce, toastr) {
+function TagController(WeirService,$scope, $q, $state, $sce, toastr) {
 	var vm = this;
 
 	var labels = {
@@ -649,11 +649,12 @@ function TagController(WeirService,$scope, $q, OrderCloud, $state, $sce, toastr)
     vm.updateTagList = function(input) {
         if (input.length >= 3) {
             var deferred = $q.defer();
-            WeirService.TagNumber(input).then(function (data) {
-                $scope.productSearch.serialNumberList = (data.Items) ? data.Items : [];
-                deferred.resolve();
-                return;
-            })
+            WeirService.TagNumber(input)
+	            .then(function (data) {
+	                $scope.productSearch.serialNumberList = (data.Items) ? data.Items : [];
+	                deferred.resolve();
+	                return;
+	            })
                 .catch(function(ex) {
                     deferred.resolve();
                     return;
