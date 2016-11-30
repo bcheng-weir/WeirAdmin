@@ -103,7 +103,7 @@ function orderConfig($stateProvider) {
 	    });
 }
 
-function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler, OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems,
+function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler, $window, $timeout, OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems,
                          Payments, Me, WeirService, Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr) {
     var vm = this;
     vm.Order = Order;
@@ -256,6 +256,10 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
     };
     vm.labels = labels[WeirService.Locale()];
 
+	vm.Print = function() {
+		$timeout($window.print,1);
+	};
+
 	vm.UpdatePO = function() {
 		if(vm.Order.xp.PONumber != "Pending") {
 			var data = {
@@ -304,7 +308,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 	vm.ShowUpdated = function (item) {
 		// return true if qty <> xp.originalQty and qty > 0
 		if(item.xp) {
-			return (item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty)) || (item.xp.OriginalUnitPrice && (item.UnitPrice != item.xp.OriginalUnitPrice)) || (item.xp.OriginalLeadTime && ((item.Product.xp.LeadTime != item.xp.OriginalLeadTime) || (item.xp.LeadTime != item.Product.xp.LeadTime )));
+			return (item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty)) || (item.xp.OriginalUnitPrice && (item.UnitPrice != item.xp.OriginalUnitPrice)) || (item.xp.OriginalLeadTime && ((item.Product.xp.LeadTime != item.xp.OriginalLeadTime) || (item.xp.LeadTime && item.xp.LeadTime != item.Product.xp.LeadTime )));
 		} else {
 			return false;
 		}
@@ -322,7 +326,7 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 	vm.ShowNew = _showNew;
 	function _showNew(line) {
 		if(line.xp) {
-			return line.xp.OriginalQty==0 || (vm.Order.ID.indexOf("Rev") != -1 && line.xp.OriginalQty==null); //Second part matches items added in admin saeach.
+			return line.xp.OriginalQty==0 || (vm.Order.ID.indexOf("Rev") != -1 && line.xp.OriginalQty==null); //Second part matches items added in admin search.
 		} else {
 			return false;
 		}

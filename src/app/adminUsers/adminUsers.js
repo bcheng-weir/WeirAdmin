@@ -177,7 +177,7 @@ function AdminUserEditController(AdminGroupService, $exceptionHandler, $state, t
     vm.adminUser = SelectedAdminUser;
     vm.adminGroupsAvailable = AdminGroupsAvailable.Items;
     vm.adminUser.UserGroupID = (CurrentGroups.Items.length > 0) ? CurrentGroups.Items[0].UserGroupID : null;
-    vm.WeirGroup = [{id: 1, label: 'WCVUK'}, {id: 2, label: 'WPIFR'}];
+    vm.WeirGroup = [{id: 1, label: 'WVCUK'}, {id: 2, label: 'WPIFR'}];
     if(!(vm.adminUser.xp && vm.adminUser.xp.WeirGroup)){
         vm.adminUser.xp = {};
         vm.adminUser.xp.WeirGroup = {};
@@ -218,7 +218,7 @@ function AdminUserCreateController(AdminGroupService, $exceptionHandler, $state,
     var vm = this;
     vm.adminUser = {Email: '', Password: '', UserGroupID: '', Active: false, TermsAccepted: false};
     vm.adminGroupsAvailable = AdminGroupsAvailable.Items;
-    vm.WeirGroup = [{id: 1, label: 'WCVUK'}, {id: 2, label: 'WPIFR'}];
+    vm.WeirGroup = [{id: 1, label: 'WVCUK'}, {id: 2, label: 'WPIFR'}];
 
     vm.Submit = function() {
         vm.adminUser.TermsAccepted = new Date();

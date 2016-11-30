@@ -14,12 +14,15 @@ function OrdersConfig($stateProvider,buyerid) {
             url: '/orders?from&to&search&page&pageSize&searchOn&sortBy&sortByXp&filters&buyerid',
             data: { componentName: 'Orders' },
             resolve: {
+            	Me: function(OrderCloud) {
+            	    return OrderCloud.Me.Get();
+	            },
                 Parameters: function ($stateParams, OrderCloudParameters) {
                     return OrderCloudParameters.Get($stateParams);
                 },
                 Orders: function (OrderCloud, Parameters) {
                     OrderCloud.BuyerID.Set(null);
-                    return OrderCloud.Orders.ListIncoming(Parameters.from, Parameters.to, Parameters.search, Parameters.page, Parameters.pageSize || 20, Parameters.searchOn, Parameters.sortBy, Parameters.filters, null);
+                    return OrderCloud.Orders.ListIncoming(Parameters.from, Parameters.to, Parameters.search, Parameters.page, Parameters.pageSize || 100, Parameters.searchOn, Parameters.sortBy, Parameters.filters, null);
                 }
             }
         })
@@ -100,10 +103,15 @@ function OrdersConfig($stateProvider,buyerid) {
     ;
 }
 
-function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler, OrderCloud, OrderCloudParameters, Orders, Parameters, buyerid, CurrentOrder, WeirService) {
+function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler, OrderCloud, OrderCloudParameters, Orders, Parameters, buyerid, CurrentOrder, WeirService, Me, Underscore) {
 	var vm = this;
 	vm.xpType = Parameters.filters ? Parameters.filters["xp.Type"] : {};
 	vm.StateName = $state.current.name;
+	Orders.Items = Underscore.filter(Orders.Items, function(item) {
+		if(item.xp && item.xp.BuyerID && Me.xp && Me.xp.WeirGroup) {
+			return item.xp.BuyerID.indexOf(Me.xp.WeirGroup.label) > -1;
+		}
+	});
 	vm.list = Orders;
 	vm.parameters = Parameters;
 	vm.sortSelection = Parameters.sortBy ? (Parameters.sortBy.indexOf('!') == 0 ? Parameters.sortBy.split('!')[1] : Parameters.sortBy) : null;
@@ -207,6 +215,7 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			quotesForReview: "Quotes Submitted for Review",
 			revisedQuotes: "Revised Quotes",
 			confirmedQuotes: "Confirmed Quotes",
+			ordersPendingPO: "Orders Submitted pending PO",
 			ordersSubmittedPO: "Orders Submitted with PO",
 			revisedOrders: "Revised Orders",
 			confirmedOrders: "Confirmed Orders",
@@ -242,6 +251,7 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			quotesForReview: $sce.trustAsHtml("Quotes Submitted for Review"),
 			revisedQuotes: $sce.trustAsHtml("Revised Quotes"),
 			confirmedQuotes: $sce.trustAsHtml("Confirmed Quotes"),
+			ordersPendingPO: $sce.trustAsHtml("Orders Submitted pending PO"),
 			ordersSubmittedPO: $sce.trustAsHtml("Orders Submitted with PO"),
 			revisedOrders: $sce.trustAsHtml("Revised Orders"),
 			confirmedOrders: $sce.trustAsHtml("Confirmed Orders"),
@@ -264,6 +274,7 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 		"ordersMain.quotesRevised":"revisedQuotes",
 		"ordersMain.quotesConfirmed":"confirmedQuotes",
 		"ordersMain.POOrders":"ordersSubmittedPO",
+		"ordersMain.pendingPO":"ordersPendingPO",
 		"ordersMain.ordersRevised":"revisedOrders",
 		"ordersMain.ordersConfirmed":"confirmedOrders",
 		"ordersMain.ordersDespatched":"despatched",

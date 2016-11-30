@@ -61,7 +61,7 @@
                     <span ng-switch-when="GBP">{{order.Total | currency: '&#163;'}}</span>
                     <span ng-switch-default>{{order.Total | currency:'&#163;'}}</span>
                 </td>
-                <td style="color: green">{{order.DateSubmitted}}</td>
+                <td style="color: green">{{order.DateSubmitted | weirdate}}</td>
                 <td>{{order.xp.ReviewerName}}</td>
                 <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.BuyerID, order.xp.CustomerID, order.xp.CustomerName)">{{orders.labels.view}}</button></td>
             </tr>

@@ -76,7 +76,7 @@
         <tbody>
         <tr ng-repeat="order in orders.list.Items">
             <th scope="row">{{order.ID}}</th>
-            <td>{{order.xp.contractNo}}</td>
+            <td>{{order.xp.ContractNumber}}</td>
             <td>{{order.xp.InvoiceNumber}}</td>
             <td>{{order.xp.PONumber}}</td>
             <td>{{order.xp.CustomerName}}</td>
@@ -88,8 +88,8 @@
             </td>
 
 
-            <td>{{order.xp.DateSubmitted}}</td>
-            <td>{{order.xp.dateDespatched}}</td>
+            <td>{{order.DateSubmitted | weirdate}}</td>
+            <td>{{order.xp.DateDespatched | weirdate}}</td>
         </tr>
         </tbody>
     </table>

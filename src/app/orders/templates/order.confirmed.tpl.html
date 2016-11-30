@@ -78,7 +78,7 @@
         <tbody>
         <tr ng-repeat="order in orders.list.Items">
             <th scope="row">{{order.ID}}</th>
-            <td>{{order.xp.contractNo}}</td>
+            <td>{{order.xp.ContractNumber}}</td>
             <td>{{order.xp.PONumber}}</td>
             <td>{{order.xp.CustomerName}}</td>
             <td>{{order.FromUserID}}</td>
@@ -87,12 +87,10 @@
                 <span ng-switch-when="GBP">{{order.Total | currency: '&#163;'}}</span>
                 <span ng-switch-default>{{order.Total | currency:'&#163;'}}</span>
             </td>
-
-
-            <td>{{order.DateSubmitted}}</td>
+            <td>{{order.DateSubmitted | weirdate}}</td>
             <td>{{order.xp.ReviewerName}}</td>
-            <td>{{order.xp.StatusDate}}</td>
-            <td>{{order.xp.estimatedDeliveryDate}}</td>
+            <td>{{order.xp.StatusDate | weirdate}}</td>
+            <td>{{order.xp.DeliveryDate | weirdate}}</td>
             <td><button class="btn btn-primary" ng-click="orders.Update(order.ID, order.xp.BuyerID)">{{orders.labels.update}}</button></td>
         </tr>
         </tbody>

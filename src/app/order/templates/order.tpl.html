@@ -124,14 +124,14 @@
 
                      <!-- review mode fields -->
                      <td ng-if="order.Order.xp.Status=='RE'">
-                         <input type="text" class="form-control" ng-show="line.xp.LeadTime==null" ng-model="line.Product.xp.LeadTime" />
-                         <input type="text" class="form-control" ng-show="line.xp.LeadTime!=null" ng-model="line.xp.LeadTime" />
+                         <input type="text" class="form-control input-sm" ng-show="line.xp.LeadTime==null" ng-model="line.Product.xp.LeadTime" />
+                         <input type="text" class="form-control input-sm" ng-show="line.xp.LeadTime!=null" ng-model="line.xp.LeadTime" />
                      </td>
                      <td ng-if="order.Order.xp.Status=='RE'">
-                         <input type="" class="form-control" ng-model="line.UnitPrice" />
+                         <input type="" class="form-control input-sm" ng-model="line.UnitPrice" />
                      </td>
                      <td ng-if="order.Order.xp.Status=='RE'">
-                        <input type="number" class="form-control" ng-model="line.Quantity" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" style="width:50%"/>
+                        <input type="number" class="form-control input-sm" ng-model="line.Quantity" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" />
                      </td>
 
                      <td style="border:0;width:100px;">
@@ -144,15 +144,15 @@
                  </tr>
 
                  <tr ng-repeat="line in order.BlankItems">
-                     <td><input type="text" class="form-control" ng-model="line.xp.SN" /></td>
-                     <td><input type="text" class="form-control" ng-model="line.xp.TagNumber" /></td>
-                     <td><input type="text" class="form-control" ng-model="line.xp.ProductName" /></td>
-                     <td><input type="text" class="form-control" ng-model="line.xp.Description" /></td>
-                     <td><input type="text" class="form-control" ng-model="line.xp.ReplacementSchedule" /></td>
-                     <td><input type="text" class="form-control" ng-model="line.xp.LeadTime" /></td>
-                     <td><input type="float" class="form-control" ng-model="line.UnitPrice" /></td>
+                     <td><input type="text" class="form-control input-sm" ng-model="line.xp.SN" /></td>
+                     <td><input type="text" class="form-control input-sm" ng-model="line.xp.TagNumber" /></td>
+                     <td><input type="text" class="form-control input-sm" ng-model="line.xp.ProductName" /></td>
+                     <td><input type="text" class="form-control input-sm" ng-model="line.xp.Description" /></td>
+                     <td><input type="text" class="form-control input-sm" ng-model="line.xp.ReplacementSchedule" /></td>
+                     <td><input type="text" class="form-control input-sm" ng-model="line.xp.LeadTime" /></td>
+                     <td><input type="float" class="form-control input-sm" ng-model="line.UnitPrice" /></td>
                      <td ng-if="order.Order.xp.Status=='RE'">
-                         <input type="number" class="form-control" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" style="width:50%" ng-model="line.Quantity" />
+                         <input type="number" class="form-control input-sm" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" ng-model="line.Quantity" />
                      </td>
                      <td style="border:0;width:100px;">
                          <h4>
@@ -186,7 +186,7 @@
                          <input type="" class="form-control" ng-model="line.UnitPrice" />
                      </td>
                      <td ng-if="order.Order.xp.Status=='RE'">
-                         <input type="number" class="form-control" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" style="width:50%" ng-model="line.TempQty" />
+                         <input type="number" class="form-control" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" ng-model="line.TempQty" />
                      </td>
 
                      <td style="border:0;width:100px;">

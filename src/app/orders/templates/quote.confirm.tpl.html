@@ -57,7 +57,7 @@
         <tbody>
         <tr ng-repeat="order in orders.list.Items">
             <th scope="row">{{order.ID}}</th>
-            <td>{{order.xp.customerRef}}</td>
+            <td>{{order.xp.RefNum}}</td>
             <td>{{order.xp.CustomerName}}</td>
             <td>{{order.FromUserFirstName}} {{order.FromUserLastName}}</td>
             <td class="text-left" ng-switch on="order.xp.Currency">

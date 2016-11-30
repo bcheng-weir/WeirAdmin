@@ -19,11 +19,14 @@ function CustomerConfig($stateProvider) {
             url: '/customers?search&page&pageSize',
             data: {componentName: 'Customers'},
             resolve: {
+                Me: function(OrderCloud) {
+                    return OrderCloud.Me.Get();
+                },
                 Parameters: function($stateParams, OrderCloudParameters) {
                     return OrderCloudParameters.Get($stateParams);
                 },
                 BuyerList: function(OrderCloud, Parameters) {
-                    return OrderCloud.Buyers.List(Parameters.search, Parameters.page, Parameters.pageSize);
+                    return OrderCloud.Buyers.List(Parameters.search, Parameters.page, Parameters.pageSize || 100, null, null);
                 }
             }
         })
@@ -250,8 +253,13 @@ function CustomerService($q, $state, $sce, OrderCloud, $exceptionHandler) {
     };
 }
 
-function CustomerCtrl($state, $ocMedia, OrderCloud, OrderCloudParameters, Parameters, BuyerList, CustomerService, WeirService) {
+function CustomerCtrl($state, $ocMedia, OrderCloud, OrderCloudParameters, Parameters, BuyerList, CustomerService, WeirService, Me, Underscore) {
     var vm = this;
+	BuyerList.Items = Underscore.filter(BuyerList.Items, function(item) {
+		if(item.xp && item.xp.WeirGroup && Me.xp && Me.xp.WeirGroup) {
+			return item.xp.WeirGroup.label == Me.xp.WeirGroup.label;
+		}
+	});
     vm.list = BuyerList;
     vm.parameters = Parameters;
     vm.sortSelection =  Parameters.sortBy ? (Parameters.sortBy.indexOf('!') == 0 ? Parameters.sortBy.split('!')[1] : Parameters.sortBy) : null;
