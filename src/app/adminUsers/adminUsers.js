@@ -185,7 +185,7 @@ function AdminUserEditController(AdminGroupService, $exceptionHandler, $state, t
     vm.oldGroupId = vm.adminUser.UserGroupID;
 
     if (vm.adminUser.TermsAccepted != null) {
-        vm.adminUser.TermsAccepted = true;
+        vm.TermsAccepted = true;
     }
 
     vm.Submit = function () {
