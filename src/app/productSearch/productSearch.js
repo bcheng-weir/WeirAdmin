@@ -29,16 +29,13 @@ function ProductSearchConfig($stateProvider, $sceDelegateProvider) {
 				CurrentCustomer: function(CurrentOrder) {
 					return CurrentOrder.GetCurrentCustomer();
 				},
-				SerialNumbers: function(WeirService, OrderCloud, CurrentOrder) {
-					return CurrentOrder.GetCurrentCustomer()
-						.then(function(cust) {
-							if (cust) {
-								//return OrderCloud.Me.ListCategories(null, 1, 100, null, null, { "catalogID": cust.id});
-								return OrderCloud.Categories.List(null, 1, 100, null, null, {"ParentID": cust.id}, 2, cust.id.substring(0,5))
-							} else {
-								return { Items: []};
-							}
-						});
+				SerialNumbers: function(WeirService, OrderCloud, CurrentCustomer) {
+					if (CurrentCustomer) {
+						//return OrderCloud.Me.ListCategories(null, 1, 100, null, null, { "catalogID": cust.id});
+						return OrderCloud.Categories.List(null, 1, 100, null, null, {"ParentID": CurrentCustomer.id}, 2, CurrentCustomer.id.substring(0,5))
+					} else {
+						return { Items: []};
+					}
 				},
 				PartNumbers: function(OrderCloud) {
 					//return OrderCloud.Me.ListProducts(null, 1, 100, null, null, null);
@@ -310,11 +307,13 @@ function SerialController(WeirService, $scope, $q, OrderCloud, $state, $sce, toa
     vm.updateSerialList = function(input) {
         var deferred = $q.defer();
         if (input.length >= 3) {
-            WeirService.SerialNumber(input).then(function(data) {
-                $scope.productSearch.serialNumberList = (data.Items) ? data.Items : [];
-                deferred.resolve();
-                return;
-            })
+        	// Why do we do this?
+            WeirService.SerialNumber(input)
+	            .then(function(data) {
+                    $scope.productSearch.serialNumberList = (data.Items) ? data.Items : [];
+                    deferred.resolve();
+                    return;
+                })
                 .catch(function(ex) {
                     deferred.resolve("No Tags with this id");
                     return;
