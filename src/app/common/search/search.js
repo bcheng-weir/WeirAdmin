@@ -4,6 +4,7 @@ angular.module('ordercloud-search')
     .directive('ordercloudSearch', OrdercloudSearch)
     .controller('ordercloudSearchCtrl', OrdercloudSearchController)
     .factory('TrackSearch', TrackSearchService )
+	.factory('SearchProducts', SearchProductsService)
 ;
 
 function OrdercloudSearch () {
@@ -118,3 +119,41 @@ function TrackSearchService() {
     return service;
 }
 
+function SearchProductsService(OrderCloud) {
+    var service = {
+    	GetSerialNumbers: _getSerialNumbers,
+	    GetTagNumbers: _getTagNumbers,
+	    GetPartNumbers: _getPartNumbers
+    };
+
+    //TODO Get a dynamic ParentID. Either pass in the ID, or have search be smart enough to get it form the CurrentOrder.
+	//TODO Get the weir group of the current logged in user:WVCUK or WPIFR
+    function _getSerialNumbers(lookForThisPartialSerialNumber) {
+	    return OrderCloud.Categories.List(null, 1, 50, null, null, {"xp.SN": lookForThisPartialSerialNumber+"*", "ParentID":"WVCUK-1352"}, null, "WVCUK")
+		    .then(function(response) {
+			    return response.Items.map(function(item) {
+				    return item.xp.SN;
+			    })
+		    });
+    }
+
+    function _getTagNumbers(lookForThisPartialTagNumber) {
+	    return OrderCloud.Categories.List(null, 1, 50, null, null, {"xp.TagNumber": lookForThisPartialTagNumber+"*", "ParentID":"WVCUK-1352"}, null, "WVCUK")
+		    .then(function(response) {
+		    	return response.Items.map(function(item) {
+		    		return item.xp.TagNumber;
+			    })
+		    });
+    }
+
+    function _getPartNumbers(lookForThisPartialPartNumber) {
+	    return OrderCloud.Products.List(null, 1, 50, null, null, {"Name": lookForThisPartialPartNumber+"*"})
+		    .then(function(response) {
+		    	return response.Items.map(function(item) {
+		    		return item.Name;
+			    })
+		    });
+    }
+
+    return service;
+}

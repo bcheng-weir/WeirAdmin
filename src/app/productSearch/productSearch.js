@@ -130,8 +130,9 @@ function ProductSearchConfig($stateProvider, $sceDelegateProvider) {
 	;
 }
 
-function ProductSearchController($sce, $state, $rootScope, OrderCloud, CurrentOrder, WeirService, CurrentCustomer, SerialNumbers, PartNumbers, MyOrg, imageRoot) {
+function ProductSearchController($sce, $state, $rootScope, OrderCloud, CurrentOrder, WeirService, CurrentCustomer, SerialNumbers, PartNumbers, MyOrg, imageRoot, SearchProducts) {
 	var vm = this;
+	vm.SearchProducts = SearchProducts;
 	vm.serialNumberList = SerialNumbers.Items;
 	vm.partNumberList = PartNumbers.Items;
 	vm.searchType = WeirService.GetLastSearchType();
@@ -250,7 +251,6 @@ function ProductSearchController($sce, $state, $rootScope, OrderCloud, CurrentOr
 
 function SerialController(WeirService, $scope, $q, OrderCloud, $state, $sce, toastr ) {
 	var vm = this;
-
 	var labels = {
 		en: {
 			WhereToFind: "where to find your serial number",
@@ -322,6 +322,15 @@ function SerialController(WeirService, $scope, $q, OrderCloud, $state, $sce, toa
 
         else return;
     };
+
+	vm.getSerialNumbers = function(sn) {
+		return OrderCloud.Categories.List(null, 1, 100, null, null, {"xp.SN": sn+"*", "ParentID":"WVCUK-1352"}, null, "WVCUK")
+			.then(function(response) {
+				return response.Items.map(function(item) {
+					return item.xp.SN;
+				})
+			})
+	};
 }
 
 function SerialResultsController(WeirService, $stateParams, $state, SerialNumberResults, $sce ) {
@@ -523,11 +532,12 @@ function PartController( $state, $sce, $scope, $q, OrderCloud, WeirService ) {
     vm.updatePartList = function(input) {
         if (input.length >= 3) {
             var deferred = $q.defer();
-            WeirService.PartNumbers(input).then(function (data) {
-                $scope.productSearch.partNumberList = (data.Items) ? data.Items : [];
-                deferred.resolve();
-                return;
-            })
+            WeirService.PartNumbers(input)
+	            .then(function (data) {
+	                $scope.productSearch.partNumberList = (data.Items) ? data.Items : [];
+	                deferred.resolve();
+	                return;
+                })
                 .catch(function(ex) {
                     deferred.resolve("No Tags with this id");
                     return;

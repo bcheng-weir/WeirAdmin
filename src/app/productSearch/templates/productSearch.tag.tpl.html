@@ -5,8 +5,20 @@
                 <div class="form-group has-feedback" ng-repeat="number in tag.tags track by $index">
                     <label ng-if="$index == 0" ng-bind-html='tag.labels.EnterTag'><span ng-if="tag.tags.length > 1"></span></label>
                     <div class="input-group col-md-12">
-                        <input type="text" class="form-control" ng-model="tag.tags[$index]" typeahead-min-length="3" ng-change="tag.updateTagList(tag.tags[$index])" uib-typeahead="tag.xp.TagNumber as (tag.xp.TagNumber + ' - ' + tag.Description) for tag in productSearch.serialNumberList | tagPreSearch:$viewValue" />
+                        <!--<input type="text" class="form-control" ng-model="tag.tags[$index]" typeahead-min-length="3" ng-change="tag.updateTagList(tag.tags[$index])" uib-typeahead="tag.xp.TagNumber as (tag.xp.TagNumber + ' - ' + tag.Description) for tag in productSearch.serialNumberList | tagPreSearch:$viewValue" />-->
+                        <input type="text"
+                           ng-model="tag.tags[$index]"
+                           placeholder="Tag number result"
+                           uib-typeahead="tagNumber for tagNumber in productSearch.SearchProducts.GetTagNumbers($viewValue)"
+                           typeahead-loading="loadingTags"
+                           typeahead-no-results="noResults"
+                           typeahead-min-length="3"
+                           class="form-control"/>
                         <span class="input-group-addon" ng-if="tag.tags.length > 1" ng-click="tag.removeTag($index)"><i class="fa fa-minus text-danger"></i></span>
+                        <i ng-show="loadingTags" class="glyphicon glyphicon-refresh"></i>
+                        <div ng-show="noResults">
+                            <i class="glyphicon glyphicon-remove"></i> No Results Found
+                        </div>
                     </div>
                 </div>
                 <button type="button" class="btn btn-link" ng-click="tag.addTag()" ng-bind-html='tag.labels.AddMore'><i class="fa fa-plus"></i></button>
