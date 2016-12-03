@@ -293,16 +293,13 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
 	            }, null, order.xp.CustomerID.substring(0, 5));
             })
             .then(function (matches) {
-                if (matches.Items.length == 1) {
-                    result = matches.Items[0];
-                    getParts(result.ID, deferred, result);
-                } else if (matches.Items.length == 0) {
-                    //throw { message: "No matches found for tag number " + tagNumber};
-                    return deferred.resolve("No matches found for tag number " + tagNumber);
-                } else {
-                    //throw { message: "Data error: Tag number " + tagNumber + " is not unique"};
-                    return deferred.resolve("Data error: Tag number " + tagNumber + " is not unique");
-                }
+	            if (matches.Items.length > 0) {
+		            angular.forEach(matches.Items, function (value, key) {
+			            getParts(value.ID, deferred, value);
+		            });
+	            } else {
+		            return deferred.resolve("No matches found for tag number " + tagNumber);
+	            }
             })
             .then(function () {
                 // Remove the impersonation token.
@@ -528,7 +525,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
                                 OrderCloud.Auth.SetImpersonationToken(data['access_token']);
                             }).then(function () {
                             	//return OrderCloud.Products.List(number, 1, 50, null, null, null); //search, page, pageSize, searchOn, sortBy, filters
-                                return OrderCloud.As().Me.ListProducts(null, 1, 50, null, null, {"Name": number}, null, miniCartBuyer.BuyerID.substring(0, 5))
+                                return OrderCloud.As().Me.ListProducts(null, 1, 50, null, null, {"Name": number+"*"}, null, miniCartBuyer.BuyerID.substring(0, 5))
                             })
                             .then(function (products) {
                                 if (products.Items.length == 0) {
@@ -730,7 +727,6 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
 
 		return deferred.promise;
 	}
-
 
 	var service = {
 		OrderStatus: orderStatuses,
