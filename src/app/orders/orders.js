@@ -89,13 +89,17 @@ function OrdersConfig($stateProvider,buyerid) {
     	            var d = $q.defer();
     	            var storageName = appname + '.routeto';
     	            $localForage.setItem(storageName, { state: 'gotoOrder', id: $stateParams.orderID, buyer: $stateParams.buyerID })
-                    .then(function () {
-                        OrderCloud.Orders.Get($stateParams.orderID, $stateParams.buyerID)
-                        .then(function (order) {
-                            $localForage.removeItem(storageName);
-                            d.resolve(order);
-                        });
-                    });
+	                    .then(function () {
+	                        OrderCloud.Orders.Get($stateParams.orderID, $stateParams.buyerID)
+		                        .then(function (order) {
+		                            $localForage.removeItem(storageName);
+		                            d.resolve(order);
+		                        })
+		                        .catch(function(ex) {
+			                        $exceptionHandler(ex);
+			                        $state.go('home');
+		                        });
+	                    });
     	            return d.promise;
     	        }
     	    }
