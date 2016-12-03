@@ -761,21 +761,22 @@ function PartController( $state, $sce, $scope, $q, OrderCloud, WeirService ) {
     };
 }
 
-function PartResultsController( $rootScope, $sce, $state, WeirService, PartNumberResults ) {
+function PartResultsController( $rootScope, $sce, $state, WeirService, PartNumberResults, Underscore ) {
 	var vm = this;
 	vm.partNumberResults = PartNumberResults;
-	if (!vm.partNumberResults || !vm.partNumberResults.Parts || vm.partNumberResults.Parts.length == 0) $state.go('productSearch.noresults');
-	vm.Customer = PartNumberResults.Customer;
+	if (vm.partNumberResults && vm.partNumberResults.length == 0) $state.go('productSearch.noresults');
+	vm.Customer = ""; //PartNumberResults.Customer;
 	vm.MultipleCustomers = (vm.Customer == "*");
 	var numFound = 0;
-	angular.forEach(PartNumberResults.Parts, function(entry) {
-		if (entry.Detail) numFound++;
+	vm.partNumberResults = Underscore.flatten(Underscore.map(vm.partNumberResults, Underscore.values));
+	angular.forEach(vm.partNumberResults, function(entry) {
+		if (entry.Number) numFound++;
 	});
 
 	var labels = {
 		en: {
 			Customer: "Customer",
-			ResultsHeader: "Showing results for part numbers; " + numFound.toString() + " of " + PartNumberResults.Parts.length.toString() + " searched part numbers found",
+			ResultsHeader: "Showing results for part numbers; " + numFound.toString() + " of " + vm.partNumberResults.length.toString() + " searched part numbers found",
 			SearchAgain: "Search again",
 			PartNum: "Part number",
 			PartDesc: "Description of part",
@@ -788,7 +789,7 @@ function PartResultsController( $rootScope, $sce, $state, WeirService, PartNumbe
 		},
 		fr: {
 			Customer: "Client",
-			ResultsHeader: $sce.trustAsHtml("Affichage des r&eacute;sultats pour les num&eacute;ros de pi&eacute;ce " + numFound.toString() + " of " + PartNumberResults.Parts.length.toString() + " searched part numbers found"),
+			ResultsHeader: $sce.trustAsHtml("Affichage des r&eacute;sultats pour les num&eacute;ros de pi&eacute;ce " + numFound.toString() + " of " + vm.partNumberResults.length.toString() + " searched part numbers found"),
 			SearchAgain: $sce.trustAsHtml("Chercher &agrave; nouveau"),
 			PartNum: $sce.trustAsHtml("R&eacute;f&eacute;rence"),
 			PartDesc: $sce.trustAsHtml("Description de la partie"),

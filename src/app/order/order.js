@@ -107,7 +107,6 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
                          OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService,
                          Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService) {
     var vm = this;
-	console.log(Me);
     vm.Order = Order;
     vm.LineItems = LineItems;
 	vm.BlankItems = [];

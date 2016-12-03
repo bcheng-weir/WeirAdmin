@@ -482,17 +482,9 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
 		var deferred = $q.defer();
 
 		getParts(partNumbers);
-		return $q.all(queue)
-			.then(function() {
-				getValvesForParts(results);
-				$q.all(q2)
-					.then(function() {
-						getCustomerForValves(categories);
-						$q.all(q3)
-							.then(function() {
-								deferred.resolve(results);
-							});
-					});
+		$q.all(queue)
+			.then(function(results) {
+				deferred.resolve(results);
 			})
 			.catch (function(ex) {
 				deferred.resolve(results);
@@ -536,7 +528,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
                                         results.Parts.push(result);
                                     });
                                 }
-                                d.resolve();
+                                d.resolve(results);
                             })
                             .then(function () {
                                 // Remove the impersonation token.
@@ -544,7 +536,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
                             })
                             .catch(function (ex) {
                                 results.Parts.push({Number: number, Detail: null});
-                                d.resolve();
+                                d.resolve(results);
                             });
                         return d.promise;
                     })());
