@@ -57,9 +57,10 @@ function CustomerConfig($stateProvider) {
                     return OrderCloud.Buyers.Get($stateParams.buyerid)
                 },
                 SelectedAddress: function($stateParams, $state, OrderCloud) {
-                    return OrderCloud.Addresses.Get($stateParams.addressid,SelectedBuyer.ID).catch(function() {
-                        console.writeline("failed to get address");
-                    });
+                    return OrderCloud.Addresses.Get($stateParams.addressid,SelectedBuyer.ID)
+                        .catch(function() {
+                            console.writeline("failed to get address");
+                        });
                 }
             }
         })
@@ -89,8 +90,7 @@ function CustomerConfig($stateProvider) {
                 SelectedBuyer: function($stateParams, OrderCloud) {
                     return OrderCloud.Buyers.Get($stateParams.buyerid);
                 },
-                EndUsers: function($stateParams, OrderCloud) {
-                    //TODO filter xp.Type.ID
+                EndUsers: function(OrderCloud) {
                     return OrderCloud.Buyers.List();
                 }
             }
@@ -438,7 +438,7 @@ function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, O
     }
 }
 
-function CustomerCreateCtrl($q, $exceptionHandler, $scope, $state, toastr, OrderCloud, CustomerService, OCGeography, WeirService) {
+function CustomerCreateCtrl($q, $state, toastr, CustomerService, OCGeography, WeirService) {
     var vm = this;
     vm.WeirGroups = CustomerService.WeirGroups;
     vm.types = CustomerService.CustomerTypes;
@@ -479,7 +479,7 @@ function CustomerCreateCtrl($q, $exceptionHandler, $scope, $state, toastr, Order
     }
 }
 
-function CustomerAddressEditCtrl($q, $exceptionHandler, $state, $scope, toastr, OrderCloud, OCGeography, SelectedBuyer, SelectedAddress, Underscore, WeirService, CustomerService) {
+function CustomerAddressEditCtrl($exceptionHandler, $state, $scope, toastr, OrderCloud, OCGeography, SelectedBuyer, SelectedAddress, Underscore, WeirService, CustomerService) {
     var vm = this,
         addressID = SelectedAddress.ID;
     vm.addressName = SelectedAddress.AddressName;
@@ -600,7 +600,7 @@ function CustomerAddressEditCtrl($q, $exceptionHandler, $state, $scope, toastr, 
     };
 }
 
-function CustomerAddressCreateCtrl($q, $exceptionHandler, $scope, $state, toastr, OrderCloud, OCGeography, CustomerService, SelectedBuyer, Underscore, WeirService) {
+function CustomerAddressCreateCtrl($exceptionHandler, $state, toastr, OrderCloud, OCGeography, CustomerService, SelectedBuyer, Underscore, WeirService) {
     var vm = this;
     vm.countries = OCGeography.Countries;
     vm.states = OCGeography.States;
@@ -658,7 +658,7 @@ function CustomerAddressCreateCtrl($q, $exceptionHandler, $scope, $state, toastr
     }
 }
 
-function CustomerAssignCtrl($q, $exceptionHandler, $scope, $state, toastr, Underscore, OrderCloud, SelectedBuyer, EndUsers, Assignments, WeirService, CustomerService) {
+function CustomerAssignCtrl($exceptionHandler, $scope, $state, toastr, Underscore, OrderCloud, SelectedBuyer, EndUsers, Assignments, WeirService, CustomerService) {
     // ToDo: This needs to page!
     var vm = this;
     vm.list = angular.copy(EndUsers);

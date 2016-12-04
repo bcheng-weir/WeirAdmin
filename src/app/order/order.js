@@ -14,7 +14,13 @@ function OrderShareService() {
     return svc;
 }
 
-function orderConfig($stateProvider) {
+function orderConfig($stateProvider, $sceDelegateProvider) {
+	$sceDelegateProvider.resourceUrlWhitelist([
+		'self',
+		'https://www.global.weir/brands/**',
+		'https://**.herokuapp.com/**',
+		'https://s3.us-east-2.amazonaws.com/ordercloudtest/**'
+	]);
     $stateProvider
 	    .state('order', {
 	        parent: 'base',
@@ -103,8 +109,9 @@ function orderConfig($stateProvider) {
 	    });
 }
 
-function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler, $window, $timeout, OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems,
-                         Payments, Me, WeirService, Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr) {
+function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $window, $timeout,
+                         OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService,
+                         Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService) {
     var vm = this;
     vm.Order = Order;
     vm.LineItems = LineItems;
@@ -397,6 +404,17 @@ function OrderController($q, $scope, $rootScope, $state, $sce, $exceptionHandler
 			return false;
 		}
 	}
+
+	vm.GetFile = function(fileName) {
+		var orderid = vm.Order.xp.OriginalOrderID ? vm.Order.xp.OriginalOrderID : vm.Order.ID;
+		FilesService.Get(orderid + fileName)
+			.then(function(fileData) {
+				console.log(fileData);
+				var file = new Blob([fileData.Body], {type: fileData.ContentType});
+				var fileURL = URL.createObjectURL(file);
+				window.open(fileURL, "_blank");
+			});
+	};
 
 	vm.AddBlankItem = _addBlankItem;
 	function _addBlankItem(line) {

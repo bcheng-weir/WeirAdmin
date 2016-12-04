@@ -113,32 +113,6 @@ function FilesService($q,fileStore) {
 
 	return service;
 }
-/*function FilesService($q, $http, OrderCloud, apiurl) {
-    var service = {
-        Upload: _upload
-    };
-
-    var fileURL = apiurl + '/v1/files';
-
-    function _upload(file, fileName) {
-        var deferred = $q.defer();
-
-        var fd = new FormData();
-        fd.append('file', file);
-
-        $http.post(fileURL + '?filename=' + fileName, fd, {transformRequest: angular.identity, headers: {'Content-Type': undefined, 'Authorization': 'Bearer ' + OrderCloud.Auth.ReadToken()}})
-            .success(function(data) {
-                deferred.resolve(data);
-            })
-            .error(function(error) {
-                deferred.reject(error)
-            });
-
-        return deferred.promise;
-    }
-
-    return service;
-}*/
 
 function ordercloudFileUpload($parse, Underscore, FileReader, FilesService) {
     var directive = {
@@ -168,6 +142,16 @@ function ordercloudFileUpload($parse, Underscore, FileReader, FilesService) {
         scope.remove = function() {
             delete scope.model.xp[scope.keyname];
         };
+
+	    scope.get = function(fileName) {
+		    FilesService.Get(orderid + fileName)
+			    .then(function(fileData) {
+				    console.log(fileData);
+				    var file = new Blob([fileData.Body], {type: fileData.ContentType});
+				    var fileURL = URL.createObjectURL(file);
+				    window.open(fileURL, "_blank");
+			    });
+	    };
 
         function afterSelection(file, fileName) {
             FilesService.Upload(file, fileName)
@@ -284,7 +268,13 @@ function ordercloudPoUpload($parse, $exceptionHandler, $sce, Underscore, FileRea
 		scope.labels = WeirService.LocaleResources(labels);
 
 		scope.get = function(fileName) {
-			FilesService.Get(orderid + fileName);
+			FilesService.Get(orderid + fileName)
+				.then(function(fileData) {
+					console.log(fileData);
+					var file = new Blob([fileData.Body], {type: fileData.ContentType});
+					var fileURL = URL.createObjectURL(file);
+					window.open(fileURL, "_blank");
+				});
 		};
 
 		scope.remove = function(fileName) {

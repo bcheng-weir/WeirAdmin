@@ -113,9 +113,9 @@
                          <span ng-show="line.xp.LeadTime==null">{{line.Product.xp.LeadTime}}</span>
                          <span ng-show="line.xp.LeadTime!=null">{{line.xp.LeadTime}}</span>
                      </td>
-                     <td ng-switch on="myquote.Quote.xp.Currency" class='text-right' ng-if="order.Order.xp.Status!='RE'">
-                         <span ng-switch-when="EUR">{{line.UnitPrice | currency:'&euro; '}}</span>
-                         <span ng-switch-when="GBP">{{line.UnitPrice | currency:'&#163; '}}</span>
+                     <td ng-switch on="order.Order.xp.CustomerID | weirGroupFromBuyersID" class='text-right' ng-if="order.Order.xp.Status!='RE'">
+                         <span ng-switch-when="WPIFR">{{line.UnitPrice | currency:'&euro; '}}</span>
+                         <span ng-switch-when="WVCUK">{{line.UnitPrice | currency:'&#163; '}}</span>
                          <span ng-switch-default>{{line.UnitPrice | currency:'&#163; '}}</span>
                      </td>
                      <td ng-if="order.Order.xp.Status!='RE'">
@@ -170,15 +170,14 @@
                      <td>{{line.Product.xp.ReplacementSchedule}}</td>
 
                      <td ng-if="order.Order.xp.Status!='RE'">{{line.Product.xp.LeadTime}}</td>
-                     <td ng-switch on="myquote.Quote.xp.Currency" class='text-right' ng-if="order.Order.xp.Status!='RE'">
-                         <span ng-switch-when="EUR">{{line.UnitPrice | currency:'&euro; '}}</span>
-                         <span ng-switch-when="GBP">{{line.UnitPrice | currency:'&#163; '}}</span>
+                     <td ng-switch on="order.Order.xp.CustomerID | weirGroupFromBuyersID" class='text-right' ng-if="order.Order.xp.Status!='RE'">
+                         <span ng-switch-when="WPIFR">{{line.UnitPrice | currency:'&euro; '}}</span>
+                         <span ng-switch-when="WVCUK">{{line.UnitPrice | currency:'&#163; '}}</span>
                          <span ng-switch-default>{{line.UnitPrice | currency:'&#163; '}}</span>
                      </td>
                      <td ng-if="order.Order.xp.Status!='RE'">
                          {{order.Zero}}
                      </td>
-
                      <td ng-if="order.Order.xp.Status=='RE'">
                          <input type="text" class="form-control" ng-model="line.Product.xp.LeadTime" />
                      </td>
@@ -200,9 +199,9 @@
                  <tr ng-if="order.LineItems.Items.length > 0">
                      <td class="button-th" colspan="5"></td>
                      <td ng-bind-html='order.labels.Total'></td>
-                     <td ng-switch on="order.Order.xp.Currency" class='text-right'>
-                         <span ng-switch-when="EUR">{{order.Order.Total | currency:'&euro; '}}</span>
-                         <span ng-switch-when="GBP">{{order.Order.Total | currency:'&#163; '}}</span>
+                     <td ng-switch on="order.Order.xp.CustomerID | weirGroupFromBuyersID" class='text-right'>
+                         <span ng-switch-when="WPIFR">{{order.Order.Total | currency:'&euro; '}}</span>
+                         <span ng-switch-when="WVCUK">{{order.Order.Total | currency:'&#163; '}}</span>
                          <span ng-switch-default>{{order.Order.Total | currency:'&#163; '}}</span>
                      </td>
                  </tr>
@@ -220,10 +219,10 @@
              <!-- ToDo footer stuff -->
              <strong><span ng-bind-html='order.labels.YourAttachments'></span></strong><br />
              <p ng-repeat="fileName in order.Order.xp.Files">
-                 <a href="{{order.GetFileUrl(fileName)}}" target="_blank">{{fileName}}</a>
+                 <a href="" ng-click="order.GetFile(fileName)" target="_blank">{{fileName}}</a>
              </p>
              <p ng-hide="order.Order.xp.Status=='SE'">
-                 <a href="{{order.GetFileUrl(order.Order.xp.PODocument)}}" target="_blank">{{order.Order.xp.PODocument}}</a>
+                 <a href="" ng-click="order.GetFile(order.Order.xp.PODocument)" target="_blank">{{order.Order.xp.PODocument}}</a>
              </p>
              <p ng-show="order.Order.xp.Status=='SE'">
                  <ordercloud-po-upload model="order.Order" keyname="PODocument" label=''></ordercloud-po-upload>

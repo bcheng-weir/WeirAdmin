@@ -3,20 +3,18 @@
         <button type="button" class="btn btn-success pull-right" ui-sref=".create"><i class="fa fa-plus-circle"></i> {{customers.labels.CreateNew}}</button>
         <h3>{{customers.labels.Customers}}</h3>
     </div>
-
     <!--====== SEARCH/FILTERS ======-->
     <form name="CustomersSearchForm" class="form-inline" ng-submit="customers.search()">
         <fieldset class="form-group">
             <input type="search" placeholder="Search customers..." ng-model="customers.parameters.search" class="form-control">
         </fieldset>
         <fieldset class="form-group" ng-class="{'text-center':application.$ocMedia('max-width:767px')}">
-		<span ng-class="{'btn-group':customers.searchResults}">
-			<button type="submit" class="btn btn-primary">{{customers.labels.Search}}</button>
-			<button ng-if="customers.searchResults" ng-click="customers.clearSearch()" type="button" class="btn btn-default"><i class="fa fa-times"></i></button>
-		</span>
+        <span ng-class="{'btn-group':customers.searchResults}">
+            <button type="submit" class="btn btn-primary">{{customers.labels.Search}}</button>
+            <button ng-if="customers.searchResults" ng-click="customers.clearSearch()" type="button" class="btn btn-default"><i class="fa fa-times"></i></button>
+        </span>
         </fieldset>
     </form>
-
     <!--====== LIST ======-->
     <div class="no-matches" ng-if="!customers.list.Items.length">
         <b>{{customers.labels.NoMatch}}.</b>
@@ -26,34 +24,34 @@
             buyersAddresses.list.Meta.ItemRange[1] + ' of ' + customers.list.Meta.TotalCount + ' results'}}</b>
         <table class="table table-hover table-condensed oc-table-responsive">
             <thead>
-            <tr>
-                <th scope="col">
-                    <!-- Commented out until API supports sorting for buyers -->
-                    <!-- <a href="#" role="button" ng-click="customers.updateSort('ID')"> -->
-                    {{customers.labels.ID}}
-                    <i class="fa fa-caret-down" ng-show="customers.parameters.sortBy == 'ID'"></i>
-                    <i class="fa fa-caret-up" ng-show="customers.parameters.sortBy == '!ID'"></i>
-                    <!-- </a> -->
-                </th>
-                <th scope="col">
-                    <!-- Commented out until API supports sorting for buyers -->
-                    <!-- <a href="#" role="button" ng-click="customers.updateSort('Name')"> -->
-                    {{customers.labels.Name}}
-                    <i class="fa fa-caret-down" ng-show="customers.parameters.sortBy == 'Name'"></i>
-                    <i class="fa fa-caret-up" ng-show="customers.parameters.sortBy == '!Name'"></i>
-                    <!-- </a> -->
-                </th>
-                <th class="text-center" scope="col">
-                    {{customers.labels.WeirGroup}}
-                </th>
-                <th class="text-center" scope="col">
-                    {{customers.labels.CustomerType}}
-                </th>
-                <th class="text-center" scope="col">
-                    {{customers.labels.Active}}
-                </th>
-                <th scope="col"></th>
-            </tr>
+                <tr>
+                    <th scope="col">
+                        <!-- Commented out until API supports sorting for buyers -->
+                        <!-- <a href="#" role="button" ng-click="customers.updateSort('ID')"> -->
+                        {{customers.labels.ID}}
+                        <i class="fa fa-caret-down" ng-show="customers.parameters.sortBy == 'ID'"></i>
+                        <i class="fa fa-caret-up" ng-show="customers.parameters.sortBy == '!ID'"></i>
+                        <!-- </a> -->
+                    </th>
+                    <th scope="col">
+                        <!-- Commented out until API supports sorting for buyers -->
+                        <!-- <a href="#" role="button" ng-click="customers.updateSort('Name')"> -->
+                        {{customers.labels.Name}}
+                        <i class="fa fa-caret-down" ng-show="customers.parameters.sortBy == 'Name'"></i>
+                        <i class="fa fa-caret-up" ng-show="customers.parameters.sortBy == '!Name'"></i>
+                        <!-- </a> -->
+                    </th>
+                    <th class="text-center" scope="col">
+                        {{customers.labels.WeirGroup}}
+                    </th>
+                    <th class="text-center" scope="col">
+                        {{customers.labels.CustomerType}}
+                    </th>
+                    <th class="text-center" scope="col">
+                        {{customers.labels.Active}}
+                    </th>
+                    <th scope="col"></th>
+                </tr>
             </thead>
             <tbody>
             <tr ng-repeat="buyer in customers.list.Items">

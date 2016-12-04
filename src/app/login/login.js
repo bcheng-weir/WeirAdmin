@@ -30,7 +30,7 @@ function LoginService($q, $window, $state, toastr, OrderCloud, TokenRefresh, cli
         .then(function (rte) {
             $localForage.removeItem(storageName);
             if (rte && rte.state) {
-                if (rte.state == 'gotoOrder') {
+                if (rte.state == 'gotoOrder' && rte.id && rte.buyer) {
                     $state.go('gotoOrder', { orderID: rte.id, buyerID: rte.buyer });
                 } else {
                     $state.go('home');
@@ -134,7 +134,7 @@ function LoginController($state, $stateParams, $exceptionHandler, OrderCloud, Lo
                 LoginService.RouteAfterLogin();
             })
             .catch(function(ex) {
-                if(ex.data.error == "Username not found or password incorrect") {
+                if(ex.data.error == "Username not found or password incorrect.") {
                     ex.data.error = "We are not able to recognise the email or password entered. Please check and re-enter.";
                 }
                 $exceptionHandler(ex);
