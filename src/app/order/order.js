@@ -14,7 +14,13 @@ function OrderShareService() {
     return svc;
 }
 
-function orderConfig($stateProvider) {
+function orderConfig($stateProvider, $sceDelegateProvider) {
+	$sceDelegateProvider.resourceUrlWhitelist([
+		'self',
+		'https://www.global.weir/brands/**',
+		'https://**.herokuapp.com/**',
+		'https://s3.us-east-2.amazonaws.com/ordercloudtest/**'
+	]);
     $stateProvider
 	    .state('order', {
 	        parent: 'base',
