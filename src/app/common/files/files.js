@@ -114,7 +114,7 @@ function FilesService($q,fileStore) {
 	return service;
 }
 
-function ordercloudFileUpload($parse, Underscore, FileReader, FilesService) {
+function ordercloudFileUpload($parse, Underscore, FileReader, FilesService, FileSaver) {
     var directive = {
         scope: {
             model: '=',
@@ -148,8 +148,9 @@ function ordercloudFileUpload($parse, Underscore, FileReader, FilesService) {
 			    .then(function(fileData) {
 				    console.log(fileData);
 				    var file = new Blob([fileData.Body], {type: fileData.ContentType});
-				    var fileURL = URL.createObjectURL(file);
-				    window.open(fileURL, "_blank");
+				    FileSaver.saveAs(file, fileName);
+				    //var fileURL = URL.createObjectURL(file);
+				    //window.open(fileURL, "_blank");
 			    });
 	    };
 
@@ -223,7 +224,7 @@ function ordercloudFileUpload($parse, Underscore, FileReader, FilesService) {
     return directive;
 }
 
-function ordercloudPoUpload($parse, $exceptionHandler, $sce, Underscore, FileReader, FilesService, OrderCloud, fileStore, WeirService) {
+function ordercloudPoUpload($parse, $exceptionHandler, $sce, Underscore, FileReader, FilesService, OrderCloud, fileStore, WeirService, FileSaver) {
 	var directive = {
 		scope: {
 			model: '=',
@@ -272,8 +273,9 @@ function ordercloudPoUpload($parse, $exceptionHandler, $sce, Underscore, FileRea
 				.then(function(fileData) {
 					console.log(fileData);
 					var file = new Blob([fileData.Body], {type: fileData.ContentType});
-					var fileURL = URL.createObjectURL(file);
-					window.open(fileURL, "_blank");
+					FileSaver.saveAs(file, fileName);
+					//var fileURL = URL.createObjectURL(file);
+					//window.open(fileURL, "_blank");
 				});
 		};
 
