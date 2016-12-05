@@ -111,7 +111,7 @@ function orderConfig($stateProvider, $sceDelegateProvider) {
 
 function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $window, $timeout,
                          OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService,
-                         Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService) {
+                         Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService, FileSaver) {
     var vm = this;
     vm.Order = Order;
     vm.LineItems = LineItems;
@@ -411,8 +411,9 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
 			.then(function(fileData) {
 				console.log(fileData);
 				var file = new Blob([fileData.Body], {type: fileData.ContentType});
-				var fileURL = URL.createObjectURL(file);
-				window.open(fileURL, "_blank");
+				FileSaver.saveAs(file, fileName);
+				//var fileURL = URL.createObjectURL(file);
+				//window.open(fileURL, "_blank");
 			});
 	};
 
