@@ -93,6 +93,9 @@ function orderConfig($stateProvider, $sceDelegateProvider) {
 		        },
 	            Payments: function (Order, OrderCloud) {
 	                return OrderCloud.Payments.List(Order.ID,null,null,null,null,null,null,Order.xp.BuyerID);
+	            },
+	            UserGroups: function (UserGroupsService) {
+	                return UserGroupsService.UserGroups();
 	            }
 	        }
         })
@@ -109,14 +112,18 @@ function orderConfig($stateProvider, $sceDelegateProvider) {
 	    });
 }
 
-function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $window, $timeout,
+function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $window, $timeout, UserGroupsService,
                          OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService,
-                         Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService, FileSaver) {
+                         Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService, FileSaver,
+                         UserGroups) {
     var vm = this;
     vm.Order = Order;
     vm.LineItems = LineItems;
-	vm.BlankItems = [];
-	if(PreviousLineItems) {
+    vm.BlankItems = [];
+    var userIsInternalSalesAdmin = UserGroups.indexOf(UserGroupsService.Groups.InternalSales) > -1;
+    var userIsSuperAdmin = UserGroups.indexOf(UserGroupsService.Groups.SuperAdmin) > -1;
+
+    if (PreviousLineItems) {
 		vm.PreviousLineItems = Underscore.filter(PreviousLineItems.Items, function (item) {
 			if(item.ProductID == "PLACEHOLDER") {
 				var found = false;
@@ -154,8 +161,9 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
 		var result = Underscore.findWhere(OCGeography.Countries, { value: c });
 		return result ? result.label : '';
 	};
-
-	/*vm.PONumber = "";
+	vm.showReviewer = [WeirService.OrderStatus.Submitted.id, WeirService.OrderStatus.Review.id, WeirService.OrderStatus.SubmittedWithPO.id, WeirService.OrderStatus.SubmittedPendingPO.id, WeirService.OrderStatus.RevisedQuote.id, WeirService.OrderStatus.RevisedOrder.id].indexOf(vm.Order.xp.Status) > -1;
+	vm.showAssign = vm.showReviewer && (Me.ID != vm.Order.xp.ReviewerID) && (userIsInternalSalesAdmin || userIsSuperAdmin);
+    /*vm.PONumber = "";
 	var payment = (vm.Payments.Items.length > 0) ? vm.Payments.Items[0] : null;
 	if (payment && payment.xp && payment.xp.PONumber) vm.PONumber = payment.xp.PONumber;*/
 
@@ -163,6 +171,9 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
         en: {
             //header labels
             status: "Status",
+            reviewer: "Reviewer; ",
+            unassigned: "Not assigned",
+            AssignToMe: "Assign to me",
             OrderDate: "Order date;",
             Confirm: "Confirm",
             Revise: "Revise",
@@ -208,13 +219,18 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
 	        Cancel: "Cancel",
 	        POSaveTitle: "PO Number Updated",
 	        POSaveMessage: "PO Number saved as: ",
-	        DragAndDrop: "Drag and drop files here to upload"
+	        DragAndDrop: "Drag and drop files here to upload",
+	        OrderAssignedMsg: "This order has been assigned to you",
+            QuoteAssignedMsg: "This quote has been assigned to you"
         },
         fr: {
             //header labels
-            status:$sce.trustAsHtml( "Status"),
+            status: $sce.trustAsHtml("Status"),
+            reviewer: "Reviewer; ",
+            unassigned: "Not assigned",
             OrderDate:$sce.trustAsHtml( "Order date;"),
-            Confirm:$sce.trustAsHtml( "Confirm"),
+            AssignToMe: "Assign to me",
+            Confirm: $sce.trustAsHtml("Confirm"),
             Revise:$sce.trustAsHtml( "Revise"),
             ShareRevision:$sce.trustAsHtml( "Share revision"),
 	        Update: $sce.trustAsHtml("Update"),
@@ -258,7 +274,9 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
 	        Cancel: $sce.trustAsHtml("Cancel"),
 	        POSaveTitle: $sce.trustAsHtml("PO Number Updated"),
 	        POSaveMessage: $sce.trustAsHtml("PO Number saved as: "),
-	        DragAndDrop: $sce.trustAsHtml("FR: Drag and drop files here to upload")
+	        DragAndDrop: $sce.trustAsHtml("FR: Drag and drop files here to upload"),
+	        OrderAssignedMsg: "This order has been assigned to you",
+	        QuoteAssignedMsg: "This quote has been assigned to you"
         }
     };
     vm.labels = labels[WeirService.Locale()];
@@ -278,6 +296,9 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
 					PendingPO: false
 				}
 			};
+			if (vm.Order.xp.ReviewerID != Me.ID) {
+			    data.xp.ReviewerID = Me.ID;
+			}
 
 			OrderCloud.Orders.Patch(vm.Order.ID, data, vm.Order.xp.BuyerID)
 				.then(function (order) {
@@ -542,6 +563,9 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
 				ReviewerName: currentUser.FirstName + " " + currentUser.LastName
 			}
 		};
+		if (vm.Order.xp.ReviewerID != currentUser.ID) {
+		    patch.xp.ReviewerID = currentUser.ID;
+		}
 
 		if(patch.xp.Status) {
 			OrderCloud.Orders.Patch(vm.Order.ID, patch, vm.Order.xp.BuyerID)
@@ -588,6 +612,9 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
 				ReviewerName: currentUser.FirstName + " " + currentUser.LastName
 			}
 		};
+		if (vm.Order.xp.ReviewerID != currentUser.ID) {
+		    patch.xp.ReviewerID = currentUser.ID;
+		}
 
 		if(patch.xp.Status) {
 			OrderCloud.Orders.Patch(vm.Order.ID, patch, vm.Order.xp.BuyerID)
@@ -675,6 +702,9 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
 				OriginalOrderID: vm.Order.xp.OriginalOrderID
 			}
 		};
+		if (vm.Order.xp.ReviewerID != currentUser.ID) {
+		    orderPatch.xp.ReviewerID = currentUser.ID;
+		}
 
 		var impersonation = {
 			ClientID: buyernetwork,
@@ -739,6 +769,33 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
 				$rootScope.$broadcast('SwitchCart');
 				$state.go($state.current,{}, {reload:true});
 			});
+	}
+	vm.AssignToMe = _assignToMe;
+	function _assignToMe() {
+	    var newID = Me.ID;
+	    var oldID = vm.Order.xp.ReviewerID;
+	    if (newID && (newID != oldID)) {
+	        var data = {
+	            xp: {
+	                ReviewerID: newID,
+	                ReviewerName: Me.FirstName + " " + Me.LastName
+	            }
+	        };
+	        if (oldID) {
+	            data.xp.PriorReviewerID = oldID;
+	        }
+	        OrderCloud.Orders.Patch(vm.Order.ID, data, vm.Order.xp.BuyerID)
+            .then(function (order) {
+                vm.Order = order;
+                vm.showAssign = false;
+                if (vm.Order.xp.Type == 'Quote') {
+                    toastr.success(vm.labels.QuoteAssignedMsg);
+                } else {
+                    toastr.success(vm.labels.OrderAssignedMsg);
+                }
+            });
+
+	    }
 	}
 }
 

@@ -7,30 +7,37 @@ function UserGroupsService($q, OrderCloud) {
     function _isUserInGroup(groupList) {
         var d = $q.defer();
         var isInGroup = false;
+        _getGroupsForUser()
+        .then(function (usrGroups) {
+            for (var i = 0; i < usrGroups.length; i++) {
+                if (groupList.indexOf(usrGroups[i]) > -1) isInGroup = true;
+            }
+            d.resolve(isInGroup);
+        });
+        return d.promise;
+    }
+    function _getGroupsForUser() {
+        var d = $q.defer();
         if (!groups) {
             OrderCloud.Me.Get()
-            .then(function(usr) {
+            .then(function (usr) {
                 OrderCloud.AdminUserGroups.ListUserAssignments(null, usr.ID, 1, 50)
                 .then(function (results) {
                     groups = [];
                     for (var i = 0; i < results.Items.length; i++) {
-                        var id = results.Items[i].UserGroupID;
-                        groups.push(id);
-                        if (groupList.indexOf(id) > -1) isInGroup = true;
+                        groups.push(results.Items[i].UserGroupID);
                     }
-                    d.resolve(isInGroup);
+                    d.resolve(groups);
                 })
             })
         } else {
-            for (var i = 0; i < groups.length; i++) {
-                if (groupList.indexOf(groups[i]) > -1) isInGroup = true;
-            }
-            d.resolve(isInGroup);
+            d.resolve(groups);
         }
         return d.promise;
     }
     return {
         IsUserInGroup: _isUserInGroup,
+        UserGroups: _getGroupsForUser,
         Groups: {
             SuperAdmin: 'SuperAdmin',
             InternalSales: 'InternalSales',
