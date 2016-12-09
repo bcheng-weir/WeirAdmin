@@ -76,7 +76,7 @@
                      <span ng-bind-html='order.labels.PONumber'></span>
                      <span class="text-danger" ng-hide="order.Order.xp.Status=='SE'">{{order.Order.xp.PONumber}}</span>
                      <span ng-show="order.Order.xp.Status=='SE'">
-                         <input type="text" ng-model="order.Order.xp.PONumber" /> <button class="btn btn-sm btn-primary" ng-bind-html="order.labels.Add" ng-click="order.UpdatePO()"></button>
+                         <input type="text" ng-model="order.Order.xp.PONumber" placeholder="{{order.labels.POPlaceHolder}}" /> <button class="btn btn-sm btn-primary" ng-bind-html="order.labels.Add" ng-click="order.UpdatePO()"></button>
                     </span>
                  </b>
              </p>
@@ -233,6 +233,8 @@
              </p>
              <p ng-show="order.Order.xp.Status=='SE'">
                  <ordercloud-po-upload model="order.Order" keyname="PODocument" label=''></ordercloud-po-upload>
+                 <br>
+                 <span ng-bind="order.labels.PONote"></span>
              </p>
          </div>
      </div>

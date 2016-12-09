@@ -118,6 +118,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
                          UserGroups) {
     var vm = this;
     vm.Order = Order;
+	vm.Order.xp.PONumber = vm.Order.xp.PONumber != "Pending" ? vm.Order.xp.PONumber : ""; // In the buyer app we were initially setting this to pending.
     vm.LineItems = LineItems;
     vm.BlankItems = [];
     var userIsInternalSalesAdmin = UserGroups.indexOf(UserGroupsService.Groups.InternalSales) > -1;
@@ -221,7 +222,9 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
 	        POSaveMessage: "PO Number saved as: ",
 	        DragAndDrop: "Drag and drop files here to upload",
 	        OrderAssignedMsg: "This order has been assigned to you",
-            QuoteAssignedMsg: "This quote has been assigned to you"
+            QuoteAssignedMsg: "This quote has been assigned to you",
+	        POPlaceHolder: "Enter PO Number",
+	        PONote: "You can also upload a PO document using the upload button below the order details"
         },
         fr: {
             //header labels
@@ -275,8 +278,10 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
 	        POSaveTitle: $sce.trustAsHtml("PO Number Updated"),
 	        POSaveMessage: $sce.trustAsHtml("PO Number saved as: "),
 	        DragAndDrop: $sce.trustAsHtml("FR: Drag and drop files here to upload"),
-	        OrderAssignedMsg: "This order has been assigned to you",
-	        QuoteAssignedMsg: "This quote has been assigned to you"
+	        OrderAssignedMsg: $sce.trustAsHtml("FR:This order has been assigned to you"),
+	        QuoteAssignedMsg: $sce.trustAsHtml("FR:This quote has been assigned to you"),
+	        POPlaceHolder: $sce.trustAsHtml("FR:Enter PO Number"),
+	        PONote: $sce.trustAsHtml("FR: You can also upload a PO document using the upload button below the order details")
         }
     };
     vm.labels = labels[WeirService.Locale()];
@@ -364,7 +369,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
 	function _showConfirm() {
 		var validStatus = {
 			SB: true,
-			SP: true
+			SP: true,
+			SE: true
 		};
 		if(vm.Order.xp) {
 			return validStatus[vm.Order.xp.Status];
@@ -379,7 +385,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
 			SB: true,
 			SP: true,
 			RQ: true,
-			RR: true
+			RR: true,
+			SE: true
 		};
 		if(vm.Order.xp) {
 			return validStatus[vm.Order.xp.Status];
@@ -433,8 +440,6 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
 				console.log(fileData);
 				var file = new Blob([fileData.Body], {type: fileData.ContentType});
 				FileSaver.saveAs(file, fileName);
-				//var fileURL = URL.createObjectURL(file);
-				//window.open(fileURL, "_blank");
 			});
 	};
 
@@ -770,6 +775,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
 				$state.go($state.current,{}, {reload:true});
 			});
 	}
+
 	vm.AssignToMe = _assignToMe;
 	function _assignToMe() {
 	    var newID = Me.ID;
