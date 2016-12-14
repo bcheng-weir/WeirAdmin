@@ -6,8 +6,20 @@
                     <label ng-if="$index == 0 && part.partNumbers.length <= 1" ng-bind-html='part.labels.EnterPart'></label>
                     <label ng-if="$index == 0 && part.partNumbers.length > 1" ng-bind-html='part.labels.EnterParts'></label>
                     <div class="input-group col-md-12">
-                        <input type="text" class="form-control" ng-model="part.partNumbers[$index]" ng-change="part.updatePartList(part.partNumbers[$index])" typeahead-min-length="3" uib-typeahead="part.Name for part in productSearch.partNumberList | partPreSearch:$viewValue" />
+                        <!--<input type="text" class="form-control" ng-model="part.partNumbers[$index]" ng-change="part.updatePartList(part.partNumbers[$index])" typeahead-min-length="3" uib-typeahead="part.Name for part in productSearch.partNumberList | partPreSearch:$viewValue" />-->
+                        <input type="text"
+                               ng-model="part.partNumbers[$index]"
+                               placeholder="Part number result"
+                               uib-typeahead="partNumber for partNumber in productSearch.SearchProducts.GetPartNumbers($viewValue)"
+                               typeahead-loading="loadingParts"
+                               typeahead-no-results="noResults"
+                               typeahead-min-length="3"
+                               class="form-control"/>
                         <span class="input-group-addon" ng-if="part.partNumbers.length > 1" ng-click="part.removePartNumber($index)"><i class="fa fa-minus text-danger"></i></span>
+                        <i ng-show="loadingParts" class="glyphicon glyphicon-refresh"></i>
+                        <div ng-show="noResults">
+                            <i class="glyphicon glyphicon-remove"></i> No Results Found
+                        </div>
                     </div>
                     <span class="fa fa-minus text-danger form-control-feedback" ng-if="part.partNumbers.length > 1" ng-click="part.removePartNumber($index)"></span>
                 </div>

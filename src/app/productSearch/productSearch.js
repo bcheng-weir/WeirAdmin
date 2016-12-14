@@ -128,8 +128,9 @@ function ProductSearchConfig($stateProvider, $sceDelegateProvider) {
 	;
 }
 
-function ProductSearchController($sce, $state, $rootScope, OrderCloud, CurrentOrder, WeirService, CurrentCustomer, SerialNumbers, PartNumbers, MyOrg, imageRoot) {
+function ProductSearchController($sce, $state, $rootScope, OrderCloud, CurrentOrder, WeirService, CurrentCustomer, SerialNumbers, PartNumbers, MyOrg, imageRoot, SearchProducts) {
 	var vm = this;
+	vm.SearchProducts = SearchProducts;
 	vm.serialNumberList = SerialNumbers.Items;
 	vm.partNumberList = PartNumbers.Items;
 	vm.searchType = WeirService.GetLastSearchType();
@@ -248,7 +249,6 @@ function ProductSearchController($sce, $state, $rootScope, OrderCloud, CurrentOr
 
 function SerialController(WeirService, $scope, $q, OrderCloud, $state, $sce, toastr ) {
 	var vm = this;
-
 	var labels = {
 		en: {
 			WhereToFind: "where to find your serial number",
@@ -320,6 +320,15 @@ function SerialController(WeirService, $scope, $q, OrderCloud, $state, $sce, toa
 
         else return;
     };
+
+	vm.getSerialNumbers = function(sn) {
+		return OrderCloud.Categories.List(null, 1, 100, null, null, {"xp.SN": sn+"*", "ParentID":"WVCUK-1352"}, null, "WVCUK")
+			.then(function(response) {
+				return response.Items.map(function(item) {
+					return item.xp.SN;
+				})
+			})
+	};
 }
 
 function SerialResultsController(WeirService, $stateParams, $state, SerialNumberResults, $sce ) {
@@ -459,6 +468,130 @@ function SerialDetailController( $stateParams, $rootScope, $state, $sce, WeirSer
 		part.xp = typeof part.xp == "undefined" ? {} : part.xp;
 		part.xp.SN = vm.serialNumber.Name;
 		part.xp.TagNumber = vm.serialNumber.xp.TagNumber;
+		WeirService.AddPartToQuote(part)
+			.then(function(data) {
+				$rootScope.$broadcast('LineItemAddedToCart', data.Order.ID, data.LineItem); //This kicks off an event in cart.js
+				part.Quantity = null;
+			});
+	};
+}
+
+function PartController( $state, $sce, $scope, $q, OrderCloud, WeirService ) {
+	var vm = this;
+
+	vm.partNumbers = [null];
+	WeirService.SetLastSearchType(WeirService.SearchType.Part);
+
+	vm.addPartNumber = function() {
+		vm.partNumbers.push(null);
+	};
+
+	vm.removePartNumber = function(index) {
+		vm.partNumbers.splice(index, 1);
+	};
+
+	vm.searchPartNumbers = function() {
+		$state.go('productSearch.part.results', {numbers: vm.partNumbers.join(',')});
+	};
+
+	vm.clearSearch = function() {
+		vm.partNumbers = [null];
+	};
+
+	vm.showClearSearch = function() {
+		var count = 0;
+		angular.forEach(vm.partNumbers, function(number) {
+			if (number) count++;
+		});
+		return count > 0;
+	};
+
+	var labels = {
+		en: {
+			WhereToFind: "where to find your part number",
+			EnterPart: "Enter part number",
+			EnterParts: "Enter part numbers",
+			AddMore: "Add more part numbers   ",
+			ClearSearch: "Clear search",
+			Search: "Search"
+		},
+		fr: {
+			WhereToFind: $sce.trustAsHtml("O&ugrave; trouver votre num&eacute;ro de pi&eacute;ce"),
+			EnterPart: $sce.trustAsHtml("Entrez le num$eacute;ro de la pi&eacute;ce"),
+			EnterParts: $sce.trustAsHtml("Entrez le num$eacute;ro de la pi&eacute;ce"),
+			AddMore: $sce.trustAsHtml("Ajouter plus de num&eacute;ros de pi&eacute;ce   "),
+
+			ClearSearch: $sce.trustAsHtml("Effacer la recherche"),
+			Search: "Chercher"
+		}
+	};
+	vm.labels = WeirService.LocaleResources(labels);
+
+    vm.updatePartList = function(input) {
+        if (input.length >= 3) {
+            var deferred = $q.defer();
+            WeirService.PartNumbers(input)
+	            .then(function (data) {
+	                $scope.productSearch.partNumberList = (data.Items) ? data.Items : [];
+	                deferred.resolve();
+	                return;
+                })
+                .catch(function(ex) {
+                    deferred.resolve("No Tags with this id");
+                    return;
+                });
+        }
+    };
+
+}
+
+function PartResultsController( $rootScope, $sce, $state, WeirService, PartNumberResults ) {
+	var vm = this;
+	vm.partNumberResults = PartNumberResults;
+	if(vm.partNumberResults == null) $state.go('productSearch.noresults');
+	vm.Customer = PartNumberResults.Customer;
+	vm.MultipleCustomers = (vm.Customer == "*");
+	var numFound = 0;
+	angular.forEach(PartNumberResults.Parts, function(entry) {
+		if (entry.Detail) numFound++;
+	});
+
+	var labels = {
+		en: {
+			Customer: "Customer",
+			ResultsHeader: "Showing results for part numbers; " + numFound.toString() + " of " + PartNumberResults.Parts.length.toString() + " searched part numbers found",
+			SearchAgain: "Search again",
+			PartNum: "Part number",
+			PartDesc: "Description of part",
+			ReplSched: "Recommended replacement",
+			LeadTime: "Lead time",
+			Price: "Price per item or set",
+			Qty: "Quantity",
+			LeadTimeNotice: "Lead time for all orders will be based on the longest lead time from the list of spares requested",
+			AddToQuote: "Add to Quote"
+		},
+		fr: {
+			Customer: "Client",
+			ResultsHeader: $sce.trustAsHtml("Affichage des r&eacute;sultats pour les num&eacute;ros de pi&eacute;ce " + numFound.toString() + " of " + PartNumberResults.Parts.length.toString() + " searched part numbers found"),
+			SearchAgain: $sce.trustAsHtml("Chercher &agrave; nouveau"),
+			PartNum: $sce.trustAsHtml("R&eacute;f&eacute;rence"),
+			PartDesc: $sce.trustAsHtml("Description de la partie"),
+			PartQty: $sce.trustAsHtml("Quantit&eacute; de partie"),
+			ReplSched: $sce.trustAsHtml("Remplacement recommand&eacute;e"),
+			LeadTime: $sce.trustAsHtml("D&eacute;lai de mise en &oelig;uvre"),
+			Price: $sce.trustAsHtml("Prix par article ou ensemble"),
+			Qty: $sce.trustAsHtml("Quantit&eacute;"),
+			LeadTimeNotice: $sce.trustAsHtml("D&eacute;lai de livraison pour toutes les commandes sera bas&eacute; sur le plus long d&eacute;lai de la liste des pi&eacute;ces de rechange demand&eacute;es"),
+			AddToQuote: $sce.trustAsHtml("Ajouter &agrave; la proposition")
+
+		}
+	};
+	vm.labels = WeirService.LocaleResources(labels);
+	if(numFound == 0) $state.go('productSearch.noresults');
+	vm.addPartToQuote = function(part) {
+		part.xp = typeof part.xp == "undefined" ? {} : part.xp;
+		part.xp.SN = null;
+		part.xp.TagNumber = null;
 		WeirService.AddPartToQuote(part)
 			.then(function(data) {
 				$rootScope.$broadcast('LineItemAddedToCart', data.Order.ID, data.LineItem); //This kicks off an event in cart.js
