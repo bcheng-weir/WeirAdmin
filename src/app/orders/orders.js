@@ -20,9 +20,11 @@ function OrdersConfig($stateProvider,buyerid) {
                 Parameters: function ($stateParams, OrderCloudParameters) {
                     return OrderCloudParameters.Get($stateParams);
                 },
-                Orders: function (OrderCloud, Parameters) {
+                Orders: function (OrderCloud, Parameters, Me) {
                     OrderCloud.BuyerID.Set(null);
-                    return OrderCloud.Orders.ListIncoming(Parameters.from, Parameters.to, Parameters.search, Parameters.page, Parameters.pageSize || 100, Parameters.searchOn, Parameters.sortBy, Parameters.filters, null);
+	                Parameters.searchOn = Parameters.searchOn ? Parameters.searchOn : "ID,FromUserID,Total,xp";
+	                Parameters.filters["xp.BuyerID"] = Me.xp.WeirGroup.label+'*';
+                    return OrderCloud.Orders.ListIncoming(Parameters.from, Parameters.to, Parameters.search, Parameters.page, Parameters.pageSize || 20, Parameters.searchOn, Parameters.sortBy, Parameters.filters, null);
                 }
             }
         })
@@ -111,11 +113,11 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 	var vm = this;
 	vm.xpType = Parameters.filters ? Parameters.filters["xp.Type"] : {};
 	vm.StateName = $state.current.name;
-	Orders.Items = Underscore.filter(Orders.Items, function(item) {
+	/*Orders.Items = Underscore.filter(Orders.Items, function(item) {
 		if(item.xp && item.xp.BuyerID && Me.xp && Me.xp.WeirGroup) {
 			return item.xp.BuyerID.indexOf(Me.xp.WeirGroup.label) > -1;
 		}
-	});
+	});*/
 	vm.list = Orders;
 	vm.parameters = Parameters;
 	vm.sortSelection = Parameters.sortBy ? (Parameters.sortBy.indexOf('!') == 0 ? Parameters.sortBy.split('!')[1] : Parameters.sortBy) : null;
