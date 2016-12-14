@@ -53,17 +53,15 @@
             <th scope="col">
                 {{orders.labels.dateDespatched}}
             </th>
-            <th scope="col"></th>
-            <th scope="col"></th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="order in orders.list.Items">
-            <th scope="row">{{order.ID}}</th>
+            <th cope="row">{{order.ID}}</th>
             <td>{{order.xp.ContractNumber}}</td>
             <td>{{order.xp.InvoiceNumber}}</td>
             <td>{{order.xp.PONumber}}</td>
-            <td>{{order.xp.CustomerName}}</td>
+            <td>{{order.FromUserFirstName}} {{order.FromUserLastName}}</td>
             <td>{{order.xp.orderedBy}}</td>
             <td class="text-left" ng-switch on="order.xp.CustomerID | weirGroupFromBuyersID">
                 <span ng-switch-when="WPIFR">{{order.Total | currency: '&euro;'}}</span>
@@ -71,6 +69,7 @@
                 <span ng-switch-default>{{order.Total | currency:'&#163;'}}</span>
             </td>
             <td>{{order.DateSubmitted | weirdate}}</td>
+            <td><!-- Assigned To? --></td>
             <td>{{order.xp.DateDespatched | weirdate}}</td>
         </tr>
         </tbody>

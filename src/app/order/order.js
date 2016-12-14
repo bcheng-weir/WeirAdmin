@@ -46,19 +46,16 @@ function orderConfig($stateProvider, $sceDelegateProvider) {
 	            LineItems: function ($q, $state, toastr, OrderCloud, CurrentOrder, OrderShareService, Order, LineItemHelpers) {
 	                OrderShareService.LineItems.length = 0;
 		            var dfd = $q.defer();
-		            CurrentOrder.GetID()
-			            .then(function(id) {
-				            OrderCloud.LineItems.List(Order.ID,null,null,null,null,null,null,Order.xp.BuyerID)
-					            .then(function(data) {
-						            if (!data.Items.length) {
-							            toastr.error('Your quote does not contain any line items.', 'Error');
-							            dfd.resolve({ Items: [] });
-						            } else {
-							            LineItemHelpers.GetBlankProductInfo(data.Items);
-							            LineItemHelpers.GetProductInfo(data.Items)
-								            .then(function() { dfd.resolve(data); });
-						            }
-					            })
+		            OrderCloud.LineItems.List(Order.ID,null,null,null,null,null,null,Order.xp.BuyerID)
+			            .then(function(data) {
+				            if (!data.Items.length) {
+					            toastr.error('Your quote does not contain any line items.', 'Error');
+					            dfd.resolve({ Items: [] });
+				            } else {
+					            LineItemHelpers.GetBlankProductInfo(data.Items);
+					            LineItemHelpers.GetProductInfo(data.Items)
+						            .then(function() { dfd.resolve(data); });
+				            }
 			            })
 			            .catch(function () {
 			                toastr.error('Your quote does not contain any line items.', 'Error');
@@ -67,8 +64,6 @@ function orderConfig($stateProvider, $sceDelegateProvider) {
 		            return dfd.promise;
 	            },
 		        PreviousLineItems: function($q, toastr, OrderCloud, Order, LineItemHelpers) {
-	            	// We can't have a quantity of 0 on a line item. With show previous line items
-			        // Split the current order ID. If a rec exists, get, else do nothing.
 			        var pieces = Order.ID.split('-Rev');
 			        if(pieces.length > 1) {
 				        var prevId = pieces[0] + "-Rev" + (pieces[1] - 1).toString();
@@ -112,7 +107,7 @@ function orderConfig($stateProvider, $sceDelegateProvider) {
 	    });
 }
 
-function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $window, $timeout, UserGroupsService,
+function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGroupsService,
                          OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService,
                          Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService, FileSaver,
                          UserGroups) {
