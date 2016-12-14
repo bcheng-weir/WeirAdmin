@@ -93,7 +93,6 @@ function UsersConfig($stateProvider) {
     ;
 }
 
-
 function UsersController($state, $ocMedia, OrderCloud, OrderCloudParameters, UserList, Parameters) {
     var vm = this;
     vm.list = UserList;
