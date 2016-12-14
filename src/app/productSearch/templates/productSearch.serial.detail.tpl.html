@@ -14,12 +14,10 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-4" id="imgDiv" ng-if="serialDetail.serialNumber.xp.ImageName">
             <figure>
-                <img ng-if="serialDetail.serialNumber.xp.ImageName" ng-src="{{productSearch.GetValveImageUrl(serialDetail.serialNumber.xp.ImageName)}}" style="height: 18em; margin-top: 2em; display:block; margin-left:auto; margin-right:auto;" />
-                <div ng-if="!serialDetail.serialNumber.xp.ImageName" class="serial-image">
-                    <span>General Arrangement drawing of Valve Type</span>
-                </div>
+                <img ng-src="{{productSearch.GetValveImageUrl(serialDetail.serialNumber.xp.ImageName)}}" style="height: 18em; margin-top: 2em; display:block; margin-left:auto; margin-right:auto;"
+                         onerror="window.document.getElementById('imgDiv').style.display='none';"/>
             </figure>
         </div>
         <div class="col-md-6">

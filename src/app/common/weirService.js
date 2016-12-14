@@ -345,9 +345,17 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
             })
             .then(function (products) {
                 result.Parts = [];
+                var hasPrices = [];
+                var noPrices = [];
                 angular.forEach(products.Items, function (product) {
-                    result.Parts.push({Number: product.ID, Detail: product});
+                    if (product.StandardPriceSchedule && product.StandardPriceSchedule.PriceBreaks && product.StandardPriceSchedule.PriceBreaks.length > 0 && product.StandardPriceSchedule.PriceBreaks[0].Price) {
+                        hasPrices.push({ Number: product.ID, Detail: product });
+                    } else {
+                        noPrices.push({ Number: product.ID, Detail: product });
+                    }
                 });
+                result.Parts.push.apply(result.Parts, hasPrices);
+                result.Parts.push.apply(result.Parts, noPrices);
                 deferred.resolve(result);
             })
             .then(function () {
