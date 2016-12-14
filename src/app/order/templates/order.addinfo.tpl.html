@@ -32,11 +32,6 @@
                     <label ng-bind-html='info.labels.DespatchDate'></label><br />
                     <input type="date" datetime="dd/MM/yyyy" ng-model="info.Order.xp.DateDespatched" placeholder="Please enter a date"> </input>
                 </div>
-                <!-- in case the validation for each field is different decoupling them.-->
-                <div class="form-group" >
-                    <label ng-bind-html='info.labels.InvoiceNum'></label>
-                    <input type="text" name="InvoiceNumber" class="form-control" ng-model="info.Order.xp.InvoiceNumber" placeholder="Please enter an invoice number">
-                </div>
                 <p><b>Your customer will be sent a notification when you save details on this page</b></p>
 
                 <button type="submit" class="btn btn-primary" ng-disabled="updateOrderInfo.$pristine" ng-click="info.Save(info.Order)" ng-bind-html='info.labels.Save'></button>

@@ -155,7 +155,6 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
         return status.id == vm.Order.xp.Status;
     });
     vm.Payments = Payments;
-	vm.ShowCommentBox = false;
 	vm.CommentToWeir = "";
 	vm.fileStore = fileStore;
 	vm.country = function (c) {
@@ -195,7 +194,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
             Description: "Description of Part",
             RecReplacement: "Recommended replacement",
             LeadTimeAvailability: "Lead time / Availability",
-            PricePerItem: "PricePerItem",
+            PricePerItem: "Price Per Item",
             Quantity: "Quantity",
             Total: "Total",
             //labels to right of table
@@ -252,7 +251,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
             Description:$sce.trustAsHtml( "Description of Part"),
             RecReplacement:$sce.trustAsHtml( "Recommended replacement"),
             LeadTimeAvailability:$sce.trustAsHtml( "Lead time / Availability"),
-            PricePerItem:$sce.trustAsHtml( "PricePerItem"),
+            PricePerItem:$sce.trustAsHtml( "Price Per Item"),
             Quantity:$sce.trustAsHtml( "Quantity"),
             Total:$sce.trustAsHtml( "Total"),
             //labels to right of table
@@ -285,10 +284,6 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
         }
     };
     vm.labels = labels[WeirService.Locale()];
-
-	vm.Print = function() {
-		$timeout($window.print,1);
-	};
 
 	vm.UpdatePO = function() {
 		if(vm.Order.xp.PONumber != "Pending") {
@@ -584,23 +579,28 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, $windo
 	}
 
 	vm.AddNewComment = function() {
-		var comment = {
-			date: new Date(),
-			by: Me.FirstName + " " + Me.LastName,
-			val: vm.CommentToWeir
-		};
-		if(vm.Order.xp.CommentsToWeir == null) {
-			vm.Order.xp.CommentsToWeir = [];
+		if(vm.CommentToWeir) {
+			var comment = {
+				date: new Date(),
+				by: Me.FirstName + " " + Me.LastName,
+				val: vm.CommentToWeir,
+				IsWeirComment: true
+			};
+			if(vm.Order.xp.CommentsToWeir == null) {
+				vm.Order.xp.CommentsToWeir = [];
+			}
+			vm.Order.xp.CommentsToWeir.push(comment);
+			OrderCloud.Orders.Patch(vm.Order.ID, {xp:{CommentsToWeir: vm.Order.xp.CommentsToWeir}}, vm.Order.xp.BuyerID)
+				.then(function(order) {
+					vm.CommentToWeir = "";
+					$state.go($state.current,{}, {reload:true});
+				})
+				.catch(function(ex) {
+					$exceptionHandler(ex);
+				})
+		} else {
+			toastr.info("Cannot save an empty comment.","Empty Comment");
 		}
-		vm.Order.xp.CommentsToWeir.push(comment);
-		OrderCloud.Orders.Patch(vm.Order.ID, {xp:{CommentsToWeir: vm.Order.xp.CommentsToWeir}}, vm.Order.xp.BuyerID)
-			.then(function(order) {
-				vm.CommentToWeir = "";
-				$state.go($state.current,{}, {reload:true});
-			})
-			.catch(function(ex) {
-				$exceptionHandler(ex);
-			})
 	};
 
 	vm.Confirm = _confirm;
@@ -861,7 +861,7 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, O
 				.catch(function(ec) {
 					$exceptionHandler(ex);
 				});
-        };
+        }
         function cancel() {
             $state.go('order');
         }

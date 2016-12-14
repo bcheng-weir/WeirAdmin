@@ -36,7 +36,7 @@
     <div class="row">
         <div class="col-sm-6 form-group">
             <label for="userPasswordInput">Password</label>
-            <input id="userPasswordInput" type="password" pattern='^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$' pattern-err-type="customPassword" class="form-control" ng-model="adminUserEdit.adminUser.Password" required/>
+            <input id="userPasswordInput" type="password" pattern='^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$' pattern-err-type="customPassword" class="form-control" ng-model="adminUserEdit.adminUser.Password" />
         </div>
         <div class="col-sm-6 form-group">
         <label for="securityProfile">Admin User Group</label>
@@ -46,7 +46,7 @@
     <div class="row">
         <div class="col-sm-6 form-group">
             <label for="userPasswordConfirmInput">Confirm Password</label>
-            <input id="userPasswordConfirmInput" type="password" pattern='^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$' pattern-err-type="customPassword" class="form-control" ng-model="adminUserEdit.PasswordConfirm" required/>
+            <input id="userPasswordConfirmInput" type="password" pattern='^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$' pattern-err-type="customPassword" class="form-control" ng-model="adminUserEdit.PasswordConfirm" />
         </div>
         <div class="col-sm-6 form-group">
             <label for="weirgroup">Weir Group</label>
@@ -63,7 +63,7 @@
     <div class="row">
         <div class="col-sm-6 form-group">
             <label for="userTermsAcceptedCheckbox">
-            <input id="userTermsAcceptedCheckbox" type="checkbox" ng-model="adminUserEdit.TermsAccepted" ng-required="true"/>
+            <input id="userTermsAcceptedCheckbox" type="checkbox" ng-model="adminUserEdit.TermsAccepted" />
             Terms & Conditions</label>
         </div>
     </div>

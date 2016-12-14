@@ -100,9 +100,8 @@
                     </td>
                     <td data-title="Phone">{{address.Phone || '---'}}</td>
                     <td class="actions-cell">
-                        <button type="button" class="btn btn-default btn-sm" ui-sref=".addressEdit({buyerid: customerEdit.buyer.ID,addressid: address.ID})">{{customerEdit.labels.Edit}}
-                        </button>
-                        <button type="button" class="btn btn-default btn-sm" ui-sref=".assign({addressid: address.ID})">Assign
+                        <button type="button" class="btn btn-default btn-sm" ui-sref="customers.edit.addressEdit({buyerid: customerEdit.buyer.ID,addressid: address.ID})">
+                            {{customerEdit.labels.Edit}}
                         </button>
                     </td>
                 </tr>

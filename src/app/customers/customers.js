@@ -56,7 +56,7 @@ function CustomerConfig($stateProvider) {
                 SelectedBuyer: function($stateParams, OrderCloud){
                     return OrderCloud.Buyers.Get($stateParams.buyerid)
                 },
-                SelectedAddress: function($stateParams, $state, OrderCloud) {
+                SelectedAddress: function($stateParams, $state, OrderCloud, SelectedBuyer) {
                     return OrderCloud.Addresses.Get($stateParams.addressid,SelectedBuyer.ID)
                         .catch(function() {
                             console.writeline("failed to get address");
