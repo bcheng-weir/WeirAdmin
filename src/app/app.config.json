@@ -16,7 +16,7 @@
 		"top": true,
 		"bottom": false
 	},
-	"imageRoot": "https://weirwebhooks.azurewebsites.net/Content/Images/",
+	"imageRoot": "https://store.flowcontrol.weir/hooks/Content/Images/",
 	"fileStore": {
 		"akid":"AKIAIDJEBSBD44ECHPAQ",
 		"sak":"vals+hHD4gvcnZpOgzS8j1C1ixRrLOjl+yINYbzN",
