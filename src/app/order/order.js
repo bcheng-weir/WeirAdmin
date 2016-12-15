@@ -156,7 +156,10 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		var result = Underscore.findWhere(OCGeography.Countries, { value: c });
 		return result ? result.label : '';
 	};
-	vm.showReviewer = [WeirService.OrderStatus.Submitted.id, WeirService.OrderStatus.Review.id, WeirService.OrderStatus.SubmittedWithPO.id, WeirService.OrderStatus.SubmittedPendingPO.id, WeirService.OrderStatus.RevisedQuote.id, WeirService.OrderStatus.RevisedOrder.id].indexOf(vm.Order.xp.Status) > -1;
+	vm.showReviewer = [WeirService.OrderStatus.Submitted.id, WeirService.OrderStatus.Review.id,
+			WeirService.OrderStatus.SubmittedWithPO.id, WeirService.OrderStatus.SubmittedPendingPO.id,
+			WeirService.OrderStatus.RevisedQuote.id, WeirService.OrderStatus.RevisedOrder.id,
+			WeirService.OrderStatus.SubmittedPendingPO.id, WeirService.OrderStatus.ConfirmedQuote.id].indexOf(vm.Order.xp.Status) > -1;
 	vm.showAssign = vm.showReviewer && (Me.ID != vm.Order.xp.ReviewerID) && (userIsInternalSalesAdmin || userIsSuperAdmin);
     /*vm.PONumber = "";
 	var payment = (vm.Payments.Items.length > 0) ? vm.Payments.Items[0] : null;
@@ -218,7 +221,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        OrderAssignedMsg: "This order has been assigned to you",
             QuoteAssignedMsg: "This quote has been assigned to you",
 	        POPlaceHolder: "Enter PO Number",
-	        PONote: "You can also upload a PO document using the upload button below the order details"
+	        PONote: "You can also upload a PO document using the upload button below the order details",
+	        Currency: "Currency"
         },
         fr: {
             //header labels
@@ -275,7 +279,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        OrderAssignedMsg: $sce.trustAsHtml("FR:This order has been assigned to you"),
 	        QuoteAssignedMsg: $sce.trustAsHtml("FR:This quote has been assigned to you"),
 	        POPlaceHolder: $sce.trustAsHtml("FR:Enter PO Number"),
-	        PONote: $sce.trustAsHtml("FR: You can also upload a PO document using the upload button below the order details")
+	        PONote: $sce.trustAsHtml("FR: You can also upload a PO document using the upload button below the order details"),
+	        Currency: $sce.trustAsHtml("Currency")
         }
     };
     vm.labels = labels[WeirService.Locale()];
@@ -306,17 +311,6 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		}
 	};
 
-	vm.GetFileUrl = function(fileName) {
-		var encodedFileName = encodeURIComponent(fileName);
-		var orderid = null;
-		if(vm.Order.xp.OriginalOrderID == null) {
-			orderid = vm.Order.ID;
-		} else {
-			orderid = vm.Order.xp.OriginalOrderID
-		}
-		return vm.fileStore.location + orderid + encodedFileName;
-	};
-
     vm.ToCsvJson = toCsv;
 	function toCsv() {
 		return OrderToCsvService.ToCsvJson(vm.Order, vm.LineItems, vm.DeliveryAddress, vm.Payments, vm.labels);
@@ -331,7 +325,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	vm.ShowUpdated = function (item) {
 		// return true if qty <> xp.originalQty and qty > 0
 		if(item.xp) {
-			return (item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty)) || (item.xp.OriginalUnitPrice && (item.UnitPrice != item.xp.OriginalUnitPrice)) || (item.xp.OriginalLeadTime && ((item.Product.xp.LeadTime != item.xp.OriginalLeadTime) || (item.xp.LeadTime && item.xp.LeadTime != item.Product.xp.LeadTime )));
+			return (item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty)) || (item.xp.OriginalUnitPrice==null && item.UnitPrice!=0) || (item.xp.OriginalUnitPrice && (item.UnitPrice != item.xp.OriginalUnitPrice)) || (item.xp.OriginalLeadTime && ((item.Product.xp.LeadTime != item.xp.OriginalLeadTime) || (item.xp.LeadTime && item.xp.LeadTime != item.Product.xp.LeadTime )));
 		} else {
 			return false;
 		}
@@ -363,7 +357,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			SE: true
 		};
 		if(vm.Order.xp) {
-			return validStatus[vm.Order.xp.Status];
+			return validStatus[vm.Order.xp.Status] && vm.Order.xp.ReviewerID == Me.ID;
 		} else {
 			return false;
 		}
@@ -379,7 +373,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			SE: true
 		};
 		if(vm.Order.xp) {
-			return validStatus[vm.Order.xp.Status];
+			return validStatus[vm.Order.xp.Status] && vm.Order.xp.ReviewerID == Me.ID;
 		} else {
 			return false;
 		}
@@ -618,8 +612,10 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 
 		if(patch.xp.Status) {
 			OrderCloud.Orders.Patch(vm.Order.ID, patch, vm.Order.xp.BuyerID)
-				.then(function() {
-					$state.go($state.current,{}, {reload:true});
+				.then(function(order) {
+					vm.order = order;
+					//$state.go($state.current,{}, {reload:true});
+					$state.transitionTo($state.current, $state.$current.params, { reload: true, inherit: true, notify: true });
 				})
 				.catch(function(ex) {
 					$exceptionHandler(ex);
@@ -795,7 +791,6 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
                     toastr.success(vm.labels.OrderAssignedMsg);
                 }
             });
-
 	    }
 	}
 }

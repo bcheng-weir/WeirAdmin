@@ -12,13 +12,17 @@
         <div class="col-lg-12">
             <ul class="nav nav-tabs nav-justified" style="padding-top: 20px; background-color: rgb(248, 248, 248)">
                 <ul class="nav navbar-nav navbar-left">
-                    <li style="padding: 10px 5px 0px 0px;">
+                    <li style="padding: 10px 16px 0px 0px;">
                         <span ng-bind-html='order.labels.status'></span><br />
                         <h4>
                             <span ng-bind-html='order.Status.label'></span>;
                             <span ng-bind-html='order.Order.xp.StatusDate | weirdate'></span>
-                        <br/>
-                            <span ng-if="order.showReviewer" ng-bind-html='order.labels.reviewer'></span>
+                        </h4>
+                    </li>
+                    <li style="padding: 10px 16px 0px 0px;">
+                        <span ng-if="order.showReviewer" ng-bind-html='order.labels.reviewer'></span>
+                        <br />
+                        <h4>
                             <span ng-if='order.showReviewer && order.Order.xp.ReviewerName'>{{order.Order.xp.ReviewerName}}</span>
                             <span ng-if='order.showReviewer && !order.Order.xp.ReviewerName' ng-bind-html='order.labels.unassigned'></span>
                         </h4>
@@ -63,16 +67,18 @@
                  <span ng-bind-html="order.labels.DirectionsCont"></span>
              </p>
              <p>
-                 <b><span ng-show="order.Order.xp.Type=='Order'" ng-bind-html='order.labels.WeirOrderNo'></span>
+                 <b>
+                     <span ng-show="order.Order.xp.Type=='Order'" ng-bind-html='order.labels.WeirOrderNo'></span>
                      <span ng-show="order.Order.xp.Type=='Quote'" ng-bind-html='order.labels.WeirQuoteNo'></span>
-                     <span class="text-danger">{{order.Order.ID}}</span></b>
+                     <span class="text-danger">{{order.Order.ID}}</span>
+                 </b>
              </p>
              <p><b><span ng-bind-html='order.labels.QuoteRef'></span><span class="text-danger">{{order.Order.xp.RefNum}}</span></b></p>
-             <p ng-show="order.Order.xp.Type=='Order'">
+             <p ng-show="(order.Order.xp.Status=='CQ'||order.Order.xp.Status=='SE')&&order.showAssign==false">
                  <b>
                      <span ng-bind-html='order.labels.PONumber'></span>
-                     <span class="text-danger" ng-hide="order.Order.xp.Status=='SE'">{{order.Order.xp.PONumber}}</span>
-                     <span ng-show="order.Order.xp.Status=='SE'">
+                     <span ng-if="order.showAssign==true" class="text-danger">{{order.Order.xp.PONumber}}</span>
+                     <span ng-if="order.showAssign!=true">
                          <input type="text" ng-model="order.Order.xp.PONumber" placeholder="{{order.labels.POPlaceHolder}}" /> <button class="btn btn-sm btn-primary" ng-bind-html="order.labels.Add" ng-click="order.UpdatePO()"></button>
                     </span>
                  </b>
@@ -225,10 +231,10 @@
             <p ng-repeat="fileName in order.Order.xp.Files">
                 <a href="" ng-click="order.GetFile(fileName)" target="_blank">{{fileName}}</a>
             </p>
-            <p ng-hide="order.Order.xp.Status=='SE'">
+            <p ng-hide="order.Order.xp.Status=='SE'||order.Order.xp.Status=='CQ'">
                 <a href="" ng-click="order.GetFile(order.Order.xp.PODocument)" target="_blank">{{order.Order.xp.PODocument}}</a>
             </p>
-            <p ng-show="order.Order.xp.Status=='SE'">
+            <p ng-show="order.Order.xp.Status=='SE'||order.Order.xp.Status=='CQ'">
                 <ordercloud-po-upload model="order.Order" keyname="PODocument" label=''></ordercloud-po-upload>
                 <br>
                 <span ng-bind="order.labels.PONote"></span>
@@ -297,9 +303,5 @@
                 </div>
             </div>
         </div>
-    </div>
-    <br>
-    <div class="row">
-
     </div>
 </article>
