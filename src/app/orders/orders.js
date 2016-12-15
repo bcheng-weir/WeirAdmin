@@ -81,7 +81,7 @@ function OrdersConfig($stateProvider,buyerid) {
 		.state('ordersMain.ordersAll', {
 		    url: '/ordersAll',
 		    templateUrl: 'orders/templates/order.all.tpl.html',
-		    parent: 'ordersMain.ordersConfirmed'
+		    parent: 'ordersMain'
 		})
     	.state('gotoOrder', {
     	    url: '/orders/:buyerID/:orderID',

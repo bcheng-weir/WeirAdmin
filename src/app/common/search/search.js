@@ -144,11 +144,21 @@ function SearchProductsService(OrderCloud, $q) {
 	    return dfd.promise;
     }
 
-    function _getPartNumbers(lookForThisPartialPartNumber) {
+    function _getPartNumbers(lookForThisPartialPartNumber, Customer) {
     	var dfd = $q.defer();
+        var partResults = [];
 	    OrderCloud.Products.List(null, 1, 50, null, null, {"Name": lookForThisPartialPartNumber+"*"})
 		    .then(function(response) {
-		    	dfd.resolve(response.Items);
+		    	if(Customer.id.substring(0,5) == 'WVCUK') {
+		    		partResults = response.Items;
+				    return OrderCloud.Products.List(null, 1, 50, null, null, {"xp.AlternatePartNumber":lookForThisPartialPartNumber+'*'})
+					    .then(function(altResponse) {
+					    	partResults.push.apply(altResponse.Items);
+						    dfd.resolve(partResults);
+					    });
+			    } else {
+			    	dfd.resolve(response.Items)
+			    }
 		    });
 	    return dfd.promise;
     }
