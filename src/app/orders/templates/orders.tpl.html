@@ -10,6 +10,12 @@
             <br>
             {{orders.labels.viewRevision}}
         </p>
+        <p ng-if="orders.StateName=='ordersMain.quotesRevised'||orders.StateName=='ordersMain.ordersRevised'">
+            {{orders.labels.StatusRV}}<br/>
+            {{orders.labels.StatusRQ}}<br/>
+            {{orders.labels.StatusRO}}<br/>
+            {{orders.labels.StatusRR}}<br/>
+        </p>
     </div>
 
     <!--====== SEARCH/FILTERS ======-->

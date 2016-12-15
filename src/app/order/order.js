@@ -292,9 +292,10 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	};
 
 	vm.UpdatePO = function() {
-		if(vm.Order.xp.PONumber != "Pending") {
+		if(vm.Order.xp.PONumber != "Pending" && vm.Order.xp.PONumber != '') {
 			var data = {
 				xp: {
+					Type: 'Order',
 					Status: WeirService.OrderStatus.SubmittedWithPO.id,
 					StatusDate: new Date(),
 					ReviewerName: Me.FirstName + " " + Me.LastName,

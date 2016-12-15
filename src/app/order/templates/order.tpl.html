@@ -76,13 +76,19 @@
              <p><b><span ng-bind-html='order.labels.QuoteRef'></span><span class="text-danger">{{order.Order.xp.RefNum}}</span></b></p>
              <p ng-show="(order.Order.xp.Status=='CQ'||order.Order.xp.Status=='SE')&&order.showAssign==false">
                  <b>
-                     <span ng-bind-html='order.labels.PONumber'></span>
-                     <span ng-if="order.showAssign==true" class="text-danger">{{order.Order.xp.PONumber}}</span>
-                     <span ng-if="order.showAssign!=true">
-                         <input type="text" ng-model="order.Order.xp.PONumber" placeholder="{{order.labels.POPlaceHolder}}" /> <button class="btn btn-sm btn-primary" ng-bind-html="order.labels.Add" ng-click="order.UpdatePO()"></button>
+                    <span ng-bind-html='order.labels.PONumber'></span>
+                    <span ng-if="order.showAssign==true" class="text-danger">{{order.Order.xp.PONumber}}</span>
+                    <span ng-if="order.showAssign!=true">
+                        <input type="text" ng-model="order.Order.xp.PONumber" placeholder="{{order.labels.POPlaceHolder}}" /> <button class="btn btn-sm btn-primary" ng-bind-html="order.labels.Add" ng-click="order.UpdatePO()"></button>
                     </span>
+
                  </b>
              </p>
+             <span ng-show="(order.Order.xp.Status=='CQ'||(order.Order.xp.Type=='Order'&&(!order.Order.xp.PODocument||order.Order.xp.PODocument=='undefined')))&&order.showAssign==false"">
+                         <ordercloud-po-upload model="order.Order" keyname="PODocument" label=''></ordercloud-po-upload>
+                 <!--<br>
+                 <span ng-bind="order.labels.PONote"></span>-->
+             </span>
          </div>
          <div class="col-md-3">
              <div class="pull-right" style="padding: 30px 25px 0px 0px; float: right;">
@@ -234,11 +240,11 @@
             <p ng-hide="order.Order.xp.Status=='SE'||order.Order.xp.Status=='CQ'">
                 <a href="" ng-click="order.GetFile(order.Order.xp.PODocument)" target="_blank">{{order.Order.xp.PODocument}}</a>
             </p>
-            <p ng-show="order.Order.xp.Status=='SE'||order.Order.xp.Status=='CQ'">
+            <!--<p ng-show="order.Order.xp.Status=='SE'||order.Order.xp.Status=='CQ'">
                 <ordercloud-po-upload model="order.Order" keyname="PODocument" label=''></ordercloud-po-upload>
                 <br>
                 <span ng-bind="order.labels.PONote"></span>
-            </p>
+            </p>-->
         </div>
     </div>
     <div class="row" style="padding: 5px 5px 5px 5px;">

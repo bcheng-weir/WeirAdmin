@@ -234,7 +234,11 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			viewOrderRevisions: "Select ‘revisions’ to view list of order revisions",
 			revisionsList: vm.xpType + " revisions for " + vm.xpType + "; " + Parameters.filters["xp.OriginalOrderID"],
 			selectRevision:"Select ‘view’ to view previous revisions for reference",
-			viewRevision: "You can view and update the current revision"
+			viewRevision: "You can view and update the current revision",
+			StatusRV: "Status RV = Revised Quote",
+			StatusRO: "Status RO = Revised Order",
+			StatusRR: "Status RR = Rejected Revised Order",
+			StatusRQ: "Status RQ = Rejected Quote"
 		},
 		fr: {
 			search:$sce.trustAsHtml("Search"),
@@ -270,7 +274,11 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			viewOrderRevision: $sce.trustAsHtml("Select ‘revisions’ to view list of order revisions"),
 			revisionsList: $sce.trustAsHtml(vm.xpType + " revisions for " + vm.xpType + "; " + Parameters.filters["xp.OriginalOrderID"]),
 			selectRevision:$sce.trustAsHtml("Select ‘view’ to view previous revisions for reference"),
-			viewRevision: $sce.trustAsHtml("You can view and update the current revision")
+			viewRevision: $sce.trustAsHtml("You can view and update the current revision"),
+			StatusRV: $sce.trustAsHtml("FR: Status RV = Revised Quote"),
+			StatusRO: $sce.trustAsHtml("FR: Status RO = Revised Order"),
+			StatusRR: $sce.trustAsHtml("FR: Status RR = Rejected Revised Order"),
+			StatusRQ: $sce.trustAsHtml("FR: Status RQ = Rejected Quote")
 		}
 	};
 	vm.labels = labels.en;
