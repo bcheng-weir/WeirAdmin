@@ -165,6 +165,10 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	var payment = (vm.Payments.Items.length > 0) ? vm.Payments.Items[0] : null;
 	if (payment && payment.xp && payment.xp.PONumber) vm.PONumber = payment.xp.PONumber;*/
 
+    vm.LineItemZero = function() {
+    	return Underscore.findWhere(vm.LineItems.Items,{LineTotal:0});
+    };
+
     var labels = {
         en: {
             //header labels
@@ -333,7 +337,10 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		// return true if qty <> xp.originalQty and qty > 0
 		if(item.xp) {
 			//return (item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty)) || (item.xp.OriginalUnitPrice==null && item.UnitPrice!=0) || (item.xp.OriginalUnitPrice && (item.UnitPrice != item.xp.OriginalUnitPrice)) || (item.xp.OriginalLeadTime && ((item.Product.xp.LeadTime != item.xp.OriginalLeadTime) || (item.xp.LeadTime && item.xp.LeadTime != item.Product.xp.LeadTime )));
-			return (item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty)) || (item.xp.OriginalUnitPrice && (item.UnitPrice != item.xp.OriginalUnitPrice)) || (item.xp.OriginalLeadTime && ((item.Product.xp.LeadTime != item.xp.OriginalLeadTime) || (item.xp.LeadTime && item.xp.LeadTime != item.Product.xp.LeadTime )));
+			console.log(item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty));
+			console.log(item.xp.OriginalUnitPrice===0 && (item.UnitPrice != item.xp.OriginalUnitPrice));
+			console.log(item.xp.OriginalLeadTime && ((item.Product.xp.LeadTime != item.xp.OriginalLeadTime) || (item.xp.LeadTime && item.xp.LeadTime != item.Product.xp.LeadTime )));
+			return (item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty)) || (item.xp.OriginalUnitPrice===0 && (item.UnitPrice != item.xp.OriginalUnitPrice)) || (item.xp.OriginalLeadTime && ((item.Product.xp.LeadTime != item.xp.OriginalLeadTime) || (item.xp.LeadTime && item.xp.LeadTime != item.Product.xp.LeadTime )));
 		} else {
 			return false;
 		}
@@ -719,7 +726,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		OrderCloud.Orders.Patch(OrderID, orderPatch, vm.Order.xp.BuyerID)
 			.then(function(order) {
 				angular.forEach(vm.LineItems.Items, function(value, key) {
-					queue.push(OrderCloud.LineItems.Patch(order.ID, value.ID, {xp:{OriginalQty:value.Quantity,OriginalUnitPrice:value.UnitPrice,OriginalLeadTime:value.Product.xp.LeadTime}}, vm.Order.xp.BuyerID));
+					queue.push(OrderCloud.LineItems.Patch(order.ID, value.ID, {xp:{OriginalQty:value.Quantity,OriginalUnitPrice:value.UnitPrice?value.UnitPrice:0,OriginalLeadTime:value.Product.xp.LeadTime}}, vm.Order.xp.BuyerID));
 				});
 				$q.all(queue)
 					.then(function(results) {

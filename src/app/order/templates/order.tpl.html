@@ -36,14 +36,18 @@
                     <li ng-if="order.showAssign" ng-click="order.AssignToMe()" style="padding: 0px 10px 0px 0px;">
                         <button type="button" class="btn btn-lg btn-primary"><span ng-bind-html='order.labels.AssignToMe'></span></button>
                     </li>
-                    <li ng-click="order.Confirm(base.currentUser)" style="padding: 0px 10px 0px 0px;" ng-if="order.ShowConfirm()">
-                        <button type="button" class="btn btn-lg btn-success"><span ng-bind-html='order.labels.Confirm'></span></button>
+                    <li style="padding: 0px 10px 0px 0px;" ng-if="order.ShowConfirm()">
+                        <button type="button" ng-click="order.Confirm(base.currentUser)" class="btn btn-lg btn-success" ng-disabled="order.LineItemZero()">
+                            <span ng-bind-html='order.labels.Confirm'></span>
+                        </button>
                     </li>
                     <li ng-click="order.Revise(base.currentUser)" style="padding: 0px 10px 0px 10px;" ng-if="order.ShowRevise()">
                         <button type="button" class="btn btn-lg btn-warning"><span ng-bind-html='order.labels.Revise'></span></button>
                     </li>
-                    <li ng-click="order.ShareRevision(base.currentUser)" style="padding: 0px 10px 0px 10px;" ng-if="order.ShowShareRevision()">
-                        <button type="button" class="btn btn-lg btn-primary"><span ng-bind-html='order.labels.ShareRevision'></span></button>
+                    <li style="padding: 0px 10px 0px 10px;" ng-if="order.ShowShareRevision()">
+                        <button type="button" class="btn btn-lg btn-primary" ng-click="order.ShareRevision(base.currentUser)" ng-disabled="order.LineItemZero()">
+                            <span ng-bind-html='order.labels.ShareRevision'></span>
+                        </button>
                     </li>
                     <li ng-click="order.Update()" style="padding: 0px 10px 0px 10px;" ng-if="order.ShowUpdate()">
                         <button type="button" class="btn btn-lg btn-primary"><span ng-bind-html="order.labels.Update"></span></button>
