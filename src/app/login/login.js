@@ -20,6 +20,8 @@ function LoginService($q, $window, $state, toastr, OrderCloud, TokenRefresh, cli
         SendVerificationCode: _sendVerificationCode,
         ResetPassword: _resetPassword,
         RememberMe: _rememberMe,
+        GetUsername: _getUsername,
+        SetUsername: _setUsername,
         Logout: _logout,
         RouteAfterLogin: _routeAfterLogin
     };
@@ -110,25 +112,54 @@ function LoginService($q, $window, $state, toastr, OrderCloud, TokenRefresh, cli
                 }
             });
     }
+
+	function _setUsername(username) {
+		$localForage.setItem('username',username);
+	}
+
+	function _getUsername() {
+		var dfd = $q.defer();
+		$localForage.getItem('username')
+			.then(function(username) {
+				dfd.resolve(username);
+			});
+		return dfd.promise;
+	}
 }
 
-function LoginController($state, $stateParams, $exceptionHandler, OrderCloud, LoginService, TokenRefresh, buyerid) {
+function LoginController($stateParams, $exceptionHandler, OrderCloud, LoginService, TokenRefresh, buyerid) {
     var vm = this;
-    vm.credentials = {
+	var username = null;
+	LoginService.GetUsername()
+		.then(function(myUsername) {
+			console.log('My User Name: ' + myUsername);
+			username = myUsername;
+			vm.credentials = {
+				Username: username,
+				Password: null
+			};
+			vm.rememberStatus = username ? true : false;
+		});
+    /*vm.credentials = {
         Username: null,
         Password: null
-    };
+    };*/
     vm.token = $stateParams.token;
     vm.form = vm.token ? 'reset' : 'login';
     vm.setForm = function(form) {
         vm.form = form;
     };
-    vm.rememberStatus = false;
+    //vm.rememberStatus = false;
 
     vm.submit = function() {
         OrderCloud.Auth.GetToken(vm.credentials)
             .then(function(data) {
-                vm.rememberStatus ? TokenRefresh.SetToken(data['refresh_token']) : angular.noop();
+                //vm.rememberStatus ? TokenRefresh.SetToken(data['refresh_token']) : angular.noop();
+	            if(vm.rememberStatus) {
+		            LoginService.SetUsername(vm.credentials.Username);
+	            } else {
+		            LoginService.SetUsername(null);
+	            }
                 OrderCloud.BuyerID.Set(buyerid);
                 OrderCloud.Auth.SetToken(data['access_token']);
                 LoginService.RouteAfterLogin();
