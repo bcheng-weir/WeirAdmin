@@ -114,7 +114,8 @@ function BaseConfig($stateProvider, $injector) {
     $stateProvider.state('base', baseState);
 }
 
-function BaseController($rootScope, $ocMedia, $state, $sce, $uibModal, Underscore, snapRemote, defaultErrorMessageResolver, CurrentUser, ComponentList, base, WeirService, IsAdmin, IsInternalSales) {
+function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, snapRemote, defaultErrorMessageResolver,
+                        CurrentUser, ComponentList, base, WeirService, IsAdmin, IsInternalSales, BackToListService) {
     var vm = this;
     vm.left = base.left;
     vm.right = base.right;
@@ -227,6 +228,10 @@ function BaseController($rootScope, $ocMedia, $state, $sce, $uibModal, Underscor
         });
         modalInstance.result;
     };
+
+	$rootScope.$on('$stateChangeSuccess', function(ev, to, toParams, from, fromParams) {
+		BackToListService.GenerateLocation(from, fromParams);
+	});
 }
 
 function occomponents() {

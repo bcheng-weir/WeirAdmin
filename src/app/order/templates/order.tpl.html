@@ -86,8 +86,8 @@
          </div>
          <div class="col-md-3">
              <div class="pull-right" style="padding: 30px 25px 0px 0px; float: right;">
-                 <p><a ng-if="order.Order.xp.Type == 'Quote' && order.Order.xp.Status!='SB' && order.Order.xp.Status!='SP'" href="#" ui-sref="home">Back to Quotes</a></p>
-                 <p><a ng-if="order.Order.xp.Type == 'Order'" href="#" ui-sref="home">Back to Orders</a></p>
+                 <p><a ng-if="order.Order.xp.Type == 'Quote' && order.Order.xp.Status!='SB' && order.Order.xp.Status!='SP'" href="#" ng-click="order.BackToList()">Back to Quotes</a></p>
+                 <p><a ng-if="order.Order.xp.Type == 'Order'" href="#" ng-click="order.BackToList()">Back to Orders</a></p>
                  <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ui-sref="productSearch" ng-bind-html='order.labels.AddNewItems' ng-show="order.Order.xp.Status=='RE'" ng-if="order.ShowAddItems()"></button></p>
                  <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ng-click="order.AddBlankItem()" ng-bind-html='order.labels.AddABlankItem' ng-show="order.Order.xp.Status=='RE'" ng-if="order.ShowAddItems()"></button></p>
              </div>

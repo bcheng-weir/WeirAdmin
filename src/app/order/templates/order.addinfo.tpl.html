@@ -10,7 +10,7 @@
             <h4><span ng-bind-html='detail.labels.UploadHeader'></span></h4>
         </div>
         <div class="col-md-3">
-            <a class="pull-right" href="#" ng-click="info.BackToOrders()" ng-bind-html="info.labels.BackToOrders"></a>
+            <a class="pull-right" href="#" ng-click="order.BackToList()" ng-bind-html="info.labels.BackToOrders"></a>
         </div>
     </div>
     <div class="row">
@@ -35,7 +35,7 @@
                 <p><b>Your customer will be sent a notification when you save details on this page</b></p>
 
                 <button type="submit" class="btn btn-primary" ng-disabled="updateOrderInfo.$pristine" ng-click="info.Save(info.Order)" ng-bind-html='info.labels.Save'></button>
-                <button type="submit" class="btn btn-primary" ng-click="info.Cancel()" style="background-color: whitesmoke; color: blue;" ng-bind-html='info.labels.Cancel'></button>
+                <button type="submit" class="btn btn-primary" ng-click="info.Cancel()" style="background-color: whitesmoke; color: blue;" ng-bind-html='info.labels.Back'></button>
             </form>
 
     </div>

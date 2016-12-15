@@ -73,6 +73,7 @@
             <td>{{order.xp.ReviewerName}}</td>
             <td>{{order.xp.StatusDate | weirdate}}</td>
             <td>{{order.xp.DeliveryDate | weirdate}}</td>
+            <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.BuyerID, order.xp.CustomerID, order.xp.CustomerName)">{{orders.labels.view}}</button></td>
             <td><button class="btn btn-primary" ng-click="orders.Update(order.ID, order.xp.BuyerID)">{{orders.labels.update}}</button></td>
         </tr>
         </tbody>

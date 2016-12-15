@@ -110,7 +110,7 @@ function orderConfig($stateProvider, $sceDelegateProvider) {
 function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGroupsService,
                          OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService,
                          Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService, FileSaver,
-                         UserGroups) {
+                         UserGroups, BackToListService) {
     var vm = this;
     vm.Order = Order;
 	vm.Order.xp.PONumber = vm.Order.xp.PONumber != "Pending" ? vm.Order.xp.PONumber : ""; // In the buyer app we were initially setting this to pending.
@@ -222,7 +222,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
             QuoteAssignedMsg: "This quote has been assigned to you",
 	        POPlaceHolder: "Enter PO Number",
 	        PONote: "You can also upload a PO document using the upload button below the order details",
-	        Currency: "Currency"
+	        Currency: "Currency",
+	        Back: "Back"
         },
         fr: {
             //header labels
@@ -280,10 +281,15 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        QuoteAssignedMsg: $sce.trustAsHtml("FR:This quote has been assigned to you"),
 	        POPlaceHolder: $sce.trustAsHtml("FR:Enter PO Number"),
 	        PONote: $sce.trustAsHtml("FR: You can also upload a PO document using the upload button below the order details"),
-	        Currency: $sce.trustAsHtml("Currency")
+	        Currency: $sce.trustAsHtml("Currency"),
+	        Back: "Back"
         }
     };
     vm.labels = labels[WeirService.Locale()];
+
+	vm.BackToList = function() {
+		BackToListService.GoToLocation();
+	};
 
 	vm.UpdatePO = function() {
 		if(vm.Order.xp.PONumber != "Pending") {
@@ -811,7 +817,8 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, O
                 InvoiceNum: "Invoice Number",
                 NotificationText: "Your customer will be sent a notification when you save details on this page.",
                 Save: "Save",
-                Cancel: "Cancel"
+                Cancel: "Cancel",
+	            Back: "Back"
             }, fr: {
                 OrderNumber: $sce.trustAsHtml("FR: Order Number"),
                 BackToOrders: $sce.trustAsHtml("FR: Back to Orders"),
@@ -821,7 +828,8 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, O
                 InvoiceNum: $sce.trustAsHtml("FR: Invoice Number"),
                 NotificationText: $sce.trustAsHtml("FR: Your customer will be sent a notification when you save details on this page."),
                 Save: $sce.trustAsHtml("FR: Save"),
-                Cancel: $sce.trustAsHtml("FR: Cancel")
+                Cancel: $sce.trustAsHtml("FR: Cancel"),
+		        Back: "Back"
             }
         };
         function save(Order) {
