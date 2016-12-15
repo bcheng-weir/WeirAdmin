@@ -9,7 +9,7 @@
                         <input type="text"
                             ng-model="serial.serialNumbers[$index]"
                             placeholder="Serial number result"
-                            uib-typeahead="serialNumber for serialNumber in productSearch.SearchProducts.GetSerialNumbers($viewValue)"
+                            uib-typeahead="s.xp.SN as (s.xp.SN + ' - ' + s.Description) for s in productSearch.SearchProducts.GetSerialNumbers($viewValue, productSearch.Customer)"
                             typeahead-loading="loadingSerials"
                             typeahead-no-results="noResults"
                             typeahead-min-length="3"

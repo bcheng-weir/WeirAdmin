@@ -10,7 +10,7 @@
                         <input type="text"
                                ng-model="part.partNumbers[$index]"
                                placeholder="Part number result"
-                               uib-typeahead="partNumber for partNumber in productSearch.SearchProducts.GetPartNumbers($viewValue)"
+                               uib-typeahead="p.Name as (p.Name + ' - ' + p.Description) for p in productSearch.SearchProducts.GetPartNumbers($viewValue, productSearch.Customer)"
                                typeahead-loading="loadingParts"
                                typeahead-no-results="noResults"
                                typeahead-min-length="3"
