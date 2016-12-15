@@ -21,7 +21,7 @@
     </div>
     <div ng-if="customers.list.Items.length">
         <b class="pull-right">{{(application.$ocMedia('min-width:768px') ? customers.list.Meta.ItemRange[0] : '1') + ' - ' +
-            buyersAddresses.list.Meta.ItemRange[1] + ' of ' + customers.list.Meta.TotalCount + ' results'}}</b>
+            customers.list.Meta.ItemRange[1] + ' of ' + customers.list.Meta.TotalCount + ' results'}}</b>
         <table class="table table-hover table-condensed oc-table-responsive">
             <thead>
                 <tr>

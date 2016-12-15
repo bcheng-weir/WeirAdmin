@@ -50,11 +50,17 @@ function AdminUsersConfig($stateProvider) {
             url: '/adminusers?search&page&pageSize&searchOn&sortBy&filters',
             data: {componentName: 'Admin Users'},
             resolve : {
+                Me: function(OrderCloud) {
+                    return OrderCloud.Me.Get();
+                },
                 Parameters: function($stateParams, OrderCloudParameters) {
                     return OrderCloudParameters.Get($stateParams);
                 },
-                AdminUsersList: function(OrderCloud, Parameters, $state) {
-                    return OrderCloud.AdminUsers.List(Parameters.search, Parameters.page, Parameters.pageSize || 12, Parameters.searchOn, Parameters.sortBy, Parameters.filters)
+                AdminUsersList: function(OrderCloud, Parameters, $state, Me) {
+	                var filter = {
+		                "xp.WeirGroup.label":Me.xp.WeirGroup.label
+	                };
+                    return OrderCloud.AdminUsers.List(Me.xp.WeirGroup.label, Parameters.page, Parameters.pageSize || 12, "xp", Parameters.sortBy, Parameters.filters)
                         .then(function(data) {
                             if (data.Items.length == 1 && Parameters.search) {
                                 $state.go('adminUsers.edit', {adminuserid:data.Items[0].ID});
