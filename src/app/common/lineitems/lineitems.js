@@ -3,7 +3,7 @@ angular.module('ordercloud-lineitems', [])
     .controller('LineItemModalCtrl', LineItemModalController)
 ;
 
-function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderCloud, CurrentOrder) {
+function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderCloud, CurrentOrder, buyernetwork) {
     return {
         SpecConvert: _specConvert,
         RemoveItem: _removeItem,
@@ -69,25 +69,49 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
         }
     }
 
-    function _getProductInfo(LineItems) {
+    function _getProductInfo(LineItems, Order) {
         var li = LineItems.Items || LineItems;
         var productIDs = Underscore.uniq(Underscore.pluck(li, 'ProductID'));
         var dfd = $q.defer();
         var queue = [];
-        angular.forEach(productIDs, function (productid) {
-            if(productid != "PLACEHOLDER") {
-                queue.push(OrderCloud.Products.Get(productid));
-            }
-        });
-        $q.all(queue)
-            .then(function (results) {
-                angular.forEach(li, function (item) {
-                    if(item.ProductID != "PLACEHOLDER") {
-                        item.Product = angular.copy(Underscore.where(results, {ID: item.ProductID})[0]);
-                    }
-                });
-                dfd.resolve(li);
-            });
+	    var impersonation = {
+		    ClientID: buyernetwork,
+		    Claims: []
+	    };
+
+	    OrderCloud.Users.Get(Order.FromUserID, Order.xp.BuyerID)
+		    .then(function(buyer) {
+			    // Get an access token for impersonation.
+			    impersonation.Claims = buyer.AvailableRoles;
+			    return OrderCloud.Users.GetAccessToken(Order.FromUserID, impersonation, Order.xp.BuyerID);
+		    })
+		    .then(function(data) {
+			    // Set the local impersonation token so that As() can be used.
+			    return OrderCloud.Auth.SetImpersonationToken(data['access_token']);
+		    })
+		    .then(function() {
+			    angular.forEach(productIDs, function (productid) {
+				    if(productid != "PLACEHOLDER") {
+					    queue.push(OrderCloud.As().Me.GetProduct(productid));
+					    //queue.push(OrderCloud.Products.Get(productid));
+				    }
+			    });
+			    $q.all(queue)
+				    .then(function (results) {
+					    angular.forEach(li, function (item) {
+						    if(item.ProductID != "PLACEHOLDER") {
+							    item.Product = angular.copy(Underscore.where(results, {ID: item.ProductID})[0]);
+						    }
+					    });
+					    dfd.resolve(li);
+				    });
+		    })
+		    .then(function() {
+			    // Remove the impersonation token.
+			    return OrderCloud.Auth.RemoveImpersonationToken();
+		    });
+
+
         return dfd.promise;
     }
 

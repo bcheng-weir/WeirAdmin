@@ -44,7 +44,7 @@ function CartConfig($stateProvider) {
 								dfd.reject();
 							}
 							else {
-								LineItemHelpers.GetProductInfo(data.Items)
+								LineItemHelpers.GetProductInfo(data.Items, Order)
 									.then(function() {
 										dfd.resolve(data);
 									});
@@ -85,7 +85,7 @@ function CartController($q, $rootScope, $timeout, OrderCloud, LineItemHelpers, O
 				.then(function(data) {
 					vm.lineItems.Meta = data.Meta;
 					vm.lineItems.Items = [].concat(vm.lineItems.Items, data.Items);
-					LineItemHelpers.GetProductInfo(vm.lineItems.Items)
+					LineItemHelpers.GetProductInfo(vm.lineItems.Items, Order)
 						.then(function() {
 							dfd.resolve(vm.lineItems);
 						});
@@ -105,7 +105,7 @@ function CartController($q, $rootScope, $timeout, OrderCloud, LineItemHelpers, O
 	$rootScope.$on('OC:UpdateLineItem', function(event,Order) {
 		OrderCloud.LineItems.List(Order.ID)
 			.then(function(data) {
-				LineItemHelpers.GetProductInfo(data.Items)
+				LineItemHelpers.GetProductInfo(data.Items, Order)
 					.then(function() {
 						vm.lineItems = data;
 					});
@@ -174,7 +174,7 @@ function MiniCartController($q, $state, $rootScope,$uibModal, $ocMedia, $sce, Or
 							vm.LineItems.Meta = result.Meta;
 						});
 						LineItemHelpers.GetBlankProductInfo(vm.LineItems.Items);
-						dfd.resolve(LineItemHelpers.GetProductInfo(vm.LineItems.Items.reverse()));
+						dfd.resolve(LineItemHelpers.GetProductInfo(vm.LineItems.Items.reverse(),order));
 					});
 				Underscore.map(vm.LineItems.Items, function(value, key){
 					vm.TotalItems += value.Quantity;
