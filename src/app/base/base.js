@@ -103,7 +103,7 @@ function BaseConfig($stateProvider, $injector) {
                 return deferred.promise;
             },
             IsAdmin: function(UserGroupsService) {
-                return UserGroupsService.IsUserInGroup([UserGroupsService.Groups.SuperAdmin]);
+                return UserGroupsService.IsUserInGroup([UserGroupsService.Groups.SuperAdmin,UserGroupsService.Groups.DataLoader]);
             },
             IsInternalSales: function (UserGroupsService) {
                 return UserGroupsService.IsUserInGroup([UserGroupsService.Groups.InternalSales]);
@@ -123,7 +123,7 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
     vm.catalogItems = ComponentList.nonSpecific;
     vm.organizationItems = ComponentList.buyerSpecific;
     vm.IsAdmin = IsAdmin;
-    vm.CanEditCustomers = IsAdmin || IsInternalSales;
+    vm.CanEditCustomers = IsAdmin; // || IsInternalSales; Based on call with Paul on 12/16.
     vm.registrationAvailable = Underscore.filter(vm.organizationItems, function (item) { return item.StateRef == 'registration' }).length;
 
     defaultErrorMessageResolver.getErrorMessages().then(function (errorMessages) {

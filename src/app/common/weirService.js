@@ -41,7 +41,8 @@ function UserGroupsService($q, OrderCloud) {
         Groups: {
             SuperAdmin: 'SuperAdmin',
             InternalSales: 'InternalSales',
-            ExternalSales: 'ExternalSales'
+            ExternalSales: 'ExternalSales',
+	        DataLoader: 'DataLoader'
         }
     }
 }
