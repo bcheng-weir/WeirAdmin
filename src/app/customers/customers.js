@@ -16,7 +16,7 @@ function CustomerConfig($stateProvider) {
             templateUrl: 'customers/templates/customers.tpl.html',
             controller: 'CustomerCtrl',
             controllerAs: 'customers',
-            url: '/customers?search&page&pageSize',
+            url: '/customers?search&page&pageSize&searchOn&sortBy&filters',
             data: {componentName: 'Customers'},
             resolve: {
                 Me: function(OrderCloud) {
@@ -34,7 +34,7 @@ function CustomerConfig($stateProvider) {
             }
         })
         .state('customers.edit', {
-            url: '/:buyerid/edit?search&page&pageSize&searchOn&sortBy&filters   ',
+            url: '/:buyerid/edit',
             templateUrl: 'customers/templates/customerEdit.tpl.html',
             controller: 'CustomerEditCtrl',
             controllerAs: 'customerEdit',
@@ -51,14 +51,11 @@ function CustomerConfig($stateProvider) {
             }
         })
         .state('customers.edit.addressEdit', {
-            url: '/:buyerid/edit/:addressid',
-            templateUrl: 'customers/templates/addressEdit.tpl.html',
+            url: '/:addressid/edit',
+            templateUrl: 'customers/templates/customerAddressEdit.tpl.html',
             controller: 'CustomerAddressEditCtrl',
             controllerAs: 'customerAddressEdit',
             resolve: {
-                SelectedBuyer: function($stateParams, OrderCloud){
-                    return OrderCloud.Buyers.Get($stateParams.buyerid)
-                },
                 SelectedAddress: function($stateParams, $state, OrderCloud, SelectedBuyer) {
                     return OrderCloud.Addresses.Get($stateParams.addressid,SelectedBuyer.ID)
                         .catch(function() {
@@ -68,15 +65,10 @@ function CustomerConfig($stateProvider) {
             }
         })
         .state('customers.edit.addressCreate', {
-            url: '/:buyerid/edit/address/create',
-            templateUrl: 'customers/templates/addressCreate.tpl.html',
+            url: '/address/create',
+            templateUrl: 'customers/templates/customerAddressCreate.tpl.html',
             controller: 'CustomerAddressCreateCtrl',
-            controllerAs:'customerAddressCreate',
-            resolve: {
-                SelectedBuyer: function($stateParams, OrderCloud) {
-                    return OrderCloud.Buyers.Get($stateParams.buyerid);
-                }
-            }
+            controllerAs:'customerAddressCreate'
         })
         .state('customers.create', {
             url: '/create',
@@ -90,9 +82,6 @@ function CustomerConfig($stateProvider) {
             controller: 'CustomerAssignCtrl',
             controllerAs: 'customerAssign',
             resolve: {
-                SelectedBuyer: function($stateParams, OrderCloud) {
-                    return OrderCloud.Buyers.Get($stateParams.buyerid);
-                },
                 EndUsers: function(OrderCloud) {
                     return OrderCloud.Buyers.List();
                 }
@@ -100,7 +89,7 @@ function CustomerConfig($stateProvider) {
         });
 }
 
-function CustomerService($q, $state, $sce, OrderCloud, $exceptionHandler) {
+function CustomerService($sce, OrderCloud, $exceptionHandler) {
     var _weirGroups = [{id: "1", label: "WVCUK"}, {id: "2", label: "WPIFR"}];
     var _customerTypes = [{id: "1", label: "End User"}, {id: "2", label: "Service Company"}];
     var _componentLabels = {
@@ -256,13 +245,8 @@ function CustomerService($q, $state, $sce, OrderCloud, $exceptionHandler) {
     };
 }
 
-function CustomerCtrl($state, $ocMedia, OrderCloud, OrderCloudParameters, Parameters, BuyerList, CustomerService, WeirService, Me, Underscore) {
+function CustomerCtrl($state, $ocMedia, OrderCloud, OrderCloudParameters, Parameters, BuyerList, CustomerService, WeirService) {
     var vm = this;
-	/*BuyerList.Items = Underscore.filter(BuyerList.Items, function(item) {
-		if(item.xp && item.xp.WeirGroup && Me.xp && Me.xp.WeirGroup) {
-			return item.xp.WeirGroup.label == Me.xp.WeirGroup.label;
-		}
-	});*/
     vm.list = BuyerList;
     vm.parameters = Parameters;
     vm.sortSelection =  Parameters.sortBy ? (Parameters.sortBy.indexOf('!') == 0 ? Parameters.sortBy.split('!')[1] : Parameters.sortBy) : null;
@@ -340,7 +324,7 @@ function CustomerCtrl($state, $ocMedia, OrderCloud, OrderCloudParameters, Parame
 
 function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, OrderCloud, SelectedBuyer, AddressList, CustomerService, Parameters, Underscore, OrderCloudParameters, WeirService) {
     var vm = this;
-    $scope.$state = $state;
+    //$scope.$state = $state;
     vm.buyer = SelectedBuyer;
     vm.list = AddressList;
     vm.parameters = Parameters;

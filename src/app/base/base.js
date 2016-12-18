@@ -74,7 +74,7 @@ function BaseConfig($stateProvider, $injector) {
             AnonymousUser: function($q, OrderCloud, CurrentUser) {
                 CurrentUser.Anonymous = angular.isDefined(JSON.parse(atob(OrderCloud.Auth.ReadToken().split('.')[1])).orderid);
             },
-            ComponentList: function($state, $q, Underscore, CurrentUser) {
+            ComponentList: function($state, $q, Underscore) {
                 var deferred = $q.defer();
                 var nonSpecific = ['Customers', 'Orders', 'Buyers', 'Products', 'Specs', 'Price Schedules', 'Admin Users', 'Product Facets'];
                 var components = {
@@ -115,7 +115,7 @@ function BaseConfig($stateProvider, $injector) {
 }
 
 function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, snapRemote, defaultErrorMessageResolver,
-                        CurrentUser, ComponentList, base, WeirService, IsAdmin, IsInternalSales, BackToListService) {
+                        CurrentUser, ComponentList, base, WeirService, IsAdmin, BackToListService) {
     var vm = this;
     vm.left = base.left;
     vm.right = base.right;

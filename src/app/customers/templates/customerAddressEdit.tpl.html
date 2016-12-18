@@ -1,5 +1,5 @@
 <h3 class="page-header">
-	<b>{{customerAddressEdit.labels.EditAddress}}:</b> {{customerAddressEdit.addressName}}
+	<b>Edit Address:</b> <span ng-bind-html="customerAddressEdit.addressName"></span>
 </h3>
 <form name="AddressEditForm" ng-submit="customerAddressEdit.Submit()" novalidate>
 	<div class="row">
@@ -67,8 +67,6 @@
 	<div class="form-group">
 		<button type="submit" class="btn btn-primary" ng-disabled="AddressEditForm.$invalid">{{customerAddressEdit.labels.Save}}</button>
 		<button type="button" class="btn btn-default" ui-sref="^">{{customerAddressEdit.labels.Cancel}}</button>
-		<!--<button type="button" class="btn btn-default" ng-click="customerAddressEdit.Delete()" ng-disabled="customerAddressEdit.address.xp.primary"><i class="fa fa-trash text-danger"></i></button>-->
 		<button type="button" class="btn btn-default" ng-click="customerAddressEdit.Delete()" ng-disabled="customerAddressEdit.address.xp.primary">{{customerAddressEdit.labels.SetInactive}}</button>
 	</div>
-	<!--TODO: The Address Edit state should also include Address Assignments-->
 </form>
