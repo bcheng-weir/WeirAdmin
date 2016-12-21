@@ -4,7 +4,7 @@ angular.module('orderCloud')
     .controller('RouteToOrderCtrl', RouteToOrderController)
 ;
 
-function OrdersConfig($stateProvider,buyerid) {
+function OrdersConfig($stateProvider, buyerid) {
     $stateProvider
         .state('ordersMain', {
             parent: 'base',
@@ -87,7 +87,7 @@ function OrdersConfig($stateProvider,buyerid) {
     	    url: '/orders/:buyerID/:orderID',
     	    controller: 'RouteToOrderCtrl',
     	    resolve: {
-    	        Order: function ($q, appname, $localForage, $stateParams, OrderCloud) {
+    	        Order: function ($q, appname, $localForage, $stateParams, OrderCloud, toastr, $state, $exceptionHandler) {
     	            var d = $q.defer();
     	            var storageName = appname + '.routeto';
     	            $localForage.setItem(storageName, { state: 'gotoOrder', id: $stateParams.orderID, buyer: $stateParams.buyerID })
@@ -97,9 +97,12 @@ function OrdersConfig($stateProvider,buyerid) {
 		                            $localForage.removeItem(storageName);
 		                            d.resolve(order);
 		                        })
-		                        .catch(function(ex) {
-			                        $exceptionHandler(ex);
-			                        $state.go('home');
+		                        .catch(function (ex) {
+		                            if (ex.status == 404) {
+		                                $localForage.removeItem(storageName);
+		                                toastr.error("Order not found");
+		                                $state.go('home');
+		                            }
 		                        });
 	                    });
     	            return d.promise;
