@@ -338,7 +338,7 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 		});
 	};
 }
-function RouteToOrderController($rootScope, $state, OrderCloud, CurrentOrder, toastr, Order) {
+function RouteToOrderController($rootScope, $state, OrderCloud, CurrentOrder, toastr, Order, $exceptionHandler) {
     if (Order) {
             reviewOrder(Order.ID, Order.xp.Status, Order.xp.BuyerID, Order.xp.CustomerID, Order.xp.CustomerName);
     } else {
