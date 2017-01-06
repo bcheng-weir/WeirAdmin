@@ -1,10 +1,10 @@
 {
 	"appname": "Weir B2B Site Administration",
 	"scope": "CategoryAdmin ProductAdmin ProductAssignmentAdmin FullAccess ",
-	"clientid":"17595D62-E8EC-4911-903F-EB24CA3769AB",
-	"buyernetwork":"85DC0813-F2F8-41D6-B741-80FA9EAC0D34",
+	"clientid": "35C0B8D9-4FAD-4544-902B-3AA1B8DC5630",
+	"buyernetwork": "290DD50B-0085-4AB4-94F4-57F315AB9BE0",
 	"buyerid": "weir",
-	"environment": "prod",
+	"environment": "dev",
 	"anonymous": false,
 	"base": {
 		"left": false,
@@ -14,10 +14,10 @@
 	},
 	"imageRoot": "https://store.flowcontrol.weir/hooks/Content/Images/",
 	"fileStore": {
-		"akid":"AKIAIUP4AZCX6QWGFPQQ",
-		"sak":"ghOoHTZyKejoBpN+Qw/OblzOKQBgq8eXQPlMjyZn",
-		"awsRegion":"eu-west-2",
-		"bucket": "ordercloudfiles",
-		"location": "https://s3.eu-west-2.amazonaws.com/ordercloudfiles/"
+		"akid":"AKIAIDJEBSBD44ECHPAQ",
+		"sak":"vals+hHD4gvcnZpOgzS8j1C1ixRrLOjl+yINYbzN",
+		"awsRegion":"us-east-2",
+		"bucket": "ordercloudtest",
+		"location": "https://s3.us-east-2.amazonaws.com/ordercloudtest/"
 	}
 }
