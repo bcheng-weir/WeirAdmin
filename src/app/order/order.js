@@ -309,6 +309,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			};
 			if (vm.Order.xp.ReviewerID != Me.ID) {
 			    data.xp.ReviewerID = Me.ID;
+			    data.xp.ReviewerEmail = Me.Email;
 			}
 
 			OrderCloud.Orders.Patch(vm.Order.ID, data, vm.Order.xp.BuyerID)
@@ -565,6 +566,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		};
 		if (vm.Order.xp.ReviewerID != currentUser.ID) {
 		    patch.xp.ReviewerID = currentUser.ID;
+		    patch.xp.ReviewerEmail = currentUser.Email;
 		}
 
 		if(patch.xp.Status) {
@@ -619,6 +621,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		};
 		if (vm.Order.xp.ReviewerID != currentUser.ID) {
 		    patch.xp.ReviewerID = currentUser.ID;
+		    patch.xp.ReviewerEmail = currentUser.Email;
 		}
 
 		if(patch.xp.Status) {
@@ -711,7 +714,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		};
 		if (vm.Order.xp.ReviewerID != currentUser.ID) {
 		    orderPatch.xp.ReviewerID = currentUser.ID;
-		}
+		    orderPatch.xp.ReviewerEmail = currentUser.Email;
+        }
 
 		var impersonation = {
 			ClientID: buyernetwork,
@@ -786,7 +790,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        var data = {
 	            xp: {
 	                ReviewerID: newID,
-	                ReviewerName: Me.FirstName + " " + Me.LastName
+	                ReviewerName: Me.FirstName + " " + Me.LastName,
+                    ReviewerEmail: Me.Email
 	            }
 	        };
 	        if (oldID) {
