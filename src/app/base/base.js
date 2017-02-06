@@ -5,7 +5,15 @@ angular.module('orderCloud')
     .filter('occomponents', occomponents)
 ;
 
-function BaseConfig($stateProvider, $injector) {
+function BaseConfig($stateProvider, $injector, $sceDelegateProvider) {
+	$sceDelegateProvider.resourceUrlWhitelist([
+		'self',
+		'https://www.global.weir/brands/**',
+		'https://**.herokuapp.com/**',
+		'https://s3.us-east-2.amazonaws.com/ordercloudtest/**',
+		'https://s3.eu-west-2.amazonaws.com/ordercloudfiles/'
+	]);
+
     var baseViews = {
         '': {
             templateUrl: 'base/templates/base.tpl.html',

@@ -12,11 +12,7 @@ angular.module('orderCloud')
 	.controller( 'NoResultCtrl', NoResultsController )
 ;
 
-function ProductSearchConfig($stateProvider, $sceDelegateProvider) {
-	$sceDelegateProvider.resourceUrlWhitelist([
-		'self',
-		'https://www.global.weir/brands/**'
-	]);
+function ProductSearchConfig($stateProvider) {
 	$stateProvider
 		.state('productSearch', {
 			parent: 'base',
