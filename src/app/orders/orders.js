@@ -23,7 +23,7 @@ function OrdersConfig($stateProvider, buyerid) {
                 Orders: function (OrderCloud, Parameters, Me) {
                     OrderCloud.BuyerID.Set(null);
 	                Parameters.searchOn = Parameters.searchOn ? Parameters.searchOn : "ID,FromUserID,Total,xp";
-	                Parameters.filters["xp.BuyerID"] = Me.xp.WeirGroup.label+'*';
+	                Parameters.filters["FromCompanyID"] = Me.xp.WeirGroup.label+'*';
                     return OrderCloud.Orders.ListIncoming(Parameters.from, Parameters.to, Parameters.search, Parameters.page, Parameters.pageSize || 20, Parameters.searchOn, Parameters.sortBy, Parameters.filters, null);
                 }
             }
