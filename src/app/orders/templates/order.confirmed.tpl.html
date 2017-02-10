@@ -24,10 +24,10 @@
                 {{orders.labels.businessName}}
             </th>
             <th scope="col">
-                <a href="#" role="button" ng-click="orders.updateSort('OrderedBy')">
+                <a href="#" role="button" ng-click="orders.updateSort('FromUserID')">
                     {{orders.labels.orderedBy}}
-                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'OrderedBy'"></i>
-                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!OrderedBy'"></i>
+                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'FromUserID'"></i>
+                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!FromUserID'"></i>
                 </a>
             </th>
             <th scope="col">
@@ -38,10 +38,10 @@
                 </a>
             </th>
             <th scope="col">
-                <a href="#" role="button" ng-click="orders.updateSort('OrderDate')">
+                <a href="#" role="button" ng-click="orders.updateSort('DateSubmitted')">
                     {{orders.labels.dateOrdered}}
-                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'OrderDate'"></i>
-                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!OrderDate'"></i>
+                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'DateSubmitted'"></i>
+                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!DateSubmitted'"></i>
                 </a>
             </th>
             <th scope="col">

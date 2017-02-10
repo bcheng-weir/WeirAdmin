@@ -23,7 +23,7 @@
                         <span ng-if="order.showReviewer" ng-bind-html='order.labels.reviewer'></span>
                         <br />
                         <h4>
-                            <span ng-if='order.showReviewer && order.Order.xp.ReviewerName'>{{order.Order.xp.ReviewerName}}</span>
+                            <span ng-if='order.showReviewer && order.Order.xp.ReviewerName' ng-bind-html="order.Order.xp.ReviewerName"></span>
                             <span ng-if='order.showReviewer && !order.Order.xp.ReviewerName' ng-bind-html='order.labels.unassigned'></span>
                         </h4>
                     </li>
@@ -56,7 +56,7 @@
                         <a role="button" class="btn btn-lg btn-default" href="#Comments"><span ng-bind-html="order.labels.Comments"></span></a>
                     </li>
                     <li style="padding: 0px 10px 0px 0px;">
-                        <button type="button" class="btn btn-lg btn-default" ng-csv="order.ToCsvJson" filename="{{order.CsvFilename}}" ng-bind-html="order.labels.Download"></button>
+                        <!--<button type="button" class="btn btn-lg btn-default" ng-csv="order.ToCsvJson" filename="{{order.CsvFilename}}" ng-bind-html="order.labels.Download"></button>-->
                     </li>
                 </ul>
             </ul>
@@ -74,14 +74,14 @@
                  <b>
                      <span ng-show="order.Order.xp.Type=='Order'" ng-bind-html='order.labels.WeirOrderNo'></span>
                      <span ng-show="order.Order.xp.Type=='Quote'" ng-bind-html='order.labels.WeirQuoteNo'></span>
-                     <span class="text-danger">{{order.Order.ID}}</span>
+                     <span class="text-danger" ng-bind-html="order.Order.ID"></span>
                  </b>
              </p>
-             <p><b><span ng-bind-html='order.labels.QuoteRef'></span><span class="text-danger">{{order.Order.xp.RefNum}}</span></b></p>
+             <p><b><span ng-bind-html='order.labels.QuoteRef'></span><span class="text-danger" ng-bind-html="order.Order.xp.RefNum"></span></b></p>
              <p ng-show="(order.Order.xp.Status=='CQ'||order.Order.xp.Status=='SE')&&order.showAssign==false">
                  <b>
                     <span ng-bind-html='order.labels.PONumber'></span>
-                    <span ng-if="order.showAssign==true" class="text-danger">{{order.Order.xp.PONumber}}</span>
+                    <span ng-if="order.showAssign==true" class="text-danger" ng-bind-html="order.Order.xp.PONumber"></span>
                     <span ng-if="order.showAssign!=true">
                         <input type="text" ng-model="order.Order.xp.PONumber" placeholder="{{order.labels.POPlaceHolder}}" /> <button class="btn btn-sm btn-primary" ng-bind-html="order.labels.Add" ng-click="order.UpdatePO()"></button>
                     </span>
@@ -122,25 +122,23 @@
                  </thead>
                  <tbody>
                  <tr ng-repeat="line in order.LineItems.Items" style="border-right-width: 0;">
-                     <td>{{line.xp.SN}}</td>
-                     <td>{{line.xp.TagNumber}}</td>
-                     <td>{{line.Product.Name}}</td>
-                     <td>{{line.Product.Description}}</td>
-                     <td>{{line.Product.xp.ReplacementSchedule}}</td>
+                     <td ng-bind-html="line.xp.SN"></td>
+                     <td ng-bind-html="line.xp.TagNumber"></td>
+                     <td ng-bind-html="line.Product.Name"></td>
+                     <td ng-bind-html="line.Product.Description"></td>
+                     <td ng-bind-html="line.Product.xp.ReplacementSchedule"></td>
 
                      <!-- Non-review fields -->
                      <td ng-if="order.Order.xp.Status!='RE'">
-                         <span ng-show="line.xp.LeadTime==null">{{line.Product.xp.LeadTime}}</span>
-                         <span ng-show="line.xp.LeadTime!=null">{{line.xp.LeadTime}}</span>
+                         <span ng-show="line.xp.LeadTime==null" ng-bind-html="line.Product.xp.LeadTime"></span>
+                         <span ng-show="line.xp.LeadTime!=null" ng-bind-html="line.xp.LeadTime"></span>
                      </td>
                      <td ng-switch on="order.Order.xp.CustomerID | weirGroupFromBuyersID" class='text-right' ng-if="order.Order.xp.Status!='RE'">
-                         <span ng-switch-when="WPIFR">{{line.UnitPrice | currency:'&euro; '}}</span>
-                         <span ng-switch-when="WVCUK">{{line.UnitPrice | currency:'&#163; '}}</span>
-                         <span ng-switch-default>{{line.UnitPrice | currency:'&#163; '}}</span>
+                         <span ng-switch-when="WPIFR" ng-bind-html="line.UnitPrice | currency:'&euro; '"></span>
+                         <span ng-switch-when="WVCUK" ng-bind-html="line.UnitPrice | currency:'&#163; '"></span>
+                         <span ng-switch-default ng-bind-html="line.UnitPrice | currency:'&#163; '"></span>
                      </td>
-                     <td ng-if="order.Order.xp.Status!='RE'">
-                         {{line.Quantity}}
-                     </td>
+                     <td ng-if="order.Order.xp.Status!='RE'" ng-bind-html="line.Quantity"></td>
 
                      <!-- review mode fields -->
                      <td ng-if="order.Order.xp.Status=='RE'">
@@ -183,21 +181,19 @@
                  </tr>
 
                  <tr ng-repeat="line in order.PreviousLineItems">
-                     <td>{{line.xp.SN}}</td>
-                     <td>{{line.xp.TagNumber}}</td>
-                     <td>{{line.Product.Name}}</td>
-                     <td>{{line.Product.Description}}</td>
-                     <td>{{line.Product.xp.ReplacementSchedule}}</td>
+                     <td ng-bind-html="line.xp.SN"></td>
+                     <td ng-bind-html="line.xp.TagNumber"></td>
+                     <td ng-bind-html="line.Product.Name"></td>
+                     <td ng-bind-html="line.Product.Description"></td>
+                     <td ng-bind-html="line.Product.xp.ReplacementSchedule"></td>
 
-                     <td ng-if="order.Order.xp.Status!='RE'">{{line.Product.xp.LeadTime}}</td>
+                     <td ng-if="order.Order.xp.Status!='RE'" ng-bind-html="line.Product.xp.LeadTime"></td>
                      <td ng-switch on="order.Order.xp.CustomerID | weirGroupFromBuyersID" class='text-right' ng-if="order.Order.xp.Status!='RE'">
-                         <span ng-switch-when="WPIFR">{{line.UnitPrice | currency:'&euro; '}}</span>
-                         <span ng-switch-when="WVCUK">{{line.UnitPrice | currency:'&#163; '}}</span>
-                         <span ng-switch-default>{{line.UnitPrice | currency:'&#163; '}}</span>
+                         <span ng-switch-when="WPIFR" ng-bind-html="line.UnitPrice | currency:'&euro; '"></span>
+                         <span ng-switch-when="WVCUK" ng-bind-html="line.UnitPrice | currency:'&#163; '"></span>
+                         <span ng-switch-default ng-bind-html="line.UnitPrice | currency:'&#163; '"></span>
                      </td>
-                     <td ng-if="order.Order.xp.Status!='RE'">
-                         {{order.Zero}}
-                     </td>
+                     <td ng-if="order.Order.xp.Status!='RE'" ng-bind-html="order.Zero"></td>
                      <td ng-if="order.Order.xp.Status=='RE'">
                          <input type="text" class="form-control" ng-model="line.Product.xp.LeadTime" />
                      </td>
@@ -220,9 +216,9 @@
                      <td class="button-th" colspan="5"></td>
                      <td ng-bind-html='order.labels.Total'></td>
                      <td ng-switch on="order.Order.xp.CustomerID | weirGroupFromBuyersID" class='text-right'>
-                         <span ng-switch-when="WPIFR">{{order.Order.Total | currency:'&euro; '}}</span>
-                         <span ng-switch-when="WVCUK">{{order.Order.Total | currency:'&#163; '}}</span>
-                         <span ng-switch-default>{{order.Order.Total | currency:'&#163; '}}</span>
+                         <span ng-switch-when="WPIFR" ng-bind-html="order.Order.Total | currency:'&euro; '"></span>
+                         <span ng-switch-when="WVCUK" ng-bind-html="order.Order.Total | currency:'&#163; '"></span>
+                         <span ng-switch-default ng-bind-html="order.Order.Total | currency:'&#163; '"></span>
                      </td>
                  </tr>
                  </tbody>
@@ -239,10 +235,10 @@
             <!-- ToDo footer stuff -->
             <strong><span ng-bind-html='order.labels.YourAttachments'></span></strong><br />
             <p ng-repeat="fileName in order.Order.xp.Files">
-                <a href="" ng-click="order.GetFile(fileName)" target="_blank">{{fileName}}</a>
+                <a href="" ng-click="order.GetFile(fileName)" target="_blank" ng-bind-html="fileName"></a>
             </p>
             <p ng-hide="order.Order.xp.Status=='SE'||order.Order.xp.Status=='CQ'">
-                <a href="" ng-click="order.GetFile(order.Order.xp.PODocument)" target="_blank">{{order.Order.xp.PODocument}}</a>
+                <a href="" ng-click="order.GetFile(order.Order.xp.PODocument)" target="_blank" ng-bind-html="order.Order.xp.PODocument"></a>
             </p>
             <!--<p ng-show="order.Order.xp.Status=='SE'||order.Order.xp.Status=='CQ'">
                 <ordercloud-po-upload model="order.Order" keyname="PODocument" label=''></ordercloud-po-upload>
@@ -256,29 +252,26 @@
             <!-- ToDo footer stuff -->
             <strong><span ng-bind-html='order.labels.DelieveryAddress'></span></strong><br />
             <div ng-if="order.DeliveryAddress.Country=='FR'">
-                <!--{{order.DeliveryAddress.CompanyName}}<br>-->
                 <span ng-bind-html='order.DeliveryAddress.FirstName + " " + order.DeliveryAddress.LastName'></span><br />
-                {{order.DeliveryAddress.Street1}}<br>
-                {{order.DeliveryAddress.Street2}}<br>
-                {{order.DeliveryAddress.Zip}} {{order.DeliveryAddress.City}}<br>
-                {{order.country(order.DeliveryAddress.Country)}}
+                <span ng-bind-html="order.DeliveryAddress.Street1"></span><br>
+                <span ng-bind-html="order.DeliveryAddress.Street2"></span><br>
+                <span ng-bind-html="order.DeliveryAddress.Zip"></span> <span ng-bind-html="order.DeliveryAddress.City"></span><br>
+                <span ng-bind-html="order.country(order.DeliveryAddress.Country)"></span>
             </div>
             <div ng-if="order.DeliveryAddress.Country=='GB'">
-                <!--{{order.DeliveryAddress.CompanyName}}<br>-->
                 <span ng-bind-html='order.DeliveryAddress.FirstName + " " + order.DeliveryAddress.LastName'></span><br />
-                {{order.DeliveryAddress.Street1}}<br>
-                {{order.DeliveryAddress.Street2}}<br>
-                {{order.DeliveryAddress.City}}<br>
-                {{order.DeliveryAddress.Zip}}<br>
-                {{order.country(order.DeliveryAddress.Country)}}
+                <span ng-bind-html="order.DeliveryAddress.Street1"></span><br>
+                <span ng-bind-html="order.DeliveryAddress.Street2"></span><br>
+                <span ng-bind-html="order.DeliveryAddress.City"></span><br>
+                <span ng-bind-html="order.DeliveryAddress.Zip"></span><br>
+                <span ng-bind-html="order.country(order.DeliveryAddress.Country)"></span>
             </div>
             <div ng-if="order.DeliveryAddress.Country!='GB' && order.DeliveryAddress.Country!='FR'">
-                <!--{{order.DeliveryAddress.CompanyName}}<br>-->
                 <span ng-bind-html='order.DeliveryAddress.FirstName + " " + order.DeliveryAddress.LastName'></span><br />
-                {{order.DeliveryAddress.Street1}}<br>
-                {{order.DeliveryAddress.Street2}}<br>
-                {{order.DeliveryAddress.City}}, {{order.DeliveryAddress.State}} {{order.DeliveryAddress.Zip}}<br>
-                {{order.country(order.DeliveryAddress.Country)}}
+                <span ng-bind-html="order.DeliveryAddress.Street1"></span><br>
+                <span ng-bind-html="order.DeliveryAddress.Street2"></span><br>
+                <span ng-bind-html="order.DeliveryAddress.City"></span>, <span ng-bind-html="order.DeliveryAddress.State"></span> <span ng-bind-html="order.DeliveryAddress.Zip"></span><br>
+                <span ng-bind-html="order.country(order.DeliveryAddress.Country)"></span>
             </div>
         </div>
         <div class="col-xs-6">

@@ -80,7 +80,8 @@ function BaseConfig($stateProvider, $injector, $sceDelegateProvider) {
                 return dfd.promise;
             },
             AnonymousUser: function($q, OrderCloud, CurrentUser) {
-                CurrentUser.Anonymous = angular.isDefined(JSON.parse(atob(OrderCloud.Auth.ReadToken().split('.')[1])).orderid);
+	            var tmp = OrderCloud.Auth.ReadToken();
+                CurrentUser.Anonymous = (tmp) ? angular.isDefined(JSON.parse(atob(OrderCloud.Auth.ReadToken().split('.')[1])).orderid) : tmp;
             },
             ComponentList: function($state, $q, Underscore) {
                 var deferred = $q.defer();

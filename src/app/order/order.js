@@ -805,48 +805,64 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	}
 }
 
-function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, OrderCloud, WeirService, Order) {
-        var vm = this;
-        vm.Order = Order;
-    	vm.Order.xp.DateDespatched = vm.Order.xp.DateDespatched == null ? null : new Date(vm.Order.xp.DateDespatched);
-    	vm.Order.xp.DeliveryDate = vm.Order.xp.DeliveryDate == null ? null : new Date(vm.Order.xp.DeliveryDate);
+function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, $scope, OrderCloud, WeirService, Order) {
+    var vm = this;
+    vm.Order = Order;
+    vm.Order.xp.DateDespatched = vm.Order.xp.DateDespatched == null ? null : new Date(vm.Order.xp.DateDespatched);
+    vm.Order.xp.DeliveryDate = vm.Order.xp.DeliveryDate == null ? null : new Date(vm.Order.xp.DeliveryDate);
+	vm.popupDespatched = {
+		opened: false
+	};
+	vm.popupDelivery = {
+		opened: false
+	};
+	vm.inlineOptions = {
+		minDate: new Date(),
+		showWeeks: true
+	};
+	vm.dateOptions = {
+		formatYear: 'yy',
+		maxDate: new Date(2020, 5, 22),
+		minDate: new Date(2000, 1, 1),
+		startingDay: 1
+	};
 
-        var labels = {
-            en: {
-                OrderNumber: "Order Number",
-                BackToOrders: "Back to Orders",
-                ContractNumber: "Contract number",
-                DeliveryDate: "Delivery date",
-                DespatchDate: "Date despatched",
-                InvoiceNum: "Invoice Number",
-                NotificationText: "Your customer will be sent a notification when you save details on this page.",
-                Save: "Save",
-                Cancel: "Cancel",
-	            Back: "Back"
-            }, fr: {
-                OrderNumber: $sce.trustAsHtml("FR: Order Number"),
-                BackToOrders: $sce.trustAsHtml("FR: Back to Orders"),
-                ContractNumber: $sce.trustAsHtml("FR: Contract number"),
-                DeliveryDate: $sce.trustAsHtml("FR: Delivery date"),
-                DespatchDate: $sce.trustAsHtml("FR: Date despatched"),
-                InvoiceNum: $sce.trustAsHtml("FR: Invoice Number"),
-                NotificationText: $sce.trustAsHtml("FR: Your customer will be sent a notification when you save details on this page."),
-                Save: $sce.trustAsHtml("FR: Save"),
-                Cancel: $sce.trustAsHtml("FR: Cancel"),
-		        Back: "Back"
-            }
-        };
-        function save(Order) {
-			var orderStatus = vm.Order.xp.Status;
-			//console.log(vm.Order.xp.ContractNumber +  "\n" + Order.xp.DeliveryDate +  "\n" + vm.Order.xp.DateDespatched +  "\n" + vm.Order.xp.InvoiceNumber);
-            //if it has a despatch date- it is despatched. if it has an invoice it is in the final stage and is invoiced.
-			if(vm.Order.xp.DateDespatched){
-				orderStatus = 'DP';
-			}
-			if(vm.Order.xp.InvoiceNumber){
-				orderStatus = 'IV';
-			}
-			var patch = {
+    var labels = {
+        en: {
+            OrderNumber: "Order Number",
+            BackToOrders: "Back to Orders",
+            ContractNumber: "Contract number",
+            DeliveryDate: "Delivery date",
+            DespatchDate: "Date despatched",
+            InvoiceNum: "Invoice Number",
+            NotificationText: "Your customer will be sent a notification when you save details on this page.",
+            Save: "Save",
+            Cancel: "Cancel",
+            Back: "Back"
+        }, fr: {
+            OrderNumber: $sce.trustAsHtml("FR: Order Number"),
+            BackToOrders: $sce.trustAsHtml("FR: Back to Orders"),
+            ContractNumber: $sce.trustAsHtml("FR: Contract number"),
+            DeliveryDate: $sce.trustAsHtml("FR: Delivery date"),
+            DespatchDate: $sce.trustAsHtml("FR: Date despatched"),
+            InvoiceNum: $sce.trustAsHtml("FR: Invoice Number"),
+            NotificationText: $sce.trustAsHtml("FR: Your customer will be sent a notification when you save details on this page."),
+            Save: $sce.trustAsHtml("FR: Save"),
+            Cancel: $sce.trustAsHtml("FR: Cancel"),
+	        Back: "Back"
+        }
+    };
+    function save(Order) {
+		var orderStatus = vm.Order.xp.Status;
+		//console.log(vm.Order.xp.ContractNumber +  "\n" + Order.xp.DeliveryDate +  "\n" + vm.Order.xp.DateDespatched +  "\n" + vm.Order.xp.InvoiceNumber);
+        //if it has a despatch date- it is despatched. if it has an invoice it is in the final stage and is invoiced.
+		if(vm.Order.xp.DateDespatched){
+			orderStatus = 'DP';
+		}
+		if(vm.Order.xp.InvoiceNumber){
+			orderStatus = 'IV';
+		}
+		var patch = {
 			xp: {
 				ContractNumber: vm.Order.xp.ContractNumber,
 				DeliveryDate: vm.Order.xp.DeliveryDate,
@@ -854,24 +870,47 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, O
 				InvoiceNumber: vm.Order.xp.InvoiceNumber,
 				Status: orderStatus
 			}
-			};
-			OrderCloud.Orders.Patch(Order.ID, patch, vm.Order.xp.BuyerID)
-				.then(function() {
-					$rootScope.$broadcast('SwitchCart');
-					$state.go($state.current,{}, {reload:true});
-				})
-				.catch(function(ec) {
-					$exceptionHandler(ex);
-				});
-        }
-        function cancel() {
-            $state.go('order');
-        }
-        function backToOrders() {
-            $state.go('ordersMain');
-        }
-        vm.labels = WeirService.LocaleResources(labels);
-        vm.Save = save;
-        vm.Cancel = cancel;
-        vm.BackToOrders = backToOrders;
+		};
+		OrderCloud.Orders.Patch(Order.ID, patch, vm.Order.xp.BuyerID)
+			.then(function() {
+				$rootScope.$broadcast('SwitchCart');
+				$state.go($state.current,{}, {reload:true});
+			})
+			.catch(function(ec) {
+				$exceptionHandler(ex);
+			});
+    }
+    function cancel() {
+        $state.go('order');
+    }
+    function backToOrders() {
+        $state.go('ordersMain');
+    }
+    function openDespatched() {
+		vm.popupDespatched.opened = true;
+	}
+	function openDelivery() {
+		vm.popupDelivery.opened = true;
+	}
+    vm.labels = WeirService.LocaleResources(labels);
+    vm.Save = save;
+    vm.Cancel = cancel;
+    vm.BackToOrders = backToOrders;
+	vm.openDespatched = openDespatched;
+	vm.openDelivery = openDelivery;
+
+	function getDayClass(data) {
+		var date = data.date,
+			mode = data.mode;
+		if (mode === 'day') {
+			var dayToCheck = new Date(date).setHours(0,0,0,0);
+			for (var i = 0; i < $scope.events.length; i++) {
+				var currentDay = new Date($scope.events[i].date).setHours(0,0,0,0);
+				if (dayToCheck === currentDay) {
+					return $scope.events[i].status;
+				}
+			}
+		}
+		return '';
+	}
 }
