@@ -893,14 +893,7 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, $
 	function openDelivery() {
 		vm.popupDelivery.opened = true;
 	}
-	vm.change = function() {
-    	return;
-		if (vm.Order.xp.DateDespatched.getTime() > new Date().getTime()) {
-			//$scope.dateForm.dateField.$setValidity("required",true);
-		} else {
-			//$scope.dateForm.dateField.$setValidity("required",false);
-		}
-	};
+
     vm.labels = WeirService.LocaleResources(labels);
     vm.Save = save;
     vm.Cancel = cancel;

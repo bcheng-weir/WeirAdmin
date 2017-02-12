@@ -25,7 +25,7 @@
                     <!-- http://plnkr.co/edit/N9Hk9QFIfj3IXfHoWwbt?p=preview -->
                     <label ng-bind-html='info.labels.DeliveryDate'></label><br />
                     <p class="input-group">
-                        <input type="text" class="form-control" uib-datepicker-popup="dd/MM/yyyy" ng-model="info.Order.xp.DeliveryDate" ng-change="info.change()"
+                        <input type="text" class="form-control" uib-datepicker-popup="dd/MM/yyyy" ng-model="info.Order.xp.DeliveryDate"
                             is-open="info.popupDelivery.opened" datepicker-options="info.dateOptions" close-text="Close" width="20"/>
                         <span class="input-group-btn">
                             <button type="button" class="btn btn-default" ng-click="info.openDelivery()"><i class="glyphicon glyphicon-calendar"></i></button>
