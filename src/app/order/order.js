@@ -806,7 +806,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 }
 
 function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, $scope, OrderCloud, WeirService, Order) {
-    var vm = this;
+	var vm = this;
     vm.Order = Order;
     vm.Order.xp.DateDespatched = vm.Order.xp.DateDespatched == null ? null : new Date(vm.Order.xp.DateDespatched);
     vm.Order.xp.DeliveryDate = vm.Order.xp.DeliveryDate == null ? null : new Date(vm.Order.xp.DeliveryDate);
@@ -821,11 +821,12 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, $
 		showWeeks: true
 	};
 	vm.dateOptions = {
-		formatYear: 'yy',
-		maxDate: new Date(2020, 5, 22),
+		formatYear: 'yyyy',
+		maxDate: new Date(2050, 12, 31),
 		minDate: new Date(2000, 1, 1),
 		startingDay: 1
 	};
+	vm.altInputFormats = ['d!/M!/yyyy'];
 
     var labels = {
         en: {
@@ -876,7 +877,7 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, $
 				$rootScope.$broadcast('SwitchCart');
 				$state.go($state.current,{}, {reload:true});
 			})
-			.catch(function(ec) {
+			.catch(function(ex) {
 				$exceptionHandler(ex);
 			});
     }
@@ -892,6 +893,14 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, $
 	function openDelivery() {
 		vm.popupDelivery.opened = true;
 	}
+	vm.change = function() {
+    	return;
+		if (vm.Order.xp.DateDespatched.getTime() > new Date().getTime()) {
+			//$scope.dateForm.dateField.$setValidity("required",true);
+		} else {
+			//$scope.dateForm.dateField.$setValidity("required",false);
+		}
+	};
     vm.labels = WeirService.LocaleResources(labels);
     vm.Save = save;
     vm.Cancel = cancel;
@@ -899,18 +908,4 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, $
 	vm.openDespatched = openDespatched;
 	vm.openDelivery = openDelivery;
 
-	function getDayClass(data) {
-		var date = data.date,
-			mode = data.mode;
-		if (mode === 'day') {
-			var dayToCheck = new Date(date).setHours(0,0,0,0);
-			for (var i = 0; i < $scope.events.length; i++) {
-				var currentDay = new Date($scope.events[i].date).setHours(0,0,0,0);
-				if (dayToCheck === currentDay) {
-					return $scope.events[i].status;
-				}
-			}
-		}
-		return '';
-	}
 }
