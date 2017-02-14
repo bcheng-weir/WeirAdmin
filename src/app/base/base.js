@@ -11,7 +11,7 @@ function BaseConfig($stateProvider, $injector, $sceDelegateProvider) {
 		'https://www.global.weir/brands/**',
 		'https://**.herokuapp.com/**',
 		'https://s3.us-east-2.amazonaws.com/ordercloudtest/**',
-		'https://s3.eu-west-2.amazonaws.com/ordercloudfiles/'
+		'https://s3.eu-west-2.amazonaws.com/ordercloudfiles/**'
 	]);
 
     var baseViews = {
