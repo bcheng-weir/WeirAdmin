@@ -142,14 +142,14 @@
 
                      <!-- review mode fields -->
                      <td ng-if="order.Order.xp.Status=='RE'">
-                         <input type="text" class="form-control input-sm" ng-show="line.xp.LeadTime==null" ng-model="line.Product.xp.LeadTime" />
-                         <input type="text" class="form-control input-sm" ng-show="line.xp.LeadTime!=null" ng-model="line.xp.LeadTime" />
+                         <input type="text" class="form-control input-sm" ng-show="line.xp.LeadTime==null" ng-model="line.Product.xp.LeadTime" ng-enter="order.NoOp()" />
+                         <input type="text" class="form-control input-sm" ng-show="line.xp.LeadTime!=null" ng-model="line.xp.LeadTime" ng-enter="order.NoOp()" />
                      </td>
                      <td ng-if="order.Order.xp.Status=='RE'">
-                         <input type="" class="form-control input-sm" ng-model="line.UnitPrice" />
+                         <input type="" class="form-control input-sm" ng-model="line.UnitPrice" ng-enter="order.NoOp()" />
                      </td>
                      <td ng-if="order.Order.xp.Status=='RE'">
-                        <input type="number" class="form-control input-sm" ng-model="line.Quantity" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" />
+                        <input type="number" class="form-control input-sm" ng-model="line.Quantity" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" ng-enter="order.NoOp()" />
                      </td>
 
                      <td style="border:0;width:100px;">

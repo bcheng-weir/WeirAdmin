@@ -491,15 +491,15 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
 			Parts: [],
 			Customer: ""
 		};
-		var categories = [];
+		//var categories = [];
 		var queue = [];
-		var q2 = [];
-		var q3 = [];
+		//var q2 = [];
+		//var q3 = [];
 		var deferred = $q.defer();
 
 		getParts(partNumbers);
 		$q.all(queue)
-			.then(function(results) {
+			.then(function(tmp) {
 				deferred.resolve(results);
 			})
 			.catch (function(ex) {
@@ -521,7 +521,13 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
                         CurrentOrder.Get()
 	                        .then(function (co) {
 	                        	order = co;
-	                            miniCartBuyer = {"FromUserID": co.FromUserID, "BuyerID": co.xp.BuyerID};
+	                        	miniCartBuyer = { "FromUserID": co.FromUserID, "BuyerID": co.xp.BuyerID, WeirGroup: "" };
+	                        	if (miniCartBuyer.BuyerID) {
+	                        	    var tmp = miniCartBuyer.BuyerID.indexOf('-');
+	                        	    if (tmp >= 0) {
+	                        	        miniCartBuyer.WeirGroup = miniCartBuyer.BuyerID.substring(0, tmp);
+	                        	    }
+	                        	}
 	                            return OrderCloud.Users.Get(co.FromUserID, co.xp.BuyerID)
                             }).then(function (buyer) {
 	                            // Get an access token for impersonation.
@@ -532,8 +538,8 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
                                 // Set the local impersonation token so that As() can be used.
                                 OrderCloud.Auth.SetImpersonationToken(data['access_token']);
                             }).then(function () {
-                            	//return OrderCloud.Products.List(number, 1, 50, null, null, null); //search, page, pageSize, searchOn, sortBy, filters
-                                return OrderCloud.As().Me.ListProducts(null, 1, 50, null, null, {"Name": number+"*"}, null, miniCartBuyer.BuyerID.substring(0, 5))
+                                return OrderCloud.Products.List(null, 1, 50, null, null, { "Name": number, "catalogID": miniCartBuyer.WeirGroup }) //search, page, pageSize, searchOn, sortBy, filters
+                                //OrderCloud.As().Me.ListProducts(null, 1, 50, null, null, {"Name": number+"*"}, null, miniCartBuyer.BuyerID.substring(0, 5))
                             })
                             .then(function (products) {
                                 if (products.Items.length == 0) {
@@ -560,49 +566,49 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
             })
         }
 
-		function getValvesForParts(results) {
-			angular.forEach(results.Parts, function(result) {
-				if (result.Detail) {
-					q2.push((function() {
-						var d2 = $q.defer();
-						var part = result.Detail;
-						OrderCloud.Categories.ListProductAssignments(null, part.ID, 1, 50)
-							.then(function(valveIds) {
-								angular.forEach(valveIds.Items, function(entry) {
-									if (categories.indexOf(entry) < 0) categories.push(entry);
-								});
-								d2.resolve();
-							})
-							.catch (function(ex) {
-								d2.resolve();
-							});
-						return d2.promise;
-					})());
-				}
-			});
-		}
+		//function getValvesForParts(results) {
+		//	angular.forEach(results.Parts, function(result) {
+		//		if (result.Detail) {
+		//			q2.push((function() {
+		//				var d2 = $q.defer();
+		//				var part = result.Detail;
+		//				OrderCloud.Categories.ListProductAssignments(null, part.ID, 1, 50)
+		//					.then(function(valveIds) {
+		//						angular.forEach(valveIds.Items, function(entry) {
+		//							if (categories.indexOf(entry) < 0) categories.push(entry);
+		//						});
+		//						d2.resolve();
+		//					})
+		//					.catch (function(ex) {
+		//						d2.resolve();
+		//					});
+		//				return d2.promise;
+		//			})());
+		//		}
+		//	});
+		//}
 
-		function getCustomerForValves(valves) {
-			var def3 = $q.defer();
-			angular.forEach(valves, function(entry) {
-				q3.push((function() {
-					var d3 = $q.defer();
-					OrderCloud.Categories.Get(entry.CategoryID)
-						.then(function(item) {
-							if (!results.Customer) {
-								results.Customer = item.xp.Customer;
-							} else if (results.Customer != item.xp.Customer) {
-								results.Customer = "*";
-							}
-							d3.resolve();
-						})
-						.catch(function(ex) {
-							d3.resolve();
-						});
-					return d3.promise;
-				})());
-			});
-		}
+	//	function getCustomerForValves(valves) {
+	//		var def3 = $q.defer();
+	//		angular.forEach(valves, function(entry) {
+	//			q3.push((function() {
+	//				var d3 = $q.defer();
+	//				OrderCloud.Categories.Get(entry.CategoryID)
+	//					.then(function(item) {
+	//						if (!results.Customer) {
+	//							results.Customer = item.xp.Customer;
+	//						} else if (results.Customer != item.xp.Customer) {
+	//							results.Customer = "*";
+	//						}
+	//						d3.resolve();
+	//					})
+	//					.catch(function(ex) {
+	//						d3.resolve();
+	//					});
+	//				return d3.promise;
+	//			})());
+	//		});
+	//	}
 	}
 
 	function addPartToQuote(part) {

@@ -110,6 +110,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	vm.Order.xp.PONumber = vm.Order.xp.PONumber != "Pending" ? vm.Order.xp.PONumber : ""; // In the buyer app we were initially setting this to pending.
     vm.LineItems = LineItems;
     vm.BlankItems = [];
+    vm.NoOp = function () { }
     var userIsInternalSalesAdmin = UserGroups.indexOf(UserGroupsService.Groups.InternalSales) > -1;
     var userIsSuperAdmin = UserGroups.indexOf(UserGroupsService.Groups.SuperAdmin) > -1;
 

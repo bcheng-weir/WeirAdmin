@@ -461,7 +461,8 @@ function SerialDetailController( $stateParams, $rootScope, $state, $sce, WeirSer
 	vm.headers = WeirService.LocaleResources(headers);
 
 	vm.addPartToQuote = function(part) {
-		part.xp = typeof part.xp == "undefined" ? {} : part.xp;
+	    if (!part.Quantity) return;
+	    part.xp = typeof part.xp == "undefined" ? {} : part.xp;
 		part.xp.SN = vm.serialNumber.Name;
 		part.xp.TagNumber = vm.serialNumber.xp.TagNumber;
 		WeirService.AddPartToQuote(part)
@@ -677,7 +678,8 @@ function TagDetailController( $stateParams, $rootScope, $sce, $state, WeirServic
 	vm.headers = WeirService.LocaleResources(headers);
 
 	vm.addPartToQuote = function(part) {
-		part.xp = typeof part.xp == "undefined" ? {} : part.xp;
+	    if (!part.Quantity) return;
+	    part.xp = typeof part.xp == "undefined" ? {} : part.xp;
 		part.xp.SN = vm.tagNumber.Name;
 		part.xp.TagNumber = vm.tagNumber.xp.TagNumber;
 		WeirService.AddPartToQuote(part)
@@ -810,7 +812,8 @@ function PartResultsController( $rootScope, $sce, $state, WeirService, PartNumbe
 	};
 	vm.labels = WeirService.LocaleResources(labels);
 	if(numFound == 0) $state.go('productSearch.noresults');
-	vm.addPartToQuote = function(part) {
+	vm.addPartToQuote = function (part) {
+	    if (!part.Quantity) return;
 		part.xp = typeof part.xp == "undefined" ? {} : part.xp;
 		part.xp.SN = null;
 		part.xp.TagNumber = null;
