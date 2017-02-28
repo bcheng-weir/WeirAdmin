@@ -1,0 +1,35 @@
+<article id="COMPONENT_StandardDelivery" ui-view class="container-fluid">
+	<div class="page-header">
+		<h3 ng-bind-html='delivery.labels.EditHeader'></h3>
+		<div class="row">
+           <div class="col-md-12">
+                <p ng-bind-html='delivery.labels.EditInstructions'></p>
+            </div>
+        </div>
+	</div>
+
+    <div class="row">
+        <div class='col-md-12'>
+            <h4><label for='charge' ng-bind-html='delivery.labels.CarriageLabel'></label></h4>
+        </div>
+    </div>
+        <form name='myform'>
+            <div class='row form-group form-row'>
+                <div class='col-md-12'>
+                    <span ng-if='delivery.labels.Currency=="GBP"' style='margin-right: 0.5em; margin-top: 0.3em; float: left;'>&#163;</span>
+                    <span ng-if='delivery.labels.Currency=="EU"' style='margin-right: 0.5em; margin-top: 0.3em; float: left;'>&#128;</span>
+                    <input ng-if="!delivery.editable" ng-model='delivery.rateStr' ng-disabled="true" />
+                    <input ng-if="delivery.editable" type='number' class='form-control' style="width: 10em;" ng-model='delivery.newRate' ng-min='0.00' ng-required='true'
+                           step='0.01' ng-pattern='/^\d+(\.\d{1,2})?$/' name='charge' ng-disabled='!delivery.editable'
+                           pattern-err-type="currencyError" step-err-type="currencyError" />
+                </div>
+            </div>
+            <div class='row' style='margin-top: 0.5em;'>
+                <div class='col-md-12'>
+                    <button class='btn btn-default' ng-click='delivery.Edit()' ng-bind-html='delivery.labels.EditAction' ng-disabled='delivery.editable'></button>
+                    <button class='btn btn-primary' style="margin-left: 0.25em;" ng-click='delivery.Save()' ng-bind-html='delivery.labels.SaveAction' ng-disabled='myform.$invalid || !delivery.editable'></button>
+                    <button class='btn btn-default' type='reset' ng-click='delivery.Cancel()' style='margin-left: 0.25em;' ng-bind-html='delivery.labels.CancelAction' ng-disabled='!delivery.editable'></button>
+                </div>
+            </div>
+        </form>
+</article>

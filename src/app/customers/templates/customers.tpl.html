@@ -40,6 +40,9 @@
                         Customer Type
                     </th>
                     <th class="text-center" scope="col">
+                        Carriage Type
+                    </th>
+                    <th class="text-center" scope="col">
                         Active
                     </th>
                     <th scope="col"></th>
@@ -50,7 +53,11 @@
                 <th scope="row">{{buyer.ID}}</th>
                 <td data-title="Name">{{buyer.Name}}</td>
                 <td data-title="WeirGroup" class="text-center">{{buyer.xp.WeirGroup.label}}</td>
-                <td data-title="Name" class="text-center">{{buyer.xp.Type.label}}</td>
+                <td data-title="CustomerType" class="text-center">{{buyer.xp.Type.label}}</td>
+                <td data-title="CarriageType" class="text-center">
+			        <span ng-if="buyer.xp.UseCustomCarriageRate">Customer Specific</span>
+			        <span ng-if="!buyer.xp.UseCustomCarriageRate">Standard</span>
+         	    </td>
                 <td class="text-center" data-title="Active"><i class="fa fa-circle" aria-hidden="true" ng-class="{'active':buyer.Active}"></i></td>
                 <td class="actions-cell">
                     <button type="button" ui-sref="customers.assign({buyerid: buyer.ID})" class="btn btn-default btn-sm" ng-hide="buyer.xp.Type.id==1">Assign

@@ -47,6 +47,9 @@ function CustomerConfig($stateProvider) {
                         "xp.active":"true"
                     };
                     return OrderCloud.Addresses.List(Parameters.search,Parameters.page,Parameters.pageSize,Parameters.searchOn,Parameters.sortBy,f,SelectedBuyer.ID);
+                },
+                WeirGroup: function (OrderCloud, SelectedBuyer) {
+                    return OrderCloud.Catalogs.Get(SelectedBuyer.xp.WeirGroup.label)
                 }
             }
         })
@@ -322,9 +325,10 @@ function CustomerCtrl($state, $ocMedia, OrderCloud, OrderCloudParameters, Parame
     };
 }
 
-function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, OrderCloud, SelectedBuyer, AddressList, CustomerService, Parameters, Underscore, OrderCloudParameters, WeirService) {
+function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, OrderCloud, SelectedBuyer, WeirGroup, AddressList, CustomerService, Parameters, Underscore, OrderCloudParameters, WeirService) {
     var vm = this;
     //$scope.$state = $state;
+    vm.Group = WeirGroup;
     vm.buyer = SelectedBuyer;
     vm.list = AddressList;
     vm.parameters = Parameters;
@@ -422,6 +426,30 @@ function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, O
         } else {
             return false;
         }
+    }
+    var labels = {
+        WVCUK: {
+            CarriageHeader: "Carriage",
+            StandardCarriageLabel: 'UK Standard carriage (default)',
+            CustomerSpecificLabel: 'Customer specific carriage',
+            Currency: "GBP"
+        },
+        WPIFR: {
+            CarriageHeader: "Carriage",
+            StandardCarriageLabel: 'FR Standard carriage (default)',
+            CustomerSpecificLabel: 'Customer specific carriage',
+            Currency: "EU"
+        }
+    }
+    vm.labels = labels[vm.Group.ID];
+    if (!vm.buyer.xp.UseCustomCarriageRate) vm.buyer.xp.UseCustomCarriageRate = false;
+    vm.standardRate = vm.Group.xp.StandardCarriage.toFixed(2);
+    vm.rateEditable = false;
+    vm.customRateStr = (!vm.buyer.xp.UseCustomCarriageRate || !(vm.buyer.xp.CustomCarriageRate)) ? vm.standardRate :
+        vm.buyer.xp.CustomCarriageRate.toFixed(2);
+    vm.editCarriage = function () {
+        vm.rateEditable = true;
+        if (!vm.buyer.xp.CustomCarriageRate) vm.buyer.xp.CustomCarriageRate = vm.Group.xp.StandardCarriage;
     }
 }
 

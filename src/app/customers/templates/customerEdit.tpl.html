@@ -32,15 +32,55 @@
             </div>
             <div class="row">
                 <div class="form-group col-md-6">
-                    <label for="buyer_termsConditions" >Terms</label>
-                    <textarea rows="6" cols="40" id="buyer_termsConditions" type="text" ng-model="customerEdit.buyer.xp.termsConditions" class="form-control"/>
+                    <label for="buyer_termsConditions">Terms</label>
+                    <textarea rows="6" cols="40" id="buyer_termsConditions" type="text" ng-model="customerEdit.buyer.xp.termsConditions" class="form-control" />
                 </div>
                 <div class="form-group col-md-6">
                     <label for="buyer_shippingDetails">Shipping Details</label>
-                    <textarea rows="6" cols="40" id="buyer_shippingDetails" type="text" ng-model="customerEdit.buyer.xp.ShippingDetails" class="form-control"/>
+                    <textarea rows="6" cols="40" id="buyer_shippingDetails" type="text" ng-model="customerEdit.buyer.xp.ShippingDetails" class="form-control" />
                 </div>
             </div>
-            <div class="form-group">
+            <div class="row form-group">
+                <div class="col-md-6">
+                        <label for="stdCarriage" ng-bind-html="customerEdit.labels.CarriageHeader"></label>
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-md-6">
+                    <input type="radio" ng-model="customerEdit.buyer.xp.UseCustomCarriageRate" ng-value="false"  ng-disabled="!customerEdit.rateEditable" />
+                    <label for="stdCarriage" ng-bind-html="customerEdit.labels.StandardCarriageLabel"></label>
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-md-6">
+                    <span ng-if='customerEdit.labels.Currency=="GBP"' style='margin-right: 0.5em; margin-top: 0.3em; float: left;'>&#163;</span>
+                    <span ng-if='customerEdit.labels.Currency=="EU"' style='margin-right: 0.5em; margin-top: 0.3em; float: left;'>&#128;</span>
+                    <input ng-model='customerEdit.standardRate' ng-disabled="true" />
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-md-6">
+                    <input type="radio" ng-model="customerEdit.buyer.xp.UseCustomCarriageRate" ng-value="true" ng-disabled="!customerEdit.rateEditable" />
+                    <label for="stdCarriage" ng-bind-html="customerEdit.labels.CustomerSpecificLabel"></label>
+                </div>
+            </div>
+            <div class="row form-group">
+                <div class="col-md-6">
+                    <span ng-if='customerEdit.labels.Currency=="GBP"' style='margin-right: 0.5em; margin-top: 0.3em; float: left;'>&#163;</span>
+                    <span ng-if='customerEdit.labels.Currency=="EU"' style='margin-right: 0.5em; margin-top: 0.3em; float: left;'>&#128;</span>
+                    <input ng-if="!customerEdit.rateEditable || !customerEdit.buyer.xp.UseCustomCarriageRate" ng-model='customerEdit.customRateStr' ng-disabled="true" />
+                    <input ng-if="customerEdit.rateEditable && customerEdit.buyer.xp.UseCustomCarriageRate" type='number' class='form-control'
+                           style="width: 10em;" ng-model='customerEdit.buyer.xp.CustomCarriageRate' ng-min='0.00'
+                           ng-required='customerEdit.buyer.xp.UseCustomCarriageRate'
+                           step='0.01' ng-pattern='/^\d+(\.\d{1,2})?$/' name='charge'
+                           ng-disabled='!customerEdit.rateEditable || !customerEdit.buyer.xp.UseCustomCarriageRate'
+                           pattern-err-type="currencyError" step-err-type="currencyError" />
+                </div>
+            </div>
+            <div class="form-group" style="margin-top: 1em;">
+                <button class="btn btn-default" type="button" ng-disabled="customerEdit.rateEditable" ng-click="customerEdit.editCarriage()">
+                    Edit
+                </button>
                 <button class="btn btn-primary" type="submit" ng-disabled="CustomerEditForm.$invalid || customerEdit.checkForPrimary()">
                     Save
                 </button>
@@ -57,57 +97,63 @@
                 <b>No match</b>
             </div>
             <div ng-if="customerEdit.list.Items.length">
-                <b class="pull-right">{{(application.$ocMedia('min-width:768px') ? customerEdit.list.Meta.ItemRange[0] : '1') + ' - ' +
-                    customerEdit.list.Meta.ItemRange[1] + ' of ' + customerEdit.list.Meta.TotalCount + ' results'}}</b>
+                <b class="pull-right">
+                    {{
+(application.$ocMedia('min-width:768px') ? customerEdit.list.Meta.ItemRange[0] : '1') + ' - ' +
+                    customerEdit.list.Meta.ItemRange[1] + ' of ' + customerEdit.list.Meta.TotalCount + ' results'
+                    }}
+                </b>
                 <table class="table table-hover table-condensed oc-table-responsive">
                     <thead>
-                    <tr>
-                        <th scope="col">
-                            Primary
-                        </th>
-                        <th scope="col">
-                            <a href="#" role="button" ng-click="customerEdit.updateSort('AddressName')">
-                                Address Name
-                                <i class="fa fa-caret-down" ng-show="customerEdit.parameters.sortBy == 'AddressName'"></i>
-                                <i class="fa fa-caret-up" ng-show="customerEdit.parameters.sortBy == '!AddressName'"></i>
-                            </a>
-                        </th>
-                        <th scope="col">
-                            <a href="#" role="button" ng-click="customerEdit.updateSort('CompanyName')">
-                                Company Name
-                                <i class="fa fa-caret-down" ng-show="customerEdit.parameters.sortBy == 'CompanyName'"></i>
-                                <i class="fa fa-caret-up" ng-show="customerEdit.parameters.sortBy == '!CompanyName'"></i>
-                            </a>
-                        </th>
-                        <th scope="col">
-                            <a href="#" role="button" ng-click="customerEdit.updateSort('Street1')">
-                                Address
-                                <i class="fa fa-caret-down" ng-show="customerEdit.parameters.sortBy == 'Street1'"></i>
-                                <i class="fa fa-caret-up" ng-show="customerEdit.parameters.sortBy == '!Street1'"></i>
-                            </a>
-                        </th>
-                        <th scope="col">
-                            Phone Number
-                        </th>
-                        <th scope="col"></th>
-                    </tr>
+                        <tr>
+                            <th scope="col">
+                                Primary
+                            </th>
+                            <th scope="col">
+                                <a href="#" role="button" ng-click="customerEdit.updateSort('AddressName')">
+                                    Address Name
+                                    <i class="fa fa-caret-down" ng-show="customerEdit.parameters.sortBy == 'AddressName'"></i>
+                                    <i class="fa fa-caret-up" ng-show="customerEdit.parameters.sortBy == '!AddressName'"></i>
+                                </a>
+                            </th>
+                            <th scope="col">
+                                <a href="#" role="button" ng-click="customerEdit.updateSort('CompanyName')">
+                                    Company Name
+                                    <i class="fa fa-caret-down" ng-show="customerEdit.parameters.sortBy == 'CompanyName'"></i>
+                                    <i class="fa fa-caret-up" ng-show="customerEdit.parameters.sortBy == '!CompanyName'"></i>
+                                </a>
+                            </th>
+                            <th scope="col">
+                                <a href="#" role="button" ng-click="customerEdit.updateSort('Street1')">
+                                    Address
+                                    <i class="fa fa-caret-down" ng-show="customerEdit.parameters.sortBy == 'Street1'"></i>
+                                    <i class="fa fa-caret-up" ng-show="customerEdit.parameters.sortBy == '!Street1'"></i>
+                                </a>
+                            </th>
+                            <th scope="col">
+                                Phone Number
+                            </th>
+                            <th scope="col"></th>
+                        </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="address in customerEdit.list.Items">
-                        <td>{{address.xp.primary}}</td>
-                        <td data-title="Name">{{address.AddressName || '---'}}</td>
-                        <td scope="row">{{address.CompanyName}}</td>
-                        <td data-title="Address">{{address.Street1 + (address.Street2 ? (' ' + address.Street2) : '')}} <br
-                                ng-if="application.$ocMedia('max-width:767px')"> {{address.City + ', ' + address.State + ' ' +
-                            address.Zip}}
-                        </td>
-                        <td data-title="Phone">{{address.Phone || '---'}}</td>
-                        <td class="actions-cell">
-                            <button type="button" class="btn btn-default btn-sm" ui-sref="customers.edit.addressEdit({buyerid: customerEdit.buyer.ID,addressid: address.ID})">
-                                Edit
-                            </button>
-                        </td>
-                    </tr>
+                        <tr ng-repeat="address in customerEdit.list.Items">
+                            <td>{{address.xp.primary}}</td>
+                            <td data-title="Name">{{address.AddressName || '---'}}</td>
+                            <td scope="row">{{address.CompanyName}}</td>
+                            <td data-title="Address">
+                                {{address.Street1 + (address.Street2 ? (' ' + address.Street2) : '')}} <br ng-if="application.$ocMedia('max-width:767px')"> {{
+address.City + ', ' + address.State + ' ' +
+                            address.Zip
+                                }}
+                            </td>
+                            <td data-title="Phone">{{address.Phone || '---'}}</td>
+                            <td class="actions-cell">
+                                <button type="button" class="btn btn-default btn-sm" ui-sref="customers.edit.addressEdit({buyerid: customerEdit.buyer.ID,addressid: address.ID})">
+                                    Edit
+                                </button>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
                 <div class="text-center" ng-if="application.$ocMedia('min-width:768px') && customersEdit.list.Meta.TotalPages > 1">
@@ -119,7 +165,8 @@
                         ng-if="application.$ocMedia('max-width:767px')"
                         class="btn btn-default btn-block btn-lg"
                         ng-show="customerEdit.list.Meta.Page < customerEdit.list.Meta.TotalPages"
-                        ng-click="customerEdit.loadMore()">Load More
+                        ng-click="customerEdit.loadMore()">
+                    Load More
                 </button>
             </div>
         </form>

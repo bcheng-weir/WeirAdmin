@@ -145,6 +145,7 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
         errorMessages['confirmpassword'] = 'Your passwords do not match';
         errorMessages['noSpecialChars'] = 'Only Alphanumeric characters are allowed';
         errorMessages['customPhone'] = 'Only numbers, spaces and parenthesis are allowed';
+        errorMessages['currencyError'] = 'Please enter a valid amount in the format ###0.00';
     });
 
     vm.snapOptions = {
@@ -165,7 +166,8 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
             confirmedOrders: "Confirmed Orders",
             despatched: "Despatched",
             invoiced: "Invoiced",
-            allOrders: "All Orders"
+            allOrders: "All Orders",
+	    standardDelivery: "Carriage"
         }
     };
 
