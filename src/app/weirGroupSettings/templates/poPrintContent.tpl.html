@@ -1,0 +1,99 @@
+<article id="COMPONENT_StandardDelivery" ui-view class="container-fluid">
+	<div class="page-header">
+		<h3 ng-bind-html='pocontent.labels.Header'></h3>
+	</div>
+
+    <div ng-if="pocontent.weirGroupID == 'WVCUK'">
+        <form name='myform'>
+            <div class='row form-group form-row'>
+                <div class='col-md-12'>
+                    <h4><label for='charge' ng-bind-html='pocontent.edits.Logo.header'></label></h4>
+                    <textarea rows="6" cols="40" disabled="disabled">This area TBD - need to determine how to handle logo / image upload / etc.</textarea>
+                </div>
+            </div>
+            <div class='row form-group form-row'>
+                <div class='col-md-12'>
+                    <h4><label for='charge' ng-bind-html='pocontent.edits.Address.header'></label></h4>
+                    <textarea rows="6" cols="40" ng-model='pocontent.edits.Address.old' disabled="disabled" ng-if="!pocontent.edits.Address.editable" />
+                    <textarea rows="6" cols="40" ng-model='pocontent.edits.Address.newValue' ng-if="pocontent.edits.Address.editable" />
+                    <button class='btn btn-default' style="vertical-align: top;" ng-click='pocontent.edit("Address")' ng-bind-html='pocontent.labels.EditAction' ng-disabled='pocontent.edits.Address.editable'></button>
+                    <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='pocontent.save("Address")' ng-bind-html='pocontent.labels.SaveAction' ng-disabled='!pocontent.edits.Address.editable'></button>
+                    <button class='btn btn-default' type='reset' ng-click='pocontent.cancel("Address")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='pocontent.labels.CancelAction' ng-disabled='!pocontent.edits.Address.editable'></button>
+                </div>
+            </div>
+            <div class='row form-group form-row'>
+                <div class='col-md-12'>
+                    <h4><label for='charge' ng-bind-html='pocontent.edits.Message.header'></label></h4>
+                    <textarea rows="6" cols="40" ng-model='pocontent.edits.Message.old' disabled="disabled" ng-if="!pocontent.edits.Message.editable" />
+                    <textarea rows="6" cols="40" ng-model='pocontent.edits.Message.newValue' ng-if="pocontent.edits.Message.editable" />
+                    <button class='btn btn-default' style="vertical-align: top;" ng-click='pocontent.edit("Message")' ng-bind-html='pocontent.labels.EditAction' ng-disabled='pocontent.edits.Message.editable'></button>
+                    <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='pocontent.save("Message")' ng-bind-html='pocontent.labels.SaveAction' ng-disabled='!pocontent.edits.Message.editable'></button>
+                    <button class='btn btn-default' type='reset' ng-click='pocontent.cancel("Message")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='pocontent.labels.CancelAction' ng-disabled='!pocontent.edits.Message.editable'></button>
+                </div>
+            </div>
+            <div class='row form-group form-row'>
+                <div class='col-md-12'>
+                    <h4><label for='charge' ng-bind-html='pocontent.edits.DetailsText.header'></label></h4>
+                    <textarea rows="4" cols="40" ng-model='pocontent.edits.DetailsText.old' disabled="disabled" ng-if="!pocontent.edits.DetailsText.editable" />
+                    <textarea rows="4" cols="40" ng-model='pocontent.edits.DetailsText.newValue' ng-if="pocontent.edits.DetailsText.editable" />
+                    <button class='btn btn-default' style="vertical-align: top;" ng-click='pocontent.edit("DetailsText")' ng-bind-html='pocontent.labels.EditAction' ng-disabled='pocontent.edits.DetailsText.editable'></button>
+                    <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='pocontent.save("DetailsText")' ng-bind-html='pocontent.labels.SaveAction' ng-disabled='!pocontent.edits.DetailsText.editable'></button>
+                    <button class='btn btn-default' type='reset' ng-click='pocontent.cancel("DetailsText")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='pocontent.labels.CancelAction' ng-disabled='!pocontent.edits.DetailsText.editable'></button>
+                </div>
+            </div>
+            <div class='row form-group form-row'>
+                <div class='col-md-12'>
+                    <h4><label for='charge' ng-bind-html='pocontent.edits.VATDisclaimer.header'></label></h4>
+                    <textarea rows="2" cols="40" ng-model='pocontent.edits.VATDisclaimer.old' disabled="disabled" ng-if="!pocontent.edits.VATDisclaimer.editable" />
+                    <textarea rows="2" cols="40" ng-model='pocontent.edits.VATDisclaimer.newValue' ng-if="pocontent.edits.VATDisclaimer.editable" />
+                    <button class='btn btn-default' style="vertical-align: top;" ng-click='pocontent.edit("VATDisclaimer")' ng-bind-html='pocontent.labels.EditAction' ng-disabled='pocontent.edits.VATDisclaimer.editable'></button>
+                    <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='pocontent.save("VATDisclaimer")' ng-bind-html='pocontent.labels.SaveAction' ng-disabled='!pocontent.edits.VATDisclaimer.editable'></button>
+                    <button class='btn btn-default' type='reset' ng-click='pocontent.cancel("VATDisclaimer")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='pocontent.labels.CancelAction' ng-disabled='!pocontent.edits.VATDisclaimer.editable'></button>
+                </div>
+            </div>
+            <div class='row form-group form-row'>
+                <div class='col-md-12'>
+                    <h4><label for='charge' ng-bind-html='pocontent.edits.DocDisclaimer.header'></label></h4>
+                    <textarea rows="4" cols="40" ng-model='pocontent.edits.DocDisclaimer.old' disabled="disabled" ng-if="!pocontent.edits.DocDisclaimer.editable" />
+                    <textarea rows="4" cols="40" ng-model='pocontent.edits.DocDisclaimer.newValue' ng-if="pocontent.edits.DocDisclaimer.editable" />
+                    <button class='btn btn-default' style="vertical-align: top;" ng-click='pocontent.edit("DocDisclaimer")' ng-bind-html='pocontent.labels.EditAction' ng-disabled='pocontent.edits.DocDisclaimer.editable'></button>
+                    <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='pocontent.save("DocDisclaimer")' ng-bind-html='pocontent.labels.SaveAction' ng-disabled='!pocontent.edits.DocDisclaimer.editable'></button>
+                    <button class='btn btn-default' type='reset' ng-click='pocontent.cancel("DocDisclaimer")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='pocontent.labels.CancelAction' ng-disabled='!pocontent.edits.DocDisclaimer.editable'></button>
+                </div>
+            </div>
+            <div class='row form-group form-row'>
+                <div class='col-md-12'>
+                    <h4><label for='charge' ng-bind-html='pocontent.edits.SalesDisclaimer.header'></label></h4>
+                    <textarea rows="2" cols="40" ng-model='pocontent.edits.SalesDisclaimer.old' disabled="disabled" ng-if="!pocontent.edits.SalesDisclaimer.editable" />
+                    <textarea rows="2" cols="40" ng-model='pocontent.edits.SalesDisclaimer.newValue' ng-if="pocontent.edits.SalesDisclaimer.editable" />
+                    <button class='btn btn-default' style="vertical-align: top;" ng-click='pocontent.edit("SalesDisclaimer")' ng-bind-html='pocontent.labels.EditAction' ng-disabled='pocontent.edits.SalesDisclaimer.editable'></button>
+                    <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='pocontent.save("SalesDisclaimer")' ng-bind-html='pocontent.labels.SaveAction' ng-disabled='!pocontent.edits.SalesDisclaimer.editable'></button>
+                    <button class='btn btn-default' type='reset' ng-click='pocontent.cancel("SalesDisclaimer")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='pocontent.labels.CancelAction' ng-disabled='!pocontent.edits.SalesDisclaimer.editable'></button>
+                </div>
+            </div>
+            <div class='row form-group form-row'>
+                <div class='col-md-12'>
+                    <h4><label for='charge' ng-bind-html='pocontent.edits.VatExtraNotice.header'></label></h4>
+                    <textarea rows="2" cols="40" ng-model='pocontent.edits.VatExtraNotice.old' disabled="disabled" ng-if="!pocontent.edits.VatExtraNotice.editable" />
+                    <textarea rows="2" cols="40" ng-model='pocontent.edits.VatExtraNotice.newValue' ng-if="pocontent.edits.VatExtraNotice.editable" />
+                    <button class='btn btn-default' style="vertical-align: top;" ng-click='pocontent.edit("VatExtraNotice")' ng-bind-html='pocontent.labels.EditAction' ng-disabled='pocontent.edits.VatExtraNotice.editable'></button>
+                    <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='pocontent.save("VatExtraNotice")' ng-bind-html='pocontent.labels.SaveAction' ng-disabled='!pocontent.edits.VatExtraNotice.editable'></button>
+                    <button class='btn btn-default' type='reset' ng-click='pocontent.cancel("VatExtraNotice")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='pocontent.labels.CancelAction' ng-disabled='!pocontent.edits.VatExtraNotice.editable'></button>
+                </div>
+            </div>
+            <div class='row form-group form-row'>
+                <div class='col-md-12'>
+                    <h4><label for='charge' ng-bind-html='pocontent.edits.RegisteredAddress.header'></label></h4>
+                    <textarea rows="4" cols="40" ng-model='pocontent.edits.RegisteredAddress.old' disabled="disabled" ng-if="!pocontent.edits.RegisteredAddress.editable" />
+                    <textarea rows="4" cols="40" ng-model='pocontent.edits.RegisteredAddress.newValue' ng-if="pocontent.edits.RegisteredAddress.editable" />
+                    <button class='btn btn-default' style="vertical-align: top;" ng-click='pocontent.edit("RegisteredAddress")' ng-bind-html='pocontent.labels.EditAction' ng-disabled='pocontent.edits.RegisteredAddress.editable'></button>
+                    <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='pocontent.save("RegisteredAddress")' ng-bind-html='pocontent.labels.SaveAction' ng-disabled='!pocontent.edits.RegisteredAddress.editable'></button>
+                    <button class='btn btn-default' type='reset' ng-click='pocontent.cancel("RegisteredAddress")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='pocontent.labels.CancelAction' ng-disabled='!pocontent.edits.RegisteredAddress.editable'></button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div ng-if="pocontent.weirGroupID == 'WPIFR'">
+        WPIFR Static Content Here
+    </div>
+</article>
