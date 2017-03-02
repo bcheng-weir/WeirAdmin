@@ -1,4 +1,4 @@
-<div ui-view>
+<article id="COMPONENT_Customers" ui-view class="container-fluid">
     <h3 class="page-header">
         <b>Edit Customer:</b> <span ng-model="customerEdit.buyerName"></span>
     </h3>
@@ -42,13 +42,14 @@
             </div>
             <div class="row form-group">
                 <div class="col-md-6">
-                        <label for="stdCarriage" ng-bind-html="customerEdit.labels.CarriageHeader"></label>
+                    <label for="stdCarriage" ng-bind-html="customerEdit.labels.CarriageHeader"></label>
                 </div>
             </div>
             <div class="row form-group">
                 <div class="col-md-6">
-                    <input type="radio" ng-model="customerEdit.buyer.xp.UseCustomCarriageRate" ng-value="false"  ng-disabled="!customerEdit.rateEditable" />
-                    <label for="stdCarriage" ng-bind-html="customerEdit.labels.StandardCarriageLabel"></label>
+                    <input type="radio" ng-model="customerEdit.buyer.xp.UseCustomCarriageRate" ng-value="false" ng-disabled="!customerEdit.rateEditable"
+                           ng-class="{ 'rbActive' : !customerEdit.buyer.xp.UseCustomCarriageRate }" style="vertical-align:middle;" />
+                    <label for="stdCarriage" ng-bind-html="customerEdit.labels.StandardCarriageLabel" style="vertical-align: text-top;"></label>
                 </div>
             </div>
             <div class="row form-group">
@@ -60,8 +61,9 @@
             </div>
             <div class="row form-group">
                 <div class="col-md-6">
-                    <input type="radio" ng-model="customerEdit.buyer.xp.UseCustomCarriageRate" ng-value="true" ng-disabled="!customerEdit.rateEditable" />
-                    <label for="stdCarriage" ng-bind-html="customerEdit.labels.CustomerSpecificLabel"></label>
+                    <input type="radio" ng-model="customerEdit.buyer.xp.UseCustomCarriageRate" ng-value="true" ng-disabled="!customerEdit.rateEditable" 
+                           ng-class="{ 'rbActive' : customerEdit.buyer.xp.UseCustomCarriageRate }" style="vertical-align:middle;"/>
+                    <label for="stdCarriage" ng-bind-html="customerEdit.labels.CustomerSpecificLabel" style="vertical-align: text-top;"></label>
                 </div>
             </div>
             <div class="row form-group">
@@ -171,4 +173,4 @@ address.City + ', ' + address.State + ' ' +
             </div>
         </form>
     </div>
-</div ui-view>
+ </article>
