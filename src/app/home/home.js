@@ -66,6 +66,8 @@ function HomeController($sce, WeirService, IsAdmin, IsInternalSales) {
 			All: "All",
 			Admin: "Admin",
 			ManageAdmins: "Manage admins",
+			StandardDelivery: "Carriage",
+		    POPrintContent: "Fixed PO Print Content",
 			Customers: "Customers",
 			CustomerManage: "Manage customers and customer addresses"
 		},
@@ -84,6 +86,8 @@ function HomeController($sce, WeirService, IsAdmin, IsInternalSales) {
 			All: $sce.trustAsHtml("All"),
 			Admin: $sce.trustAsHtml("Admin"),
 			ManageAdmins: $sce.trustAsHtml("Manage admins"),
+			StandardDelivery: "Carriage",
+			POPrintContent: "Fixed PO Print Content",
 			Customers: $sce.trustAsHtml("Customers"),
 			CustomerManage: $sce.trustAsHtml("Manage customers and customer addresses")
 		}

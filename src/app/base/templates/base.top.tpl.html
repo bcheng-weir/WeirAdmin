@@ -23,13 +23,13 @@
                     </ul>
                 </li>
                 <li uib-dropdown ng-if="!base.currentUser.Anonymous && base.CanEditCustomers">
-                    <a href="#" uib-dropdown-toggle role="button">{{base.labels.customers}} <span class="caret"></a>
+                    <a href="#" uib-dropdown-toggle role="button">{{base.labels.customers}} <span class="caret"></span></a>
                     <ul uib-dropdown-menu>
                         <li><a href="" ui-sref="customers">{{base.labels.customers}}</a></li>
                     </ul>
                 </li>
                 <li uib-dropdown ng-if="!base.currentUser.Anonymous">
-                    <a href="#" uib-dropdown-toggle role="button">{{base.labels.orders}} <span class="caret"></a>
+                    <a href="#" uib-dropdown-toggle role="button">{{base.labels.orders}} <span class="caret"></span></a>
                     <ul uib-dropdown-menu>
                         <li><a href="" ng-click="base.OrderAction('ReviewQuotes')">{{base.labels.quotesForReview}}</a></li>
                         <li><a href="" ng-click="base.OrderAction('RevisedQuotes')">{{base.labels.revisedQuotes}}</a></li>
