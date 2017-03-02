@@ -99,7 +99,7 @@ function StandardDeliveryController($state, OrderCloud, toastr, Me, WeirGroup) {
     };
 }
 
-function POPrintContentController($state, OrderCloud, toastr, Me, WeirGroup) {
+function POPrintContentController($state, OrderCloud, toastr, Me, WeirGroup, $sce) {
     var vm = this;
     vm.weirGroupID = WeirGroup.ID;
     var labels = {
@@ -120,12 +120,6 @@ function POPrintContentController($state, OrderCloud, toastr, Me, WeirGroup) {
     vm.originalValues = WeirGroup.xp.POContent || {};
     if (vm.weirGroupID == 'WVCUK') {
         vm.edits = {
-            Logo: {
-                header: "Logo",
-                old: vm.originalValues.Logo || "",
-                newValue: "",
-                editable: false
-            },
             Address: {
                 header: "Address",
                 old: vm.originalValues.Address || "",
@@ -177,7 +171,96 @@ function POPrintContentController($state, OrderCloud, toastr, Me, WeirGroup) {
         };
     } else {
         vm.edits = {
-
+            Address: {
+                header: "Address",
+                old: vm.originalValues.Address || "",
+                newValue: "",
+                editable: false
+            },
+            Salutation: {
+                header: "Salutation",
+                old: vm.originalValues.Salutation || "",
+                newValue: "",
+                editable: false
+            },
+            SalutationMessage: {
+                header: "Salutation Message",
+                old: vm.originalValues.SalutationMessage || "",
+                newValue: "",
+                editable: false
+            },
+            Line1Header: {
+                header: "Line 1 Header",
+                old: $sce.trustAsHtml(vm.originalValues.Line1Header || ""),
+                newValue: "",
+                editable: false
+            },
+            Line1Content: {
+                header: "Line 1 Content",
+                old: $sce.trustAsHtml(vm.originalValues.Line1Content|| ""),
+                newValue: "",
+                editable: false
+            },
+            Line2Header: {
+                header: "Line 2 Header",
+                old: $sce.trustAsHtml(vm.originalValues.Line2Header || ""),
+                newValue: "",
+                editable: false
+            },
+            Line2Content: {
+                header: "Line 2 Content",
+                old: $sce.trustAsHtml(vm.originalValues.Line2Content || ""),
+                newValue: "",
+                editable: false
+            },
+            Line3Header: {
+                header: "Line 3 Header",
+                old: $sce.trustAsHtml(vm.originalValues.Line3Header || ""),
+                newValue: "",
+                editable: false
+            },
+            Line3Content: {
+                header: "Line 3 Content",
+                old: $sce.trustAsHtml(vm.originalValues.Line3Content || ""),
+                newValue: "",
+                editable: false
+            },
+            Line4Header: {
+                header: "Line 4 Header",
+                old: $sce.trustAsHtml(vm.originalValues.Line4Header || ""),
+                newValue: "",
+                editable: false
+            },
+            Line4Content: {
+                header: "Line 4 Content",
+                old: $sce.trustAsHtml(vm.originalValues.Line4Content || ""),
+                newValue: "",
+                editable: false
+            },
+            Line5Header: {
+                header: "Line 5 Header",
+                old: $sce.trustAsHtml(vm.originalValues.Line5Header || ""),
+                newValue: "",
+                editable: false
+            },
+            Line5Content: {
+                header: "Line 5 Content",
+                old: $sce.trustAsHtml(vm.originalValues.Line5Content || ""),
+                newValue: "",
+                editable: false
+            },
+            ClosingLine: {
+                header: "Closing Line",
+                old: $sce.trustAsHtml(vm.originalValues.ClosingLine || ""),
+                newValue: "",
+                editable: false
+            },
+            RegisteredAddress: {
+                header: "Registered Address",
+                old: $sce.trustAsHtml(vm.originalValues.RegisteredAddress || ""),
+                newValue: "",
+                editable: false
+            }
         };
     }
     vm.edit = function (name) {
