@@ -104,13 +104,13 @@ function POPrintContentController($state, OrderCloud, toastr, Me, WeirGroup, $sc
     vm.weirGroupID = WeirGroup.ID;
     var labels = {
         WVCUK: {
-            Header: "Fixed PO Print Content",
+            Header: "Fixed Print Content",
             EditAction: "Edit",
             SaveAction: "Save",
             CancelAction: "Cancel"
         },
         WPIFR: {
-            Header: "Fixed PO Print Content",
+            Header: "Fixed Print Content",
             EditAction: "Edit",
             SaveAction: "Save",
             CancelAction: "Cancel"
