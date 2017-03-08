@@ -132,12 +132,6 @@ function POPrintContentController($state, OrderCloud, toastr, Me, WeirGroup, $sc
                 newValue: "",
                 editable: false
             },
-            DetailsText: {
-                header: "Details Header Text",
-                old: vm.originalValues.DetailsText || "",
-                newValue: "",
-                editable: false
-            },
             VATDisclaimer: {
                 header: "VAT Price Disclaimer",
                 old: vm.originalValues.VATDisclaimer || "",
