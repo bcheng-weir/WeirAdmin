@@ -3,7 +3,7 @@
         <b>Edit Customer:</b> <span ng-model="customerEdit.buyerName"></span>
     </h3>
     <div>
-        <form ng-submit="customerEdit.Submit()" name="CustomerEditForm" novalidate>
+        <form name="CustomerEditForm" novalidate>
             <div class="row">
                 <div class="form-group col-md-3">
                     <label for="buyer_name">Name</label>
@@ -85,7 +85,7 @@
                         <button class="btn btn-default" type="button" ng-disabled="customerEdit.rateEditable" ng-click="customerEdit.editCarriage()">
                             Edit
                         </button>
-                        <button class="btn btn-primary" type="submit" ng-disabled="CustomerEditForm.$invalid || customerEdit.checkForPrimary()">
+                        <button class="btn btn-primary" type="button" ng-click="customerEdit.Submit()" ng-disabled="CustomerEditForm.$invalid || customerEdit.checkForPrimary()">
                             Save
                         </button>
                         <button class="btn btn-default" ui-sref="^" type="button">Cancel</button>
