@@ -41,52 +41,113 @@
                 </div>
             </div>
             <div class="row form-group">
-                <div class="col-md-6">
-                    <label for="stdCarriage" ng-bind-html="customerEdit.labels.CarriageHeader"></label>
+                <div class="col-md-4"><!-- Carriage Price -->
+                    <div class="row form-group">
+                        <div class="col-md-12">
+                            <label for="stdCarriage" ng-bind-html="customerEdit.labels.CarriageHeader"></label>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-12">
+                            <input type="radio" ng-model="customerEdit.buyer.xp.UseCustomCarriageRate" ng-value="false" ng-disabled="!customerEdit.rateEditable"
+                                   ng-class="{ 'rbActive' : !customerEdit.buyer.xp.UseCustomCarriageRate }" style="vertical-align:middle;" />
+                            <label for="stdCarriage" ng-bind-html="customerEdit.labels.StandardCarriageLabel" style="vertical-align: text-top;"></label>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-12">
+                            <span ng-if='customerEdit.labels.Currency=="GBP"' style='margin-right: 0.5em; margin-top: 0.3em; float: left;'>&#163;</span>
+                            <span ng-if='customerEdit.labels.Currency=="EU"' style='margin-right: 0.5em; margin-top: 0.3em; float: left;'>&#128;</span>
+                            <input ng-model='customerEdit.standardRate' ng-disabled="true" />
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-12">
+                            <input type="radio" ng-model="customerEdit.buyer.xp.UseCustomCarriageRate" ng-value="true" ng-disabled="!customerEdit.rateEditable"
+                                   ng-class="{ 'rbActive' : customerEdit.buyer.xp.UseCustomCarriageRate }" style="vertical-align:middle;"/>
+                            <label for="stdCarriage" ng-bind-html="customerEdit.labels.CustomerSpecificLabel" style="vertical-align: text-top;"></label>
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <div class="col-md-12">
+                            <span ng-if='customerEdit.labels.Currency=="GBP"' style='margin-right: 0.5em; margin-top: 0.3em; float: left;'>&#163;</span>
+                            <span ng-if='customerEdit.labels.Currency=="EU"' style='margin-right: 0.5em; margin-top: 0.3em; float: left;'>&#128;</span>
+                            <input ng-if="!customerEdit.rateEditable || !customerEdit.buyer.xp.UseCustomCarriageRate" ng-model='customerEdit.customRateStr' ng-disabled="true" />
+                            <input ng-if="customerEdit.rateEditable && customerEdit.buyer.xp.UseCustomCarriageRate" type='number' class='form-control'
+                                   style="width: 10em;" ng-model='customerEdit.buyer.xp.CustomCarriageRate' ng-min='0.00'
+                                   ng-required='customerEdit.buyer.xp.UseCustomCarriageRate'
+                                   step='0.01' ng-pattern='/^\d+(\.\d{1,2})?$/' name='charge'
+                                   ng-disabled='!customerEdit.rateEditable || !customerEdit.buyer.xp.UseCustomCarriageRate'
+                                   pattern-err-type="currencyError" step-err-type="currencyError" />
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 1em;">
+                        <button class="btn btn-default" type="button" ng-disabled="customerEdit.rateEditable" ng-click="customerEdit.editCarriage()">
+                            Edit
+                        </button>
+                        <button class="btn btn-primary" type="submit" ng-disabled="CustomerEditForm.$invalid || customerEdit.checkForPrimary()">
+                            Save
+                        </button>
+                        <button class="btn btn-default" ui-sref="^" type="button">Cancel</button>
+                    </div>
+                </div>
+                <div class="col-md-4"><!-- Carriage Price -->
+                    <div class="row form-group">
+                        <label for='charge' ng-bind-html='customerEdit.edits.CarriagePrice.header'></label><br>
+                        <textarea rows="6" cols="40" ng-model='customerEdit.edits.CarriagePrice.old' disabled="disabled" ng-if="!customerEdit.edits.CarriagePrice.editable" />
+                        <textarea rows="6" cols="40" ng-model='customerEdit.edits.CarriagePrice.newValue' ng-if="customerEdit.edits.CarriagePrice.editable" />
+                        <br>
+                        <button class='btn btn-default' style="vertical-align: top;" ng-click='customerEdit.poedit("CarriagePrice")' ng-bind-html='customers.labels.Edit' ng-disabled='customerEdit.edits.CarriagePrice.editable'></button>
+                        <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='customerEdit.posave("CarriagePrice")' ng-bind-html='customers.labels.Save' ng-disabled='!customerEdit.edits.CarriagePrice.editable'></button>
+                        <button class='btn btn-default' type='reset' ng-click='customerEdit.pocancel("CarriagePrice")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='customers.labels.Cancel' ng-disabled='!customerEdit.edits.CarriagePrice.editable'></button>
+                    </div>
+                </div>
+                <div class="col-md-4"><!-- Price Quote -->
+                    <div class="row form-group">
+                        <label for='charge' ng-bind-html='customerEdit.edits.PriceQuote.header'></label><br>
+                        <textarea rows="6" cols="40" ng-model='customerEdit.edits.PriceQuote.old' disabled="disabled" ng-if="!customerEdit.edits.PriceQuote.editable" />
+                        <textarea rows="6" cols="40" ng-model='customerEdit.edits.PriceQuote.newValue' ng-if="customerEdit.edits.PriceQuote.editable" />
+                        <br>
+                        <button class='btn btn-default' style="vertical-align: top;" ng-click='customerEdit.poedit("PriceQuote")' ng-bind-html='customers.labels.Edit' ng-disabled='customerEdit.edits.PriceQuote.editable'></button>
+                        <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='customerEdit.posave("PriceQuote")' ng-bind-html='customers.labels.Save' ng-disabled='!customerEdit.edits.PriceQuote.editable'></button>
+                        <button class='btn btn-default' type='reset' ng-click='customerEdit.pocancel("PriceQuote")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='customers.labels.Cancel' ng-disabled='!customerEdit.edits.PriceQuote.editable'></button>
+                    </div>
                 </div>
             </div>
             <div class="row form-group">
-                <div class="col-md-6">
-                    <input type="radio" ng-model="customerEdit.buyer.xp.UseCustomCarriageRate" ng-value="false" ng-disabled="!customerEdit.rateEditable"
-                           ng-class="{ 'rbActive' : !customerEdit.buyer.xp.UseCustomCarriageRate }" style="vertical-align:middle;" />
-                    <label for="stdCarriage" ng-bind-html="customerEdit.labels.StandardCarriageLabel" style="vertical-align: text-top;"></label>
+                <div class="col-md-4"><!-- Payment Terms -->
+                    <div class="row form-group">
+                        <label for='charge' ng-bind-html='customerEdit.edits.PaymentTerms.header'></label><br>
+                        <textarea rows="6" cols="40" ng-model='customerEdit.edits.PaymentTerms.old' disabled="disabled" ng-if="!customerEdit.edits.PaymentTerms.editable" />
+                        <textarea rows="6" cols="40" ng-model='customerEdit.edits.PaymentTerms.newValue' ng-if="customerEdit.edits.PaymentTerms.editable" />
+                        <br>
+                        <button class='btn btn-default' style="vertical-align: top;" ng-click='customerEdit.poedit("PaymentTerms")' ng-bind-html='customers.labels.Edit' ng-disabled='customerEdit.edits.PaymentTerms.editable'></button>
+                        <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='customerEdit.posave("PaymentTerms")' ng-bind-html='customers.labels.Save' ng-disabled='!customerEdit.edits.PaymentTerms.editable'></button>
+                        <button class='btn btn-default' type='reset' ng-click='customerEdit.pocancel("PaymentTerms")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='customers.labels.Cancel' ng-disabled='!customerEdit.edits.PaymentTerms.editable'></button>
+                    </div>
                 </div>
-            </div>
-            <div class="row form-group">
-                <div class="col-md-6">
-                    <span ng-if='customerEdit.labels.Currency=="GBP"' style='margin-right: 0.5em; margin-top: 0.3em; float: left;'>&#163;</span>
-                    <span ng-if='customerEdit.labels.Currency=="EU"' style='margin-right: 0.5em; margin-top: 0.3em; float: left;'>&#128;</span>
-                    <input ng-model='customerEdit.standardRate' ng-disabled="true" />
+                <div class="col-md-4"><!-- Delivery Terms -->
+                    <div class="row form-group">
+                        <label for='charge' ng-bind-html='customerEdit.edits.DeliveryTerms.header'></label><br>
+                        <textarea rows="6" cols="40" ng-model='customerEdit.edits.DeliveryTerms.old' disabled="disabled" ng-if="!customerEdit.edits.DeliveryTerms.editable" />
+                        <textarea rows="6" cols="40" ng-model='customerEdit.edits.DeliveryTerms.newValue' ng-if="customerEdit.edits.DeliveryTerms.editable" />
+                        <br>
+                        <button class='btn btn-default' style="vertical-align: top;" ng-click='customerEdit.poedit("DeliveryTerms")' ng-bind-html='customers.labels.Edit' ng-disabled='customerEdit.edits.DeliveryTerms.editable'></button>
+                        <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='customerEdit.posave("DeliveryTerms")' ng-bind-html='customers.labels.Save' ng-disabled='!customerEdit.edits.DeliveryTerms.editable'></button>
+                        <button class='btn btn-default' type='reset' ng-click='customerEdit.pocancel("DeliveryTerms")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='customers.labels.Cancel' ng-disabled='!customerEdit.edits.DeliveryTerms.editable'></button>
+                    </div>
                 </div>
-            </div>
-            <div class="row form-group">
-                <div class="col-md-6">
-                    <input type="radio" ng-model="customerEdit.buyer.xp.UseCustomCarriageRate" ng-value="true" ng-disabled="!customerEdit.rateEditable" 
-                           ng-class="{ 'rbActive' : customerEdit.buyer.xp.UseCustomCarriageRate }" style="vertical-align:middle;"/>
-                    <label for="stdCarriage" ng-bind-html="customerEdit.labels.CustomerSpecificLabel" style="vertical-align: text-top;"></label>
+                <div class="col-md-4"><!-- Packing -->
+                    <div class="row form-group">
+                        <label for='charge' ng-bind-html='customerEdit.edits.Packing.header'></label><br>
+                        <textarea rows="6" cols="40" ng-model='customerEdit.edits.Packing.old' disabled="disabled" ng-if="!customerEdit.edits.Packing.editable" />
+                        <textarea rows="6" cols="40" ng-model='customerEdit.edits.Packing.newValue' ng-if="customerEdit.edits.Packing.editable" />
+                        <br>
+                        <button class='btn btn-default' style="vertical-align: top;" ng-click='customerEdit.poedit("Packing")' ng-bind-html='customers.labels.Edit' ng-disabled='customerEdit.edits.Packing.editable'></button>
+                        <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='customerEdit.posave("Packing")' ng-bind-html='customers.labels.Save' ng-disabled='!customerEdit.edits.Packing.editable'></button>
+                        <button class='btn btn-default' type='reset' ng-click='customerEdit.pocancel("Packing")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='customers.labels.Cancel' ng-disabled='!customerEdit.edits.Packing.editable'></button>
+                    </div>
                 </div>
-            </div>
-            <div class="row form-group">
-                <div class="col-md-6">
-                    <span ng-if='customerEdit.labels.Currency=="GBP"' style='margin-right: 0.5em; margin-top: 0.3em; float: left;'>&#163;</span>
-                    <span ng-if='customerEdit.labels.Currency=="EU"' style='margin-right: 0.5em; margin-top: 0.3em; float: left;'>&#128;</span>
-                    <input ng-if="!customerEdit.rateEditable || !customerEdit.buyer.xp.UseCustomCarriageRate" ng-model='customerEdit.customRateStr' ng-disabled="true" />
-                    <input ng-if="customerEdit.rateEditable && customerEdit.buyer.xp.UseCustomCarriageRate" type='number' class='form-control'
-                           style="width: 10em;" ng-model='customerEdit.buyer.xp.CustomCarriageRate' ng-min='0.00'
-                           ng-required='customerEdit.buyer.xp.UseCustomCarriageRate'
-                           step='0.01' ng-pattern='/^\d+(\.\d{1,2})?$/' name='charge'
-                           ng-disabled='!customerEdit.rateEditable || !customerEdit.buyer.xp.UseCustomCarriageRate'
-                           pattern-err-type="currencyError" step-err-type="currencyError" />
-                </div>
-            </div>
-            <div class="form-group" style="margin-top: 1em;">
-                <button class="btn btn-default" type="button" ng-disabled="customerEdit.rateEditable" ng-click="customerEdit.editCarriage()">
-                    Edit
-                </button>
-                <button class="btn btn-primary" type="submit" ng-disabled="CustomerEditForm.$invalid || customerEdit.checkForPrimary()">
-                    Save
-                </button>
-                <button class="btn btn-default" ui-sref="^" type="button">Cancel</button>
             </div>
             <!--====== LIST ======-->
             <div class="page-header">

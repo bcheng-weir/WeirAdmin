@@ -138,7 +138,8 @@ function CustomerService($sce, OrderCloud, $exceptionHandler) {
             LoadMore: "Load More",
             Customers: "Customers",
             Users: "Users",
-            Search: "Search"
+            Search: "Search",
+            CarriagePrice: "Carriage Price"
         },
         fr: {
             NewCustomer: $sce.trustAsHtml("New Customer"),
@@ -182,7 +183,8 @@ function CustomerService($sce, OrderCloud, $exceptionHandler) {
             LoadMore: $sce.trustAsHtml("Load More"),
             Customers: $sce.trustAsHtml("Customers"),
             Users: $sce.trustAsHtml("Users"),
-            Search: $sce.trustAsHtml("Search")
+            Search: $sce.trustAsHtml("Search"),
+	        CarriagePrice: $sce.trustAsHtml("Carriage Price")
         }
     };
 
@@ -329,6 +331,7 @@ function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, O
     var vm = this;
     //$scope.$state = $state;
     vm.Group = WeirGroup;
+	vm.weirGroupID = WeirGroup.ID;
     vm.buyer = SelectedBuyer;
     vm.list = AddressList;
     vm.parameters = Parameters;
@@ -408,7 +411,7 @@ function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, O
     vm.Submit = function() {
         OrderCloud.Buyers.Patch(vm.buyer, vm.buyer.ID)
             .then(function() {
-                $state.go('customers', {}, {reload: true});
+                //$state.go('customers', {}, {reload: true});
                 toastr.success('Buyer Updated', 'Success');
             })
             .catch(function(ex) {
@@ -426,7 +429,7 @@ function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, O
         } else {
             return false;
         }
-    }
+    };
     var labels = {
         WVCUK: {
             CarriageHeader: "Carriage",
@@ -440,8 +443,117 @@ function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, O
             CustomerSpecificLabel: 'Customer specific carriage',
             Currency: "EU"
         }
-    }
+    };
     vm.labels = labels[vm.Group.ID];
+
+	vm.originalValues = vm.buyer.xp.POContent || {};
+	if (vm.weirGroupID == 'WVCUK') {
+		vm.edits = {
+			CarriagePrice: {
+				header: "Carriage Price",
+				old: vm.originalValues.CarriagePrice || "",
+				newValue: "",
+				editable: false
+			},
+            PriceQuote: {
+	            header: "Price Quote",
+	            old: vm.originalValues.PriceQuote || "",
+	            newValue: "",
+	            editable: false
+            },
+			PaymentTerms: {
+	            header: "Payment Terms",
+	            old: vm.originalValues.PaymentTerms || "",
+	            newValue: "",
+	            editable: false
+            },
+            DeliveryTerms: {
+	            header: "Delivery Terms",
+	            old: vm.originalValues.DeliveryTerms || "",
+	            newValue: "",
+	            editable: false
+            },
+            Packing: {
+	            header: "Packing",
+	            old: vm.originalValues.Packing || "",
+	            newValue: "",
+	            editable: false
+            }
+		};
+	} else {
+		vm.edits = {
+			CarriagePrice: {
+				header: "Carriage Price",
+				old: vm.originalValues.CarriagePrice || "",
+				newValue: "",
+				editable: false
+			},
+			PriceQuote: {
+				header: "Price Quote",
+				old: vm.originalValues.PriceQuote || "",
+				newValue: "",
+				editable: false
+			},
+			PaymentTerms: {
+				header: "Payment Terms",
+				old: vm.originalValues.PaymentTerms || "",
+				newValue: "",
+				editable: false
+			},
+			DeliveryTerms: {
+				header: "Delivery Terms",
+				old: vm.originalValues.DeliveryTerms || "",
+				newValue: "",
+				editable: false
+			},
+			Packing: {
+				header: "Packing",
+				old: vm.originalValues.Packing || "",
+				newValue: "",
+				editable: false
+			}
+		};
+	}
+	vm.poedit = function (name) {
+		if (vm.edits[name]) {
+			var tmp = vm.edits[name];
+			tmp.editable = true;
+			tmp.newValue = tmp.old;
+		}
+	};
+	vm.pocancel = function (name) {
+		if (vm.edits[name]) {
+			var tmp = vm.edits[name];
+			tmp.editable = false;
+			tmp.newValue = tmp.old;
+		}
+	};
+	vm.posave = function (name) {
+		if (vm.edits[name]) {
+			var tmp = vm.edits[name];
+			if (tmp.newValue != tmp.old) {
+				var upd = {
+					xp: {
+						POContent: {}
+					}
+				};
+				upd.xp.POContent[name] = tmp.newValue;
+				console.log("Update = " + JSON.stringify(upd));
+				OrderCloud.Buyers.Patch(upd, vm.buyer.ID)
+					.then(function () {
+						tmp.old = tmp.newValue;
+						toastr.success(tmp.header + ' Updated', 'Success');
+						tmp.editable = false;
+					})
+					.catch(function (err) {
+						$exceptionHandler(err);
+					});
+			} else {
+				tmp.editable = false;
+			}
+		}
+	};
+
     if (!vm.buyer.xp.UseCustomCarriageRate) vm.buyer.xp.UseCustomCarriageRate = false;
     vm.standardRate = vm.Group.xp.StandardCarriage.toFixed(2);
     vm.rateEditable = false;

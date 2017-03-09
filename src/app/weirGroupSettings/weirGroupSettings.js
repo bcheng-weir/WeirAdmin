@@ -263,14 +263,14 @@ function POPrintContentController($state, OrderCloud, toastr, Me, WeirGroup, $sc
             tmp.editable = true;
             tmp.newValue = tmp.old;
         }
-    }
+    };
     vm.cancel = function (name) {
         if (vm.edits[name]) {
             var tmp = vm.edits[name];
             tmp.editable = false;
             tmp.newValue = tmp.old;
         }
-    }
+    };
     vm.save = function (name) {
         if (vm.edits[name]) {
             var tmp = vm.edits[name];
