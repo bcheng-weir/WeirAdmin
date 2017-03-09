@@ -18,7 +18,7 @@ function WeirGroupSettingsConfig($stateProvider) {
                     return OrderCloud.Me.Get();
                 },
                 WeirGroup: function(OrderCloud, Me) {
-	            var groupId = Me.xp.WeirGroup.label;
+	                var groupId = Me.xp.WeirGroup.label;
                     return OrderCloud.Catalogs.Get(groupId);
                 }
             }
@@ -71,7 +71,7 @@ function StandardDeliveryController($state, OrderCloud, toastr, Me, WeirGroup) {
         }
     };
     vm.labels = labels[weirGroupID];
-    vm.Edit = function () { vm.editable = true; }
+    vm.Edit = function () { vm.editable = true; };
     vm.Cancel = function () {
         vm.newRate = vm.originalRate;
         vm.editable = false;
