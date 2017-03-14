@@ -222,7 +222,11 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        POPlaceHolder: "Enter PO Number",
 	        PONote: "You can also upload a PO document using the upload button below the order details",
 	        Currency: "Currency",
-	        Back: "Back"
+	        Back: "Back",
+	        //Eunquiry table
+	        PartTypes: "Part types for;",
+	        Brand: "Brand",
+	        ValveType: "Valve type"
         },
         fr: {
             //header labels
@@ -281,7 +285,11 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        POPlaceHolder: $sce.trustAsHtml("FR:Enter PO Number"),
 	        PONote: $sce.trustAsHtml("FR: You can also upload a PO document using the upload button below the order details"),
 	        Currency: $sce.trustAsHtml("Currency"),
-	        Back: "Back"
+	        Back: "Back",
+	        //Eunquiry table
+	        PartTypes: $sce.trustAsHtml("FR: Part types for;"),
+	        Brand: $sce.trustAsHtml("FR: Brand"),
+	        ValveType: $sce.trustAsHtml("FR: Valve type")
         }
     };
     vm.labels = labels[WeirService.Locale()];
