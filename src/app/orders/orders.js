@@ -43,6 +43,11 @@ function OrdersConfig($stateProvider, buyerid) {
 		    templateUrl: 'orders/templates/quote.confirm.tpl.html',
 		    parent: 'ordersMain'
 		})
+	    .state('ordersMain.quotesEnquiry', {
+	    	url: '/quotesEnquiry',
+		    templateUrl: 'orders/templates/quote.enquiry.tpl.html',
+		    parent: 'ordersMain'
+	    })
 		.state('ordersMain.ordersRevised', {
 		    url: '/ordersRevised',
 		    templateUrl: 'orders/templates/order.revised.tpl.html',
@@ -241,7 +246,10 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			StatusRV: "Status RV = Revised Quote",
 			StatusRO: "Status RO = Revised Order",
 			StatusRR: "Status RR = Rejected Revised Order",
-			StatusRQ: "Status RQ = Rejected Quote"
+			StatusRQ: "Status RQ = Rejected Quote",
+			StatusEN: "Status EN = Enquiry Submitted",
+			StatusER: "Status ER = Enquiry Under Review",
+			enquiriesSubmitted: "Enquiries submitted"
 		},
 		fr: {
 			search:$sce.trustAsHtml("Search"),
@@ -281,7 +289,10 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			StatusRV: $sce.trustAsHtml("FR: Status RV = Revised Quote"),
 			StatusRO: $sce.trustAsHtml("FR: Status RO = Revised Order"),
 			StatusRR: $sce.trustAsHtml("FR: Status RR = Rejected Revised Order"),
-			StatusRQ: $sce.trustAsHtml("FR: Status RQ = Rejected Quote")
+			StatusRQ: $sce.trustAsHtml("FR: Status RQ = Rejected Quote"),
+			StatusEN: $sce.trustAsHtml("FR: Status EN = Enquiry Submitted"),
+			StatusER: $sce.trustAsHtml("FR: Status ER = Enquiry Under Review"),
+			enquiriesSubmitted: $sce.trustAsHtml("FR: Enquiries submitted")
 		}
 	};
 	vm.labels = labels.en;
@@ -290,6 +301,7 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 		"ordersMain.quotesReview":"quotesForReview",
 		"ordersMain.quotesRevised":"revisedQuotes",
 		"ordersMain.quotesConfirmed":"confirmedQuotes",
+		"ordersMain.quotesEnquiry":"enquiriesSubmitted",
 		"ordersMain.POOrders":"ordersSubmittedPO",
 		"ordersMain.pendingPO":"ordersPendingPO",
 		"ordersMain.ordersRevised":"revisedOrders",
