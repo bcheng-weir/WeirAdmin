@@ -164,6 +164,10 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     	return Underscore.findWhere(vm.LineItems.Items,{LineTotal:0});
     };
 
+    vm.InvalidPO = function() {
+        return (vm.Order.xp.PONumber == "Pending" || vm.Order.xp.PONumber == "") || (vm.Order.xp.PODocument == "" || vm.Order.xp.PODocument == null);
+    };
+
     var labels = {
         en: {
             //header labels

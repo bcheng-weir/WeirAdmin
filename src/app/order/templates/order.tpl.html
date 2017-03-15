@@ -38,7 +38,7 @@
                             <button type="button" class="btn btn-lg btn-primary"><span ng-bind-html='order.labels.AssignToMe'></span></button>
                         </li>
                         <li style="padding: 0px 10px 0px 0px;" ng-if="order.ShowConfirm()">
-                            <button type="button" ng-click="order.Confirm(base.currentUser)" class="btn btn-lg btn-success" ng-disabled="order.LineItemZero()">
+                            <button type="button" ng-click="order.Confirm(base.currentUser)" class="btn btn-lg btn-success" ng-disabled="order.LineItemZero() || order.InvalidPO()">
                                 <span ng-bind-html='order.labels.Confirm'></span>
                             </button>
                         </li>
