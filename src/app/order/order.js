@@ -80,12 +80,36 @@ function orderConfig($stateProvider) {
 			        	return null;
 			        }
 		        },
+                PreviousOrderShipping: function($q, toastr, OrderCloud, Order) {
+                    var pieces = Order.ID.split('-Rev');
+                    var buyerId = OrderCloud.BuyerID.Get();
+                    if(pieces.length > 1) {
+                        var prevId = pieces[0] + "-Rev" + (pieces[1] - 1).toString();
+                        var dfd = $q.defer();
+                        OrderCloud.Orders.Get(prevId, buyerId)
+                            .then(function(data) {
+								dfd.resolve( data.ShippingCost );
+                            })
+                            .catch(function () {
+                                dfd.resolve(0);
+                            });
+                        return dfd.promise;
+                    } else {
+                        return null;
+                    }
+                },
 	            Payments: function (Order, OrderCloud) {
 	                return OrderCloud.Payments.List(Order.ID,null,null,null,null,null,null,Order.xp.BuyerID);
 	            },
 	            UserGroups: function (UserGroupsService) {
 	                return UserGroupsService.UserGroups();
-	            }
+	            },
+                ShippingCost : function(Order){
+                    return Order.ShippingCost;
+                },
+                ShippingDescription : function(Order){
+                    return Order.xp.ShippingDescription;
+                }
 	        }
         })
 	    .state('order.addinfo', {
@@ -104,13 +128,15 @@ function orderConfig($stateProvider) {
 function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGroupsService,
                          OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService,
                          Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService, FileSaver,
-                         UserGroups, BackToListService) {
+                         UserGroups, BackToListService, PreviousOrderShipping, ShippingDescription, ShippingCost) {
     var vm = this;
     vm.Order = Order;
 	vm.Order.xp.PONumber = vm.Order.xp.PONumber != "Pending" ? vm.Order.xp.PONumber : ""; // In the buyer app we were initially setting this to pending.
+    vm.Order.ShippingCost = ShippingCost;
+    vm.Order.xp.ShippingDescription = ShippingDescription;
     vm.LineItems = LineItems;
     vm.BlankItems = [];
-    vm.NoOp = function () { }
+    vm.NoOp = function () { };
     var userIsInternalSalesAdmin = UserGroups.indexOf(UserGroupsService.Groups.InternalSales) > -1;
     var userIsSuperAdmin = UserGroups.indexOf(UserGroupsService.Groups.SuperAdmin) > -1;
 
@@ -163,7 +189,6 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     vm.LineItemZero = function() {
     	return Underscore.findWhere(vm.LineItems.Items,{LineTotal:0});
     };
-
     var labels = {
         en: {
             //header labels
@@ -222,7 +247,9 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        POPlaceHolder: "Enter PO Number",
 	        PONote: "You can also upload a PO document using the upload button below the order details",
 	        Currency: "Currency",
-	        Back: "Back"
+	        Back: "Back",
+            CarriageCharge: "Carriage charge",
+            Exworks: "Carriage ex-works"
         },
         fr: {
             //header labels
@@ -337,6 +364,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			return false;
 		}
 	};
+
 
 	vm.ShowRemoved = _showRemoved;
 	function _showRemoved(line) {
@@ -493,37 +521,65 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	}
 
 	vm.EditLineItem = _editLineItem;
-	function _editLineItem(line) {
-		// ToDo If the qty is 0, then delete the line item. The prior revision will display a removed.
-		if(line.Quantity > 0) {
-			// Is this a placeholder item?
-			var patch = {
-				UnitPrice: line.UnitPrice,
-				Quantity: line.Quantity,
-				xp: {
-					LeadTime: line.xp.LeadTime ? line.xp.LeadTime : line.Product.xp.LeadTime
-				}
-			};
-			OrderCloud.LineItems.Patch(vm.Order.ID, line.ID, patch, vm.Order.xp.BuyerID)
-				.then(function () {
-					$rootScope.$broadcast('SwitchCart');
-					$state.go($state.current, {}, {reload: true});
-				})
-				.catch(function (ex) {
-					$exceptionHandler(ex);
-				});
-		} else {
-			OrderCloud.LineItems.Delete(vm.Order.ID, line.ID, vm.Order.xp.BuyerID)
-				.then(function () {
-					$rootScope.$broadcast('SwitchCart');
-					$state.go($state.current, {}, {reload: true});
-				})
-				.catch(function (ex) {
-					$exceptionHandler(ex);
-				});
-		}
-	}
+    function _editLineItem(line) {
+        // ToDo If the qty is 0, then delete the line item. The prior revision will display a removed.
+        if(line.Quantity > 0) {
+            // Is this a placeholder item?
+            var patch = {
+                UnitPrice: line.UnitPrice,
+                Quantity: line.Quantity,
+                xp: {
+                    LeadTime: line.xp.LeadTime ? line.xp.LeadTime : line.Product.xp.LeadTime
+                }
+            };
+            OrderCloud.LineItems.Patch(vm.Order.ID, line.ID, patch, vm.Order.xp.BuyerID)
+                .then(function () {
+                    $rootScope.$broadcast('SwitchCart');
+                    $state.go($state.current, {}, {reload: true});
+                })
+                .catch(function (ex) {
+                    $exceptionHandler(ex);
+                });
+        } else {
+            OrderCloud.LineItems.Delete(vm.Order.ID, line.ID, vm.Order.xp.BuyerID)
+                .then(function () {
+                    $rootScope.$broadcast('SwitchCart');
+                    $state.go($state.current, {}, {reload: true});
+                })
+                .catch(function (ex) {
+                    $exceptionHandler(ex);
+                });
+        }
+    }
 
+    vm.EditOrderShipping = _editShipping;
+    function _editShipping() {
+        var patch = {
+            ShippingCost : vm.Order.ShippingCost,
+            xp: {
+                ShippingDescription:  vm.Order.xp.ShippingDescription != null ? vm.Order.xp.ShippingDescription : null
+            }
+        };
+            OrderCloud.Orders.Patch(vm.Order.ID, patch, OrderCloud.BuyerID.Get())
+                .then(function () {
+                    $state.go($state.current, {}, {reload: true});
+                })
+                .catch(function (ex) {
+                    $exceptionHandler(ex);
+                });
+    }
+    vm.ShowUpdatedShipping = function () {
+    	if(vm.Order.xp.OldShippingData) {
+            if (vm.Order.ShippingCost != vm.Order.xp.OldShippingData.ShippingCost || vm.Order.xp.ShippingDescription != vm.Order.xp.OldShippingData.ShippingDescription) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        else {
+    		return false;
+		}
+    };
 	vm.AddLineItem = _addLineItem;
 	function _addLineItem(line) {
 		if(line.TempQty > 0) {
@@ -689,7 +745,6 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			});
 			return rev;
 		}
-
 		// pass in the copy order id. Use that to set the copy and the order.
 		orderCopy.ID = _determineCopyRevision(orderCopy.ID); //Rev0 or current rev
 		OrderID = angular.copy(vm.Order.ID);
@@ -697,6 +752,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 
 		var orderPatch = {
 			ID: vm.Order.ID,
+            ShippingCost: vm.Order.ShippingCost,
 			xp: {
 				Active: true,
 				Status: WeirService.OrderStatus.Review.id,
@@ -704,7 +760,13 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 				ReviewerName: currentUser.Username,
 				RevisedDate: new Date(),
 				Revised: true,
-				OriginalOrderID: vm.Order.xp.OriginalOrderID
+				ShippingDescription: vm.Order.xp.ShippingDescription != null ? vm.Order.xp.ShippingDescription : null,
+				OriginalOrderID: vm.Order.xp.OriginalOrderID,
+				OldShippingData:
+					{
+						ShippingCost : vm.Order.ShippingCost ,
+						ShippingDescription: vm.Order.xp.ShippingDescription != null ? vm.Order.xp.ShippingDescription : null
+					}
 			}
 		};
 		if (vm.Order.xp.ReviewerID != currentUser.ID) {
