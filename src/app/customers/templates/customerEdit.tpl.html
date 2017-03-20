@@ -40,8 +40,18 @@
                     <textarea rows="6" cols="40" id="buyer_shippingDetails" type="text" ng-model="customerEdit.buyer.xp.ShippingDetails" class="form-control" />
                 </div>
             </div>
+            <div class="row">
+                <div class="col-xs-4">
+                    <div class="form-group" style="margin-top: 1em;">
+                        <button class="btn btn-primary" type="button" ng-click="customerEdit.Submit()" ng-disabled="CustomerEditForm.$invalid || customerEdit.checkForPrimary()">
+                            Save
+                        </button>
+                        <button class="btn btn-default" ui-sref="^" type="button">Cancel</button>
+                    </div>
+                </div>
+            </div>
             <div class="row form-group">
-                <div class="col-md-4"><!-- Carriage Price -->
+                <div class="col-md-4"><!-- Carriage Rate -->
                     <div class="row form-group">
                         <div class="col-md-12">
                             <label for="stdCarriage" ng-bind-html="customerEdit.labels.CarriageHeader"></label>
@@ -72,7 +82,7 @@
                         <div class="col-md-12">
                             <span ng-if='customerEdit.labels.Currency=="GBP"' style='margin-right: 0.5em; margin-top: 0.3em; float: left;'>&#163;</span>
                             <span ng-if='customerEdit.labels.Currency=="EU"' style='margin-right: 0.5em; margin-top: 0.3em; float: left;'>&#128;</span>
-                            <input ng-if="!customerEdit.rateEditable || !customerEdit.buyer.xp.UseCustomCarriageRate" ng-model='customerEdit.customRateStr' ng-disabled="true" />
+                            <input ng-if="!customerEdit.rateEditable || !customerEdit.buyer.xp.UseCustomCarriageRate" ng-model='customerEdit.buyer.xp.CustomCarriageRate' ng-disabled="true" />
                             <input ng-if="customerEdit.rateEditable && customerEdit.buyer.xp.UseCustomCarriageRate" type='number' class='form-control'
                                    style="width: 10em;" ng-model='customerEdit.buyer.xp.CustomCarriageRate' ng-min='0.00'
                                    ng-required='customerEdit.buyer.xp.UseCustomCarriageRate'
@@ -85,10 +95,10 @@
                         <button class="btn btn-default" type="button" ng-disabled="customerEdit.rateEditable" ng-click="customerEdit.editCarriage()">
                             Edit
                         </button>
-                        <button class="btn btn-primary" type="button" ng-click="customerEdit.Submit()" ng-disabled="CustomerEditForm.$invalid || customerEdit.checkForPrimary()">
+                        <button class="btn btn-primary" type="button" ng-click="customerEdit.saveCarriage()" ng-disabled="!customerEdit.rateEditable">
                             Save
                         </button>
-                        <button class="btn btn-default" ui-sref="^" type="button">Cancel</button>
+                        <button class="btn btn-default" type="reset" ng-click="customerEdit.cancelCarriage()" ng-disabled="!customerEdit.rateEditable">Cancel</button>
                     </div>
                 </div>
                 <div class="col-md-4"><!-- Carriage Price -->
