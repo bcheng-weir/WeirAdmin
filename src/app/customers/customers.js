@@ -559,10 +559,31 @@ function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, O
     vm.rateEditable = false;
     vm.customRateStr = (!vm.buyer.xp.UseCustomCarriageRate || !(vm.buyer.xp.CustomCarriageRate)) ? vm.standardRate :
         vm.buyer.xp.CustomCarriageRate.toFixed(2);
-    vm.editCarriage = function () {
-        vm.rateEditable = true;
-        if (!vm.buyer.xp.CustomCarriageRate) vm.buyer.xp.CustomCarriageRate = vm.Group.xp.StandardCarriage;
-    }
+
+	vm.editCarriage = function () {
+		vm.rateEditable = true;
+		//if (!vm.buyer.xp.CustomCarriageRate) vm.buyer.xp.CustomCarriageRate = vm.Group.xp.StandardCarriage;
+	};
+    vm.cancelCarriage = function () {
+        vm.rateEditable = false;
+    };
+    vm.saveCarriage = function() {
+		var upd = {
+			xp: {
+				UseCustomCarriageRate:	vm.buyer.xp.UseCustomCarriageRate,
+				CustomCarriageRate: vm.buyer.xp.CustomCarriageRate
+			}
+		};
+	    OrderCloud.Buyers.Patch(upd, vm.buyer.ID)
+		    .then(function() {
+			    toastr.success('Buyer Updated', 'Success');
+			    vm.rateEditable = false;
+		    })
+		    .catch(function(ex) {
+			    $exceptionHandler(ex);
+		    });
+    };
+
 }
 
 function CustomerCreateCtrl($q, $state, toastr, CustomerService, OCGeography, WeirService) {
