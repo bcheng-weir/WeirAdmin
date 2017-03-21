@@ -38,7 +38,7 @@
                             <button type="button" class="btn btn-lg btn-primary"><span ng-bind-html='order.labels.AssignToMe'></span></button>
                         </li>
                         <li style="padding: 0px 10px 0px 0px;" ng-if="order.ShowConfirm()">
-                            <button type="button" ng-click="order.Confirm(base.currentUser)" class="btn btn-lg btn-success" ng-disabled="order.LineItemZero()">
+                            <button type="button" ng-click="order.Confirm(base.currentUser)" class="btn btn-lg btn-success" ng-disabled="order.LineItemZero() || order.InvalidPO()">
                                 <span ng-bind-html='order.labels.Confirm'></span>
                             </button>
                         </li>
@@ -94,18 +94,40 @@
                 <ordercloud-po-upload model="order.Order" keyname="PODocument" label=''></ordercloud-po-upload>
              </span>
          </div>
-         <div class="col-md-3">
+         <!--<div class="col-md-3">
              <div class="pull-right" style="padding: 30px 25px 0px 0px; float: right;">
                  <p><a ng-if="order.Order.xp.Type == 'Quote' && order.Order.xp.Status!='SB' && order.Order.xp.Status!='SP'" href="#" ng-click="order.BackToList()">Back to Quotes</a></p>
                  <p><a ng-if="order.Order.xp.Type == 'Order'" href="#" ng-click="order.BackToList()">Back to Orders</a></p>
-                 <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ui-sref="productSearch" ng-bind-html='order.labels.AddNewItems' ng-show="order.Order.xp.Status=='RE'" ng-if="order.ShowAddItems()"></button></p>
-                 <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ng-click="order.AddBlankItem()" ng-bind-html='order.labels.AddABlankItem' ng-show="order.Order.xp.Status=='RE'" ng-if="order.ShowAddItems()"></button></p>
+                 <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ui-sref="productSearch" ng-bind-html='order.labels.AddNewItems' ng-show="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'" ng-if="order.ShowAddItems()"></button></p>
+                 <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ng-click="order.AddBlankItem()" ng-bind-html='order.labels.AddABlankItem' ng-show="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'" ng-if="order.ShowAddItems()"></button></p>
              </div>
-         </div>
+         </div>-->
      </div>
 
-     <div class="row" style="width: 65%">
-         <div class="col-lg-12">
+     <div class="row">
+         <div class="col-xs-9">
+             <table ng-if="order.Order.xp.Status=='EN' || order.Order.xp.Status=='ER'" class="enquiry">
+                 <thead>
+                     <tr>
+                         <th colspan="2" ng-bind-html="order.labels.PartTypes"></th>
+                     </tr>
+                 </thead>
+                 <tbody>
+                    <tr>
+                        <td ng-bind-html="order.labels.SerialNum"></td>
+                        <td class="data">hardcoded 40001694/0010/1</td>
+                    </tr>
+                    <tr>
+                        <td ng-bind-html="order.labels.Brand"></td>
+                        <td class="data">hardcoded test brand</td>
+                    </tr>
+                    <tr>
+                        <td ng-bind-html="order.labels.ValveType"></td>
+                        <td class="data">hardcoded valve type</td>
+                    </tr>
+                 </tbody>
+             </table>
+             <br>
              <table class="table table-bordered oc-table-responsive weir-results-table" style="float: left;border-right: 0">
                  <thead class="header-cell">
                  <tr style="background-color: blue; color: white;">
@@ -129,26 +151,26 @@
                      <td ng-bind-html="line.Product.xp.ReplacementSchedule"></td>
 
                      <!-- Non-review fields -->
-                     <td ng-if="order.Order.xp.Status!='RE'">
+                     <td ng-if="order.Order.xp.Status!='RE' && order.Order.xp.Status!='ER'">
                          <span ng-show="line.xp.LeadTime==null" ng-bind-html="line.Product.xp.LeadTime"></span>
                          <span ng-show="line.xp.LeadTime!=null" ng-bind-html="line.xp.LeadTime"></span>
                      </td>
-                     <td ng-switch on="order.Order.xp.CustomerID | weirGroupFromBuyersID" class='text-right' ng-if="order.Order.xp.Status!='RE'">
+                     <td ng-switch on="order.Order.xp.CustomerID | weirGroupFromBuyersID" class='text-right' ng-if="order.Order.xp.Status!='RE' && order.Order.xp.Status!='ER'">
                          <span ng-switch-when="WPIFR" ng-bind-html="line.UnitPrice | currency:'&euro; '"></span>
                          <span ng-switch-when="WVCUK" ng-bind-html="line.UnitPrice | currency:'&#163; '"></span>
                          <span ng-switch-default ng-bind-html="line.UnitPrice | currency:'&#163; '"></span>
                      </td>
-                     <td ng-if="order.Order.xp.Status!='RE'" ng-bind-html="line.Quantity"></td>
+                     <td ng-if="order.Order.xp.Status!='RE' && order.Order.xp.Status!='ER'" ng-bind-html="line.Quantity"></td>
 
                      <!-- review mode fields -->
-                     <td ng-if="order.Order.xp.Status=='RE'">
+                     <td ng-if="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'">
                          <input type="text" class="form-control input-sm" ng-show="line.xp.LeadTime==null" ng-model="line.Product.xp.LeadTime" ng-enter="order.NoOp()" />
                          <input type="text" class="form-control input-sm" ng-show="line.xp.LeadTime!=null" ng-model="line.xp.LeadTime" ng-enter="order.NoOp()" />
                      </td>
-                     <td ng-if="order.Order.xp.Status=='RE'">
+                     <td ng-if="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'">
                          <input type="" class="form-control input-sm" ng-model="line.UnitPrice" ng-enter="order.NoOp()" />
                      </td>
-                     <td ng-if="order.Order.xp.Status=='RE'">
+                     <td ng-if="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'">
                         <input type="number" class="form-control input-sm" ng-model="line.Quantity" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" ng-enter="order.NoOp()" />
                      </td>
 
@@ -172,7 +194,7 @@
                      <td><input type="text" class="form-control input-sm" ng-model="line.xp.ReplacementSchedule" /></td>
                      <td><input type="text" class="form-control input-sm" ng-model="line.xp.LeadTime" /></td>
                      <td><input type="float" class="form-control input-sm" ng-model="line.UnitPrice" /></td>
-                     <td ng-if="order.Order.xp.Status=='RE'">
+                     <td ng-if="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'">
                          <input type="number" class="form-control input-sm" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" ng-model="line.Quantity" />
                      </td>
                      <td style="border:0;width:100px;">
@@ -189,20 +211,20 @@
                      <td ng-bind-html="line.Product.Description"></td>
                      <td ng-bind-html="line.Product.xp.ReplacementSchedule"></td>
 
-                     <td ng-if="order.Order.xp.Status!='RE'" ng-bind-html="line.Product.xp.LeadTime"></td>
-                     <td ng-switch on="order.Order.xp.CustomerID | weirGroupFromBuyersID" class='text-right' ng-if="order.Order.xp.Status!='RE'">
+                     <td ng-if="order.Order.xp.Status!='RE' || order.Order.xp.Status=='ER'" ng-bind-html="line.Product.xp.LeadTime"></td>
+                     <td ng-switch on="order.Order.xp.CustomerID | weirGroupFromBuyersID" class='text-right' ng-if="order.Order.xp.Status!='RE' || order.Order.xp.Status=='ER'">
                          <span ng-switch-when="WPIFR" ng-bind-html="line.UnitPrice | currency:'&euro; '"></span>
                          <span ng-switch-when="WVCUK" ng-bind-html="line.UnitPrice | currency:'&#163; '"></span>
                          <span ng-switch-default ng-bind-html="line.UnitPrice | currency:'&#163; '"></span>
                      </td>
-                     <td ng-if="order.Order.xp.Status!='RE'" ng-bind-html="order.Zero"></td>
-                     <td ng-if="order.Order.xp.Status=='RE'">
+                     <td ng-if="order.Order.xp.Status!='RE' || order.Order.xp.Status=='ER'" ng-bind-html="order.Zero"></td>
+                     <td ng-if="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'">
                          <input type="text" class="form-control" ng-model="line.Product.xp.LeadTime" />
                      </td>
-                     <td ng-if="order.Order.xp.Status=='RE'">
+                     <td ng-if="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'">
                          <input type="" class="form-control" ng-model="line.UnitPrice" />
                      </td>
-                     <td ng-if="order.Order.xp.Status=='RE'">
+                     <td ng-if="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'">
                          <input type="number" class="form-control" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" ng-model="line.TempQty" />
                      </td>
 
@@ -259,6 +281,14 @@
                  </tbody>
              </table>
          </div>
+         <div class="col-xs-3">
+             <div class="pull-right" style="padding: 30px 25px 0px 0px; float: right;">
+                 <p><a ng-if="order.Order.xp.Type == 'Quote' && order.Order.xp.Status!='SB' && order.Order.xp.Status!='SP'" href="#" ng-click="order.BackToList()">Back to Quotes</a></p>
+                 <p><a ng-if="order.Order.xp.Type == 'Order'" href="#" ng-click="order.BackToList()">Back to Orders</a></p>
+                 <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ui-sref="productSearch" ng-bind-html='order.labels.AddNewItems' ng-show="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'" ng-if="order.ShowAddItems()"></button></p>
+                 <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ng-click="order.AddBlankItem()" ng-bind-html='order.labels.AddABlankItem' ng-show="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'" ng-if="order.ShowAddItems()"></button></p>
+             </div>
+         </div>
      </div>
 
     <div class="row" style="padding: 5px 5px 5px 5px;">
@@ -289,14 +319,14 @@
             <div ng-if="order.DeliveryAddress.Country=='FR'">
                 <span ng-bind-html='order.DeliveryAddress.FirstName + " " + order.DeliveryAddress.LastName'></span><br />
                 <span ng-bind-html="order.DeliveryAddress.Street1"></span><br>
-                <span ng-bind-html="order.DeliveryAddress.Street2"></span><br>
+                <span ng-bind-html="order.DeliveryAddress.Street2" ng-if="order.DeliveryAddress.Street2"></span><br ng-if="order.DeliveryAddress.Street2">
                 <span ng-bind-html="order.DeliveryAddress.Zip"></span> <span ng-bind-html="order.DeliveryAddress.City"></span><br>
                 <span ng-bind-html="order.country(order.DeliveryAddress.Country)"></span>
             </div>
             <div ng-if="order.DeliveryAddress.Country=='GB'">
                 <span ng-bind-html='order.DeliveryAddress.FirstName + " " + order.DeliveryAddress.LastName'></span><br />
                 <span ng-bind-html="order.DeliveryAddress.Street1"></span><br>
-                <span ng-bind-html="order.DeliveryAddress.Street2"></span><br>
+                <span ng-bind-html="order.DeliveryAddress.Street2" ng-if="order.DeliveryAddress.Street2"></span><br ng-if="order.DeliveryAddress.Street2">
                 <span ng-bind-html="order.DeliveryAddress.City"></span><br>
                 <span ng-bind-html="order.DeliveryAddress.Zip"></span><br>
                 <span ng-bind-html="order.country(order.DeliveryAddress.Country)"></span>
@@ -304,7 +334,7 @@
             <div ng-if="order.DeliveryAddress.Country!='GB' && order.DeliveryAddress.Country!='FR'">
                 <span ng-bind-html='order.DeliveryAddress.FirstName + " " + order.DeliveryAddress.LastName'></span><br />
                 <span ng-bind-html="order.DeliveryAddress.Street1"></span><br>
-                <span ng-bind-html="order.DeliveryAddress.Street2"></span><br>
+                <span ng-bind-html="order.DeliveryAddress.Street2" ng-if="order.DeliveryAddress.Street2"></span><br ng-if="order.DeliveryAddress.Street2">
                 <span ng-bind-html="order.DeliveryAddress.City"></span>, <span ng-bind-html="order.DeliveryAddress.State"></span> <span ng-bind-html="order.DeliveryAddress.Zip"></span><br>
                 <span ng-bind-html="order.country(order.DeliveryAddress.Country)"></span>
             </div>

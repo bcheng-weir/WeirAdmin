@@ -180,7 +180,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	vm.showReviewer = [WeirService.OrderStatus.Submitted.id, WeirService.OrderStatus.Review.id,
 			WeirService.OrderStatus.SubmittedWithPO.id, WeirService.OrderStatus.SubmittedPendingPO.id,
 			WeirService.OrderStatus.RevisedQuote.id, WeirService.OrderStatus.RevisedOrder.id,
-			WeirService.OrderStatus.SubmittedPendingPO.id, WeirService.OrderStatus.ConfirmedQuote.id].indexOf(vm.Order.xp.Status) > -1;
+			WeirService.OrderStatus.SubmittedPendingPO.id, WeirService.OrderStatus.ConfirmedQuote.id,
+			WeirService.OrderStatus.Enquiry.id, WeirService.OrderStatus.EnquiryReview.id].indexOf(vm.Order.xp.Status) > -1;
 	vm.showAssign = vm.showReviewer && (Me.ID != vm.Order.xp.ReviewerID) && (userIsInternalSalesAdmin || userIsSuperAdmin);
     /*vm.PONumber = "";
 	var payment = (vm.Payments.Items.length > 0) ? vm.Payments.Items[0] : null;
@@ -189,6 +190,11 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     vm.LineItemZero = function() {
     	return Underscore.findWhere(vm.LineItems.Items,{LineTotal:0});
     };
+
+    vm.InvalidPO = function() {
+        return (vm.Order.xp.PONumber == "Pending" || vm.Order.xp.PONumber == "") || (vm.Order.xp.PODocument == "" || vm.Order.xp.PODocument == null);
+    };
+
     var labels = {
         en: {
             //header labels
@@ -250,6 +256,10 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        Back: "Back",
             CarriageCharge: "Carriage charge",
             Exworks: "Carriage ex-works"
+	        //Eunquiry table
+	        PartTypes: "Part types for;",
+	        Brand: "Brand",
+	        ValveType: "Valve type"
         },
         fr: {
             //header labels
@@ -308,7 +318,11 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        POPlaceHolder: $sce.trustAsHtml("FR:Enter PO Number"),
 	        PONote: $sce.trustAsHtml("FR: You can also upload a PO document using the upload button below the order details"),
 	        Currency: $sce.trustAsHtml("Currency"),
-	        Back: "Back"
+	        Back: "Back",
+	        //Eunquiry table
+	        PartTypes: $sce.trustAsHtml("FR: Part types for;"),
+	        Brand: $sce.trustAsHtml("FR: Brand"),
+	        ValveType: $sce.trustAsHtml("FR: Valve type")
         }
     };
     vm.labels = labels[WeirService.Locale()];
@@ -353,7 +367,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 
 	vm.ShowEdit = _showEdit;
 	function _showEdit(status, item) {
-		return status==WeirService.OrderStatus.Review.id;
+		return status==WeirService.OrderStatus.Review.id || status==WeirService.OrderStatus.EnquiryReview.id;
 	}
 
 	vm.ShowUpdated = function (item) {
@@ -405,7 +419,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			SP: true,
 			RQ: true,
 			RR: true,
-			SE: true
+			SE: true,
+			EN: true
 		};
 		if(vm.Order.xp) {
 			return validStatus[vm.Order.xp.Status] && vm.Order.xp.ReviewerID == Me.ID;
@@ -417,7 +432,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	vm.ShowShareRevision = _showShareRevision;
 	function _showShareRevision() {
 		var validStatus = {
-			RE: true
+			RE: true,
+			ER: true
 		};
 		if(vm.Order.xp) {
 			return validStatus[vm.Order.xp.Status];
@@ -443,7 +459,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	vm.ShowAddItems = _showAddItems;
 	function _showAddItems() {
 		var validStatus = {
-			RE: true
+			RE: true,
+			ER: true
 		};
 		if(vm.Order.xp) {
 			return validStatus[vm.Order.xp.Status];
@@ -749,13 +766,15 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		orderCopy.ID = _determineCopyRevision(orderCopy.ID); //Rev0 or current rev
 		OrderID = angular.copy(vm.Order.ID);
 		vm.Order.ID = _determineRevision(vm.Order.ID);
-
+		//ToDo Use EnquiryReview status.
+		// if current status is Enquiry, then set to EnquiryReview, else set to
+		var status = vm.Order.xp.Status == "EN" ? WeirService.OrderStatus.EnquiryReview.id : WeirService.OrderStatus.Review.id;
 		var orderPatch = {
 			ID: vm.Order.ID,
             ShippingCost: vm.Order.ShippingCost,
 			xp: {
 				Active: true,
-				Status: WeirService.OrderStatus.Review.id,
+				Status: status,
 				StatusDate: new Date(),
 				ReviewerName: currentUser.Username,
 				RevisedDate: new Date(),
