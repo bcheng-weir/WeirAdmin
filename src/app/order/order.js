@@ -154,7 +154,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	vm.showReviewer = [WeirService.OrderStatus.Submitted.id, WeirService.OrderStatus.Review.id,
 			WeirService.OrderStatus.SubmittedWithPO.id, WeirService.OrderStatus.SubmittedPendingPO.id,
 			WeirService.OrderStatus.RevisedQuote.id, WeirService.OrderStatus.RevisedOrder.id,
-			WeirService.OrderStatus.SubmittedPendingPO.id, WeirService.OrderStatus.ConfirmedQuote.id].indexOf(vm.Order.xp.Status) > -1;
+			WeirService.OrderStatus.SubmittedPendingPO.id, WeirService.OrderStatus.ConfirmedQuote.id,
+			WeirService.OrderStatus.Enquiry.id, WeirService.OrderStatus.EnquiryReview.id].indexOf(vm.Order.xp.Status) > -1;
 	vm.showAssign = vm.showReviewer && (Me.ID != vm.Order.xp.ReviewerID) && (userIsInternalSalesAdmin || userIsSuperAdmin);
     /*vm.PONumber = "";
 	var payment = (vm.Payments.Items.length > 0) ? vm.Payments.Items[0] : null;
@@ -338,7 +339,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 
 	vm.ShowEdit = _showEdit;
 	function _showEdit(status, item) {
-		return status==WeirService.OrderStatus.Review.id;
+		return status==WeirService.OrderStatus.Review.id || status==WeirService.OrderStatus.EnquiryReview.id;
 	}
 
 	vm.ShowUpdated = function (item) {
@@ -389,7 +390,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			SP: true,
 			RQ: true,
 			RR: true,
-			SE: true
+			SE: true,
+			EN: true
 		};
 		if(vm.Order.xp) {
 			return validStatus[vm.Order.xp.Status] && vm.Order.xp.ReviewerID == Me.ID;
@@ -401,7 +403,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	vm.ShowShareRevision = _showShareRevision;
 	function _showShareRevision() {
 		var validStatus = {
-			RE: true
+			RE: true,
+			ER: true
 		};
 		if(vm.Order.xp) {
 			return validStatus[vm.Order.xp.Status];
@@ -427,7 +430,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	vm.ShowAddItems = _showAddItems;
 	function _showAddItems() {
 		var validStatus = {
-			RE: true
+			RE: true,
+			ER: true
 		};
 		if(vm.Order.xp) {
 			return validStatus[vm.Order.xp.Status];
@@ -706,12 +710,14 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		orderCopy.ID = _determineCopyRevision(orderCopy.ID); //Rev0 or current rev
 		OrderID = angular.copy(vm.Order.ID);
 		vm.Order.ID = _determineRevision(vm.Order.ID);
-
+		//ToDo Use EnquiryReview status.
+		// if current status is Enquiry, then set to EnquiryReview, else set to
+		var status = vm.Order.xp.Status == "EN" ? WeirService.OrderStatus.EnquiryReview.id : WeirService.OrderStatus.Review.id;
 		var orderPatch = {
 			ID: vm.Order.ID,
 			xp: {
 				Active: true,
-				Status: WeirService.OrderStatus.Review.id,
+				Status: status,
 				StatusDate: new Date(),
 				ReviewerName: currentUser.Username,
 				RevisedDate: new Date(),
