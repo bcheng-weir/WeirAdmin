@@ -115,15 +115,15 @@
                  <tbody>
                     <tr>
                         <td ng-bind-html="order.labels.SerialNum"></td>
-                        <td class="data">hardcoded 40001694/0010/1</td>
+                        <td class="data" ng-bind-html="order.Order.xp.SN"></td>
                     </tr>
                     <tr>
                         <td ng-bind-html="order.labels.Brand"></td>
-                        <td class="data">hardcoded test brand</td>
+                        <td class="data" ng-bind-html="order.Order.xp.Brand"></td>
                     </tr>
                     <tr>
                         <td ng-bind-html="order.labels.ValveType"></td>
-                        <td class="data">hardcoded valve type</td>
+                        <td class="data" ng-bind-html="order.Order.xp.ValveType"></td>
                     </tr>
                  </tbody>
              </table>
@@ -236,7 +236,7 @@
                      </td>
                  </tr>
 
-                 <tr>
+                 <tr ng-if="order.Order.xp.CarriageRateType">
                      <td></td>
                      <td></td>
                      <td></td>

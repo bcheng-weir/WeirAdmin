@@ -255,7 +255,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        Currency: "Currency",
 	        Back: "Back",
             CarriageCharge: "Carriage charge",
-            Exworks: "Carriage ex-works"
+            Exworks: "Carriage ex-works",
 	        //Eunquiry table
 	        PartTypes: "Part types for;",
 	        Brand: "Brand",
@@ -312,17 +312,17 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        Cancel: $sce.trustAsHtml("Cancel"),
 	        POSaveTitle: $sce.trustAsHtml("PO Number Updated"),
 	        POSaveMessage: $sce.trustAsHtml("PO Number saved as: "),
-	        DragAndDrop: $sce.trustAsHtml("FR: Drag and drop files here to upload"),
-	        OrderAssignedMsg: $sce.trustAsHtml("FR:This order has been assigned to you"),
-	        QuoteAssignedMsg: $sce.trustAsHtml("FR:This quote has been assigned to you"),
-	        POPlaceHolder: $sce.trustAsHtml("FR:Enter PO Number"),
-	        PONote: $sce.trustAsHtml("FR: You can also upload a PO document using the upload button below the order details"),
+	        DragAndDrop: $sce.trustAsHtml("Drag and drop files here to upload"),
+	        OrderAssignedMsg: $sce.trustAsHtml("This order has been assigned to you"),
+	        QuoteAssignedMsg: $sce.trustAsHtml("This quote has been assigned to you"),
+	        POPlaceHolder: $sce.trustAsHtml("Enter PO Number"),
+	        PONote: $sce.trustAsHtml("You can also upload a PO document using the upload button below the order details"),
 	        Currency: $sce.trustAsHtml("Currency"),
 	        Back: "Back",
-	        //Eunquiry table
-	        PartTypes: $sce.trustAsHtml("FR: Part types for;"),
-	        Brand: $sce.trustAsHtml("FR: Brand"),
-	        ValveType: $sce.trustAsHtml("FR: Valve type")
+	        //Enquiry table
+	        PartTypes: $sce.trustAsHtml("Part types for;"),
+	        Brand: $sce.trustAsHtml("Brand"),
+	        ValveType: $sce.trustAsHtml("Valve type")
         }
     };
     vm.labels = labels[WeirService.Locale()];
