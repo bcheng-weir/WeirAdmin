@@ -94,14 +94,6 @@
                 <ordercloud-po-upload model="order.Order" keyname="PODocument" label=''></ordercloud-po-upload>
              </span>
          </div>
-         <!--<div class="col-md-3">
-             <div class="pull-right" style="padding: 30px 25px 0px 0px; float: right;">
-                 <p><a ng-if="order.Order.xp.Type == 'Quote' && order.Order.xp.Status!='SB' && order.Order.xp.Status!='SP'" href="#" ng-click="order.BackToList()">Back to Quotes</a></p>
-                 <p><a ng-if="order.Order.xp.Type == 'Order'" href="#" ng-click="order.BackToList()">Back to Orders</a></p>
-                 <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ui-sref="productSearch" ng-bind-html='order.labels.AddNewItems' ng-show="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'" ng-if="order.ShowAddItems()"></button></p>
-                 <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ng-click="order.AddBlankItem()" ng-bind-html='order.labels.AddABlankItem' ng-show="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'" ng-if="order.ShowAddItems()"></button></p>
-             </div>
-         </div>-->
      </div>
 
      <div class="row">
@@ -150,16 +142,16 @@
                      <td ng-bind-html="line.xp.SN"></td>
                      <td ng-bind-html="line.xp.TagNumber"></td>
                      <td>
-                         <span ng-if="!line.xp.Name" ng-bind-html="line.Product.Name"></span>
-                         <span ng-if="line.xp.Name" ng-bind-html="line.xp.Name"></span>
+                         <span ng-if="!line.xp.ProductName" ng-bind-html="line.Product.Name"></span>
+                         <span ng-if="line.xp.ProductName" ng-bind-html="line.xp.ProductName"></span>
                      </td>
                      <td>
                          <span ng-if="!line.xp.Description" ng-bind-html="line.Product.Description"></span>
                          <span ng-if="line.xp.Description" ng-bind-html="line.xp.Description"></span>
                      </td>
                      <td>
-                         <span ng-if="!line.xp.Replacement" ng-bind-html="line.Product.xp.ReplacementSchedule"></span>
-                         <span ng-if="line.xp.Replacement" ng-bind-html="line.xp.Replacement"></span>
+                         <span ng-if="!line.xp.ReplacementSchedule" ng-bind-html="line.Product.xp.ReplacementSchedule"></span>
+                         <span ng-if="line.xp.ReplacementSchedule" ng-bind-html="line.xp.ReplacementSchedule"></span>
                      </td>
                      <td>
                          <span ng-if="!line.xp.LeadTime" ng-bind-html="line.Product.xp.LeadTime"></span>
@@ -189,14 +181,16 @@
                          <input type="text" class="form-control input-sm" ng-model="line.xp.TagNumber" ng-enter="order.NoOp()" />
                      </td>
                      <td>
-                         <input type="text" class="form-control input-sm" ng-model="line.Product.Name" ng-enter="order.NoOp()" />
+                         <input type="text" class="form-control input-sm" ng-if="!line.xp.ProductName" ng-model="line.Product.Name" ng-enter="order.NoOp()" />
+                         <input type="text" class="form-control input-sm" ng-if="line.xp.ProductName" ng-model="line.xp.ProductName" ng-enter="order.NoOp()" />
                      </td>
                      <td>
-                         <input type="text" class="form-control input-sm" ng-model="line.Product.Description" ng-enter="order.NoOp()" />
+                         <input type="text" class="form-control input-sm" ng-if="!line.xp.Description" ng-model="line.Product.Description" ng-enter="order.NoOp()" />
+                         <input type="text" class="form-control input-sm" ng-if="line.xp.Description" ng-model="line.xp.Description" ng-enter="order.NoOp()" />
                      </td>
                      <td>
-                         <input type="text" class="form-control input-sm" ng-if="!line.xp.Replacement" ng-model="line.Product.xp.ReplacementSchedule" ng-enter="order.NoOp()" />
-                         <input type="text" class="form-control input-sm" ng-if="line.xp.Replacement" ng-model="line.xp.Replacement" ng-enter="order.NoOp()" />
+                         <input type="text" class="form-control input-sm" ng-if="!line.xp.ReplacementSchedule" ng-model="line.Product.xp.ReplacementSchedule" ng-enter="order.NoOp()" />
+                         <input type="text" class="form-control input-sm" ng-if="line.xp.ReplacementSchedule" ng-model="line.xp.ReplacementSchedule" ng-enter="order.NoOp()" />
                      </td>
                      <td>
                          <input type="text" class="form-control input-sm" ng-if="!line.xp.LeadTime" ng-model="line.Product.xp.LeadTime" ng-enter="order.NoOp()" />

@@ -373,12 +373,38 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	vm.ShowUpdated = function (item) {
 		// return true if qty <> xp.originalQty and qty > 0
 		if(item.xp) {
-			return (item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty)) || (item.xp.OriginalUnitPrice && (item.xp.OriginalUnitPrice===0 || (item.UnitPrice != item.xp.OriginalUnitPrice))) || (item.xp.OriginalLeadTime && ((item.Product.xp.LeadTime != item.xp.OriginalLeadTime) || (item.xp.LeadTime && item.xp.LeadTime != item.Product.xp.LeadTime )));
+			return (item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty)) ||
+				(item.xp.OriginalUnitPrice && (item.xp.OriginalUnitPrice===0 || (item.UnitPrice != item.xp.OriginalUnitPrice))) ||
+				(typeof item.xp.OriginalLeadTime !== "undefined" &&
+					(
+						(typeof item.Product.xp.LeadTime !== "undefined" && (item.xp.OriginalLeadTime !== item.Product.xp.LeadTime)) ||
+						(typeof item.xp.LeadTime !== "undefined" && (item.xp.OriginalLeadTime !== item.xp.LeadTime))
+					)
+				) ||
+				(typeof item.xp.OriginalReplacementSchedule !== "undefined" &&
+					(
+						(typeof item.Product.xp.ReplacementSchedule !== "undefined" && (item.xp.OriginalReplacementSchedule !== item.Product.xp.ReplacementSchedule)) ||
+						(typeof item.xp.ReplacementSchedule !== "undefined" && (item.xp.OriginalReplacementSchedule !== item.xp.ReplacementSchedule))
+					)
+				) ||
+				(typeof item.xp.OriginalDescription !== "undefined" &&
+					(
+						(typeof item.Product.xp.Description !== "undefined" && (item.xp.OriginalDescription !== item.Product.xp.Description)) ||
+						(typeof item.xp.Description !== "undefined" && (item.xp.OriginalDescription !== item.xp.Description))
+					)
+				) ||
+				(typeof item.xp.OriginalProductName !== "undefined" &&
+					(
+						(typeof item.Product.xp.Name !== "undefined" && (item.xp.OriginalProductName !== item.Product.xp.Name)) ||
+						(typeof item.xp.ProductName !== "undefined" && (item.xp.OriginalProductName !== item.xp.ProductName))
+					)
+				) ||
+				(typeof item.xp.OriginalTagNumber !== "undefined" && (item.xp.TagNumber !== item.xp.OriginalTagNumber)) ||
+				(typeof item.xp.OriginalSN !== "undefined" && (item.xp.SN !== item.xp.OriginalSN))
 		} else {
 			return false;
 		}
 	};
-
 
 	vm.ShowRemoved = _showRemoved;
 	function _showRemoved(line) {
@@ -529,8 +555,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 					"TagNumber": null,
 					"ProductName": null,
 					"Description": null,
-					"ReplacementSchedule": null,
-					"LeadTime": null
+					"ReplacementSchedule": 0,
+					"LeadTime": 0
 				}
 			};
 			vm.BlankItems.push(newItem);
@@ -546,11 +572,11 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
                 UnitPrice: line.UnitPrice,
                 Quantity: line.Quantity,
                 xp: {
-	                SerialNumber: line.xp.SN,
+	                SN: line.xp.SN,
 	                TagNumber: line.xp.TagNumber,
-	                PartNumber: line.xp.PartNumber ? line.xp.PartNumber : line.Product.Name,
+	                ProductName: line.xp.ProductName ? line.xp.ProductName : line.Product.Name,
 	                Description: line.xp.Description ? line.xp.Description : line.Product.Description,
-	                Replacement: line.xp.Replacement ? line.xp.Replacement : line.Product.xp.ReplacementSchedule,
+	                ReplacementSchedule: line.xp.ReplacementSchedule ? line.xp.ReplacementSchedule : line.Product.xp.ReplacementSchedule,
 	                LeadTime: line.xp.LeadTime ? line.xp.LeadTime : line.Product.xp.LeadTime
                 }
             };
@@ -590,6 +616,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
                 $exceptionHandler(ex);
             });
     }
+
     vm.ShowUpdatedShipping = function () {
     	if(vm.Order.xp.OldShippingData) {
             if (vm.Order.ShippingCost != vm.Order.xp.OldShippingData.ShippingCost || vm.Order.xp.ShippingDescription != vm.Order.xp.OldShippingData.ShippingDescription) {
@@ -602,7 +629,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     		return false;
 		}
     };
-	vm.AddLineItem = _addLineItem;
+
+	vm.AddLineItem = _addLineItem;//A previous line item being returned to the current order.
 	function _addLineItem(line) {
 		if(line.TempQty > 0) {
 			line.ID = null;
@@ -806,7 +834,19 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		OrderCloud.Orders.Patch(OrderID, orderPatch, vm.Order.xp.BuyerID)
 			.then(function(order) {
 				angular.forEach(vm.LineItems.Items, function(value, key) {
-					queue.push(OrderCloud.LineItems.Patch(order.ID, value.ID, {xp:{OriginalQty:value.Quantity,OriginalUnitPrice:value.UnitPrice?value.UnitPrice:0,OriginalLeadTime:value.Product.xp.LeadTime}}, vm.Order.xp.BuyerID));
+					var liPatch = {
+						xp: {
+							OriginalSN: value.xp.SN ? value.xp.SN : null,
+							OriginalTagNumber: value.xp.TagNumber ? value.xp.TagNumber : null,
+							OriginalProductName: value.xp.ProductName ? value.xp.ProductName : (value.Product.Name ? value.Product.Name : null),
+							OriginalDescription: value.xp.Description ? value.xp.Description : (value.Product.Description ? value.Product.Description : null),
+							OriginalReplacementSchedule: value.xp.ReplacementSchedule ? value.xp.ReplacementSchedule : (value.Product.xp.ReplacementSchedule ? value.Product.xp.ReplacementSchedule : 0),
+							OriginalLeadTime: value.xp.LeadTime ? value.xp.LeadTime : (value.Product.xp.LeadTime ? value.Product.xp.LeadTime : 0),
+							OriginalQty: value.Quantity ? value.Quantity : 0,
+							OriginalUnitPrice: value.UnitPrice ? value.UnitPrice : 0
+						}
+					};
+					queue.push(OrderCloud.LineItems.Patch(order.ID, value.ID, liPatch, vm.Order.xp.BuyerID));
 				});
 				$q.all(queue)
 					.then(function(results) {
