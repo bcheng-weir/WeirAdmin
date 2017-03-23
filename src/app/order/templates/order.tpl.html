@@ -203,7 +203,7 @@
                          <input type="text" class="form-control input-sm" ng-if="line.xp.LeadTime" ng-model="line.xp.LeadTime" ng-enter="order.NoOp()" />
                      </td>
                      <td>
-                         <input type="" class="form-control input-sm" ng-model="line.UnitPrice" ng-enter="order.NoOp()" />
+                         <input type="text" class="form-control input-sm" ng-model="line.UnitPrice" ng-enter="order.NoOp()" />
                      </td>
                      <td>
                          <input type="number" class="form-control input-sm" ng-model="line.Quantity" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" ng-enter="order.NoOp()" />
