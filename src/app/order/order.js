@@ -546,7 +546,12 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
                 UnitPrice: line.UnitPrice,
                 Quantity: line.Quantity,
                 xp: {
-                    LeadTime: line.xp.LeadTime ? line.xp.LeadTime : line.Product.xp.LeadTime
+	                SerialNumber: line.xp.SN,
+	                TagNumber: line.xp.TagNumber,
+	                PartNumber: line.xp.PartNumber ? line.xp.PartNumber : line.Product.Name,
+	                Description: line.xp.Description ? line.xp.Description : line.Product.Description,
+	                Replacement: line.xp.Replacement ? line.xp.Replacement : line.Product.xp.ReplacementSchedule,
+	                LeadTime: line.xp.LeadTime ? line.xp.LeadTime : line.Product.xp.LeadTime
                 }
             };
             OrderCloud.LineItems.Patch(vm.Order.ID, line.ID, patch, vm.Order.xp.BuyerID)
@@ -577,13 +582,13 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
                 ShippingDescription:  vm.Order.xp.ShippingDescription != null ? vm.Order.xp.ShippingDescription : null
             }
         };
-            OrderCloud.Orders.Patch(vm.Order.ID, patch, OrderCloud.BuyerID.Get())
-                .then(function () {
-                    $state.go($state.current, {}, {reload: true});
-                })
-                .catch(function (ex) {
-                    $exceptionHandler(ex);
-                });
+        OrderCloud.Orders.Patch(vm.Order.ID, patch, OrderCloud.BuyerID.Get())
+            .then(function () {
+                $state.go($state.current, {}, {reload: true});
+            })
+            .catch(function (ex) {
+                $exceptionHandler(ex);
+            });
     }
     vm.ShowUpdatedShipping = function () {
     	if(vm.Order.xp.OldShippingData) {
@@ -781,11 +786,10 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 				Revised: true,
 				ShippingDescription: vm.Order.xp.ShippingDescription != null ? vm.Order.xp.ShippingDescription : null,
 				OriginalOrderID: vm.Order.xp.OriginalOrderID,
-				OldShippingData:
-					{
-						ShippingCost : vm.Order.ShippingCost ,
-						ShippingDescription: vm.Order.xp.ShippingDescription != null ? vm.Order.xp.ShippingDescription : null
-					}
+				OldShippingData: {
+					ShippingCost : vm.Order.ShippingCost ,
+					ShippingDescription: vm.Order.xp.ShippingDescription != null ? vm.Order.xp.ShippingDescription : null
+				}
 			}
 		};
 		if (vm.Order.xp.ReviewerID != currentUser.ID) {
