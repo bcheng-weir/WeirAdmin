@@ -103,13 +103,7 @@ function orderConfig($stateProvider) {
 	            },
 	            UserGroups: function (UserGroupsService) {
 	                return UserGroupsService.UserGroups();
-	            },
-                ShippingCost : function(Order){
-                    return Order.ShippingCost;
-                },
-                ShippingDescription : function(Order){
-                    return Order.xp.ShippingDescription;
-                }
+	            }
 	        }
         })
 	    .state('order.addinfo', {
@@ -128,12 +122,10 @@ function orderConfig($stateProvider) {
 function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGroupsService,
                          OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService,
                          Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService, FileSaver,
-                         UserGroups, BackToListService, PreviousOrderShipping, ShippingDescription, ShippingCost) {
+                         UserGroups, BackToListService) {
     var vm = this;
     vm.Order = Order;
 	vm.Order.xp.PONumber = vm.Order.xp.PONumber != "Pending" ? vm.Order.xp.PONumber : ""; // In the buyer app we were initially setting this to pending.
-    vm.Order.ShippingCost = ShippingCost;
-    vm.Order.xp.ShippingDescription = ShippingDescription;
     vm.LineItems = LineItems;
     vm.BlankItems = [];
     vm.NoOp = function () { };
@@ -319,6 +311,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        PONote: $sce.trustAsHtml("You can also upload a PO document using the upload button below the order details"),
 	        Currency: $sce.trustAsHtml("Currency"),
 	        Back: "Back",
+	        CarriageCharge: "Carriage charge",
+	        Exworks: "Carriage ex-works",
 	        //Enquiry table
 	        PartTypes: $sce.trustAsHtml("Part types for;"),
 	        Brand: $sce.trustAsHtml("Brand"),
@@ -399,8 +393,10 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 						(typeof item.xp.ProductName !== "undefined" && (item.xp.OriginalProductName !== item.xp.ProductName))
 					)
 				) ||
-				(typeof item.xp.OriginalTagNumber !== "undefined" && (item.xp.TagNumber !== item.xp.OriginalTagNumber)) ||
-				(typeof item.xp.OriginalSN !== "undefined" && (item.xp.SN !== item.xp.OriginalSN))
+				(typeof item.xp.OriginalTagNumber !== "undefined" &&
+					typeof item.xp.TagNumber !== "undefined" &&
+					(item.xp.TagNumber !== item.xp.OriginalTagNumber)) ||
+				(typeof item.xp.OriginalSN !== "undefined" && typeof item.xp.SN !== "undefined" && (item.xp.SN !== item.xp.OriginalSN))
 		} else {
 			return false;
 		}
