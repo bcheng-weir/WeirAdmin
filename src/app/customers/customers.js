@@ -327,7 +327,7 @@ function CustomerCtrl($state, $ocMedia, OrderCloud, OrderCloudParameters, Parame
     };
 }
 
-function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, OrderCloud, SelectedBuyer, WeirGroup, AddressList, CustomerService, Parameters, Underscore, OrderCloudParameters, WeirService) {
+function CustomerEditCtrl($exceptionHandler, $state, $ocMedia, toastr, OrderCloud, SelectedBuyer, WeirGroup, AddressList, CustomerService, Parameters, Underscore, OrderCloudParameters, WeirService) {
     var vm = this;
     //$scope.$state = $state;
     vm.Group = WeirGroup;
@@ -570,7 +570,7 @@ function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, O
     vm.saveCarriage = function() {
 		var upd = {
 			xp: {
-				UseCustomCarriageRate:	vm.buyer.xp.UseCustomCarriageRate,
+				UseCustomCarriageRate: vm.buyer.xp.UseCustomCarriageRate,
 				CustomCarriageRate: vm.buyer.xp.CustomCarriageRate
 			}
 		};

@@ -103,7 +103,13 @@ function orderConfig($stateProvider) {
 	            },
 	            UserGroups: function (UserGroupsService) {
 	                return UserGroupsService.UserGroups();
-	            }
+	            },
+	            Buyer: function(OrderCloud,Order) {
+		            return OrderCloud.Buyers.Get(Order.FromCompanyID);
+	            },
+		        Catalog: function(OrderCloud,Buyer) {
+			        return OrderCloud.Catalogs.Get(Buyer.xp.WeirGroup.label);
+		        }
 	        }
         })
 	    .state('order.addinfo', {
@@ -122,7 +128,8 @@ function orderConfig($stateProvider) {
 function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGroupsService,
                          OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService,
                          Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService, FileSaver,
-                         UserGroups, BackToListService) {
+                         UserGroups, BackToListService, Buyer, Catalog) {
+	determineShipping();
     var vm = this;
     vm.Order = Order;
 	vm.Order.xp.PONumber = vm.Order.xp.PONumber != "Pending" ? vm.Order.xp.PONumber : ""; // In the buyer app we were initially setting this to pending.
@@ -368,7 +375,14 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		// return true if qty <> xp.originalQty and qty > 0
 		if(item.xp) {
 			return (item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty)) ||
-				(item.xp.OriginalUnitPrice && (item.xp.OriginalUnitPrice===0 || (item.UnitPrice != item.xp.OriginalUnitPrice))) ||
+				(typeof item.xp.OriginalUnitPrice !== "undefined" &&
+					(
+						item.xp.OriginalUnitPrice !== 0 &&
+						(
+							item.UnitPrice != item.xp.OriginalUnitPrice
+						)
+					)
+				) ||
 				(typeof item.xp.OriginalLeadTime !== "undefined" &&
 					(
 						(typeof item.Product.xp.LeadTime !== "undefined" && (item.xp.OriginalLeadTime !== item.Product.xp.LeadTime)) ||
@@ -925,9 +939,21 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
             });
 	    }
 	}
+
+	function determineShipping() {
+		if (Order.xp.ShippingDescription !== null) return;
+		// No shipping is set for the order. Determine defaults.
+		Order.xp.ShippingDescription = "Carriage charge";
+		Order.xp.CarriageRateType = "standard";
+		if(Buyer.xp.UseCustomCarriageRate === true) {
+			Order.ShippingCost = Buyer.xp.CustomCarriageRate;
+		} else {
+			Order.ShippingCost = Catalog.xp.StandardCarriage;
+		}
+	}
 }
 
-function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, $scope, OrderCloud, WeirService, Order) {
+function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, OrderCloud, WeirService, Order) {
 	var vm = this;
     vm.Order = Order;
     vm.Order.xp.DateDespatched = vm.Order.xp.DateDespatched == null ? null : new Date(vm.Order.xp.DateDespatched);
