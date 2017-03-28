@@ -109,7 +109,13 @@ function orderConfig($stateProvider) {
                 },
                 ShippingDescription : function(Order){
                     return Order.xp.ShippingDescription;
-                }
+                },
+		        Buyer: function(OrderCloud,Order) {
+			        return OrderCloud.Buyers.Get(Order.FromCompanyID);
+		        },
+		        Catalog: function(OrderCloud,Buyer) {
+			        return OrderCloud.Catalogs.Get(Buyer.xp.WeirGroup.label);
+		        }
 	        }
         })
 	    .state('order.addinfo', {
@@ -128,8 +134,9 @@ function orderConfig($stateProvider) {
 function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGroupsService,
                          OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService,
                          Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService, FileSaver,
-                         UserGroups, BackToListService, PreviousOrderShipping, ShippingDescription, ShippingCost) {
-    var vm = this;
+                         UserGroups, BackToListService, ShippingDescription, ShippingCost, Buyer, Catalog) {
+	determineShipping();
+	var vm = this;
     vm.Order = Order;
 	vm.Order.xp.PONumber = vm.Order.xp.PONumber != "Pending" ? vm.Order.xp.PONumber : ""; // In the buyer app we were initially setting this to pending.
     vm.Order.ShippingCost = ShippingCost;
@@ -865,6 +872,18 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
                 }
             });
 	    }
+	}
+
+	function determineShipping() {
+		if (Order.xp.ShippingDescription !== null) return;
+		// No shipping is set for the order. Determine defaults.
+		Order.xp.ShippingDescription = "Carriage charge";
+		Order.xp.CarriageRateType = "standard";
+		if(Buyer.xp.UseCustomCarriageRate === true) {
+			Order.ShippingCost = Buyer.xp.CustomCarriageRate;
+		} else {
+			Order.ShippingCost = Catalog.xp.StandardCarriage;
+		}
 	}
 }
 

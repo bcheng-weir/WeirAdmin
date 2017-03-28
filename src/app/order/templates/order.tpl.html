@@ -218,21 +218,18 @@
                      <td></td>
                      <td></td>
                      <td></td>
-                     <td ng-if="order.Order.xp.CarriageRateType == 'standard'" ng-bind-html="order.labels.CarriageCharge"></td>
-                     <td ng-if="order.Order.xp.CarriageRateType == 'exworks' && order.Order.xp.Status!='RE'" ng-bind-html="order.Order.xp.ShippingDescription"></td>
-                     <td ng-if="order.Order.xp.CarriageRateType == 'exworks' && order.Order.xp.Status=='RE'">
-                         <input type="text" name="ShippingDescription" ng-model="order.Order.xp.ShippingDescription"
-                                maxlength="100" required ng-trim="false">
+                     <td ng-if="order.Order.xp.Status!='RE' && order.Order.xp.Status!='ER'" ng-bind-html="order.Order.xp.ShippingDescription"></td>
+                     <td ng-if="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'">
+                         <input type="text" class="form-control" name="ShippingDescription" ng-model="order.Order.xp.ShippingDescription"
+                                maxlength="100" required ng-trim="false" placeholder="Carriage Type">
                      </td>
                      <td></td>
                      <td></td>
-                     <td ng-if="order.Order.xp.Status=='RE'">
-                         <input type="text" name="ShippingPrice" ng-model="order.Order.ShippingCost"
-                                ng-pattern="/^[0-9\.]*$/" required ng-trim="false" ng-if="order.Order.xp.CustomerID.substring(0,5) == 'WVCUK' && (order.Order.xp.CarriageRateType == 'standard' || order.Order.xp.CarriageRateType == 'exworks')">
-                         <input type="text" name="ShippingPrice" ng-model="order.Order.ShippingCost"
-                                ng-pattern="/^[0-9\.]*$/" required ng-trim="false" ng-if="order.Order.xp.CustomerID.substring(0,5) == 'WPIFR' && (order.Order.xp.CarriageRateType == 'standard' || order.Order.xp.CarriageRateType == 'exworks')">
+                     <td ng-if="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'">
+                         <input type="text" class="form-control" name="ShippingPrice" ng-model="order.Order.ShippingCost"
+                                ng-pattern="/^[0-9\.]*$/" required ng-trim="false" palceholder="Carriage Rate">
                      </td>
-                     <td ng-switch on="order.Order.xp.CustomerID | weirGroupFromBuyersID" class='text-right' ng-if="order.Order.xp.Status!='RE'">
+                     <td ng-switch on="order.Order.xp.CustomerID | weirGroupFromBuyersID" class='text-right' ng-if="order.Order.xp.Status!='RE' && order.Order.xp.Status!='ER'">
                          <span ng-switch-when="WPIFR" ng-bind-html="order.Order.ShippingCost | currency:'&euro; '"></span>
                          <span ng-switch-when="WVCUK" ng-bind-html="order.Order.ShippingCost | currency:'&#163; '"></span>
                          <span ng-switch-default ng-bind-html="order.Order.ShippingCost | currency:'&#163; '"></span>
@@ -244,7 +241,6 @@
                              <span class="label label-warning" ng-show="order.ShowUpdatedShipping()" ng-bind-html="order.labels.Updated"></span>
                          </h4>
                      </td>
-
                  </tr>
 
                  <tr ng-if="order.LineItems.Items.length > 0">
