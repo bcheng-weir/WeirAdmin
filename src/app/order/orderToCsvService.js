@@ -1,7 +1,11 @@
 angular.module('orderCloud')
     .service('OrderToCsvService', OrderToCsvService);
 
-function OrderToCsvService($filter) {
+function OrderToCsvService($filter,$sce,OCGeography,Underscore) {
+	function country (c) {
+		var result = Underscore.findWhere(OCGeography.Countries, { value: c });
+		return result ? result.label : '';
+	}
     function ToCsvJson(Order, LineItems, DeliveryAddress, Payments, Labels) {
         var payment = null;
         if (Payments && Payments.length) {
@@ -39,14 +43,28 @@ function OrderToCsvService($filter) {
             line.push(item.Quantity);
             data.push(line);
         });
+        data.push(["","","",Order.xp.ShippingDescription,"","",currency,Order.ShippingCost,""]);
         data.push(["", "", "", "", "", Labels.Total, currency[Order.xp.BuyerID.substring(0,5)], Order.Total]);
         data.push(["", ""]);
         data.push([Labels.DeliveryAddress]);
-        data.push([DeliveryAddress.FirstName + " " + DeliveryAddress.LastName]);
-        data.push([DeliveryAddress.CompanyName]);
-        data.push([DeliveryAddress.Street1]);
-        data.push([DeliveryAddress.Street2]);
-        data.push([DeliveryAddress.City]);
+	    if (DeliveryAddress) {
+		    if(DeliveryAddress.Country=="GB") {
+			    data.push([DeliveryAddress.FirstName + " " + DeliveryAddress.LastName, ""]);
+			    data.push([DeliveryAddress.CompanyName]);
+			    data.push([DeliveryAddress.Street1]);
+			    DeliveryAddress.Street2 ? data.push([DeliveryAddress.Street2]) : null;
+			    data.push([DeliveryAddress.City]);
+			    data.push([DeliveryAddress.Zip]);
+			    data.push([country(DeliveryAddress.Country)]);
+		    } else if (DeliveryAddress.Country=="FR") {
+			    data.push([DeliveryAddress.FirstName + " " + DeliveryAddress.LastName, ""]);
+			    data.push([DeliveryAddress.CompanyName]);
+			    data.push([DeliveryAddress.Street1]);
+			    DeliveryAddress.Street2 ? data.push([DeliveryAddress.Street2]) : null;
+			    data.push([DeliveryAddress.Zip, "", DeliveryAddress.City]);
+			    data.push([country(DeliveryAddress.Country)]);
+		    }
+	    }
 
 	    data.push(["", ""]);
 	    data.push([Labels.Comments]);
