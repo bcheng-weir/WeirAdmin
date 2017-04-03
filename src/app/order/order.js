@@ -830,6 +830,11 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 				}
 			}
 		};
+		if (orderPatch.xp.WasEnquiry && (orderPatch.xp.Status == WeirService.OrderStatus.EnquiryReview.id)) { //The first revision.
+			orderPatch.xp.WasEnquiry = vm.Order.xp.WasEnquiry; //Needed for the enquiry webhook.
+		} else if (orderPatch.xp.WasEnquiry && orderPatch.xp.WasEnquiry == true) { //second revision.
+			orderPatch.xp.WasEnquiry = false;
+		}
 		if (vm.Order.xp.ReviewerID != currentUser.ID) {
 		    orderPatch.xp.ReviewerID = currentUser.ID;
 		    orderPatch.xp.ReviewerEmail = currentUser.Email;
