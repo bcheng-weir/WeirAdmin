@@ -286,13 +286,13 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			revisionsList: $sce.trustAsHtml(vm.xpType + " revisions for " + vm.xpType + "; " + Parameters.filters["xp.OriginalOrderID"]),
 			selectRevision:$sce.trustAsHtml("Select ‘view’ to view previous revisions for reference"),
 			viewRevision: $sce.trustAsHtml("You can view and update the current revision"),
-			StatusRV: $sce.trustAsHtml("FR: Status RV = Revised Quote"),
-			StatusRO: $sce.trustAsHtml("FR: Status RO = Revised Order"),
-			StatusRR: $sce.trustAsHtml("FR: Status RR = Rejected Revised Order"),
-			StatusRQ: $sce.trustAsHtml("FR: Status RQ = Rejected Quote"),
-			StatusEN: $sce.trustAsHtml("FR: Status EN = Enquiry Submitted"),
-			StatusER: $sce.trustAsHtml("FR: Status ER = Enquiry Under Review"),
-			enquiriesSubmitted: $sce.trustAsHtml("FR: Enquiries submitted")
+			StatusRV: $sce.trustAsHtml("Status RV = Revised Quote"),
+			StatusRO: $sce.trustAsHtml("Status RO = Revised Order"),
+			StatusRR: $sce.trustAsHtml("Status RR = Rejected Revised Order"),
+			StatusRQ: $sce.trustAsHtml("Status RQ = Rejected Quote"),
+			StatusEN: $sce.trustAsHtml("Status EN = Enquiry Submitted"),
+			StatusER: $sce.trustAsHtml("Status ER = Enquiry Under Review"),
+			enquiriesSubmitted: $sce.trustAsHtml("Enquiries submitted")
 		}
 	};
 	vm.labels = labels.en;

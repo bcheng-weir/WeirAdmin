@@ -275,9 +275,9 @@ function FeedbackController($sce, $uibModalInstance, $state, OrderCloud, WeirSer
             suggestion: "Suggestion"
         },
         fr: {
-            title: $sce.trustAsHtml("FR: Please send us your feedback and suggestions"),
-            bugDefect: $sce.trustAsHtml("FR: Bug or error"),
-            suggestion: $sce.trustAsHtml("FR: Suggestion")
+            title: $sce.trustAsHtml("Please send us your feedback and suggestions"),
+            bugDefect: $sce.trustAsHtml("Bug or error"),
+            suggestion: $sce.trustAsHtml("Suggestion")
         }
     };
     vm.labels = WeirService.LocaleResources(labels);

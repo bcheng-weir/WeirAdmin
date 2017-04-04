@@ -994,15 +994,15 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, O
             Cancel: "Cancel",
             Back: "Back"
         }, fr: {
-            OrderNumber: $sce.trustAsHtml("FR: Order Number"),
-            BackToOrders: $sce.trustAsHtml("FR: Back to Orders"),
-            ContractNumber: $sce.trustAsHtml("FR: Contract number"),
-            DeliveryDate: $sce.trustAsHtml("FR: Delivery date"),
-            DespatchDate: $sce.trustAsHtml("FR: Date despatched"),
-            InvoiceNum: $sce.trustAsHtml("FR: Invoice Number"),
-            NotificationText: $sce.trustAsHtml("FR: Your customer will be sent a notification when you save details on this page."),
-            Save: $sce.trustAsHtml("FR: Save"),
-            Cancel: $sce.trustAsHtml("FR: Cancel"),
+            OrderNumber: $sce.trustAsHtml("Order Number"),
+            BackToOrders: $sce.trustAsHtml("Back to Orders"),
+            ContractNumber: $sce.trustAsHtml("Contract number"),
+            DeliveryDate: $sce.trustAsHtml("Delivery date"),
+            DespatchDate: $sce.trustAsHtml("Date despatched"),
+            InvoiceNum: $sce.trustAsHtml("Invoice Number"),
+            NotificationText: $sce.trustAsHtml("Your customer will be sent a notification when you save details on this page."),
+            Save: $sce.trustAsHtml("Save"),
+            Cancel: $sce.trustAsHtml("Cancel"),
 	        Back: "Back"
         }
     };
