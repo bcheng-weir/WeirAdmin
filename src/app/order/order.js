@@ -673,7 +673,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			xp: {
 				Status: orderType[vm.Order.xp.Type],
 				StatusDate: new Date(),
-				ReviewerName: currentUser.FirstName + " " + currentUser.LastName
+				ReviewerName: currentUser.FirstName + " " + currentUser.LastName,
+				ShippingDescription: vm.Order.xp.ShippingDescription
 			}
 		};
 		if (vm.Order.xp.ReviewerID != currentUser.ID) {
