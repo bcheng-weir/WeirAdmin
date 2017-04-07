@@ -31,10 +31,10 @@
                 <li uib-dropdown ng-if="!base.currentUser.Anonymous">
                     <a href="#" uib-dropdown-toggle role="button">{{base.labels.orders}} <span class="caret"></span></a>
                     <ul uib-dropdown-menu>
+                        <li><a href="" ng-click="base.OrderAction('EnquiryQuotes')">{{base.labels.enquiryQuotes}}</a></li>
                         <li><a href="" ng-click="base.OrderAction('ReviewQuotes')">{{base.labels.quotesForReview}}</a></li>
                         <li><a href="" ng-click="base.OrderAction('RevisedQuotes')">{{base.labels.revisedQuotes}}</a></li>
                         <li><a href="" ng-click="base.OrderAction('ConfirmedQuotes')">{{base.labels.confirmedQuotes}}</a></li>
-                        <li><a href="" ng-click="base.OrderAction('EnquiryQuotes')">{{base.labels.enquiryQuotes}}</a></li>
                         <li><a href="" ng-click="base.OrderAction('POOrders')">{{base.labels.ordersSubmittedPO}}</a></li>
                         <li><a href="" ng-click="base.OrderAction('PendingPO')">{{base.labels.pendingPO}}</a></li>
                         <li><a href="" ng-click="base.OrderAction('RevisedOrders')">{{base.labels.revisedOrders}}</a></li>

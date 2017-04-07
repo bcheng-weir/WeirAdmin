@@ -669,6 +669,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		};
 
 		var patch = {
+			ShippingCost: vm.Order.ShippingCost,
 			xp: {
 				Status: orderType[vm.Order.xp.Type],
 				StatusDate: new Date(),
