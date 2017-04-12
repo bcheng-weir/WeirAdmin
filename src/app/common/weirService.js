@@ -540,8 +540,8 @@ function WeirService($q, $cookieStore, $sce, OrderCloud, CurrentOrder, buyernetw
                                 // Set the local impersonation token so that As() can be used.
                                 OrderCloud.Auth.SetImpersonationToken(data['access_token']);
                             }).then(function () {
-                                return OrderCloud.Products.List(null, 1, 50, null, null, { "Name": number, "catalogID": miniCartBuyer.WeirGroup }) //search, page, pageSize, searchOn, sortBy, filters
-                                //OrderCloud.As().Me.ListProducts(null, 1, 50, null, null, {"Name": number+"*"}, null, miniCartBuyer.BuyerID.substring(0, 5))
+                                //return OrderCloud.Products.List(null, 1, 50, null, null, { "Name": number, "catalogID": miniCartBuyer.WeirGroup }) //search, page, pageSize, searchOn, sortBy, filters
+                                return OrderCloud.As().Me.ListProducts(null, 1, 50, null, null, {"Name": number+"*"}, null, miniCartBuyer.WeirGroup);
                             })
                             .then(function (products) {
                                 if (products.Items.length == 0) {
