@@ -165,7 +165,6 @@
                      <td ng-bind-html="line.Quantity"></td>
                      <td style="border:0;width:100px;">
                          <h4>
-                             <span class="label label-default" ng-show="order.ShowEdit(order.Order.xp.Status, line)" ng-bind-html="order.labels.Edit" ng-click="order.EditLineItem(line)"></span>
                              <span class="label label-warning" ng-show="order.ShowUpdated(line)" ng-bind-html="order.labels.Updated"></span>
                              <span class="label label-success" ng-show="order.ShowNew(line)" ng-bind-html="order.labels.New"></span>
                          </h4>
@@ -203,7 +202,7 @@
                      </td>
                      <td style="border:0;width:100px;">
                          <h4>
-                             <span class="label label-default" ng-show="order.ShowEdit(order.Order.xp.Status, line)" ng-bind-html="order.labels.Edit" ng-click="order.EditLineItem(line)"></span>
+                             <span class="label label-default" ng-show="order.ShowEdit(order.Order.xp.Status, line)" ng-bind-html="order.labels.Edit" ng-click="order.EditLineItems()"></span>
                              <span class="label label-warning" ng-show="order.ShowUpdated(line)" ng-bind-html="order.labels.Updated"></span>
                              <span class="label label-success" ng-show="order.ShowNew(line)" ng-bind-html="order.labels.New"></span>
                          </h4>

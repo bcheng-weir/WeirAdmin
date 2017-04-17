@@ -573,41 +573,64 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		}
 	}
 
-	vm.EditLineItem = _editLineItem;
-    function _editLineItem(line) {
-        // ToDo If the qty is 0, then delete the line item. The prior revision will display a removed.
-        if(line.Quantity > 0) {
-            // Is this a placeholder item?
-            var patch = {
-                UnitPrice: line.UnitPrice,
-                Quantity: line.Quantity,
-                xp: {
-	                SN: line.xp.SN,
-	                TagNumber: line.xp.TagNumber,
-	                ProductName: line.xp.ProductName ? line.xp.ProductName : line.Product.Name,
-	                Description: line.xp.Description ? line.xp.Description : line.Product.Description,
-	                ReplacementSchedule: line.xp.ReplacementSchedule ? line.xp.ReplacementSchedule : line.Product.xp.ReplacementSchedule,
-	                LeadTime: line.xp.LeadTime ? line.xp.LeadTime : line.Product.xp.LeadTime
-                }
-            };
-            OrderCloud.LineItems.Patch(vm.Order.ID, line.ID, patch, vm.Order.xp.BuyerID)
-                .then(function () {
-                    $rootScope.$broadcast('SwitchCart');
-                    $state.go($state.current, {}, {reload: true});
-                })
-                .catch(function (ex) {
-                    $exceptionHandler(ex);
-                });
-        } else {
-            OrderCloud.LineItems.Delete(vm.Order.ID, line.ID, vm.Order.xp.BuyerID)
-                .then(function () {
-                    $rootScope.$broadcast('SwitchCart');
-                    $state.go($state.current, {}, {reload: true});
-                })
-                .catch(function (ex) {
-                    $exceptionHandler(ex);
-                });
-        }
+	vm.saveLineItems = function() {
+		var queue = [];
+		var deferred = $q.defer();
+
+		angular.forEach(vm.LineItems.Items, function(line,key) {
+			console.log(line);
+			var d = $q.defer();
+			queue.push((function() {
+				if(line.Quantity > 0) {
+					// Is this a placeholder item?
+					var patch = {
+						UnitPrice: line.UnitPrice,
+						Quantity: line.Quantity,
+						xp: {
+							SN: line.xp.SN,
+							TagNumber: line.xp.TagNumber,
+							ProductName: line.xp.ProductName ? line.xp.ProductName : line.Product.Name,
+							Description: line.xp.Description ? line.xp.Description : line.Product.Description,
+							ReplacementSchedule: line.xp.ReplacementSchedule ? line.xp.ReplacementSchedule : line.Product.xp.ReplacementSchedule,
+							LeadTime: line.xp.LeadTime ? line.xp.LeadTime : line.Product.xp.LeadTime
+						}
+					};
+					OrderCloud.LineItems.Patch(vm.Order.ID, line.ID, patch, vm.Order.xp.BuyerID)
+						.then(function (results) {
+							d.resolve(results);
+						})
+						.catch(function (ex) {
+							d.resolve(ex);
+						});
+				} else {
+					OrderCloud.LineItems.Delete(vm.Order.ID, line.ID, vm.Order.xp.BuyerID)
+						.then(function (results) {
+							d.resolve(results);
+						})
+						.catch(function (ex) {
+							d.resolve(ex);
+						});
+				}
+				return d.promise;
+			})());
+		});
+
+		$q.all(queue)
+			.then(function(temp) {
+				deferred.resolve(temp);
+			})
+			.catch(function(ex) {
+				deferred.resolve(ex);
+			});
+
+		return deferred.promise;
+	};
+
+	vm.EditLineItems = _editLineItems;
+    function _editLineItems() {
+    	vm.saveLineItems();
+	    $rootScope.$broadcast('SwitchCart');
+	    $state.go($state.current, {}, {reload: true});
     }
 
     vm.EditOrderShipping = _editShipping;
