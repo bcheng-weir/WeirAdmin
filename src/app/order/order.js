@@ -104,15 +104,9 @@ function orderConfig($stateProvider) {
 	            UserGroups: function (UserGroupsService) {
 	                return UserGroupsService.UserGroups();
 	            },
-                ShippingCost : function(Order){
-                    return Order.ShippingCost;
-                },
-                ShippingDescription : function(Order){
-                    return Order.xp.ShippingDescription;
-                },
-		        Buyer: function(OrderCloud,Order) {
-			        return OrderCloud.Buyers.Get(Order.FromCompanyID);
-		        },
+	            Buyer: function(OrderCloud,Order) {
+		            return OrderCloud.Buyers.Get(Order.FromCompanyID);
+	            },
 		        Catalog: function(OrderCloud,Buyer) {
 			        return OrderCloud.Catalogs.Get(Buyer.xp.WeirGroup.label);
 		        }
@@ -134,13 +128,11 @@ function orderConfig($stateProvider) {
 function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGroupsService,
                          OrderCloud, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService,
                          Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService, FileSaver,
-                         UserGroups, BackToListService, ShippingDescription, ShippingCost, Buyer, Catalog) {
+                         UserGroups, BackToListService, Buyer, Catalog) {
 	determineShipping();
-	var vm = this;
+    var vm = this;
     vm.Order = Order;
 	vm.Order.xp.PONumber = vm.Order.xp.PONumber != "Pending" ? vm.Order.xp.PONumber : ""; // In the buyer app we were initially setting this to pending.
-    vm.Order.ShippingCost = ShippingCost;
-    vm.Order.xp.ShippingDescription = ShippingDescription;
     vm.LineItems = LineItems;
     vm.BlankItems = [];
     vm.NoOp = function () { };
@@ -187,7 +179,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	vm.showReviewer = [WeirService.OrderStatus.Submitted.id, WeirService.OrderStatus.Review.id,
 			WeirService.OrderStatus.SubmittedWithPO.id, WeirService.OrderStatus.SubmittedPendingPO.id,
 			WeirService.OrderStatus.RevisedQuote.id, WeirService.OrderStatus.RevisedOrder.id,
-			WeirService.OrderStatus.SubmittedPendingPO.id, WeirService.OrderStatus.ConfirmedQuote.id].indexOf(vm.Order.xp.Status) > -1;
+			WeirService.OrderStatus.SubmittedPendingPO.id, WeirService.OrderStatus.ConfirmedQuote.id,
+			WeirService.OrderStatus.Enquiry.id, WeirService.OrderStatus.EnquiryReview.id].indexOf(vm.Order.xp.Status) > -1;
 	vm.showAssign = vm.showReviewer && (Me.ID != vm.Order.xp.ReviewerID) && (userIsInternalSalesAdmin || userIsSuperAdmin);
     /*vm.PONumber = "";
 	var payment = (vm.Payments.Items.length > 0) ? vm.Payments.Items[0] : null;
@@ -196,6 +189,11 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     vm.LineItemZero = function() {
     	return Underscore.findWhere(vm.LineItems.Items,{LineTotal:0});
     };
+
+    vm.InvalidPO = function() {
+        return vm.Order.xp.Type=="Order" && ((vm.Order.xp.PONumber == "Pending" || vm.Order.xp.PONumber == "") || (vm.Order.xp.PODocument == "" || vm.Order.xp.PODocument == null));
+    };
+
     var labels = {
         en: {
             //header labels
@@ -256,7 +254,11 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        Currency: "Currency",
 	        Back: "Back",
             CarriageCharge: "Carriage charge",
-            Exworks: "Carriage ex-works"
+            Exworks: "Carriage ex-works",
+	        //Eunquiry table
+	        PartTypes: "Part types for;",
+	        Brand: "Brand",
+	        ValveType: "Valve type"
         },
         fr: {
             //header labels
@@ -309,13 +311,19 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        Cancel: $sce.trustAsHtml("Cancel"),
 	        POSaveTitle: $sce.trustAsHtml("PO Number Updated"),
 	        POSaveMessage: $sce.trustAsHtml("PO Number saved as: "),
-	        DragAndDrop: $sce.trustAsHtml("FR: Drag and drop files here to upload"),
-	        OrderAssignedMsg: $sce.trustAsHtml("FR:This order has been assigned to you"),
-	        QuoteAssignedMsg: $sce.trustAsHtml("FR:This quote has been assigned to you"),
-	        POPlaceHolder: $sce.trustAsHtml("FR:Enter PO Number"),
-	        PONote: $sce.trustAsHtml("FR: You can also upload a PO document using the upload button below the order details"),
+	        DragAndDrop: $sce.trustAsHtml("Drag and drop files here to upload"),
+	        OrderAssignedMsg: $sce.trustAsHtml("This order has been assigned to you"),
+	        QuoteAssignedMsg: $sce.trustAsHtml("This quote has been assigned to you"),
+	        POPlaceHolder: $sce.trustAsHtml("Enter PO Number"),
+	        PONote: $sce.trustAsHtml("You can also upload a PO document using the upload button below the order details"),
 	        Currency: $sce.trustAsHtml("Currency"),
-	        Back: "Back"
+	        Back: "Back",
+	        CarriageCharge: "Carriage charge",
+	        Exworks: "Carriage ex-works",
+	        //Enquiry table
+	        PartTypes: $sce.trustAsHtml("Part types for;"),
+	        Brand: $sce.trustAsHtml("Brand"),
+	        ValveType: $sce.trustAsHtml("Valve type")
         }
     };
     vm.labels = labels[WeirService.Locale()];
@@ -360,18 +368,53 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 
 	vm.ShowEdit = _showEdit;
 	function _showEdit(status, item) {
-		return status==WeirService.OrderStatus.Review.id;
+		return status==WeirService.OrderStatus.Review.id || status==WeirService.OrderStatus.EnquiryReview.id;
 	}
 
 	vm.ShowUpdated = function (item) {
 		// return true if qty <> xp.originalQty and qty > 0
 		if(item.xp) {
-			return (item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty)) || (item.xp.OriginalUnitPrice && (item.xp.OriginalUnitPrice===0 || (item.UnitPrice != item.xp.OriginalUnitPrice))) || (item.xp.OriginalLeadTime && ((item.Product.xp.LeadTime != item.xp.OriginalLeadTime) || (item.xp.LeadTime && item.xp.LeadTime != item.Product.xp.LeadTime )));
+			return (item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty)) ||
+				(typeof item.xp.OriginalUnitPrice !== "undefined" &&
+					(
+						item.xp.OriginalUnitPrice !== 0 &&
+						(
+							item.UnitPrice != item.xp.OriginalUnitPrice
+						)
+					)
+				) ||
+				(typeof item.xp.OriginalLeadTime !== "undefined" &&
+					(
+						(typeof item.Product.xp.LeadTime !== "undefined" && (item.xp.OriginalLeadTime !== item.Product.xp.LeadTime)) ||
+						(typeof item.xp.LeadTime !== "undefined" && (item.xp.OriginalLeadTime !== item.xp.LeadTime))
+					)
+				) ||
+				(typeof item.xp.OriginalReplacementSchedule !== "undefined" &&
+					(
+						(typeof item.Product.xp.ReplacementSchedule !== "undefined" && (item.xp.OriginalReplacementSchedule !== item.Product.xp.ReplacementSchedule)) ||
+						(typeof item.xp.ReplacementSchedule !== "undefined" && (item.xp.OriginalReplacementSchedule !== item.xp.ReplacementSchedule))
+					)
+				) ||
+				(typeof item.xp.OriginalDescription !== "undefined" &&
+					(
+						(typeof item.Product.xp.Description !== "undefined" && (item.xp.OriginalDescription !== item.Product.xp.Description)) ||
+						(typeof item.xp.Description !== "undefined" && (item.xp.OriginalDescription !== item.xp.Description))
+					)
+				) ||
+				(typeof item.xp.OriginalProductName !== "undefined" &&
+					(
+						(typeof item.Product.xp.Name !== "undefined" && (item.xp.OriginalProductName !== item.Product.xp.Name)) ||
+						(typeof item.xp.ProductName !== "undefined" && (item.xp.OriginalProductName !== item.xp.ProductName))
+					)
+				) ||
+				(typeof item.xp.OriginalTagNumber !== "undefined" &&
+					typeof item.xp.TagNumber !== "undefined" &&
+					(item.xp.TagNumber !== item.xp.OriginalTagNumber)) ||
+				(typeof item.xp.OriginalSN !== "undefined" && typeof item.xp.SN !== "undefined" && (item.xp.SN !== item.xp.OriginalSN))
 		} else {
 			return false;
 		}
 	};
-
 
 	vm.ShowRemoved = _showRemoved;
 	function _showRemoved(line) {
@@ -412,7 +455,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			SP: true,
 			RQ: true,
 			RR: true,
-			SE: true
+			SE: true,
+			EN: true
 		};
 		if(vm.Order.xp) {
 			return validStatus[vm.Order.xp.Status] && vm.Order.xp.ReviewerID == Me.ID;
@@ -424,7 +468,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	vm.ShowShareRevision = _showShareRevision;
 	function _showShareRevision() {
 		var validStatus = {
-			RE: true
+			RE: true,
+			ER: true
 		};
 		if(vm.Order.xp) {
 			return validStatus[vm.Order.xp.Status];
@@ -450,7 +495,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	vm.ShowAddItems = _showAddItems;
 	function _showAddItems() {
 		var validStatus = {
-			RE: true
+			RE: true,
+			ER: true
 		};
 		if(vm.Order.xp) {
 			return validStatus[vm.Order.xp.Status];
@@ -519,44 +565,72 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 					"TagNumber": null,
 					"ProductName": null,
 					"Description": null,
-					"ReplacementSchedule": null,
-					"LeadTime": null
+					"ReplacementSchedule": 0,
+					"LeadTime": 0
 				}
 			};
 			vm.BlankItems.push(newItem);
 		}
 	}
 
-	vm.EditLineItem = _editLineItem;
-    function _editLineItem(line) {
-        // ToDo If the qty is 0, then delete the line item. The prior revision will display a removed.
-        if(line.Quantity > 0) {
-            // Is this a placeholder item?
-            var patch = {
-                UnitPrice: line.UnitPrice,
-                Quantity: line.Quantity,
-                xp: {
-                    LeadTime: line.xp.LeadTime ? line.xp.LeadTime : line.Product.xp.LeadTime
-                }
-            };
-            OrderCloud.LineItems.Patch(vm.Order.ID, line.ID, patch, vm.Order.xp.BuyerID)
-                .then(function () {
-                    $rootScope.$broadcast('SwitchCart');
-                    $state.go($state.current, {}, {reload: true});
-                })
-                .catch(function (ex) {
-                    $exceptionHandler(ex);
-                });
-        } else {
-            OrderCloud.LineItems.Delete(vm.Order.ID, line.ID, vm.Order.xp.BuyerID)
-                .then(function () {
-                    $rootScope.$broadcast('SwitchCart');
-                    $state.go($state.current, {}, {reload: true});
-                })
-                .catch(function (ex) {
-                    $exceptionHandler(ex);
-                });
-        }
+	vm.saveLineItems = function() {
+		var queue = [];
+		var deferred = $q.defer();
+
+		angular.forEach(vm.LineItems.Items, function(line,key) {
+			console.log(line);
+			var d = $q.defer();
+			queue.push((function() {
+				if(line.Quantity > 0) {
+					// Is this a placeholder item?
+					var patch = {
+						UnitPrice: line.UnitPrice,
+						Quantity: line.Quantity,
+						xp: {
+							SN: line.xp.SN,
+							TagNumber: line.xp.TagNumber,
+							ProductName: line.xp.ProductName ? line.xp.ProductName : line.Product.Name,
+							Description: line.xp.Description ? line.xp.Description : line.Product.Description,
+							ReplacementSchedule: line.xp.ReplacementSchedule ? line.xp.ReplacementSchedule : line.Product.xp.ReplacementSchedule,
+							LeadTime: line.xp.LeadTime ? line.xp.LeadTime : line.Product.xp.LeadTime
+						}
+					};
+					OrderCloud.LineItems.Patch(vm.Order.ID, line.ID, patch, vm.Order.xp.BuyerID)
+						.then(function (results) {
+							d.resolve(results);
+						})
+						.catch(function (ex) {
+							d.resolve(ex);
+						});
+				} else {
+					OrderCloud.LineItems.Delete(vm.Order.ID, line.ID, vm.Order.xp.BuyerID)
+						.then(function (results) {
+							d.resolve(results);
+						})
+						.catch(function (ex) {
+							d.resolve(ex);
+						});
+				}
+				return d.promise;
+			})());
+		});
+
+		$q.all(queue)
+			.then(function(temp) {
+				deferred.resolve(temp);
+			})
+			.catch(function(ex) {
+				deferred.resolve(ex);
+			});
+
+		return deferred.promise;
+	};
+
+	vm.EditLineItems = _editLineItems;
+    function _editLineItems() {
+    	vm.saveLineItems();
+	    $rootScope.$broadcast('SwitchCart');
+	    $state.go($state.current, {}, {reload: true});
     }
 
     vm.EditOrderShipping = _editShipping;
@@ -567,14 +641,15 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
                 ShippingDescription:  vm.Order.xp.ShippingDescription != null ? vm.Order.xp.ShippingDescription : null
             }
         };
-            OrderCloud.Orders.Patch(vm.Order.ID, patch, OrderCloud.BuyerID.Get())
-                .then(function () {
-                    $state.go($state.current, {}, {reload: true});
-                })
-                .catch(function (ex) {
-                    $exceptionHandler(ex);
-                });
+        OrderCloud.Orders.Patch(vm.Order.ID, patch, OrderCloud.BuyerID.Get())
+            .then(function () {
+                $state.go($state.current, {}, {reload: true});
+            })
+            .catch(function (ex) {
+                $exceptionHandler(ex);
+            });
     }
+
     vm.ShowUpdatedShipping = function () {
     	if(vm.Order.xp.OldShippingData) {
             if (vm.Order.ShippingCost != vm.Order.xp.OldShippingData.ShippingCost || vm.Order.xp.ShippingDescription != vm.Order.xp.OldShippingData.ShippingDescription) {
@@ -587,7 +662,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     		return false;
 		}
     };
-	vm.AddLineItem = _addLineItem;
+
+	vm.AddLineItem = _addLineItem;//A previous line item being returned to the current order.
 	function _addLineItem(line) {
 		if(line.TempQty > 0) {
 			line.ID = null;
@@ -616,10 +692,12 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		};
 
 		var patch = {
+			ShippingCost: vm.Order.ShippingCost,
 			xp: {
 				Status: orderType[vm.Order.xp.Type],
 				StatusDate: new Date(),
-				ReviewerName: currentUser.FirstName + " " + currentUser.LastName
+				ReviewerName: currentUser.FirstName + " " + currentUser.LastName,
+				ShippingDescription: vm.Order.xp.ShippingDescription
 			}
 		};
 		if (vm.Order.xp.ReviewerID != currentUser.ID) {
@@ -756,26 +834,32 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		orderCopy.ID = _determineCopyRevision(orderCopy.ID); //Rev0 or current rev
 		OrderID = angular.copy(vm.Order.ID);
 		vm.Order.ID = _determineRevision(vm.Order.ID);
-
+		//ToDo Use EnquiryReview status.
+		// if current status is Enquiry, then set to EnquiryReview, else set to
+		var status = vm.Order.xp.Status == "EN" ? WeirService.OrderStatus.EnquiryReview.id : WeirService.OrderStatus.Review.id;
 		var orderPatch = {
 			ID: vm.Order.ID,
             ShippingCost: vm.Order.ShippingCost,
 			xp: {
 				Active: true,
-				Status: WeirService.OrderStatus.Review.id,
+				Status: status,
 				StatusDate: new Date(),
 				ReviewerName: currentUser.Username,
 				RevisedDate: new Date(),
 				Revised: true,
 				ShippingDescription: vm.Order.xp.ShippingDescription != null ? vm.Order.xp.ShippingDescription : null,
 				OriginalOrderID: vm.Order.xp.OriginalOrderID,
-				OldShippingData:
-					{
-						ShippingCost : vm.Order.ShippingCost ,
-						ShippingDescription: vm.Order.xp.ShippingDescription != null ? vm.Order.xp.ShippingDescription : null
-					}
+				OldShippingData: {
+					ShippingCost : vm.Order.ShippingCost ,
+					ShippingDescription: vm.Order.xp.ShippingDescription != null ? vm.Order.xp.ShippingDescription : null
+				}
 			}
 		};
+		if (orderPatch.xp.WasEnquiry && (orderPatch.xp.Status == WeirService.OrderStatus.EnquiryReview.id)) { //The first revision.
+			orderPatch.xp.WasEnquiry = vm.Order.xp.WasEnquiry; //Needed for the enquiry webhook.
+		} else if (orderPatch.xp.WasEnquiry && orderPatch.xp.WasEnquiry == true) { //second revision.
+			orderPatch.xp.WasEnquiry = false;
+		}
 		if (vm.Order.xp.ReviewerID != currentUser.ID) {
 		    orderPatch.xp.ReviewerID = currentUser.ID;
 		    orderPatch.xp.ReviewerEmail = currentUser.Email;
@@ -790,7 +874,19 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		OrderCloud.Orders.Patch(OrderID, orderPatch, vm.Order.xp.BuyerID)
 			.then(function(order) {
 				angular.forEach(vm.LineItems.Items, function(value, key) {
-					queue.push(OrderCloud.LineItems.Patch(order.ID, value.ID, {xp:{OriginalQty:value.Quantity,OriginalUnitPrice:value.UnitPrice?value.UnitPrice:0,OriginalLeadTime:value.Product.xp.LeadTime}}, vm.Order.xp.BuyerID));
+					var liPatch = {
+						xp: {
+							OriginalSN: value.xp.SN ? value.xp.SN : null,
+							OriginalTagNumber: value.xp.TagNumber ? value.xp.TagNumber : null,
+							OriginalProductName: value.xp.ProductName ? value.xp.ProductName : (value.Product.Name ? value.Product.Name : null),
+							OriginalDescription: value.xp.Description ? value.xp.Description : (value.Product.Description ? value.Product.Description : null),
+							OriginalReplacementSchedule: value.xp.ReplacementSchedule ? value.xp.ReplacementSchedule : (value.Product.xp.ReplacementSchedule ? value.Product.xp.ReplacementSchedule : 0),
+							OriginalLeadTime: value.xp.LeadTime ? value.xp.LeadTime : (value.Product.xp.LeadTime ? value.Product.xp.LeadTime : 0),
+							OriginalQty: value.Quantity ? value.Quantity : 0,
+							OriginalUnitPrice: value.UnitPrice ? value.UnitPrice : 0
+						}
+					};
+					queue.push(OrderCloud.LineItems.Patch(order.ID, value.ID, liPatch, vm.Order.xp.BuyerID));
 				});
 				$q.all(queue)
 					.then(function(results) {
@@ -887,7 +983,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	}
 }
 
-function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, $scope, OrderCloud, WeirService, Order) {
+function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, OrderCloud, WeirService, Order) {
 	var vm = this;
     vm.Order = Order;
     vm.Order.xp.DateDespatched = vm.Order.xp.DateDespatched == null ? null : new Date(vm.Order.xp.DateDespatched);
@@ -923,15 +1019,15 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, $
             Cancel: "Cancel",
             Back: "Back"
         }, fr: {
-            OrderNumber: $sce.trustAsHtml("FR: Order Number"),
-            BackToOrders: $sce.trustAsHtml("FR: Back to Orders"),
-            ContractNumber: $sce.trustAsHtml("FR: Contract number"),
-            DeliveryDate: $sce.trustAsHtml("FR: Delivery date"),
-            DespatchDate: $sce.trustAsHtml("FR: Date despatched"),
-            InvoiceNum: $sce.trustAsHtml("FR: Invoice Number"),
-            NotificationText: $sce.trustAsHtml("FR: Your customer will be sent a notification when you save details on this page."),
-            Save: $sce.trustAsHtml("FR: Save"),
-            Cancel: $sce.trustAsHtml("FR: Cancel"),
+            OrderNumber: $sce.trustAsHtml("Order Number"),
+            BackToOrders: $sce.trustAsHtml("Back to Orders"),
+            ContractNumber: $sce.trustAsHtml("Contract number"),
+            DeliveryDate: $sce.trustAsHtml("Delivery date"),
+            DespatchDate: $sce.trustAsHtml("Date despatched"),
+            InvoiceNum: $sce.trustAsHtml("Invoice Number"),
+            NotificationText: $sce.trustAsHtml("Your customer will be sent a notification when you save details on this page."),
+            Save: $sce.trustAsHtml("Save"),
+            Cancel: $sce.trustAsHtml("Cancel"),
 	        Back: "Back"
         }
     };

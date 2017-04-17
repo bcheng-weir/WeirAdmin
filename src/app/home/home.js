@@ -69,7 +69,8 @@ function HomeController($sce, WeirService, IsAdmin, IsInternalSales) {
 			StandardDelivery: "Carriage",
 		    POPrintContent: "Fixed Print Content",
 			Customers: "Customers",
-			CustomerManage: "Manage customers and customer addresses"
+			CustomerManage: "Manage customers and customer addresses",
+			EnquiryQuotes: "Enquiries submitted"
 		},
 		fr: {
 			Welcome: $sce.trustAsHtml("Welcome to the sales administration area of<br>www.store.flowcontrol.weir"),
@@ -89,7 +90,8 @@ function HomeController($sce, WeirService, IsAdmin, IsInternalSales) {
 			StandardDelivery: "Carriage",
 			POPrintContent: "Fixed Print Content",
 			Customers: $sce.trustAsHtml("Customers"),
-			CustomerManage: $sce.trustAsHtml("Manage customers and customer addresses")
+			CustomerManage: $sce.trustAsHtml("Manage customers and customer addresses"),
+			EnquiryQuotes: $sce.trustAsHtml("Enquiries submitted")
 		}
 	};
 	vm.labels = labels[WeirService.Locale()];
@@ -100,6 +102,7 @@ function HomeController($sce, WeirService, IsAdmin, IsInternalSales) {
 			"ordersMain.quotesReview":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Submitted.id + "|" + WeirService.OrderStatus.Review.id, "xp.Active":true},
 			"ordersMain.quotesRevised":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.RevisedQuote.id + "|" + WeirService.OrderStatus.RejectedQuote.id, "xp.Active":true},
 			"ordersMain.quotesConfirmed":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.ConfirmedQuote.id, "xp.Active":true},
+			"ordersMain.quotesEnquiry":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Enquiry.id + "|" + WeirService.OrderStatus.EnquiryReview.id, "xp.Active":true},
 			"ordersMain.POOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.SubmittedWithPO.id + "|" + WeirService.OrderStatus.Review.id, "xp.Active":true},
 			"ordersMain.pendingPO":{"xp.Type":"Order","xp.PendingPO":true, "xp.Active":true},
 			"ordersMain.ordersRevised":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.RevisedOrder.id + "|" + WeirService.OrderStatus.RejectedRevisedOrder.id, "xp.Active":true},

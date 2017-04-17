@@ -224,7 +224,7 @@ function ordercloudFileUpload($parse, Underscore, FileReader, FilesService, File
     return directive;
 }
 
-function ordercloudPoUpload($parse, $exceptionHandler, $sce, Underscore, FileReader, FilesService, OrderCloud, fileStore, WeirService, FileSaver) {
+function ordercloudPoUpload($parse, $exceptionHandler, $sce, Underscore, FileReader, FilesService, OrderCloud, fileStore, WeirService, FileSaver, toastr) {
 	var directive = {
 		scope: {
 			model: '=',
@@ -309,6 +309,9 @@ function ordercloudPoUpload($parse, $exceptionHandler, $sce, Underscore, FileRea
 						"PODocument": fileName
 					}};
 					return OrderCloud.Orders.Patch(scope.model.ID,xp,scope.model.xp.BuyerID);
+				})
+				.then(function(order) {
+					toastr.success(fileName + " is available in documents section of the order.","PO Document Uploaded");
 				})
 				.catch(function(ex){
 					$exceptionHandler(ex);

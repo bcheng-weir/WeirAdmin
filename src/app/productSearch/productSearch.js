@@ -221,12 +221,12 @@ function ProductSearchController($sce, $state, $rootScope, OrderCloud, CurrentOr
 			SerialSearch: $sce.trustAsHtml("Recherche par num&eacute;ro de s&eacute;rie"),
 			PartSearch: $sce.trustAsHtml("Recherche par num&eacute;ro de pi&eacute;ce"),
 			TagSearch: $sce.trustAsHtml("Recherche par num&eacute;ro de tag"),
-			CustomerFilter: $sce.trustAsHtml("FR: Results filtered by; "),
-			SelectCustomer: $sce.trustAsHtml("FR: Reset search filter"),
-			SearchMine: $sce.trustAsHtml("FR: Search your products"),
-			SearchOr: $sce.trustAsHtml("FR: Or"),
-			FilterEndUser: $sce.trustAsHtml("FR: Filter by end-user"),
-			Select: $sce.trustAsHtml("FR: Select")
+			CustomerFilter: $sce.trustAsHtml("Results filtered by; "),
+			SelectCustomer: $sce.trustAsHtml("Reset search filter"),
+			SearchMine: $sce.trustAsHtml("Search your products"),
+			SearchOr: $sce.trustAsHtml("Or"),
+			FilterEndUser: $sce.trustAsHtml("Filter by end-user"),
+			Select: $sce.trustAsHtml("Select")
 		}
 	};
 	vm.labels = WeirService.LocaleResources(labels);
@@ -486,8 +486,8 @@ function TagController(WeirService,$scope, $q, $state, $sce, toastr) {
 		},
 		fr: {
 			// WhereToFind: $sce.trustAsHtml("O&ugrave; trouver votre num&eacute;ro de s&eacute;rie"),
-			EnterTag: $sce.trustAsHtml("FR: Enter Tag number"),
-			AddMore: $sce.trustAsHtml("FR: Add more tag numbers   +"),
+			EnterTag: $sce.trustAsHtml("Enter Tag number"),
+			AddMore: $sce.trustAsHtml("Add more tag numbers   +"),
 			ClearSearch: $sce.trustAsHtml("Effacer la recherche"),
 			Search: "Chercher"
 		}
@@ -581,7 +581,7 @@ function TagResultsController(WeirService, $stateParams, $state, TagNumberResult
 		},
 		fr: {
 			Customer: "Client",
-			ResultsHeader: $sce.trustAsHtml("FR: Showing results for tag numbers; " + numFound.toString() + " of " + TagNumberResults.length.toString() + " searched tag numbers found"),
+			ResultsHeader: $sce.trustAsHtml("Showing results for tag numbers; " + numFound.toString() + " of " + TagNumberResults.length.toString() + " searched tag numbers found"),
 			SerialNumber: $sce.trustAsHtml("Num&eacute;ro de s&eacute;rie"),
 			TagNumber: $sce.trustAsHtml("Num&eacute;ro de tag (si disponible)"),
 			ValveDesc: "Description de soupape",
@@ -627,7 +627,7 @@ function TagDetailController( $stateParams, $rootScope, $sce, $state, WeirServic
 			Outlet: "Out"
 		},
 		fr: {
-			ResultsHeader: $sce.trustAsHtml("FR: Showing results for tag number "),
+			ResultsHeader: $sce.trustAsHtml("Showing results for tag number "),
 			Tag: $sce.trustAsHtml("Num&eacute;ro d'identification (si disponible); "),
 			Customer: $sce.trustAsHtml("Client; "),
 			ManufDate: $sce.trustAsHtml("La date de fabrication de la valve; "),
@@ -662,7 +662,7 @@ function TagDetailController( $stateParams, $rootScope, $sce, $state, WeirServic
 			AddToQuote: "Add to Quote"
 		},
 		fr: {
-			PartList: $sce.trustAsHtml("FR: Parts list for tag number"),
+			PartList: $sce.trustAsHtml("Parts list for tag number"),
 			PartNum: $sce.trustAsHtml("R&eacute;f&eacute;rence"),
 			PartDesc: $sce.trustAsHtml("Description de la partie"),
 			PartQty: $sce.trustAsHtml("Quantit&eacute; de partie"),

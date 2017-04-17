@@ -43,6 +43,11 @@ function OrdersConfig($stateProvider, buyerid) {
 		    templateUrl: 'orders/templates/quote.confirm.tpl.html',
 		    parent: 'ordersMain'
 		})
+	    .state('ordersMain.quotesEnquiry', {
+	    	url: '/quotesEnquiry',
+		    templateUrl: 'orders/templates/quote.enquiry.tpl.html',
+		    parent: 'ordersMain'
+	    })
 		.state('ordersMain.ordersRevised', {
 		    url: '/ordersRevised',
 		    templateUrl: 'orders/templates/order.revised.tpl.html',
@@ -241,7 +246,10 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			StatusRV: "Status RV = Revised Quote",
 			StatusRO: "Status RO = Revised Order",
 			StatusRR: "Status RR = Rejected Revised Order",
-			StatusRQ: "Status RQ = Rejected Quote"
+			StatusRQ: "Status RQ = Rejected Quote",
+			StatusEN: "Status EN = Enquiry Submitted",
+			StatusER: "Status ER = Enquiry Under Review",
+			enquiriesSubmitted: "Enquiries submitted"
 		},
 		fr: {
 			search:$sce.trustAsHtml("Search"),
@@ -278,10 +286,13 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			revisionsList: $sce.trustAsHtml(vm.xpType + " revisions for " + vm.xpType + "; " + Parameters.filters["xp.OriginalOrderID"]),
 			selectRevision:$sce.trustAsHtml("Select ‘view’ to view previous revisions for reference"),
 			viewRevision: $sce.trustAsHtml("You can view and update the current revision"),
-			StatusRV: $sce.trustAsHtml("FR: Status RV = Revised Quote"),
-			StatusRO: $sce.trustAsHtml("FR: Status RO = Revised Order"),
-			StatusRR: $sce.trustAsHtml("FR: Status RR = Rejected Revised Order"),
-			StatusRQ: $sce.trustAsHtml("FR: Status RQ = Rejected Quote")
+			StatusRV: $sce.trustAsHtml("Status RV = Revised Quote"),
+			StatusRO: $sce.trustAsHtml("Status RO = Revised Order"),
+			StatusRR: $sce.trustAsHtml("Status RR = Rejected Revised Order"),
+			StatusRQ: $sce.trustAsHtml("Status RQ = Rejected Quote"),
+			StatusEN: $sce.trustAsHtml("Status EN = Enquiry Submitted"),
+			StatusER: $sce.trustAsHtml("Status ER = Enquiry Under Review"),
+			enquiriesSubmitted: $sce.trustAsHtml("Enquiries submitted")
 		}
 	};
 	vm.labels = labels.en;
@@ -290,6 +301,7 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 		"ordersMain.quotesReview":"quotesForReview",
 		"ordersMain.quotesRevised":"revisedQuotes",
 		"ordersMain.quotesConfirmed":"confirmedQuotes",
+		"ordersMain.quotesEnquiry":"enquiriesSubmitted",
 		"ordersMain.POOrders":"ordersSubmittedPO",
 		"ordersMain.pendingPO":"ordersPendingPO",
 		"ordersMain.ordersRevised":"revisedOrders",

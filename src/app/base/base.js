@@ -160,6 +160,7 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
             quotesForReview: "Quotes Submitted for Review",
             revisedQuotes: "Revised Quotes",
             confirmedQuotes: "Confirmed Quotes",
+            enquiryQuotes: "Enquiries submitted",
             ordersSubmittedPO: "Orders Submitted with PO",
             pendingPO: "Orders submitted pending PO",
             revisedOrders: "Revised Orders",
@@ -200,6 +201,7 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
             "ReviewQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Submitted.id + "|" + WeirService.OrderStatus.Review.id, "xp.Active":true},
             "RevisedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.RevisedQuote.id + "|" + WeirService.OrderStatus.RejectedQuote.id, "xp.Active":true},
             "ConfirmedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.ConfirmedQuote.id, "xp.Active":true},
+            "EnquiryQuotes": {"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Enquiry.id + "|" + WeirService.OrderStatus.EnquiryReview.id, "xp.Active":true},
             "POOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.SubmittedWithPO.id + "|" + WeirService.OrderStatus.Review.id, "xp.Active":true},
             "PendingPO":{"xp.Type":"Order","xp.PendingPO":true, "xp.Active":true},
             "RevisedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.RevisedOrder.id + "|" + WeirService.OrderStatus.RejectedRevisedOrder.id, "xp.Active":true},
@@ -212,6 +214,7 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
             "ReviewQuotes":"ordersMain.quotesReview",
             "RevisedQuotes":"ordersMain.quotesRevised",
             "ConfirmedQuotes":"ordersMain.quotesConfirmed",
+            "EnquiryQuotes":"ordersMain.quotesEnquiry",
             "POOrders":"ordersMain.POOrders",
             "PendingPO":"ordersMain.pendingPO",
             "RevisedOrders":"ordersMain.ordersRevised",
@@ -272,9 +275,9 @@ function FeedbackController($sce, $uibModalInstance, $state, OrderCloud, WeirSer
             suggestion: "Suggestion"
         },
         fr: {
-            title: $sce.trustAsHtml("FR: Please send us your feedback and suggestions"),
-            bugDefect: $sce.trustAsHtml("FR: Bug or error"),
-            suggestion: $sce.trustAsHtml("FR: Suggestion")
+            title: $sce.trustAsHtml("Please send us your feedback and suggestions"),
+            bugDefect: $sce.trustAsHtml("Bug or error"),
+            suggestion: $sce.trustAsHtml("Suggestion")
         }
     };
     vm.labels = WeirService.LocaleResources(labels);
