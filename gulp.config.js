@@ -94,6 +94,10 @@ function getConstants() {
             result.authurl = 'https://qaauth.ordercloud.io/oauth/token';
             result.apiurl = 'https://qaapi.ordercloud.io';
             break;
+        case 'staging':
+	        result.authurl = 'https://stagingauth.ordercloud.io';
+	        result.apiurl = 'https://stagingapi.ordercloud.io';
+	        break
         default:
             result.authurl = 'https://auth.ordercloud.io/oauth/token';
             result.apiurl = 'https://api.ordercloud.io';

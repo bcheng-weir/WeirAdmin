@@ -6,16 +6,16 @@ angular.module('orderCloud')
     .controller('UserCreateCtrl', UserCreateController)
 ;
 
-function UserService($q, $state, OrderCloud) {
+function UserService($q, $state, OrderCloudSDK) {
     var _userTypes = [{ value: 1, label: "Buyer" }, { value: 2, label: "Shopper" }];
 
     function _updateUserGroup(userID, oldGroupID, newGroupID) {
         var d = $q.defer();
         if (oldGroupID) {
             if (newGroupID && (newGroupID != oldGroupID)) {
-                OrderCloud.UserGroups.DeleteUserAssignment(oldGroupID, userID)
+                OrderCloudSDK.UserGroups.DeleteUserAssignment(oldGroupID, userID)
                 .then(function () {
-                    OrderCloud.UserGroups.SaveUserAssignment({ UserGroupID: newGroupID, UserID: userID })
+                    OrderCloudSDK.UserGroups.SaveUserAssignment({ UserGroupID: newGroupID, UserID: userID })
                     .then(function () {
                         d.resolve();
                     });
@@ -27,7 +27,7 @@ function UserService($q, $state, OrderCloud) {
                 d.resolve();
             }
         } else if (newGroupID) {
-            OrderCloud.UserGroups.SaveUserAssignment({ UserGroupID: newGroupID, UserID: userID })
+            OrderCloudSDK.UserGroups.SaveUserAssignment({ UserGroupID: newGroupID, UserID: userID })
             .then(function () {
                 d.resolve();
             })
@@ -57,8 +57,8 @@ function UsersConfig($stateProvider) {
                 Parameters: function($stateParams, OrderCloudParameters) {
                     return OrderCloudParameters.Get($stateParams);
                 },
-                UserList: function(OrderCloud, Parameters) {
-                    return OrderCloud.Users.List(null, Parameters.search, Parameters.page, Parameters.pageSize || 12, Parameters.searchOn, Parameters.sortBy, Parameters.filters);
+                UserList: function(OrderCloudSDK, Parameters) {
+                    return OrderCloudSDK.Users.List(null, Parameters.search, Parameters.page, Parameters.pageSize || 12, Parameters.searchOn, Parameters.sortBy, Parameters.filters);
                 }
             }
         })
@@ -68,14 +68,14 @@ function UsersConfig($stateProvider) {
             controller: 'UserEditCtrl',
             controllerAs: 'userEdit',
             resolve: {
-                SelectedUser: function($stateParams, OrderCloud) {
-                    return OrderCloud.Users.Get($stateParams.userid);
+                SelectedUser: function($stateParams, OrderCloudSDK) {
+                    return OrderCloudSDK.Users.Get($stateParams.userid);
                 },
-                GroupsAvailable: function (OrderCloud) {
-                    return OrderCloud.UserGroups.List();
+                GroupsAvailable: function (OrderCloudSDK) {
+                    return OrderCloudSDK.UserGroups.List();
                 },
-                CurrentGroups: function ($stateParams, OrderCloud) {
-                    return OrderCloud.UserGroups.ListUserAssignments(null, $stateParams.userid)
+                CurrentGroups: function ($stateParams, OrderCloudSDK) {
+                    return OrderCloudSDK.UserGroups.ListUserAssignments(null, $stateParams.userid)
                 }
             }
         })
@@ -85,15 +85,15 @@ function UsersConfig($stateProvider) {
             controller: 'UserCreateCtrl',
             controllerAs: 'userCreate',
             resolve: {
-                GroupsAvailable: function (OrderCloud) {
-                    return OrderCloud.UserGroups.List();
+                GroupsAvailable: function (OrderCloudSDK) {
+                    return OrderCloudSDK.UserGroups.List();
                 }
             }
         })
     ;
 }
 
-function UsersController($state, $ocMedia, OrderCloud, OrderCloudParameters, UserList, Parameters) {
+function UsersController($state, $ocMedia, OrderCloudSDK, OrderCloudParameters, UserList, Parameters) {
     var vm = this;
     vm.list = UserList;
     vm.parameters = Parameters;
@@ -160,7 +160,7 @@ function UsersController($state, $ocMedia, OrderCloud, OrderCloudParameters, Use
 
     //Load the next page of results with all of the same parameters
     vm.loadMore = function() {
-        return OrderCloud.Users.List(null, Parameters.search, vm.list.Meta.Page + 1, Parameters.pageSize || vm.list.Meta.PageSize, Parameters.searchOn, Parameters.sortBy, Parameters.filters)
+        return OrderCloudSDK.Users.List(null, Parameters.search, vm.list.Meta.Page + 1, Parameters.pageSize || vm.list.Meta.PageSize, Parameters.searchOn, Parameters.sortBy, Parameters.filters)
             .then(function(data) {
                 vm.list.Items = vm.list.Items.concat(data.Items);
                 vm.list.Meta = data.Meta;
@@ -168,7 +168,7 @@ function UsersController($state, $ocMedia, OrderCloud, OrderCloudParameters, Use
     };
 }
 
-function UserEditController($exceptionHandler, $state, toastr, OrderCloud, SelectedUser, GroupsAvailable, CurrentGroups, UserService) {
+function UserEditController($exceptionHandler, $state, toastr, OrderCloudSDK, SelectedUser, GroupsAvailable, CurrentGroups, UserService) {
     var vm = this,
         userid = SelectedUser.ID;
     vm.userName = SelectedUser.Username;
@@ -186,7 +186,7 @@ function UserEditController($exceptionHandler, $state, toastr, OrderCloud, Selec
     vm.Submit = function() {
         var today = new Date();
         vm.user.TermsAccepted = today;
-        OrderCloud.Users.Update(userid, vm.user)
+        OrderCloudSDK.Users.Update(userid, vm.user)
             .then(function (user) {
                 UserService.UpdateGroup(user.ID, vm.oldGroupId, vm.user.UserGroupID)
                 .then(function () {
@@ -200,7 +200,7 @@ function UserEditController($exceptionHandler, $state, toastr, OrderCloud, Selec
     };
 
     vm.Delete = function() {
-        OrderCloud.Users.Delete(userid)
+        OrderCloudSDK.Users.Delete(userid)
             .then(function() {
                 $state.go('users', {}, {reload: true});
                 toastr.success('User Deleted', 'Success');
@@ -211,7 +211,7 @@ function UserEditController($exceptionHandler, $state, toastr, OrderCloud, Selec
     };
 }
 
-function UserCreateController($exceptionHandler, $state, toastr, OrderCloud, GroupsAvailable, UserService) {
+function UserCreateController($exceptionHandler, $state, toastr, OrderCloudSDK, GroupsAvailable, UserService) {
     var vm = this;
     vm.user = {
         Active: false,
@@ -227,7 +227,7 @@ function UserCreateController($exceptionHandler, $state, toastr, OrderCloud, Gro
     vm.Submit = function() {
         vm.user.TermsAccepted = new Date();
         vm.user.Username = vm.user.Email;
-        OrderCloud.Users.Create(vm.user)
+        OrderCloudSDK.Users.Create(vm.user)
             .then(function (user) {
                 UserService.UpdateGroup(user.ID, null, vm.user.UserGroupID)
                 .then(function() {

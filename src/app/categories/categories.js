@@ -1,5 +1,6 @@
 angular.module('orderCloud')
     .config(CategoriesConfig)
+    .controller('CatalogsCtrl', CatalogsController)
     .controller('CategoriesCtrl', CategoriesController)
     .controller('CategoryEditCtrl', CategoryEditController)
     .controller('CategoryCreateCtrl', CategoryCreateController)
@@ -13,21 +14,34 @@ angular.module('orderCloud')
 
 function CategoriesConfig($stateProvider) {
     $stateProvider
+        .state('catalogs', {
+            parent: 'base',
+            templateUrl: 'categories/templates/catalogs.tpl.html',
+            controller: 'CatalogsCtrl',
+            controllerAs: 'catalogs',
+            url: '/catalogs',
+            data: {componentName: 'Catalogs'},
+            resolve: {
+                CatalogList: function(OrderCloudSDK) {
+                    return OrderCloudSDK.Catalogs.List(null, null, null, null, "Name", {"CategoryCount": ">0"});
+                }
+            }
+        })
         .state('categories', {
             parent: 'base',
             templateUrl: 'categories/templates/categories.tpl.html',
             controller: 'CategoriesCtrl',
             controllerAs: 'categories',
-            url: '/categories?from&to&search&page&pageSize&searchOn&sortBy&filters',
+            url: '/categories?catalogId',
             data: {componentName: 'Categories'},
             resolve: {
                 Parameters: function($stateParams, OrderCloudParameters) {
                     return OrderCloudParameters.Get($stateParams);
                 },
-                CategoryList: function(OrderCloud, Parameters) {
+                CategoryList: function(OrderCloudSDK, Parameters) {
                     var parameters = angular.copy(Parameters);
                     parameters.depth = 'all';
-                    return OrderCloud.Categories.List(parameters.search, parameters.page, parameters.pageSize || 12, parameters.searchOn, parameters.sortBy, parameters.filters, parameters.parentID, parameters.depth);
+                    return OrderCloudSDK.Categories.List(null, null, null, null, null, null, 1, parameters.catalogId);
                 }
             }
         })
@@ -48,8 +62,8 @@ function CategoriesConfig($stateProvider) {
             controller: 'CategoryEditCtrl',
             controllerAs: 'categoryEdit',
             resolve: {
-                SelectedCategory: function($stateParams, $state, OrderCloud) {
-                    return OrderCloud.Categories.Get($stateParams.categoryid).catch(function() {
+                SelectedCategory: function($stateParams, $state, OrderCloudSDK) {
+                    return OrderCloudSDK.Categories.Get($stateParams.categoryid).catch(function() {
                         $state.go('^.categories');
                     });
                 }
@@ -67,14 +81,14 @@ function CategoriesConfig($stateProvider) {
             controller: 'CategoryAssignPartyCtrl',
             controllerAs: 'categoryAssignParty',
             resolve: {
-                UserGroupList: function(OrderCloud) {
-                    return OrderCloud.UserGroups.List();
+                UserGroupList: function(OrderCloudSDK) {
+                    return OrderCloudSDK.UserGroups.List();
                 },
-                AssignedUserGroups: function($stateParams, OrderCloud) {
-                    return OrderCloud.Categories.ListAssignments($stateParams.categoryid);
+                AssignedUserGroups: function($stateParams, OrderCloudSDK) {
+                    return OrderCloudSDK.Categories.ListAssignments($stateParams.categoryid);
                 },
-                SelectedCategory: function($stateParams, $state, OrderCloud) {
-                    return OrderCloud.Categories.Get($stateParams.categoryid).catch(function() {
+                SelectedCategory: function($stateParams, $state, OrderCloudSDK) {
+                    return OrderCloudSDK.Categories.Get($stateParams.categoryid).catch(function() {
                         $state.go('^.categories');
                     });
                 }
@@ -86,22 +100,26 @@ function CategoriesConfig($stateProvider) {
             controller: 'CategoryAssignProductCtrl',
             controllerAs: 'categoryAssignProd',
             resolve: {
-                ProductList: function(OrderCloud) {
-                    return OrderCloud.Products.List();
+                ProductList: function(OrderCloudSDK) {
+                    return OrderCloudSDK.Products.List();
                 },
-                ProductAssignments: function($stateParams, OrderCloud) {
-                    return OrderCloud.Categories.ListProductAssignments($stateParams.categoryid);
+                ProductAssignments: function($stateParams, OrderCloudSDK) {
+                    return OrderCloudSDK.Categories.ListProductAssignments($stateParams.categoryid);
                 },
-                SelectedCategory: function($stateParams, $state, OrderCloud) {
-                    return OrderCloud.Categories.Get($stateParams.categoryid).catch(function() {
+                SelectedCategory: function($stateParams, $state, OrderCloudSDK) {
+                    return OrderCloudSDK.Categories.Get($stateParams.categoryid).catch(function() {
                         $state.go('^.categories');
                     });
                 }
             }
         });
 }
+function CatalogsController($state, $ocMedia, OrderCloudSDK, CatalogList) {
+    var vm = this;
+    vm.list = CatalogList;
+}
 
-function CategoriesController($state, $ocMedia, OrderCloud, OrderCloudParameters, CategoryList, Parameters) {
+function CategoriesController($state, $ocMedia, OrderCloudSDK, OrderCloudParameters, CategoryList, Parameters) {
     var vm = this;
     vm.list = CategoryList;
     vm.parameters = Parameters;
@@ -168,7 +186,7 @@ function CategoriesController($state, $ocMedia, OrderCloud, OrderCloudParameters
 
     //Load the next page of results with all of the same parameters
     vm.loadMore = function() {
-        return OrderCloud.Products.List(Parameters.search, vm.list.Meta.Page + 1, Parameters.pageSize || vm.list.Meta.PageSize, Parameters.searchOn, Parameters.sortBy, Parameters.filters)
+        return OrderCloudSDK.Products.List(Parameters.search, vm.list.Meta.Page + 1, Parameters.pageSize || vm.list.Meta.PageSize, Parameters.searchOn, Parameters.sortBy, Parameters.filters)
             .then(function(data) {
                 vm.list.Items = vm.list.Items.concat(data.Items);
                 vm.list.Meta = data.Meta;
@@ -176,14 +194,14 @@ function CategoriesController($state, $ocMedia, OrderCloud, OrderCloudParameters
     };
 }
 
-function CategoryEditController($exceptionHandler, $state, $q, toastr, OrderCloud, SelectedCategory) {
+function CategoryEditController($exceptionHandler, $state, $q, toastr, OrderCloudSDK, SelectedCategory) {
     var vm = this,
         categoryID = SelectedCategory.ID;
     vm.categoryName = SelectedCategory.Name;
     vm.category = SelectedCategory;
 
     vm.Submit = function() {
-        OrderCloud.Categories.Update(categoryID, vm.category)
+        OrderCloudSDK.Categories.Update(categoryID, vm.category)
             .then(function() {
                 $state.go('categories', {}, {reload: true});
                 toastr.success('Category Updated', 'Success');
@@ -195,7 +213,7 @@ function CategoryEditController($exceptionHandler, $state, $q, toastr, OrderClou
 
     vm.typeAhead = function(searchTerm) {
         var defd = $q.defer();
-        OrderCloud.Categories.List(searchTerm, 1, 100, null, null, null, null, 'all')
+        OrderCloudSDK.Categories.List(searchTerm, 1, 100, null, null, null, null, 'all')
             .then(function(data) {
                 defd.resolve(data.Items)
             });
@@ -203,7 +221,7 @@ function CategoryEditController($exceptionHandler, $state, $q, toastr, OrderClou
     };
 
     vm.Delete = function() {
-        OrderCloud.Categories.Delete(SelectedCategory.ID)
+        OrderCloudSDK.Categories.Delete(SelectedCategory.ID)
             .then(function() {
                 $state.go('categories', {}, {reload: true});
                 toastr.success('Category Deleted', 'Success');
@@ -214,7 +232,7 @@ function CategoryEditController($exceptionHandler, $state, $q, toastr, OrderClou
     };
 }
 
-function CategoryCreateController($exceptionHandler, $state, $q, toastr, OrderCloud) {
+function CategoryCreateController($exceptionHandler, $state, $q, toastr, OrderCloudSDK) {
     var vm = this;
     vm.category = {};
 
@@ -222,7 +240,7 @@ function CategoryCreateController($exceptionHandler, $state, $q, toastr, OrderCl
         if (vm.category.ParentID === '') {
             vm.category.ParentID = null;
         }
-        OrderCloud.Categories.Create(vm.category)
+        OrderCloudSDK.Categories.Create(vm.category)
             .then(function() {
                 $state.go('categories', {}, {reload: true});
                 toastr.success('Category Created', 'Success');
@@ -234,7 +252,7 @@ function CategoryCreateController($exceptionHandler, $state, $q, toastr, OrderCl
 
     vm.typeAhead = function(searchTerm) {
         var defd = $q.defer();
-        OrderCloud.Categories.List(searchTerm, 1, 100, null, null, null, null, 'all')
+        OrderCloudSDK.Categories.List(searchTerm, 1, 100, null, null, null, null, 'all')
             .then(function(data) {
                 defd.resolve(data.Items)
             });
@@ -253,7 +271,7 @@ function CategoryTreeController(Tree, CategoryTreeService) {
     };
 }
 
-function CategoryAssignPartyController($scope, toastr, OrderCloud, Assignments, Paging, UserGroupList, AssignedUserGroups, SelectedCategory) {
+function CategoryAssignPartyController($scope, toastr, OrderCloudSDK, Assignments, Paging, UserGroupList, AssignedUserGroups, SelectedCategory) {
     var vm = this;
     vm.Category = SelectedCategory;
     vm.list = UserGroupList;
@@ -268,7 +286,7 @@ function CategoryAssignPartyController($scope, toastr, OrderCloud, Assignments, 
     });
 
     function SaveFunc(ItemID) {
-        return OrderCloud.Categories.SaveAssignment({
+        return OrderCloudSDK.Categories.SaveAssignment({
             UserID: null,
             UserGroupID: ItemID,
             CategoryID: vm.Category.ID
@@ -276,7 +294,7 @@ function CategoryAssignPartyController($scope, toastr, OrderCloud, Assignments, 
     }
 
     function DeleteFunc(ItemID) {
-        return OrderCloud.Categories.DeleteAssignment(vm.Category.ID, null, ItemID);
+        return OrderCloudSDK.Categories.DeleteAssignment(vm.Category.ID, null, ItemID);
     }
 
     function SaveAssignment() {
@@ -285,7 +303,7 @@ function CategoryAssignPartyController($scope, toastr, OrderCloud, Assignments, 
     }
 
     function AssignmentFunc() {
-        return OrderCloud.Categories.ListAssignments(vm.Category.ID, null, vm.assignments.Meta.PageSize);
+        return OrderCloudSDK.Categories.ListAssignments(vm.Category.ID, null, vm.assignments.Meta.PageSize);
     }
 
     function PagingFunction() {
@@ -293,7 +311,7 @@ function CategoryAssignPartyController($scope, toastr, OrderCloud, Assignments, 
     }
 }
 
-function CategoryAssignProductController($scope, toastr, OrderCloud, Assignments, Paging, ProductList, ProductAssignments, SelectedCategory) {
+function CategoryAssignProductController($scope, toastr, OrderCloudSDK, Assignments, Paging, ProductList, ProductAssignments, SelectedCategory) {
     var vm = this;
     vm.Category = SelectedCategory;
     vm.list = ProductList;
@@ -308,14 +326,14 @@ function CategoryAssignProductController($scope, toastr, OrderCloud, Assignments
     });
 
     function SaveFunc(ItemID) {
-        return OrderCloud.Categories.SaveProductAssignment({
+        return OrderCloudSDK.Categories.SaveProductAssignment({
             CategoryID: vm.Category.ID,
             ProductID: ItemID
         });
     }
 
     function DeleteFunc(ItemID) {
-        return OrderCloud.Categories.DeleteProductAssignment(vm.Category.ID, ItemID);
+        return OrderCloudSDK.Categories.DeleteProductAssignment(vm.Category.ID, ItemID);
     }
 
     function SaveAssignment() {
@@ -324,7 +342,7 @@ function CategoryAssignProductController($scope, toastr, OrderCloud, Assignments
     }
 
     function AssignmentFunc() {
-        return OrderCloud.Categories.ListProductAssignments(vm.Category.ID, null, vm.assignments.Meta.PageSize);
+        return OrderCloudSDK.Categories.ListProductAssignments(vm.Category.ID, null, vm.assignments.Meta.PageSize);
     }
 
     function PagingFunction() {
@@ -360,7 +378,7 @@ function CategoryNode($compile) {
     };
 }
 
-function CategoryTreeService($q, Underscore, OrderCloud) {
+function CategoryTreeService($q, Underscore, OrderCloudSDK) {
     return {
         GetCategoryTree: tree,
         UpdateCategoryNode: update
@@ -369,7 +387,7 @@ function CategoryTreeService($q, Underscore, OrderCloud) {
     function tree() {
         var tree = [];
         var deferred = $q.defer();
-        OrderCloud.Categories.List(null, 1, 100, null, null, null, null, 'all')
+        OrderCloudSDK.Categories.List(null, 1, 100, null, null, null, null, 'all')
             .then(function(list) {
             angular.forEach(Underscore.where(list.Items, {ParentID: null}), function(node) {
                 tree.push(getnode(node));
@@ -419,7 +437,7 @@ function CategoryTreeService($q, Underscore, OrderCloud) {
                 nodeQueue = [];
             angular.forEach(nodeList,function(cat, index) {
                 nodeQueue.push((function() {
-                    return OrderCloud.Categories.Patch(cat.ID, {ListOrder: index});
+                    return OrderCloudSDK.Categories.Patch(cat.ID, {ListOrder: index});
                 }));
             });
 
@@ -449,7 +467,7 @@ function CategoryTreeService($q, Underscore, OrderCloud) {
                 parentID = null;
             }
             event.source.nodeScope.node.ParentID = parentID;
-            OrderCloud.Categories.Update(event.source.nodeScope.node.ID, event.source.nodeScope.node)
+            OrderCloudSDK.Categories.Update(event.source.nodeScope.node.ID, event.source.nodeScope.node)
                 .then(function() {
                     deferred.resolve();
                 });

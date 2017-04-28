@@ -7,7 +7,7 @@ angular.module('orderCloud', [
     'ui.tree',
     'ui.router',
     'ui.bootstrap',
-    'orderCloud.sdk',
+    'ordercloud-angular-sdk',
     'LocalForageModule',
     'toastr',
     'cgBusy',
@@ -23,25 +23,40 @@ angular.module('orderCloud', [
     'ordercloud-lineitems',
     'ordercloud-geography',
     'ngCsv',
-    'ngFileSaver'
+    'ngFileSaver',
+    'ngCookies',
+    'ngResource'
     ])
-    .run(SetBuyerID)
     .config(Routing)
     .config(ErrorHandling)
     .config(Interceptor)
     .controller('AppCtrl', AppCtrl)
     .config(DatePickerConfig)
     .directive('ngEnter', NgEnter)
+    .config(OrderCloudSDKAuthAdditions)
 ;
+
+function OrderCloudSDKAuthAdditions($provide) {
+    $provide.decorator('OrderCloudSDK', function($delegate, $cookies, $state) {
+        function orderCloudAuthLogout() {
+            angular.forEach($cookies.getAll(), function(value, key) {
+                $cookies.remove(key);
+            });
+            $state.go('login');
+        }
+        $delegate.Auth.Logout = orderCloudAuthLogout;
+        return $delegate;
+    });
+}
 
 function DatePickerConfig(uibDatepickerConfig, uibDatepickerPopupConfig){
     uibDatepickerConfig.showWeeks = false;
     uibDatepickerPopupConfig.showButtonBar = false;
 }
 
-function SetBuyerID(OrderCloud, buyerid) {
-    OrderCloud.BuyerID.Get() == buyerid ? angular.noop() : OrderCloud.BuyerID.Set(buyerid);
-}
+//function SetBuyerID(Me, buyerid) {
+    //Me.GetBuyerID() == buyerid ? angular.noop() : Me.SetBuyerID(buyerid);
+//}
 
 function Routing($urlRouterProvider, $urlMatcherFactoryProvider, $locationProvider) {
     $urlMatcherFactoryProvider.strictMode(false);

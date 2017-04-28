@@ -5,7 +5,7 @@ describe('Component: AdminUsers', function() {
         oc;
     beforeEach(module('orderCloud'));
     beforeEach(module('orderCloud.sdk'));
-    beforeEach(inject(function($q, $rootScope, OrderCloud) {
+    beforeEach(inject(function($q, $rootScope, OrderCloudSDK) {
         q = $q;
         scope = $rootScope.$new();
         adminUser = {
@@ -16,7 +16,7 @@ describe('Component: AdminUsers', function() {
             "FirstName": "Test",
             "LastName": "Test"
         };
-        oc = OrderCloud;
+        oc = OrderCloudSDK;
     }));
 
     describe('Controller: AdminUserCreateCtrl', function() {

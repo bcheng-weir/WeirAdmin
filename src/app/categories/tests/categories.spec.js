@@ -5,7 +5,7 @@ describe('Component: Categories', function() {
         oc;
     beforeEach(module('orderCloud'));
     beforeEach(module('orderCloud.sdk'));
-    beforeEach(inject(function($q, $rootScope, OrderCloud) {
+    beforeEach(inject(function($q, $rootScope, OrderCloudSDK) {
         q = $q;
         scope = $rootScope.$new();
         category = {
@@ -15,7 +15,7 @@ describe('Component: Categories', function() {
             ListOrder: 1,
             Active: true
         };
-        oc = OrderCloud;
+        oc = OrderCloudSDK;
     }));
 
     describe('State: categories', function() {

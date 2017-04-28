@@ -5,7 +5,7 @@ describe('Component: Products', function() {
         oc;
     beforeEach(module('orderCloud'));
     beforeEach(module('orderCloud.sdk'));
-    beforeEach(inject(function($q, $rootScope, OrderCloud) {
+    beforeEach(inject(function($q, $rootScope, OrderCloudSDK) {
         q = $q;
         scope = $rootScope.$new();
         product = {
@@ -22,7 +22,7 @@ describe('Component: Products', function() {
             AllowOrderExceedInventory: false,
             DisplayInventory: false
         };
-        oc = OrderCloud;
+        oc = OrderCloudSDK;
     }));
 
     describe('State: products', function() {

@@ -6,10 +6,10 @@ describe('Component: Base', function() {
     beforeEach(module('orderCloud'));
     beforeEach(module('orderCloud.sdk'));
     beforeEach(module('ui.router'));
-    beforeEach(inject(function($q, $rootScope, OrderCloud, Underscore) {
+    beforeEach(inject(function($q, $rootScope, OrderCloudSDK, Underscore) {
         q = $q;
         scope = $rootScope.$new();
-        oc = OrderCloud;
+        oc = OrderCloudSDK;
         underscore = Underscore;
     }));
     describe('State: Base', function() {
@@ -18,7 +18,7 @@ describe('Component: Base', function() {
             state = $state.get('base');
             var dfd = q.defer();
             dfd.resolve(true);
-            spyOn(oc.BuyerID, 'Set').and.callThrough();
+            // spyOn(oc.BuyerID, 'Set').and.callThrough();
             spyOn(oc.Auth, 'RemoveToken').and.callThrough();
             spyOn(oc.Auth, 'RemoveImpersonationToken').and.callThrough();
             spyOn($state, 'go').and.returnValue(true);
@@ -39,7 +39,7 @@ describe('Component: Base', function() {
             scope.$digest();
             expect(oc.Auth.RemoveToken).toHaveBeenCalled();
             expect(oc.Auth.RemoveImpersonationToken).toHaveBeenCalled();
-            expect(oc.BuyerID.Set).toHaveBeenCalledWith(null);
+            // expect(oc.BuyerID.Set).toHaveBeenCalledWith(null);
             expect($state.go).toHaveBeenCalledWith('login');
         }));
         it ('should resolve ComponentsList', inject(function($injector, $state) {

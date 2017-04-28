@@ -51,37 +51,37 @@ function BaseConfig($stateProvider, $injector, $sceDelegateProvider) {
         abstract: true,
         views: baseViews,
         resolve: {
-            CurrentUser: function($q, $state, OrderCloud, buyerid, anonymous) {
+            CurrentUser: function($q, $state, OrderCloudSDK, buyerid, anonymous, CurrentBuyer) {
                 var dfd = $q.defer();
-                OrderCloud.Me.Get()
+                OrderCloudSDK.Me.Get()
                     .then(function(data) {
                         dfd.resolve(data);
                     })
                     .catch(function(){
                         if (anonymous) {
-                            if (!OrderCloud.Auth.ReadToken()) {
-                                OrderCloud.Auth.GetToken('')
+                            if (!OrderCloudSDK.GetToken()) {
+                                OrderCloudSDK.GetToken('')
                                     .then(function(data) {
-                                        OrderCloud.Auth.SetToken(data['access_token']);
+                                        OrderCloudSDK.SetToken(data['access_token']);
                                     })
                                     .finally(function() {
-                                        OrderCloud.BuyerID.Set(buyerid);
+                                        CurrentBuyer.SetBuyerID(buyerid);
                                         dfd.resolve({});
                                     });
                             }
                         } else {
-                            OrderCloud.Auth.RemoveToken();
-                            OrderCloud.Auth.RemoveImpersonationToken();
-                            OrderCloud.BuyerID.Set(null);
+                            OrderCloudSDK.RemoveToken();
+                            OrderCloudSDK.RemoveImpersonationToken();
+                            CurrentBuyer.SetBuyerID(null);
                             $state.go('login');
                             dfd.resolve();
                         }
                     });
                 return dfd.promise;
             },
-            AnonymousUser: function($q, OrderCloud, CurrentUser) {
-	            var tmp = OrderCloud.Auth.ReadToken();
-                CurrentUser.Anonymous = (tmp) ? angular.isDefined(JSON.parse(atob(OrderCloud.Auth.ReadToken().split('.')[1])).orderid) : tmp;
+            AnonymousUser: function($q, OrderCloudSDK, CurrentUser) {
+	            var tmp = OrderCloudSDK.GetToken();
+                CurrentUser.Anonymous = (tmp) ? angular.isDefined(JSON.parse(atob(OrderCloudSDK.GetToken().split('.')[1])).orderid) : tmp;
             },
             ComponentList: function($state, $q, Underscore) {
                 var deferred = $q.defer();
@@ -263,7 +263,7 @@ function occomponents() {
 }
 
 
-function FeedbackController($sce, $uibModalInstance, $state, OrderCloud, WeirService, User) {
+function FeedbackController($sce, $uibModalInstance, $state, OrderCloudSDK, WeirService, User) {
     var vm = this;
     vm.user = User;
     vm.Cancel = cancel;
@@ -304,7 +304,7 @@ function FeedbackController($sce, $uibModalInstance, $state, OrderCloud, WeirSer
         };
         var usr = vm.user;
         if (usr) {
-            OrderCloud.AdminUsers.Patch(usr.ID, data);
+            OrderCloudSDK.AdminUsers.Patch(usr.ID, data);
         }
         $uibModalInstance.close();
     }

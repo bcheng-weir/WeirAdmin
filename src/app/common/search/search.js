@@ -22,12 +22,12 @@ function OrdercloudSearch () {
     }
 }
 
-function OrdercloudSearchController($timeout, $scope, OrderCloud, TrackSearch) {
+function OrdercloudSearchController($timeout, $scope, OrderCloudSDK, TrackSearch) {
     $scope.searchTerm = null;
     if ($scope.servicename) {
         var var_name = $scope.servicename.replace(/([a-z])([A-Z])/g, '$1 $2');
         $scope.placeholder = "Search " + var_name + '...';
-        var Service = OrderCloud[$scope.servicename];
+        var Service = OrderCloudSDK[$scope.servicename];
     }
     var searching;
     $scope.$watch('searchTerm', function(n,o) {
@@ -119,7 +119,7 @@ function TrackSearchService() {
     return service;
 }
 
-function SearchProductsService(OrderCloud, $q) {
+function SearchProductsService(OrderCloudSDK, $q) {
     var service = {
     	GetSerialNumbers: _getSerialNumbers,
 	    GetTagNumbers: _getTagNumbers,
@@ -128,7 +128,7 @@ function SearchProductsService(OrderCloud, $q) {
 
     function _getSerialNumbers(lookForThisPartialSerialNumber, Customer) {
     	var dfd = $q.defer();
-	    OrderCloud.Categories.List(null, 1, 50, null, null, {"xp.SN": lookForThisPartialSerialNumber+"*", "ParentID":Customer.id}, null, Customer.id.substring(0,5))
+	    OrderCloudSDK.Categories.List(null, 1, 50, null, null, {"xp.SN": lookForThisPartialSerialNumber+"*", "ParentID":Customer.id}, null, Customer.id.substring(0,5))
 		    .then(function(response) {
 		    	dfd.resolve(response.Items);
 		    });
@@ -137,7 +137,7 @@ function SearchProductsService(OrderCloud, $q) {
 
     function _getTagNumbers(lookForThisPartialTagNumber, Customer) {
     	var dfd = $q.defer();
-	    OrderCloud.Categories.List(null, 1, 50, null, null, {"xp.TagNumber": lookForThisPartialTagNumber+"*", "ParentID":Customer.id}, null, Customer.id.substring(0,5))
+	    OrderCloudSDK.Categories.List(null, 1, 50, null, null, {"xp.TagNumber": lookForThisPartialTagNumber+"*", "ParentID":Customer.id}, null, Customer.id.substring(0,5))
 		    .then(function(response) {
 		    	dfd.resolve(response.Items);
 		    });
@@ -147,11 +147,11 @@ function SearchProductsService(OrderCloud, $q) {
     function _getPartNumbers(lookForThisPartialPartNumber, Customer) {
     	var dfd = $q.defer();
         var partResults = [];
-	    OrderCloud.Products.List(null, 1, 50, null, null, {"Name": lookForThisPartialPartNumber+"*"})
+	    OrderCloudSDK.Products.List(null, 1, 50, null, null, {"Name": lookForThisPartialPartNumber+"*"})
 		    .then(function(response) {
 		    	if(Customer.id.substring(0,5) == 'WVCUK') {
 		    		partResults = response.Items;
-				    return OrderCloud.Products.List(null, 1, 50, null, null, {"xp.AlternatePartNumber":lookForThisPartialPartNumber+'*'})
+				    return OrderCloudSDK.Products.List(null, 1, 50, null, null, {"xp.AlternatePartNumber":lookForThisPartialPartNumber+'*'})
 					    .then(function(altResponse) {
 					    	partResults.push.apply(altResponse.Items);
 						    dfd.resolve(partResults);

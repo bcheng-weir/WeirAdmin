@@ -32,9 +32,9 @@ function CartConfig($stateProvider) {
 						$state.go('home');
 					}
 				},
-				LineItemsList: function($q, $state, toastr, Underscore, OrderCloud, LineItemHelpers, Order) {
+				LineItemsList: function($q, $state, toastr, Underscore, OrderCloudSDK, LineItemHelpers, Order) {
 					var dfd = $q.defer();
-					OrderCloud.LineItems.List(Order.ID)
+					OrderCloudSDK.LineItems.List(Order.ID)
 						.then(function(data) {
 							if (!data.Items.length) {
 								toastr.error('Your order does not contain any line items.', 'Error');
@@ -56,14 +56,14 @@ function CartConfig($stateProvider) {
 						});
 					return dfd.promise;
 				},
-				PromotionsList: function(OrderCloud, Order) {
-					return OrderCloud.Orders.ListPromotions(Order.ID);
+				PromotionsList: function(OrderCloudSDK, Order) {
+					return OrderCloudSDK.Orders.ListPromotions(Order.ID);
 				}
 			}
 		});
 }
 
-function CartController($q, $rootScope, $timeout, OrderCloud, LineItemHelpers, Order, LineItemsList, PromotionsList) {
+function CartController($q, $rootScope, $timeout, OrderCloudSDK, LineItemHelpers, Order, LineItemsList, PromotionsList) {
 	var vm = this;
 	vm.order = Order;
 	vm.lineItems = LineItemsList;
@@ -81,7 +81,7 @@ function CartController($q, $rootScope, $timeout, OrderCloud, LineItemHelpers, O
 	function PagingFunction() {
 		var dfd = $q.defer();
 		if (vm.lineItems.Meta.Page < vm.lineItems.Meta.TotalPages) {
-			OrderCloud.LineItems.List(vm.order.ID, vm.lineItems.Meta.Page + 1, vm.lineItems.Meta.PageSize)
+			OrderCloudSDK.LineItems.List(vm.order.ID, vm.lineItems.Meta.Page + 1, vm.lineItems.Meta.PageSize)
 				.then(function(data) {
 					vm.lineItems.Meta = data.Meta;
 					vm.lineItems.Items = [].concat(vm.lineItems.Items, data.Items);
@@ -96,14 +96,14 @@ function CartController($q, $rootScope, $timeout, OrderCloud, LineItemHelpers, O
 	}
 
 	$rootScope.$on('OC:UpdateOrder', function(event, OrderID) {
-		OrderCloud.Orders.Get(OrderID)
+		OrderCloudSDK.Orders.Get(OrderID)
 			.then(function(data) {
 				vm.order = data;
 			});
 	});
 
 	$rootScope.$on('OC:UpdateLineItem', function(event,Order) {
-		OrderCloud.LineItems.List(Order.ID)
+		OrderCloudSDK.LineItems.List(Order.ID)
 			.then(function(data) {
 				LineItemHelpers.GetProductInfo(data.Items, Order)
 					.then(function() {
@@ -113,7 +113,7 @@ function CartController($q, $rootScope, $timeout, OrderCloud, LineItemHelpers, O
 	});
 }
 
-function MiniCartController($q, $state, $rootScope,$uibModal, $ocMedia, $sce, OrderCloud, LineItemHelpers, CurrentOrder, Underscore, WeirService) {
+function MiniCartController($q, $state, $rootScope,$uibModal, $ocMedia, $sce, OrderCloudSDK, LineItemHelpers, CurrentOrder, Underscore, WeirService) {
 	var vm = this;
 	vm.LineItems = {};
 	vm.Order = null;
@@ -161,11 +161,11 @@ function MiniCartController($q, $state, $rootScope,$uibModal, $ocMedia, $sce, Or
 		var dfd = $q.defer();
 		var queue = [];
 		vm.TotalItems = 0;
-		OrderCloud.LineItems.List(order.ID,null,null,null,null,null,null,order.xp.BuyerID)
+		OrderCloudSDK.LineItems.List(order.ID,null,null,null,null,null,null,order.xp.BuyerID)
 			.then(function(li) {
 				vm.LineItems = li;
 				if (li.Meta.TotalPages > li.Meta.Page) {
-					queue.push(OrderCloud.LineItems.List(order.ID, null ,li.Meta.Page + 1, null, null, null, null, order.xp.BuyerID));
+					queue.push(OrderCloudSDK.LineItems.List(order.ID, null ,li.Meta.Page + 1, null, null, null, null, order.xp.BuyerID));
 				}
 				$q.all(queue)
 					.then(function(results) {

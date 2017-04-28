@@ -18,8 +18,8 @@ function PriceSchedulesConfig($stateProvider) {
                 Parameters: function($stateParams, OrderCloudParameters) {
                     return OrderCloudParameters.Get($stateParams);
                 },
-                PriceScheduleList: function(OrderCloud, Parameters) {
-                    return OrderCloud.PriceSchedules.List(Parameters.search, Parameters.page, Parameters.pageSize || 12, Parameters.searchOn, Parameters.sortBy, Parameters.filters);
+                PriceScheduleList: function(OrderCloudSDK, Parameters) {
+                    return OrderCloudSDK.PriceSchedules.List(Parameters.search, Parameters.page, Parameters.pageSize || 12, Parameters.searchOn, Parameters.sortBy, Parameters.filters);
                 }
             }
         })
@@ -29,8 +29,8 @@ function PriceSchedulesConfig($stateProvider) {
             controller: 'PriceScheduleEditCtrl',
             controllerAs: 'priceScheduleEdit',
             resolve: {
-                SelectedPriceSchedule: function($stateParams, OrderCloud) {
-                    return OrderCloud.PriceSchedules.Get($stateParams.pricescheduleid);
+                SelectedPriceSchedule: function($stateParams, OrderCloudSDK) {
+                    return OrderCloudSDK.PriceSchedules.Get($stateParams.pricescheduleid);
                 }
             }
         })
@@ -43,7 +43,7 @@ function PriceSchedulesConfig($stateProvider) {
     ;
 }
 
-function PriceSchedulesController($state, $ocMedia, OrderCloud, OrderCloudParameters, PriceScheduleList, Parameters) {
+function PriceSchedulesController($state, $ocMedia, OrderCloudSDK, OrderCloudParameters, PriceScheduleList, Parameters) {
     var vm = this;
     vm.list = PriceScheduleList;
     vm.parameters = Parameters;
@@ -108,7 +108,7 @@ function PriceSchedulesController($state, $ocMedia, OrderCloud, OrderCloudParame
 
     //Load the next page of results with all of the same parameters
     vm.loadMore = function() {
-        return OrderCloud.PriceSchedules.List(Parameters.search, vm.list.Meta.Page + 1, Parameters.pageSize || vm.list.Meta.PageSize, Parameters.searchOn, Parameters.sortBy, Parameters.filters)
+        return OrderCloudSDK.PriceSchedules.List(Parameters.search, vm.list.Meta.Page + 1, Parameters.pageSize || vm.list.Meta.PageSize, Parameters.searchOn, Parameters.sortBy, Parameters.filters)
             .then(function(data) {
                 vm.list.Items = vm.list.Items.concat(data.Items);
                 vm.list.Meta = data.Meta;
@@ -116,7 +116,7 @@ function PriceSchedulesController($state, $ocMedia, OrderCloud, OrderCloudParame
     };
 }
 
-function PriceScheduleEditController($scope, $exceptionHandler, $state, toastr, OrderCloud, SelectedPriceSchedule, PriceBreak) {
+function PriceScheduleEditController($scope, $exceptionHandler, $state, toastr, OrderCloudSDK, SelectedPriceSchedule, PriceBreak) {
     var vm = this,
         priceScheduleid = angular.copy(SelectedPriceSchedule.ID);
     vm.priceScheduleName = angular.copy(SelectedPriceSchedule.Name);
@@ -135,7 +135,7 @@ function PriceScheduleEditController($scope, $exceptionHandler, $state, toastr, 
 
     vm.Submit = function() {
         vm.priceSchedule = PriceBreak.SetMinMax(vm.priceSchedule);
-        OrderCloud.PriceSchedules.Update(priceScheduleid, vm.priceSchedule)
+        OrderCloudSDK.PriceSchedules.Update(priceScheduleid, vm.priceSchedule)
             .then(function() {
                 $state.go('priceSchedules', {}, {reload: true});
                 toastr.success('Price Schedule Updated', 'Success');
@@ -146,7 +146,7 @@ function PriceScheduleEditController($scope, $exceptionHandler, $state, toastr, 
     };
 
     vm.Delete = function() {
-        OrderCloud.PriceSchedules.Delete(priceScheduleid)
+        OrderCloudSDK.PriceSchedules.Delete(priceScheduleid)
             .then(function() {
                 $state.go('priceSchedules', {}, {reload: true});
                 toastr.success('Price Schedule Deleted', 'Success');
@@ -168,7 +168,7 @@ function PriceScheduleEditController($scope, $exceptionHandler, $state, toastr, 
 
 }
 
-function PriceScheduleCreateController($scope, $exceptionHandler, $state, toastr, OrderCloud, PriceBreak) {
+function PriceScheduleCreateController($scope, $exceptionHandler, $state, toastr, OrderCloudSDK, PriceBreak) {
     var vm = this;
     vm.priceSchedule = {};
     vm.priceSchedule.RestrictedQuantity = false;
@@ -186,7 +186,7 @@ function PriceScheduleCreateController($scope, $exceptionHandler, $state, toastr
 
     vm.Submit = function() {
         vm.priceSchedule = PriceBreak.SetMinMax(vm.priceSchedule);
-        OrderCloud.PriceSchedules.Create(vm.priceSchedule)
+        OrderCloudSDK.PriceSchedules.Create(vm.priceSchedule)
             .then(function() {
                 $state.go('priceSchedules', {}, {reload: true});
                 toastr.success('Price Schedule Created', 'Success')
