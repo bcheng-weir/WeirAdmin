@@ -21,11 +21,14 @@
                 {{orders.labels.businessName}}
             </th>
             <th scope="col">
-                <a href="#" role="button" ng-click="orders.updateSort('FromUserFirstName')">
+                <!-- <a href="#" role="button" ng-click="orders.updateSort('FromUserFirstName')">
                     {{orders.labels.submittedBy}}
                     <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'FromUserFirstName'"></i>
                     <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!FromUserFirstName'"></i>
-                </a>
+		</a> -->
+		<span>
+                    {{orders.labels.submittedBy}}
+	    </span>
             </th>
             <th scope="col">
                 <a href="#" role="button" ng-click="orders.updateSort('Total')">
