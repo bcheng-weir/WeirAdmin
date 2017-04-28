@@ -28,11 +28,17 @@ function orderConfig($stateProvider) {
 	        	    return OrderCloudSDK.Me.Get();
 		        },
 	            Order: function(CurrentOrder){
-	                return CurrentOrder.Get();
+	        		CurrentOrder.Get().then(function(data){
+	        			return data;
+					})
+					.catch(function () {
+						toastr.error('Your order could not be retrieved.', 'Error');
+						return {};
+					});
 	            },
 	            DeliveryAddress: function (OrderCloudSDK, Order) {
 	                if(Order.ShippingAddressID) {
-	                    return OrderCloudSDK.Addresses.Get(Order.ShippingAddressID, Order.xp.BuyerID);
+	                    return OrderCloudSDK.Addresses.Get(Order.xp.BuyerID, Order.ShippingAddressID);
 	                } else {
 	                    return null;
 	                }
@@ -40,7 +46,7 @@ function orderConfig($stateProvider) {
 	            LineItems: function ($q, $state, toastr, OrderCloudSDK, CurrentOrder, OrderShareService, Order, LineItemHelpers) {
 	                OrderShareService.LineItems.length = 0;
 		            var dfd = $q.defer();
-		            OrderCloudSDK.LineItems.List(Order.ID,null,null,null,null,null,null,Order.xp.BuyerID)
+		            OrderCloudSDK.LineItems.List(/*DIRECTION NEEDED , */"Incoming", Order.ID, { 'filters': {key : Order.xp.BuyerID}})
 			            .then(function(data) {
 				            if (!data.Items.length) {
 					            toastr.error('Your quote does not contain any line items.', 'Error');
@@ -62,7 +68,7 @@ function orderConfig($stateProvider) {
 			        if(pieces.length > 1) {
 				        var prevId = pieces[0] + "-Rev" + (pieces[1] - 1).toString();
 				        var dfd = $q.defer();
-				        OrderCloud.LineItems.List(prevId,null,null,null,null,null,null,Order.xp.BuyerID)
+				        OrderCloudSDK.LineItems.List("Incoming" , prevId, {'filters' : { key: Order.xp.BuyerID}})
 					        .then(function(data) {
 						        if (!data.Items.length) {
 							        dfd.resolve({ Items: [] });
@@ -86,8 +92,9 @@ function orderConfig($stateProvider) {
                     if(pieces.length > 1) {
                         var prevId = pieces[0] + "-Rev" + (pieces[1] - 1).toString();
                         var dfd = $q.defer();
-                        OrderCloudSDK.Orders.Get(prevId, buyerId)
-                            .then(function(data) {
+                       // OrderCloudSDK.Orders.Get(prevId, buyerId) No more buyer id required?
+                        OrderCloudSDK.Orders.Get(/* DIRECTION NEEDED */"Incoming", prevId)
+                    .then(function(data) {
 								dfd.resolve( data.ShippingCost );
                             })
                             .catch(function () {
@@ -99,7 +106,7 @@ function orderConfig($stateProvider) {
                     }
                 },
 	            Payments: function (Order, OrderCloudSDK) {
-	                return OrderCloudSDK.Payments.List(Order.ID,null,null,null,null,null,null,Order.xp.BuyerID);
+	                return OrderCloudSDK.Payments.List("Incoming" , Order.ID, { 'filters': {key: Order.xp.BuyerID}});
 	            },
 	            UserGroups: function (UserGroupsService) {
 	                return UserGroupsService.UserGroups();
@@ -349,7 +356,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			    data.xp.ReviewerEmail = Me.Email;
 			}
 
-			OrderCloudSDK.Orders.Patch(vm.Order.ID, data, vm.Order.xp.BuyerID)
+			OrderCloudSDK.Orders.Patch("Incoming", vm.Order.ID, data)
 				.then(function (order) {
 					toastr.success(vm.labels.POSaveMessage + order.xp.PONumber, vm.labels.POSaveTitle);
 					$state.go($state.current, {}, {reload: true});
@@ -533,7 +540,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 					OriginalQty: line.xp.OriginalQty
 				}
 			};
-			OrderCloudSDK.LineItems.Create(vm.Order.ID, item, vm.Order.xp.BuyerID)
+			OrderCloudSDK.LineItems.Create("Incoming", vm.Order.ID, item)
 				.then(function () {
 					$rootScope.$broadcast('SwitchCart');
 					$state.go($state.current, {}, {reload: true});
@@ -595,7 +602,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 							LeadTime: line.xp.LeadTime ? line.xp.LeadTime : line.Product.xp.LeadTime
 						}
 					};
-					OrderCloudSDK.LineItems.Patch(vm.Order.ID, line.ID, patch, vm.Order.xp.BuyerID)
+					OrderCloudSDK.LineItems.Patch("Incoming", vm.Order.ID, line.ID, patch)
 						.then(function (results) {
 							d.resolve(results);
 						})
@@ -603,7 +610,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 							d.resolve(ex);
 						});
 				} else {
-					OrderCloudSDK.LineItems.Delete(vm.Order.ID, line.ID, vm.Order.xp.BuyerID)
+					OrderCloudSDK.LineItems.Delete("Incoming", vm.Order.ID, line.ID)
 						.then(function (results) {
 							d.resolve(results);
 						})
@@ -641,7 +648,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
                 ShippingDescription:  vm.Order.xp.ShippingDescription != null ? vm.Order.xp.ShippingDescription : null
             }
         };
-        OrderCloudSDK.Orders.Patch(vm.Order.ID, patch, CurrentBuyer.GetBuyerID())
+        OrderCloudSDK.Orders.Patch("Incoming", vm.Order.ID, patch)
             .then(function () {
                 $state.go($state.current, {}, {reload: true});
             })
@@ -670,7 +677,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			line.Quantity = line.TempQty;
 			line.DateAdded = new Date();
 			line.xp.OriginalQty = line.xp.OriginalQty ? line.xp.OriginalQty : 0;
-			OrderCloudSDK.LineItems.Create(vm.Order.ID, line, vm.Order.xp.BuyerID)
+			OrderCloudSDK.LineItems.Create("Incoming", vm.Order.ID)
 				.then(function () {
 					$rootScope.$broadcast('SwitchCart');
 					$state.go($state.current, {}, {reload: true});
@@ -706,7 +713,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		}
 
 		if(patch.xp.Status) {
-			OrderCloudSDK.Orders.Patch(vm.Order.ID, patch, vm.Order.xp.BuyerID)
+			OrderCloudSDK.Orders.Patch("Incoming", vm.Order.ID, patch)
 				.then(function(order) {
 					$state.go($state.current,{}, {reload:true});
 				})
@@ -728,7 +735,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 				vm.Order.xp.CommentsToWeir = [];
 			}
 			vm.Order.xp.CommentsToWeir.push(comment);
-			OrderCloudSDK.Orders.Patch(vm.Order.ID, {xp:{CommentsToWeir: vm.Order.xp.CommentsToWeir}}, vm.Order.xp.BuyerID)
+			OrderCloudSDK.Orders.Patch("Incoming", vm.Order.ID, {xp:{CommentsToWeir: vm.Order.xp.CommentsToWeir}})
 				.then(function(order) {
 					vm.CommentToWeir = "";
 					$state.go($state.current,{}, {reload:true});
@@ -761,7 +768,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		}
 
 		if(patch.xp.Status) {
-			OrderCloudSDK.Orders.Patch(vm.Order.ID, patch, vm.Order.xp.BuyerID)
+			OrderCloudSDK.Orders.Patch("Incoming",vm.Order.ID, patch)
 				.then(function(order) {
 					vm.order = order;
 					//$state.go($state.current,{}, {reload:true});
@@ -871,7 +878,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		};
 
 		// Patch the current order with the updated status, ID and active state.
-		OrderCloudSDK.Orders.Patch(OrderID, orderPatch, vm.Order.xp.BuyerID)
+		OrderCloudSDK.Orders.Patch("Incoming", OrderID, orderPatch)
 			.then(function(order) {
 				angular.forEach(vm.LineItems.Items, function(value, key) {
 					var liPatch = {
@@ -886,7 +893,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 							OriginalUnitPrice: value.UnitPrice ? value.UnitPrice : 0
 						}
 					};
-					queue.push(OrderCloudSDK.LineItems.Patch(order.ID, value.ID, liPatch, vm.Order.xp.BuyerID));
+					queue.push(OrderCloudSDK.LineItems.Patch("Incoming",order.ID, value.ID, liPatch));
 				});
 				$q.all(queue)
 					.then(function(results) {
@@ -896,12 +903,12 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			})
 			.then(function() {
 				// Get the details of the user that placed the order.
-                return OrderCloudSDK.Users.Get(vm.Order.FromUserID, vm.Order.xp.BuyerID);
+                return OrderCloudSDK.Users.Get(vm.Order.xp.BuyerID, vm.Order.FromUserID);
 			})
             .then(function(buyer) {
             	// Get an access token for impersonation.
 	            impersonation.Claims = buyer.AvailableRoles;
-                return OrderCloudSDK.Users.GetAccessToken(vm.Order.FromUserID, impersonation, vm.Order.xp.BuyerID);
+                return OrderCloudSDK.GetAccessToken(vm.Order.xp.BuyerID, vm.Order.FromUserID, impersonation);
 			})
             .then(function(data) {
             	// Set the local impersonation token so that As() can be used.
@@ -909,17 +916,17 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
             })
 			.then(function() {
 				// Create the order as the impersonated user.
-				return OrderCloudSDK.As().Orders.Create(orderCopy, vm.Order.xp.BuyerID);
+				return OrderCloudSDK.As().Orders.Create("Outgoing", orderCopy);
 				//ToDo make another then in order to set the shipping address.
 			})
 			.then(function() {
 				// Create the line items.
 				angular.forEach(lineItemsCopy.Items, function(value, key) {
-					queue.push(OrderCloudSDK.LineItems.Create(orderCopy.ID, value, vm.Order.xp.BuyerID));
+					queue.push(OrderCloudSDK.LineItems.Create("Outgoing", orderCopy.ID, value));
 				});
 				$q.all(queue)
 					.then(function() {
-						return OrderCloudSDK.Orders.Submit(orderCopy.ID, vm.Order.xp.BuyerID);
+						return OrderCloudSDK.Orders.Submit("Outgoing", orderCopy.ID);
 					});
 			})
 			.then(function() {
@@ -957,7 +964,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        if (oldID) {
 	            data.xp.PriorReviewerID = oldID;
 	        }
-	        OrderCloudSDK.Orders.Patch(vm.Order.ID, data, vm.Order.xp.BuyerID)
+	        OrderCloudSDK.Orders.Patch("Incoming", vm.Order.ID, data)
             .then(function (order) {
                 vm.Order = order;
                 vm.showAssign = false;
@@ -1050,7 +1057,7 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, O
 				Status: orderStatus
 			}
 		};
-		OrderCloudSDK.Orders.Patch(Order.ID, patch, vm.Order.xp.BuyerID)
+		OrderCloudSDK.Orders.Patch("Incoming", Order.ID, patch)
 			.then(function() {
 				$rootScope.$broadcast('SwitchCart');
 				$state.go($state.current,{}, {reload:true});
