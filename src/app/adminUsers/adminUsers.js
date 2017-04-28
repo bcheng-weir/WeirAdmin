@@ -58,13 +58,13 @@ function AdminUsersConfig($stateProvider) {
                 },
                 AdminUsersList: function(OrderCloudSDK, Parameters, $state, Me) {
                 var opts = {
-                    'search': Me.xp.WeirGroup.label,
-                    'searchOn': "xp",
+                    'search': Parameters.search,
                     'sortBy': Parameters.sortBy,
                     'page': Parameters.page,
                     'pageSize': Parameters.pageSize || 12
                 };
-                    // 'filters': { "xp.WeirGroup.label":Me.xp.WeirGroup.label }
+                    // 'searchOn': "xp",
+                    //'filters': { "xp.WeirGroup.label":Me.xp.WeirGroup.label }
 	                
                     return OrderCloudSDK.AdminUsers.List(opts)
                         .then(function(data) {

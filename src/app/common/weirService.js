@@ -21,7 +21,12 @@ function UserGroupsService($q, OrderCloudSDK) {
         if (!groups) {
             OrderCloudSDK.Me.Get()
             .then(function (usr) {
-                OrderCloudSDK.AdminUserGroups.ListUserAssignments(null, usr.ID, 1, 50)
+                var opts = {
+                    userID: usr.ID,
+                    page: 1,
+                    pageSize: 50
+		};
+                OrderCloudSDK.AdminUserGroups.ListUserAssignments(opts)
                 .then(function (results) {
                     groups = [];
                     for (var i = 0; i < results.Items.length; i++) {
@@ -132,12 +137,12 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 			IsShipping: true,
 			IsBilling: true
 		};
-		OrderCloudSDK.Addresses.SaveAssignment(buyerAssignment, buyerId)
+		OrderCloudSDK.Addresses.SaveAssignment(buyerId, buyerAssignment)
 			.then(function() {
-				return OrderCloudSDK.Addresses.SaveAssignment(shopperAssignment, buyerId);
+				return OrderCloudSDK.Addresses.SaveAssignment(buyerId, shopperAssignment);
 			})
 			.then(function() {
-				return OrderCloudSDK.Addresses.SaveAssignment(adminAssignment, buyerId);
+				return OrderCloudSDK.Addresses.SaveAssignment(buyerId, adminAssignment);
 			})
 			.catch(function(ex) {
 				return ex
@@ -190,7 +195,12 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 					"xp.CustomerID": customer.id,
 					"xp.Status": "DR"
 				};
-				OrderCloudSDK.Me.ListOutgoingOrders(null, 1, 50, null, null, filter)
+				var opts = {
+					page: 1,
+					pageSize: 50,
+					filters: filter
+				};
+				OrderCloudSDK.Me.ListOrders(opts)
 					.then(function(results) {
 						if (results.Items.length > 0) {
 							var ct = results.Items[0];
@@ -206,7 +216,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 									"Status": "DR"
 								}
 							}
-							OrderCloudSDK.Orders.Create(cart)
+							OrderCloudSDK.Orders.Create("Incoming", cart)
 								.then(function(ct) {
 									CurrentOrder.Set(ct.ID);
 									deferred.resolve(ct);
@@ -236,21 +246,27 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
             .then(function (co) {
                 order = co;
                 miniCartBuyer = {"FromUserID": co.FromUserID, "BuyerID": co.xp.BuyerID};
-				return OrderCloudSDK.Users.Get(co.FromUserID, co.xp.BuyerID)
+				return OrderCloudSDK.Users.Get(co.xp.BuyerID, co.FromUserID)
             })
 	        .then(function (buyer) {
 	            // Get an access token for impersonation.
 	            impersonation.Claims = buyer.AvailableRoles;
-	            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.FromUserID, impersonation, miniCartBuyer.BuyerID);
+	            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
             })
             .then(function (data) {
                 // Set the local impersonation token so that As() can be used.
                 OrderCloudSDK.SetImpersonationToken(data['access_token']);
             }).then(function () {
-				return OrderCloudSDK.As().Me.ListCategories(null, 1, 50, "ParentID", null, {
-                    "xp.SN": serialNumber,
-                    "ParentID": order.xp.CustomerID
-                    }, null, order.xp.CustomerID.substring(0, 5))
+                 var opts = {
+		     catalogID: order.xp.CustomerID.substring(0, 5),
+		     page: 1,
+		     pageSize: 50,
+		     filter: {
+                         "xp.SN": serialNumber,
+                         "ParentID": order.xp.CustomerID
+		     }
+		 };
+		return OrderCloudSDK.As().Me.ListCategories(opts)
                 .then(function (matches) {
                     if (matches.Items.length == 1) {
                         result = matches.Items[0];
@@ -285,22 +301,28 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 	        .then(function (co) {
 	        	order = co;
 	            miniCartBuyer = {"FromUserID": co.FromUserID, "BuyerID": co.xp.BuyerID};
-	            return OrderCloudSDK.Users.Get(co.FromUserID, co.xp.BuyerID)
+	            return OrderCloudSDK.Users.Get(co.xp.BuyerID, co.FromUserID)
             })
 	        .then(function (buyer) {
 	            // Get an access token for impersonation.
 	            impersonation.Claims = buyer.AvailableRoles;
-	            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.FromUserID, impersonation, miniCartBuyer.BuyerID);
+	            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
             })
             .then(function (data) {
                 // Set the local impersonation token so that As() can be used.
                return OrderCloudSDK.SetImpersonationToken(data['access_token']);
             })
 	        .then(function () {
-	            return OrderCloudSDK.As().Me.ListCategories(null, 1, 50, "ParentID", null, {
-	                "xp.TagNumber": tagNumber,
-	                "ParentID": order.xp.CustomerID
-	            }, null, order.xp.CustomerID.substring(0, 5));
+                    var opts = {
+		        catalogID: order.xp.CustomerID.substring(0, 5),
+		        page: 1,
+		        pageSize: 50,
+		        filter: {
+                            "xp.TagNumber": tagNumber,
+                            "ParentID": order.xp.CustomerID
+		        }
+		    };
+	            return OrderCloudSDK.As().Me.ListCategories(opts);
             })
             .then(function (matches) {
 	            if (matches.Items.length > 0) {
@@ -332,19 +354,25 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 	        .then(function (co) {
 	        	order = co;
 	            miniCartBuyer = {"FromUserID": co.FromUserID, "BuyerID": co.xp.BuyerID};
-	            return OrderCloudSDK.Users.Get(co.FromUserID, co.xp.BuyerID)
+	            return OrderCloudSDK.Users.Get(co.xp.BuyerID, co.FromUserID)
             })
 	        .then(function (buyer) {
 	            // Get an access token for impersonation.
 	            impersonation.Claims = buyer.AvailableRoles;
-	            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.FromUserID, impersonation, miniCartBuyer.BuyerID);
+	            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
             })
             .then(function (data) {
                 // Set the local impersonation token so that As() can be used.
                 OrderCloudSDK.SetImpersonationToken(data['access_token']);
             })
 	        .then(function () {
-                return OrderCloudSDK.As().Me.ListProducts(null, 1, 100, null, null, null, catId, result.ParentID.substring(0, 5));
+                    var opts = {
+                        page: 1,
+                        pageSize: 100,
+                        catalogID: result.ParentID.substring(0, 5),
+                        categoryID: catId
+                    };
+                return OrderCloudSDK.As().Me.ListProducts(opts)
             })
             .then(function (products) {
                 result.Parts = [];
@@ -384,11 +412,11 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
         CurrentOrder.Get().then(function(co) {
 	            order = co;
 	            miniCartBuyer = {"FromUserID" : co.FromUserID, "BuyerID": co.xp.BuyerID };
-	            return OrderCloudSDK.Users.Get(co.FromUserID, co.xp.BuyerID)
+	            return OrderCloudSDK.Users.Get(co.xp.BuyerID, co.FromUserID)
 	        }).then(function(buyer) {
 	            // Get an access token for impersonation.
 	            impersonation.Claims = buyer.AvailableRoles;
-	            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.FromUserID, impersonation, miniCartBuyer.BuyerID);
+	            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
 	        })
             .then(function(data) {
                 // Set the local impersonation token so that As() can be used.
@@ -399,7 +427,16 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
                         if (number) {
                             queue.push((function () {
                                 var d = $q.defer();
-                                return OrderCloudSDK.As().Me.ListCategories(null, 1, 50, null, null, {"xp.SN": number, "ParentID":order.xp.CustomerID}, null, order.xp.CustomerID.substring(0,5))
+                                var opts = {
+		                    catalogID: order.xp.CustomerID.substring(0, 5),
+		                    page: 1,
+		                    pageSize: 50,
+		                    filter: {
+                                        "xp.SN": number,
+                                        "ParentID": order.xp.CustomerID
+		                    }
+		                };
+                                return OrderCloudSDK.As().Me.ListCategories(opts)
                                     .then(function (matches) {
                                         if (matches.Items.length == 1) {
                                             results.push({Number: number, Detail: matches.Items[0]});
@@ -442,12 +479,12 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 	        .then(function(co) {
 	            order = co;
 	            miniCartBuyer = {"FromUserID" : co.FromUserID, "BuyerID": co.xp.BuyerID };
-	            return OrderCloudSDK.Users.Get(co.FromUserID, co.xp.BuyerID)
+	            return OrderCloudSDK.Users.Get(co.xp.BuyerID, co.FromUserID)
             })
 	        .then(function(buyer) {
 	            // Get an access token for impersonation.
 	            impersonation.Claims = buyer.AvailableRoles;
-	            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.FromUserID, impersonation, miniCartBuyer.BuyerID);
+	            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
             })
             .then(function(data) {
                 // Set the local impersonation token so that As() can be used.
@@ -458,10 +495,16 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
                         if (number) {
                             queue.push((function () {
                                 var d = $q.defer();
-                                return OrderCloudSDK.As().Me.ListCategories(null, 1, 50, null, null, {
-                                    "xp.TagNumber": number,
-                                    "ParentID": order.xp.CustomerID
-                                }, null, order.xp.CustomerID.substring(0, 5))
+                                var opts = {
+		                    catalogID: order.xp.CustomerID.substring(0, 5),
+		                    page: 1,
+		                    pageSize: 50,
+		                    filter: {
+                                        "xp.TagNumber": number,
+                                        "ParentID": order.xp.CustomerID
+		                    }
+		                };
+                                return OrderCloudSDK.As().Me.ListCategories(opts)
                                     .then(function (matches) {
                                         if (matches.Items.length == 1) {
                                             results.push({Number: number, Detail: matches.Items[0]});
@@ -530,18 +573,25 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 	                        	        miniCartBuyer.WeirGroup = miniCartBuyer.BuyerID.substring(0, tmp);
 	                        	    }
 	                        	}
-	                            return OrderCloudSDK.Users.Get(co.FromUserID, co.xp.BuyerID)
+	                            return OrderCloudSDK.Users.Get(co.xp.BuyerID, co.FromUserID)
                             }).then(function (buyer) {
 	                            // Get an access token for impersonation.
 	                            impersonation.Claims = buyer.AvailableRoles;
-	                            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.FromUserID, impersonation, miniCartBuyer.BuyerID);
+	                            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
                             })
                             .then(function (data) {
                                 // Set the local impersonation token so that As() can be used.
                                 OrderCloudSDK.SetImpersonationToken(data['access_token']);
                             }).then(function () {
-                                //return OrderCloudSDK.Products.List(null, 1, 50, null, null, { "Name": number, "catalogID": miniCartBuyer.WeirGroup }) //search, page, pageSize, searchOn, sortBy, filters
-                                return OrderCloudSDK.As().Me.ListProducts(null, 1, 50, null, null, {"Name": number+"*"}, null, miniCartBuyer.WeirGroup);
+                                var opts = {
+                                    page: 1,
+                                    pageSize: 50,
+                                    catalogID: miniCartBuyer.WeirGroup,
+		                    filter: {
+                                        "Name": number+"*"
+		                    }
+                                };
+                                return OrderCloudSDK.As().Me.ListProducts(opts)
                             })
                             .then(function (products) {
                                 if (products.Items.length == 0) {
@@ -568,49 +618,6 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
             })
         }
 
-		//function getValvesForParts(results) {
-		//	angular.forEach(results.Parts, function(result) {
-		//		if (result.Detail) {
-		//			q2.push((function() {
-		//				var d2 = $q.defer();
-		//				var part = result.Detail;
-		//				OrderCloudSDK.Categories.ListProductAssignments(null, part.ID, 1, 50)
-		//					.then(function(valveIds) {
-		//						angular.forEach(valveIds.Items, function(entry) {
-		//							if (categories.indexOf(entry) < 0) categories.push(entry);
-		//						});
-		//						d2.resolve();
-		//					})
-		//					.catch (function(ex) {
-		//						d2.resolve();
-		//					});
-		//				return d2.promise;
-		//			})());
-		//		}
-		//	});
-		//}
-
-	//	function getCustomerForValves(valves) {
-	//		var def3 = $q.defer();
-	//		angular.forEach(valves, function(entry) {
-	//			q3.push((function() {
-	//				var d3 = $q.defer();
-	//				OrderCloudSDK.Categories.Get(entry.CategoryID)
-	//					.then(function(item) {
-	//						if (!results.Customer) {
-	//							results.Customer = item.xp.Customer;
-	//						} else if (results.Customer != item.xp.Customer) {
-	//							results.Customer = "*";
-	//						}
-	//						d3.resolve();
-	//					})
-	//					.catch(function(ex) {
-	//						d3.resolve();
-	//					});
-	//				return d3.promise;
-	//			})());
-	//		});
-	//	}
 	}
 
 	function addPartToQuote(part) {
@@ -621,7 +628,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 			.then(function(order) {
 				// order is the localforge order.
 				currentOrder = order;
-				return OrderCloudSDK.LineItems.List(currentOrder.ID,null,null,null,null,null,null,currentOrder.xp.BuyerID);
+				return OrderCloudSDK.LineItems.List("Incoming", currentOrder.ID);
 			})
 			.then(function(lineItems) {
 				// If the line items contains the current part, then update.
@@ -649,7 +656,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 				ProductID: lineItem.ProductID,
 				Quantity: qty
 			};
-			OrderCloudSDK.LineItems.Patch(order.ID, lineItem.ID, li, order.xp.BuyerID)
+			OrderCloudSDK.LineItems.Patch("Incoming", order.ID, lineItem.ID, li)
 				.then(function(lineItem) {
 					deferred.resolve({Order: order, LineItem: lineItem});
 				})
@@ -673,16 +680,16 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 				Claims: []
 			};
 
-			OrderCloudSDK.Users.Get(order.FromUserID, order.xp.BuyerID)
+			OrderCloudSDK.Users.Get(order.xp.BuyerID, order.FromUserID)
 				.then(function(buyer) {
 					impersonation.Claims = buyer.AvailableRoles;
-					return OrderCloudSDK.Users.GetAccessToken(order.FromUserID, impersonation, order.xp.BuyerID);
+					return OrderCloudSDK.Users.GetAccessToken(order.xp.BuyerID, order.FromUserID, impersonation);
 				})
 				.then(function(data) {
 					return OrderCloudSDK.SetImpersonationToken(data['access_token']);
 				})
 				.then(function() {
-					return OrderCloudSDK.As().LineItems.Create(order.ID, li, order.xp.BuyerID);
+					return OrderCloudSDK.As().LineItems.Create("Outgoing", order.ID, li);
 				})
 				.then(function(lineItem) {
 					deferred.resolve({Order: order, LineItem: lineItem});
@@ -706,7 +713,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 				addLineItems(order);
 			})
 			.catch(function() {
-				OrderCloudSDK.Orders.Create({ID: randomQuoteID()})
+				OrderCloudSDK.Orders.Create("Incoming", {ID: randomQuoteID()})
 					.then(function(order) {
 						CurrentOrder.Set(order.ID);
 						addLineItems(order);
@@ -726,7 +733,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 							Quantity: part.Quantity
 						};
 
-						OrderCloudSDK.LineItems.Create(order.ID, li, order.xp.BuyerID)
+						OrderCloudSDK.LineItems.Create("Incoming", order.ID, li)
 							.then(function(lineItem) {
 								d.resolve(lineItem);
 							});
