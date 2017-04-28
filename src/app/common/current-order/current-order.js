@@ -5,6 +5,8 @@ angular.module('ordercloud-current-order', [])
 function CurrentOrderService($q, $localForage, OrderCloudSDK, appname) {
     var StorageName = appname + '.CurrentOrderID';
     var CustomerStorageName = appname + '.CurrentCustomer';
+    var isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+    var direction = isImpersonating == true ? 'Outgoing' : 'Incoming';
     return {
         Get: _get,
         GetID: _getID,
@@ -19,7 +21,7 @@ function CurrentOrderService($q, $localForage, OrderCloudSDK, appname) {
         var dfd = $q.defer();
         _getID()
             .then(function(OrderID) {
-                OrderCloudSDK.Orders.Get(OrderID)
+                OrderCloudSDK.Orders.Get(direction, OrderID)
                     .then(function(order) {
                         dfd.resolve(order);
                     })
