@@ -246,12 +246,12 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
             .then(function (co) {
                 order = co;
                 miniCartBuyer = {"FromUserID": co.FromUserID, "BuyerID": co.xp.BuyerID};
-				return OrderCloudSDK.Users.Get(co.xp.BuyerID, co.FromUserID)
+				return OrderCloudSDK.Users.Get(co.FromUserID)
             })
 	        .then(function (buyer) {
 	            // Get an access token for impersonation.
 	            impersonation.Claims = buyer.AvailableRoles;
-	            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
+	            return OrderCloudSDK.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
             })
             .then(function (data) {
                 // Set the local impersonation token so that As() can be used.
@@ -301,12 +301,12 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 	        .then(function (co) {
 	        	order = co;
 	            miniCartBuyer = {"FromUserID": co.FromUserID, "BuyerID": co.xp.BuyerID};
-	            return OrderCloudSDK.Users.Get(co.xp.BuyerID, co.FromUserID)
+	            return OrderCloudSDK.Users.Get(co.FromUserID)
             })
 	        .then(function (buyer) {
 	            // Get an access token for impersonation.
 	            impersonation.Claims = buyer.AvailableRoles;
-	            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
+	            return OrderCloudSDK.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
             })
             .then(function (data) {
                 // Set the local impersonation token so that As() can be used.
@@ -354,12 +354,12 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 	        .then(function (co) {
 	        	order = co;
 	            miniCartBuyer = {"FromUserID": co.FromUserID, "BuyerID": co.xp.BuyerID};
-	            return OrderCloudSDK.Users.Get(co.xp.BuyerID, co.FromUserID)
+	            return OrderCloudSDK.Users.Get(co.FromUserID)
             })
 	        .then(function (buyer) {
 	            // Get an access token for impersonation.
 	            impersonation.Claims = buyer.AvailableRoles;
-	            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
+	            return OrderCloudSDK.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
             })
             .then(function (data) {
                 // Set the local impersonation token so that As() can be used.
@@ -412,11 +412,11 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
         CurrentOrder.Get().then(function(co) {
 	            order = co;
 	            miniCartBuyer = {"FromUserID" : co.FromUserID, "BuyerID": co.xp.BuyerID };
-	            return OrderCloudSDK.Users.Get(co.xp.BuyerID, co.FromUserID)
+	            return OrderCloudSDK.Users.Get(co.FromUserID)
 	        }).then(function(buyer) {
 	            // Get an access token for impersonation.
 	            impersonation.Claims = buyer.AvailableRoles;
-	            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
+	            return OrderCloudSDK.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
 	        })
             .then(function(data) {
                 // Set the local impersonation token so that As() can be used.
@@ -479,12 +479,12 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 	        .then(function(co) {
 	            order = co;
 	            miniCartBuyer = {"FromUserID" : co.FromUserID, "BuyerID": co.xp.BuyerID };
-	            return OrderCloudSDK.Users.Get(co.xp.BuyerID, co.FromUserID)
+	            return OrderCloudSDK.Users.Get(co.FromUserID)
             })
 	        .then(function(buyer) {
 	            // Get an access token for impersonation.
 	            impersonation.Claims = buyer.AvailableRoles;
-	            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
+	            return OrderCloudSDK.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
             })
             .then(function(data) {
                 // Set the local impersonation token so that As() can be used.
@@ -573,11 +573,11 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 	                        	        miniCartBuyer.WeirGroup = miniCartBuyer.BuyerID.substring(0, tmp);
 	                        	    }
 	                        	}
-	                            return OrderCloudSDK.Users.Get(co.xp.BuyerID, co.FromUserID)
+	                            return OrderCloudSDK.Users.Get(co.FromUserID)
                             }).then(function (buyer) {
 	                            // Get an access token for impersonation.
 	                            impersonation.Claims = buyer.AvailableRoles;
-	                            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
+	                            return OrderCloudSDK.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
                             })
                             .then(function (data) {
                                 // Set the local impersonation token so that As() can be used.
@@ -680,10 +680,10 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 				Claims: []
 			};
 
-			OrderCloudSDK.Users.Get(order.xp.BuyerID, order.FromUserID)
+			OrderCloudSDK.Users.Get(order.FromUserID)
 				.then(function(buyer) {
 					impersonation.Claims = buyer.AvailableRoles;
-					return OrderCloudSDK.Users.GetAccessToken(order.xp.BuyerID, order.FromUserID, impersonation);
+					return OrderCloudSDK.GetAccessToken(order.xp.BuyerID, order.FromUserID, impersonation);
 				})
 				.then(function(data) {
 					return OrderCloudSDK.SetImpersonationToken(data['access_token']);

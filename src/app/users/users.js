@@ -77,7 +77,7 @@ function UsersConfig($stateProvider) {
             controllerAs: 'userEdit',
             resolve: {
                 SelectedUser: function($stateParams, OrderCloudSDK, CurrentBuyer) {
-                    return OrderCloudSDK.Users.Get(CurrentBuyer.GetBuyerID(), $stateParams.userid);
+                    return OrderCloudSDK.Users.Get($stateParams.userid);
                 },
                 GroupsAvailable: function (OrderCloudSDK, CurrentBuyer) {
                     return OrderCloudSDK.UserGroups.List(CurrentBuyer.GetBuyerID());

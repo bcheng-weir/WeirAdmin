@@ -27,16 +27,18 @@ function orderConfig($stateProvider) {
 	        	Me: function(OrderCloudSDK) {
 	        	    return OrderCloudSDK.Me.Get();
 		        },
-	            Order: function(CurrentOrder){
-	        		CurrentOrder.Get().then(function(data){
-	        			return data;
+	            Order: function(CurrentOrder, $q){
+                    var dfd = $q.defer();
+                    CurrentOrder.Get().then(function(data){
+	        			 dfd.resolve(data);
 					})
 					.catch(function () {
 						toastr.error('Your order could not be retrieved.', 'Error');
-						return {};
+						dfd.resolve({});
 					});
+	        		return dfd.promise;
 	            },
-	            DeliveryAddress: function (OrderCloudSDK, Order) {
+	            DeliveryAddress:function (OrderCloudSDK, Order) {
 	                if(Order.ShippingAddressID) {
 	                    return OrderCloudSDK.Addresses.Get(Order.xp.BuyerID, Order.ShippingAddressID);
 	                } else {
@@ -903,7 +905,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			})
 			.then(function() {
 				// Get the details of the user that placed the order.
-                return OrderCloudSDK.Users.Get(vm.Order.xp.BuyerID, vm.Order.FromUserID);
+                return OrderCloudSDK.Users.Get(vm.Order.FromUserID);
 			})
             .then(function(buyer) {
             	// Get an access token for impersonation.

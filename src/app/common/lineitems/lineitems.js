@@ -79,7 +79,7 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
 		    Claims: []
 	    };
 
-	    OrderCloudSDK.Users.Get(Order.FromUserID, Order.xp.BuyerID)
+	    OrderCloudSDK.Users.Get(Order.FromUserID)
 		    .then(function(buyer) {
 			    // Get an access token for impersonation.
 			    impersonation.Claims = buyer.AvailableRoles;
