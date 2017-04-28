@@ -24,7 +24,17 @@ function OrdersConfig($stateProvider, buyerid) {
                     CurrentBuyer.SetBuyerID(undefined);
 	                Parameters.searchOn = Parameters.searchOn ? Parameters.searchOn : "ID,FromUserID,Total,xp";
 	                Parameters.filters["FromCompanyID"] = Me.xp.WeirGroup.label+'*';
-                    return OrderCloudSDK.Orders.ListIncoming(Parameters.from, Parameters.to, Parameters.search, Parameters.page, Parameters.pageSize || 20, Parameters.searchOn, Parameters.sortBy, Parameters.filters, null);
+                    var opts = {
+                        from: Parameters.from,
+                        to: Parameters.to,
+                        search: Parameters.search,
+                        searchOn: Parameters.searchOn,
+                        sortBy: Parameters.sortBy,
+                        page: Parameters.page,
+                        pageSize: Parameters.pageSize || 20,
+                        filters: Parameters.filters
+                    };
+                    return OrderCloudSDK.Orders.List("Incoming", opts);
                 }
             }
         })
@@ -97,7 +107,7 @@ function OrdersConfig($stateProvider, buyerid) {
     	            var storageName = appname + '.routeto';
     	            $localForage.setItem(storageName, { state: 'gotoOrder', id: $stateParams.orderID, buyer: $stateParams.buyerID })
 	                    .then(function () {
-	                        OrderCloudSDK.Orders.Get($stateParams.orderID, $stateParams.buyerID)
+	                        OrderCloudSDK.Orders.Get("Incoming", $stateParams.orderID)
 		                        .then(function (order) {
 		                            $localForage.removeItem(storageName);
 		                            d.resolve(order);
@@ -191,7 +201,16 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 
 	//Load the next page of results with all of the same parameters
 	vm.loadMore = function() {
-		return OrderCloudSDK.Orders.ListOutgoing(null , null, Parameters.search, vm.list.Meta.Page + 1, Parameters.pageSize || vm.list.Meta.PageSize, Parameters.searchOn, Parameters.sortBy, Parameters.filters, buyerid)
+            var opts = {
+                search: Parameters.search,
+                searchOn: Parameters.searchOn,
+                sortBy: Parameters.sortBy,
+                page: vm.list.Meta.Page + 1,
+                pageSize: Parameters.pageSize || vm.list.Meta.PageSize,
+                filters: Parameters.filters,
+                buyerID: buyerid
+            };
+		return OrderCloudSDK.Orders.List("Outgoing", opts)
 			.then(function(data) {
 				vm.list.Items = vm.list.Items.concat(data.Items);
 				vm.list.Meta = data.Meta;
