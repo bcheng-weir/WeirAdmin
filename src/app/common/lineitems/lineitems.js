@@ -14,7 +14,8 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
         UpdateShipping: _updateShipping,
         ListAll: _listAll
     };
-
+    var isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+    var direction = isImpersonating == true ? 'Outgoing' : 'Incoming';
     function _specConvert(specs) {
         var results = [];
         angular.forEach(specs, function (spec) {
@@ -39,14 +40,17 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
     }
 
     function _removeItem(Order, LineItem) {
-        OrderCloudSDK.LineItems.Delete(Order.ID, LineItem.ID)
+        OrderCloudSDK.LineItems.Delete(direction, Order.ID, LineItem.ID)
             .then(function () {
+                var filter = {
+                    'Order.xp.BuyerID' : Order.xp.BuyerID
+                };
                 // If all line items are removed delete the order.
-                OrderCloudSDK.LineItems.List(Order.ID,null,null,null,null,null,null,Order.xp.BuyerID)
+                OrderCloudSDK.LineItems.List(direction, Order.ID, {'filters' : filter})
                     .then(function (data) {
                         if (!data.Items.length) {
                             CurrentOrder.Remove();
-                            OrderCloudSDK.Orders.Delete(Order.ID, Order.xp.BuyerID)
+                            OrderCloudSDK.Orders.Delete(direction, Order.ID, Order.xp.BuyerID)
                                 .then(function () {
                                     $state.reload();
                                     $rootScope.$broadcast('OC:RemoveOrder');
@@ -61,7 +65,7 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
 
     function _updateQuantity(Order, LineItem) {
         if (LineItem.Quantity > 0) {
-            OrderCloudSDK.LineItems.Patch(Order.ID, LineItem.ID, {Quantity: LineItem.Quantity}, Order.xp.BuyerID)
+            OrderCloudSDK.LineItems.Patch(direction, Order.ID, LineItem.ID, {Quantity: LineItem.Quantity})
                 .then(function () {
                     $rootScope.$broadcast('OC:UpdateOrder', Order.ID);
                     $rootScope.$broadcast('OC:UpdateLineItem',Order);
@@ -79,11 +83,11 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
 		    Claims: []
 	    };
 
-	    OrderCloudSDK.Users.Get(Order.FromUserID)
+	    OrderCloudSDK.Users.Get(Order.xp.BuyerID,Order.FromUserID)
 		    .then(function(buyer) {
 			    // Get an access token for impersonation.
 			    impersonation.Claims = buyer.AvailableRoles;
-			    return OrderCloudSDK.Users.GetAccessToken(Order.FromUserID, impersonation, Order.xp.BuyerID);
+			    return OrderCloudSDK.Users.GetAccessToken(Order.xp.BuyerID, Order.FromUserID, impersonation);
 		    })
 		    .then(function(data) {
 			    // Set the local impersonation token so that As() can be used.
@@ -146,7 +150,7 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
         modalInstance.result
             .then(function (address) {
                 address.ID = Math.floor(Math.random() * 1000000).toString();
-                OrderCloudSDK.LineItems.SetShippingAddress(Order.ID, LineItem.ID, address, Order.xp.BuyerID)
+                OrderCloudSDK.LineItems.SetShippingAddress(direction, Order.ID, LineItem.ID, address)
                     .then(function () {
                         $rootScope.$broadcast('LineItemAddressUpdated', LineItem.ID, address);
                     });
@@ -154,9 +158,9 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
     }
 
     function _updateShipping(Order, LineItem, AddressID) {
-        OrderCloudSDK.Addresses.Get(AddressID)
+        OrderCloudSDK.Addresses.Get(Order.xp.BuyerID, AddressID)
             .then(function (address) {
-                OrderCloudSDK.LineItems.SetShippingAddress(Order.ID, LineItem.ID, address, Order.xp.BuyerID);
+                OrderCloudSDK.LineItems.SetShippingAddress(direction, Order.ID, LineItem.ID, address);
                 $rootScope.$broadcast('LineItemAddressUpdated', LineItem.ID, address);
             });
     }
@@ -165,14 +169,24 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
         var li;
         var dfd = $q.defer();
         var queue = [];
-        OrderCloudSDK.LineItems.List(orderID, null, 1, 100, null, null, null, buyerID)
+        var filter = {
+        'filters' : {'buyerID' : buyerID},
+            'page': 1,
+            'pageSize' : 100
+        };
+        OrderCloudSDK.LineItems.List(direction, orderID, filter)
             .then(function (data) {
                 li = data;
                 if (data.Meta.TotalPages > data.Meta.Page) {
                     var page = data.Meta.Page;
                     while (page < data.Meta.TotalPages) {
                         page += 1;
-                        queue.push(OrderCloudSDK.LineItems.List(orderID, null, page, 100, null, null, null, buyerID));
+                        var filter = {
+                            'page' : page,
+                            'pageSize' : 100,
+                            'filters' : { 'buyerID' : buyerID }
+                        };
+                        queue.push(OrderCloudSDK.LineItems.List(direction, orderID, filter));
                     }
                 }
                 $q.all(queue)

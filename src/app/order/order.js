@@ -48,7 +48,7 @@ function orderConfig($stateProvider) {
 	            LineItems: function ($q, $state, toastr, OrderCloudSDK, CurrentOrder, OrderShareService, Order, LineItemHelpers) {
 	                OrderShareService.LineItems.length = 0;
 		            var dfd = $q.defer();
-		            OrderCloudSDK.LineItems.List(/*DIRECTION NEEDED , */"Incoming", Order.ID, { 'filters': {key : Order.xp.BuyerID}})
+		            OrderCloudSDK.LineItems.List(/*DIRECTION NEEDED , */"Incoming", Order.ID, { 'filters': {'Order.xp.BuyerID' : Order.xp.BuyerID}})
 			            .then(function(data) {
 				            if (!data.Items.length) {
 					            toastr.error('Your quote does not contain any line items.', 'Error');
@@ -70,7 +70,7 @@ function orderConfig($stateProvider) {
 			        if(pieces.length > 1) {
 				        var prevId = pieces[0] + "-Rev" + (pieces[1] - 1).toString();
 				        var dfd = $q.defer();
-				        OrderCloudSDK.LineItems.List("Incoming" , prevId, {'filters' : { key: Order.xp.BuyerID}})
+				        OrderCloudSDK.LineItems.List("Incoming" , prevId, {'filters' : { 'Order.xp.BuyerID': Order.xp.BuyerID}})
 					        .then(function(data) {
 						        if (!data.Items.length) {
 							        dfd.resolve({ Items: [] });
@@ -108,7 +108,7 @@ function orderConfig($stateProvider) {
                     }
                 },
 	            Payments: function (Order, OrderCloudSDK) {
-	                return OrderCloudSDK.Payments.List("Incoming" , Order.ID, { 'filters': {key: Order.xp.BuyerID}});
+	                return OrderCloudSDK.Payments.List("Incoming" , Order.ID, { 'filters': {'Order.xp.BuyerID': Order.xp.BuyerID}});
 	            },
 	            UserGroups: function (UserGroupsService) {
 	                return UserGroupsService.UserGroups();
