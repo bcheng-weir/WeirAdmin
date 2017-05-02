@@ -22,7 +22,12 @@ function OrdersConfig($stateProvider, buyerid) {
                 },
                 Orders: function (OrderCloudSDK, Parameters, Me, CurrentBuyer) {
                     CurrentBuyer.SetBuyerID(undefined);
-                    Parameters.searchOn = (Parameters.search) ? (Parameters.searchOn ? Parameters.searchOn : "ID") : null; //  "ID,FromUserID,Total";
+                    var arrSearchOn = Parameters.searchOn;
+                    if(arrSearchOn) {
+                        var indexArr = arrSearchOn.indexOf("xp");
+                        arrSearchOn = indexArr > -1 ? arrSearchOn.splice(index, 1) : arrSearchOn;
+                    }
+                    Parameters.searchOn = (Parameters.search) ? (Parameters.searchOn ? arrSearchOn : "ID") : null; //  "ID,FromUserID,Total";
 	                Parameters.filters["FromCompanyID"] = Me.xp.WeirGroup.label+'*';
                     var opts = {
                         from: Parameters.from,
