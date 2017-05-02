@@ -233,7 +233,7 @@ function CustomerService($sce, OrderCloudSDK, $exceptionHandler) {
             SecurityProfileID: groupName,
             UserGroupID: groupName
         };
-        return OrderCloudSDK.UserGroups.Create(buyerID, group)
+        return OrderCloudSDK.UserGroups.Create(group)
             .then(function(grp) {
                 OrderCloudSDK.SecurityProfiles.SaveAssignment(assignment);
             })
