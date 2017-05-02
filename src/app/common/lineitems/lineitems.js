@@ -14,8 +14,10 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
         UpdateShipping: _updateShipping,
         ListAll: _listAll
     };
-    //var isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-    var direction = 'Outgoing';
+
+    var isImpersonating = typeof( OrderCloudSDK.GetImpersonationToken() ) != 'undefined' ? true : false;
+    var direction = isImpersonating == true ? "Incoming" : 'Outgoing';
+
     function _specConvert(specs) {
         var results = [];
         angular.forEach(specs, function (spec) {
@@ -94,6 +96,8 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
 			    return OrderCloudSDK.SetImpersonationToken(data['access_token']);
 		    })
 		    .then(function() {
+                isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+                direction = isImpersonating == true ? "Incoming" : 'Outgoing';
 			    angular.forEach(productIDs, function (productid) {
 				    if(productid != "PLACEHOLDER") {
 					    queue.push(OrderCloudSDK.As().Me.GetProduct(productid));
@@ -117,6 +121,8 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
         .catch(function (e) {
             console.log("Exception caught: " + JSON.stringify(e));
         });
+        isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+        direction = isImpersonating == true ? "Incoming" : 'Outgoing';
 
 
         return dfd.promise;

@@ -89,6 +89,7 @@ function AccountService($q, $uibModal, OrderCloudSDK) {
 				changePassword();
 			})
 			.catch(function(ex) {
+				console.log(ex);
 				deferred.reject(ex);
 			});
 
