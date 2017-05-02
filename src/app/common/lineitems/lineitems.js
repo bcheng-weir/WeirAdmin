@@ -14,8 +14,8 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
         UpdateShipping: _updateShipping,
         ListAll: _listAll
     };
-    var isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-    var direction = isImpersonating == true ? 'Outgoing' : 'Incoming';
+    //var isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+    var direction = 'Outgoing';
     function _specConvert(specs) {
         var results = [];
         angular.forEach(specs, function (spec) {

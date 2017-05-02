@@ -5,8 +5,8 @@ angular.module('ordercloud-current-order', [])
 function CurrentOrderService($q, $localForage, OrderCloudSDK, appname) {
     var StorageName = appname + '.CurrentOrderID';
     var CustomerStorageName = appname + '.CurrentCustomer';
-    var isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-    var direction = isImpersonating == true ? 'Outgoing' : 'Incoming';
+    //var isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+    var direction =  'Outgoing';
     return {
         Get: _get,
         GetID: _getID,
