@@ -80,13 +80,13 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
         var queue = [];
 	    var impersonation = {
 		    ClientID: buyernetwork,
-		    Claims: []
+		    Roles: []
 	    };
 
 	    OrderCloudSDK.Users.Get(Order.xp.BuyerID,Order.FromUserID)
 		    .then(function(buyer) {
 			    // Get an access token for impersonation.
-			    impersonation.Claims = buyer.AvailableRoles;
+			    impersonation.Roles = buyer.AvailableRoles;
 			    return OrderCloudSDK.Users.GetAccessToken(Order.xp.BuyerID, Order.FromUserID, impersonation);
 		    })
 		    .then(function(data) {
@@ -113,7 +113,10 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
 		    .then(function() {
 			    // Remove the impersonation token.
 			    return OrderCloudSDK.RemoveImpersonationToken();
-		    });
+		    })
+        .catch(function (e) {
+            console.log("Exception caught: " + JSON.stringify(e));
+        });
 
 
         return dfd.promise;

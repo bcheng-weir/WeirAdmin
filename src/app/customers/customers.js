@@ -33,7 +33,7 @@ function CustomerConfig($stateProvider) {
                         search: Parameters.search,
                         page: Parameters.page,
                         pageSize: Parameters.pageSize || 100,
-                        filter: filter
+                        filters: filter
                     };
                     return OrderCloudSDK.Buyers.List(opts);
                 }
@@ -53,7 +53,7 @@ function CustomerConfig($stateProvider) {
                         "xp.active":"true"
                     };
                     var opts = {
-                        filter: f
+                        filters: f
                     };
                     return OrderCloudSDK.Addresses.List(SelectedBuyer.ID, opts);
                 },
