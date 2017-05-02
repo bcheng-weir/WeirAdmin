@@ -27,14 +27,21 @@ function ProductSearchConfig($stateProvider) {
 				SerialNumbers: function(WeirService, OrderCloudSDK, CurrentCustomer) {
 					if (CurrentCustomer) {
 						//return OrderCloudSDK.Me.ListCategories(null, 1, 100, null, null, { "catalogID": cust.id});
-						return OrderCloudSDK.Categories.List(null, 1, 100, null, null, {"ParentID": CurrentCustomer.id}, 2, CurrentCustomer.id.substring(0,5))
+					    return OrderCloudSDK.Categories.List(CurrentCustomer.id.substring(0, 5), {
+					        page: 1,
+					        pageSize: 100,
+					        filters: {
+					            "ParentID": CurrentCustomer.id
+					        },
+					        depth: 2
+					    });
 					} else {
 						return { Items: []};
 					}
 				},
 				PartNumbers: function(OrderCloudSDK) {
 					//return OrderCloudSDK.Me.ListProducts(null, 1, 100, null, null, null);
-					return OrderCloudSDK.Products.List(null, 1, 100, null, null, null);
+				    return OrderCloudSDK.Products.List({ page: 1, pageSize: 100 });
 				},
 				MyOrg: function(OrderCloudSDK, CurrentBuyer) {
 					return OrderCloudSDK.Buyers.Get(CurrentBuyer.GetBuyerID());
@@ -190,10 +197,16 @@ function ProductSearchController($sce, $state, $rootScope, OrderCloudSDK, Curren
 					vm.serialNumberList.length = 0;
 					WeirService.FindCart(vm.Customer)
 						.then(function() {
-                            OrderCloudSDK.Categories.List(null, 1, 100, null, null, { "catalogID": vm.Customer.xp.WeirGroup.label, "ParentID" : vm.Customer.id})
-								.then(function(results) {
-									vm.serialNumberList.push.apply(vm.serialNumberList, results.Items);
-								});
+						    OrderCloudSDK.Categories.List(vm.Customer.xp.WeirGroup.label, {
+						        filters: {
+						            page: 1,
+						            pageSize: 100,
+						            "ParentID": vm.Customer.id
+						        }
+						    })
+							.then(function(results) {
+							    vm.serialNumberList.push.apply(vm.serialNumberList, results.Items);
+							});
 						});
 				});
 		}
@@ -318,7 +331,14 @@ function SerialController(WeirService, $scope, $q, OrderCloudSDK, $state, $sce, 
     };
 
 	vm.getSerialNumbers = function(sn) {
-		return OrderCloudSDK.Categories.List(null, 1, 100, null, null, {"xp.SN": sn+"*", "ParentID":"WVCUK-1352"}, null, "WVCUK")
+	    return OrderCloudSDK.Categories.List(vm.Customer.xp.WeirGroup.label, {
+	        page: 1,
+	        pageSize: 100,
+	        filters: {
+	            "xp.SN": sn + "*",
+	            "ParentID": vm.Customer.ID
+	        }
+	    })
 			.then(function(response) {
 				return response.Items.map(function(item) {
 					return item.xp.SN;
@@ -745,13 +765,29 @@ function PartController( $state, $sce, OrderCloudSDK, WeirService ) {
 	    if (input.length >= 3) {
 		    var results = [];
 		    // search, page, pageSize, searchOn, sortBy, filters, categoryID, catalogID
-		    OrderCloudSDK.Me.ListProducts(vm.WeirGroup, 1, 20, "ID", "Name", { "Name": input + "*" }, null, null)
+	        OrderCloudSDK.Me.ListProducts({
+	            catalogID: vm.WeirGroup,
+	            page: 1,
+	            pageSize: 20,
+	            searchOn: "ID",
+	            sortBy: "Name",
+	            filters: {
+	                "Name": input + "*"
+	            }
+	        })
 			    .then(function (newList) {
 				    results = newList.Items;
 			    })
 			    .then(function () {
 				    if (vm.WeirGroup == 'WVCUK') {
-					    OrderCloudSDK.Me.ListProducts(vm.WeirGroup, 1, 20, "ID", "Name", { "xp.AlternatePartNumber": input + "*" }, null, null)
+				        OrderCloudSDK.Me.ListProducts({
+				            CatalogID: vm.WeirGroup,
+				            page: 1,
+				            pageSize: 20,
+				            searchOn: "ID",
+				            sortBy: "Name",
+				            filters: { "xp.AlternatePartNumber": input + "*" }
+				        })
 						    .then(function (newList) {
 							    results.push.apply(results, newList.Items);
 							    vm.PartMatches.length = 0;
@@ -777,7 +813,7 @@ function PartResultsController( $rootScope, $sce, $state, WeirService, PartNumbe
 	var numFound = 0;
 	vm.partNumberResults = Underscore.flatten(Underscore.map(vm.partNumberResults, Underscore.values));
 	angular.forEach(vm.partNumberResults, function(entry) {
-		if (entry.Number) numFound++;
+		if (entry.Detail) numFound++;
 	});
 
 	var labels = {

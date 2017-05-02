@@ -52,34 +52,34 @@ function OrdercloudSearchController($timeout, $scope, OrderCloudSDK, TrackSearch
                             });
                     }
                 }
-                else if ($scope.servicename === 'SpendingAccounts') {
-                    if (!$scope.controlleras.searchfunction) {
-                        Service.List(n, null, null, null, null, {'RedemptionCode': '!*'})
-                            .then(function (data){
-                                $scope.controlleras.list = data;
-                            });
-                    }
-                    else {
-                        $scope.controlleras.searchfunction($scope.searchTerm)
-                            .then(function (data){
-                                $scope.controlleras.list = data;
-                            });
-                    }
-                }
-                else if ($scope.servicename === 'Shipments') {
-                    if (!$scope.controlleras.searchfunction) {
-                        Service.List(null, n, null, null)
-                            .then(function (data) {
-                                $scope.controlleras.list = data;
-                            });
-                    }
-                    else {
-                        $scope.controlleras.searchfunction($scope.searchTerm)
-                            .then(function (data){
-                                $scope.controlleras.list = data;
-                            });
-                    }
-                }
+                //else if ($scope.servicename === 'SpendingAccounts') {
+                //    if (!$scope.controlleras.searchfunction) {
+                //        Service.List(n, null, null, null, null, {'RedemptionCode': '!*'})
+                //            .then(function (data){
+                //                $scope.controlleras.list = data;
+                //            });
+                //    }
+                //    else {
+                //        $scope.controlleras.searchfunction($scope.searchTerm)
+                //            .then(function (data){
+                //                $scope.controlleras.list = data;
+                //            });
+                //    }
+                //}
+                //else if ($scope.servicename === 'Shipments') {
+                //    if (!$scope.controlleras.searchfunction) {
+                //        Service.List(null, n, null, null)
+                //            .then(function (data) {
+                //                $scope.controlleras.list = data;
+                //            });
+                //    }
+                //    else {
+                //        $scope.controlleras.searchfunction($scope.searchTerm)
+                //            .then(function (data){
+                //                $scope.controlleras.list = data;
+                //            });
+                //    }
+                //}
                 else {
                     if (!$scope.controlleras.searchfunction) {
                         Service.List(n)
@@ -118,7 +118,15 @@ function TrackSearchService() {
 
     return service;
 }
-
+function WeirGroupID(customerID) {
+    var id = "";
+    if (customerID) {
+        var len = customerID.indexOf("-");
+        if (len < 0) len = customerID.length;
+        id = customerID.substring(0, len);
+    }
+    return id;
+}
 function SearchProductsService(OrderCloudSDK, $q) {
     var service = {
     	GetSerialNumbers: _getSerialNumbers,
@@ -128,16 +136,32 @@ function SearchProductsService(OrderCloudSDK, $q) {
 
     function _getSerialNumbers(lookForThisPartialSerialNumber, Customer) {
     	var dfd = $q.defer();
-	    OrderCloudSDK.Categories.List(null, 1, 50, null, null, {"xp.SN": lookForThisPartialSerialNumber+"*", "ParentID":Customer.id}, null, Customer.id.substring(0,5))
+        OrderCloudSDK.Categories.List(WeirGroupID(Customer.id), {
+    	    page: 1,
+    	    pageSize: 50, 
+    	    filters: {
+    	        "xp.SN": lookForThisPartialSerialNumber + "*",
+    	        "ParentID": Customer.id }
+    	})
 		    .then(function(response) {
 		    	dfd.resolve(response.Items);
-		    });
+		    })
+        .catch(function (ex) {
+            console.log(JSON.stringify(ex));
+        });
 	    return dfd.promise;
     }
 
     function _getTagNumbers(lookForThisPartialTagNumber, Customer) {
     	var dfd = $q.defer();
-	    OrderCloudSDK.Categories.List(null, 1, 50, null, null, {"xp.TagNumber": lookForThisPartialTagNumber+"*", "ParentID":Customer.id}, null, Customer.id.substring(0,5))
+    	OrderCloudSDK.Categories.List(WeirGroupID(Customer.id), {
+    	    page: 1,
+    	    pageSize: 50, 
+    	    filters: {
+    	        "xp.TagNumber": lookForThisPartialTagNumber + "*",
+    	        "ParentID": Customer.id
+    	    }
+    	})
 		    .then(function(response) {
 		    	dfd.resolve(response.Items);
 		    });
@@ -147,11 +171,21 @@ function SearchProductsService(OrderCloudSDK, $q) {
     function _getPartNumbers(lookForThisPartialPartNumber, Customer) {
     	var dfd = $q.defer();
         var partResults = [];
-	    OrderCloudSDK.Products.List(null, 1, 50, null, null, {"Name": lookForThisPartialPartNumber+"*"})
+        OrderCloudSDK.Products.List({
+            page: 1,
+            pageSize: 50, 
+            filters: {"Name": lookForThisPartialPartNumber+"*"}
+        })
 		    .then(function(response) {
 		    	if(Customer.id.substring(0,5) == 'WVCUK') {
 		    		partResults = response.Items;
-				    return OrderCloudSDK.Products.List(null, 1, 50, null, null, {"xp.AlternatePartNumber":lookForThisPartialPartNumber+'*'})
+		    		return OrderCloudSDK.Products.List({
+		    		    page: 1,
+		    		    pageSize: 50,
+		    		    filters: {
+		    		        "xp.AlternatePartNumber": lookForThisPartialPartNumber + '*'
+		    		    }
+		    		})
 					    .then(function(altResponse) {
 					    	partResults.push.apply(altResponse.Items);
 						    dfd.resolve(partResults);

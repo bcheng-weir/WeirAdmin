@@ -22,7 +22,7 @@ function OrdersConfig($stateProvider, buyerid) {
                 },
                 Orders: function (OrderCloudSDK, Parameters, Me, CurrentBuyer) {
                     CurrentBuyer.SetBuyerID(undefined);
-	                Parameters.searchOn = Parameters.searchOn ? Parameters.searchOn : "ID,FromUserID,Total,xp";
+                    Parameters.searchOn = (Parameters.search) ? (Parameters.searchOn ? Parameters.searchOn : "ID") : null; //  "ID,FromUserID,Total";
 	                Parameters.filters["FromCompanyID"] = Me.xp.WeirGroup.label+'*';
                     var opts = {
                         from: Parameters.from,
@@ -210,7 +210,7 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
                 filters: Parameters.filters,
                 buyerID: buyerid
             };
-		return OrderCloudSDK.Orders.List("Outgoing", opts)
+		return OrderCloudSDK.Orders.List("Incoming", opts)
 			.then(function(data) {
 				vm.list.Items = vm.list.Items.concat(data.Items);
 				vm.list.Meta = data.Meta;

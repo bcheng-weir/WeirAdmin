@@ -33,8 +33,10 @@ function CartConfig($stateProvider) {
 					}
 				},
 				LineItemsList: function($q, $state, toastr, Underscore, OrderCloudSDK, LineItemHelpers, Order) {
-					var dfd = $q.defer();
-					OrderCloudSDK.LineItems.List(Order.ID)
+				    var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+				    var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+				    var dfd = $q.defer();
+					OrderCloudSDK.LineItems.List(direction, Order.ID)
 						.then(function(data) {
 							if (!data.Items.length) {
 								toastr.error('Your order does not contain any line items.', 'Error');
@@ -57,7 +59,7 @@ function CartConfig($stateProvider) {
 					return dfd.promise;
 				},
 				PromotionsList: function(OrderCloudSDK, Order) {
-					return OrderCloudSDK.Orders.ListPromotions(Order.ID);
+				    return [];
 				}
 			}
 		});
@@ -79,9 +81,11 @@ function CartController($q, $rootScope, $timeout, OrderCloudSDK, LineItemHelpers
 	};
 
 	function PagingFunction() {
-		var dfd = $q.defer();
+	    var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+	    var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+	    var dfd = $q.defer();
 		if (vm.lineItems.Meta.Page < vm.lineItems.Meta.TotalPages) {
-			OrderCloudSDK.LineItems.List(vm.order.ID, vm.lineItems.Meta.Page + 1, vm.lineItems.Meta.PageSize)
+		    OrderCloudSDK.LineItems.List(direction, vm.order.ID, { page: vm.lineItems.Meta.Page + 1, pageSize: vm.lineItems.Meta.PageSize })
 				.then(function(data) {
 					vm.lineItems.Meta = data.Meta;
 					vm.lineItems.Items = [].concat(vm.lineItems.Items, data.Items);
@@ -103,7 +107,9 @@ function CartController($q, $rootScope, $timeout, OrderCloudSDK, LineItemHelpers
 	});
 
 	$rootScope.$on('OC:UpdateLineItem', function(event,Order) {
-		OrderCloudSDK.LineItems.List(Order.ID)
+	    var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+	    var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+	    OrderCloudSDK.LineItems.List(direction, Order.ID)
 			.then(function(data) {
 				LineItemHelpers.GetProductInfo(data.Items, Order)
 					.then(function() {
@@ -164,14 +170,16 @@ function MiniCartController($q, $state, $rootScope,$uibModal, $ocMedia, $sce, Or
 		var filter = {
 			'order.xp.BuyerID' : order.xp.BuyerID
 		};
-		OrderCloudSDK.LineItems.List("Incoming", order.ID, {'filters' : filter})
+		var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+		var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+		OrderCloudSDK.LineItems.List(direction, order.ID, { 'filters': filter })
 			.then(function(li) {
 				vm.LineItems = li;
 				if (li.Meta.TotalPages > li.Meta.Page) {
 					var filter = {
 						"order.xp.BuyerID" : order.xp.BuyerID
 					};
-					queue.push(OrderCloudSDK.LineItems.List("Incoming" , order.ID, {'page' : li.Meta.Page + 1, 'filters' : filter}));
+					queue.push(OrderCloudSDK.LineItems.List(direction , order.ID, {'page' : li.Meta.Page + 1, 'filters' : filter}));
 				}
 				$q.all(queue)
 					.then(function(results) {
