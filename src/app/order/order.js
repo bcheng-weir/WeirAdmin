@@ -933,12 +933,12 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			})
 			.then(function() {
 				// Get the details of the user that placed the order.
-                return OrderCloudSDK.Users.Get(vm.Order.FromUserID);
+			    return OrderCloudSDK.Users.Get(vm.Order.xp.BuyerID, vm.Order.FromUserID);
 			})
             .then(function(buyer) {
             	// Get an access token for impersonation.
 	            impersonation.Roles = buyer.AvailableRoles;
-                return OrderCloudSDK.GetAccessToken(vm.Order.xp.BuyerID, vm.Order.FromUserID, impersonation);
+                return OrderCloudSDK.Users.GetAccessToken(vm.Order.xp.BuyerID, vm.Order.FromUserID, impersonation);
 			})
             .then(function(data) {
             	// Set the local impersonation token so that As() can be used.
