@@ -77,13 +77,13 @@ function UsersConfig($stateProvider) {
             controllerAs: 'userEdit',
             resolve: {
                 SelectedUser: function($stateParams, OrderCloudSDK, CurrentBuyer) {
-                    return OrderCloudSDK.Users.Get($stateParams.userid);
+                    return OrderCloudSDK.Users.Get(CurrentBuyer.GetBuyerID() , $stateParams.userid);
                 },
                 GroupsAvailable: function (OrderCloudSDK, CurrentBuyer) {
                     return OrderCloudSDK.UserGroups.List(CurrentBuyer.GetBuyerID());
                 },
                 CurrentGroups: function ($stateParams, OrderCloudSDK, CurrentBuyer) {
-                    return OrderCloudSDK.UserGroups.ListUserAssignments(CurrentBuyer.GetBuyerID(), $stateParams.userid)
+                    return OrderCloudSDK.UserGroups.ListUserAssignments(CurrentBuyer.GetBuyerID())//, $stateParams.userid)
                 }
             }
         })

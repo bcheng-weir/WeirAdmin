@@ -208,6 +208,7 @@ function UserGroupAssignController($scope, toastr, OrderCloudSDK, Assignments, P
     }
 
     function AssignmentFunc() {
+        //need to update opts
         return OrderCloudSDK.UserGroups.ListUserAssignments(vm.UserGroup.ID, null, vm.assignments.Meta.PageSize, 'UserID');
     }
 
