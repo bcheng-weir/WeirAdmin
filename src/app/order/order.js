@@ -226,7 +226,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			return item;
 		});
 	} else {
-		vm.LineItems = LineItems;
+		vm.LineItems = LineItems.Items;
 	}
 
 	if(PreviousLineItems) {
@@ -274,12 +274,9 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			WeirService.OrderStatus.SubmittedPendingPO.id, WeirService.OrderStatus.ConfirmedQuote.id,
 			WeirService.OrderStatus.Enquiry.id, WeirService.OrderStatus.EnquiryReview.id].indexOf(vm.Order.xp.Status) > -1;
 	vm.showAssign = vm.showReviewer && (Me.ID != vm.Order.xp.ReviewerID) && (userIsInternalSalesAdmin || userIsSuperAdmin);
-    /*vm.PONumber = "";
-	var payment = (vm.Payments.Items.length > 0) ? vm.Payments.Items[0] : null;
-	if (payment && payment.xp && payment.xp.PONumber) vm.PONumber = payment.xp.PONumber;*/
 
     vm.LineItemZero = function() {
-    	return Underscore.findWhere(vm.LineItems.Items,{LineTotal:0});
+    	return Underscore.findWhere(vm.LineItems,{LineTotal:0});
     };
 
     vm.InvalidPO = function() {
@@ -998,7 +995,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			})
 			.then(function() {
 				// Create the line items.
-				angular.forEach(lineItemsCopy.Items, function(value, key) {
+				angular.forEach(lineItemsCopy, function(value, key) {
 					queue.push(OrderCloudSDK.LineItems.Create("Incoming", orderCopy.ID, value));
 				});
 				$q.all(queue)
