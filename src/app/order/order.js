@@ -153,13 +153,83 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     var vm = this;
     vm.Order = Order;
 	vm.Order.xp.PONumber = vm.Order.xp.PONumber != "Pending" ? vm.Order.xp.PONumber : ""; // In the buyer app we were initially setting this to pending.
-    vm.LineItems = LineItems;
+    //vm.LineItems = LineItems;
     vm.BlankItems = [];
     vm.NoOp = function () { };
     var userIsInternalSalesAdmin = UserGroups.indexOf(UserGroupsService.Groups.InternalSales) > -1;
     var userIsSuperAdmin = UserGroups.indexOf(UserGroupsService.Groups.SuperAdmin) > -1;
 
-    if (PreviousLineItems) {
+	//Part of the label comparison
+	function compare(current,previous) {
+		if(current.Quantity === previous.Quantity &&
+			current.UnitPrice === previous.UnitPrice &&
+			current.xp.TagNumber === previous.xp.TagNumber &&
+			current.xp.SN === previous.xp.SN &&
+			(
+				(typeof current.Product.xp.LeadTime !== "undefined" && typeof previous.Product.xp.LeadTime !== "undefined" &&
+				current.Product.xp.LeadTime === previous.Product.xp.LeadTime) ||
+				(typeof current.xp.LeadTime !== "undefined" && typeof previous.xp.LeadTime !== "undefined" &&
+				current.xp.LeadTime === previous.xp.LeadTime)
+			) &&
+			(
+				(typeof current.Product.xp.ReplacementSchedule !== "undefined" && typeof previous.Product.xp.ReplacementSchedule !== "undefined" &&
+				current.Product.xp.ReplacementSchedule === previous.Product.xp.ReplacementSchedule) ||
+				(typeof current.xp.ReplacementSchedule !== "undefined" && typeof previous.xp.ReplacementSchedule !== "undefined" &&
+				current.xp.ReplacementSchedule === previous.xp.ReplacementSchedule)
+			) &&
+			(
+				(typeof current.Product.Description !== "undefined" && typeof previous.Product.Description !== "undefined" &&
+				current.Product.Description === previous.Product.Description) ||
+				(typeof current.xp.Description !== "undefined" && typeof previous.xp.Description !== "undefined" &&
+				current.xp.Description === previous.xp.Description)
+			)
+			&&
+			(
+				(typeof current.Product.Name !== "undefined" && typeof previous.Product.Name !== "undefined" &&
+				current.Product.Name === previous.Product.Name) ||
+				(typeof current.xp.ProductName !== "undefined" && typeof previous.xp.ProductName !== "undefined" &&
+				current.xp.ProductName === previous.xp.ProductName)
+			)
+		) {
+			return null;
+		} else {
+			return "UPDATED"
+		}
+	}
+
+	if(LineItems && PreviousLineItems) { //hopefully an easier way to set labels.
+		// For each line item, does it exist in previous line items?  If NO then NEW, else are the fields different between the two? If YES then updated.
+		vm.LineItems = Underscore.filter(LineItems.Items, function(item) {
+			console.log(item);
+			var found = false;
+			if(item.ProductID == "PLACEHOLDER") { //Match a blank line item
+				angular.forEach(PreviousLineItems.Items, function(value, key) {
+					if(value.xp.SN == item.xp.SN) {
+						found = true;
+						item.displayStatus = compare(item,value);
+					}
+				});
+			} else { // Match regular line items
+				angular.forEach(PreviousLineItems.Items, function(value, key) {
+					if(value.ProductID === item.ProductID) {
+						found = true;
+						item.displayStatus = compare(item,value);
+					}
+				});
+			}
+
+			if(!found) {
+				//new!
+				item.displayStatus = "NEW";
+			}
+
+			return item;
+		});
+	} else {
+		vm.LineItems = LineItems;
+	}
+
+	if(PreviousLineItems) {
 		vm.PreviousLineItems = Underscore.filter(PreviousLineItems.Items, function (item) {
 			if(item.ProductID == "PLACEHOLDER") {
 				var found = false;
@@ -172,13 +242,15 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 				if(found) {
 					return;
 				} else {
-					return item;
+					item.displayStatus="DELETED";
+					return item; //Deleted blank line item.
 				}
 			} else {
 				if (Underscore.findWhere(LineItems.Items, {ProductID:item.ProductID})) {
 					return;
 				} else {
-					return item;
+					item.displayStatus="DELETED";
+					return item; //Deleted normal line item.
 				}
 			}
 		});
@@ -551,8 +623,6 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 					Description: line.xp.Description,
 					ReplacementSchedule: line.xp.ReplacementSchedule,
 					LeadTime: line.xp.LeadTime,
-					OriginalUnitPrice: line.xp.OriginalUnitPrice,
-					OriginalQty: line.xp.OriginalQty
 				}
 			};
 			//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
@@ -583,8 +653,6 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 				"ShipFromAddress": null,
 				"Specs": [],
 				"xp": {
-					"OriginalQty": 0,
-					"OriginalUnitPrice": 0,
 					"SN": null,
 					"TagNumber": null,
 					"ProductName": null,
@@ -603,7 +671,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
 		var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 
-		angular.forEach(vm.LineItems.Items, function(line,key) {
+		angular.forEach(vm.LineItems, function(line,key) {
 			console.log(line);
 			var d = $q.defer();
 			queue.push((function() {
@@ -697,10 +765,10 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			line.ID = null;
 			line.Quantity = line.TempQty;
 			line.DateAdded = new Date();
-			line.xp.OriginalQty = line.xp.OriginalQty ? line.xp.OriginalQty : 0;
+			//line.xp.OriginalQty = line.xp.OriginalQty ? line.xp.OriginalQty : 0;
 			//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
 			var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
-			OrderCloudSDK.LineItems.Create(direction, vm.Order.ID)
+			OrderCloudSDK.LineItems.Create(direction, vm.Order.ID, line)
 				.then(function () {
 					$rootScope.$broadcast('SwitchCart');
 					$state.go($state.current, {}, {reload: true});
@@ -910,28 +978,6 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
 		var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 		OrderCloudSDK.Orders.Patch(direction, OrderID, orderPatch)
-			.then(function(order) {
-				angular.forEach(vm.LineItems.Items, function(value, key) {
-					var liPatch = {
-						xp: {
-							OriginalSN: value.xp.SN ? value.xp.SN : null,
-							OriginalTagNumber: value.xp.TagNumber ? value.xp.TagNumber : null,
-							OriginalProductName: value.xp.ProductName ? value.xp.ProductName : (value.Product.Name ? value.Product.Name : null),
-							OriginalDescription: value.xp.Description ? value.xp.Description : (value.Product.Description ? value.Product.Description : null),
-							OriginalReplacementSchedule: value.xp.ReplacementSchedule ? value.xp.ReplacementSchedule : (value.Product.xp.ReplacementSchedule ? value.Product.xp.ReplacementSchedule : 0),
-							OriginalLeadTime: value.xp.LeadTime ? value.xp.LeadTime : (value.Product.xp.LeadTime ? value.Product.xp.LeadTime : 0),
-							OriginalQty: value.Quantity ? value.Quantity : 0,
-							OriginalUnitPrice: value.UnitPrice ? value.UnitPrice : 0
-						}
-					};
-					queue.push(OrderCloudSDK.LineItems.Patch(direction,order.ID, value.ID, liPatch));
-				});
-				$q.all(queue)
-					.then(function(results) {
-						deferred.resolve(results);
-					});
-				return deferred.promise;
-			})
 			.then(function() {
 				// Get the details of the user that placed the order.
 			    return OrderCloudSDK.Users.Get(vm.Order.xp.BuyerID, vm.Order.FromUserID);
