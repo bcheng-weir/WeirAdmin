@@ -39,8 +39,8 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
     }
 
     function _removeItem(Order, LineItem) {
-        var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-        var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+        //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+        var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
         OrderCloudSDK.LineItems.Delete(direction, Order.ID, LineItem.ID)
             .then(function () {
                 var filter = {
@@ -66,8 +66,8 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
 
     function _updateQuantity(Order, LineItem) {
         if (LineItem.Quantity > 0) {
-            var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-            var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+            //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+            var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
             OrderCloudSDK.LineItems.Patch(direction, Order.ID, LineItem.ID, { Quantity: LineItem.Quantity })
                 .then(function () {
                     $rootScope.$broadcast('OC:UpdateOrder', Order.ID);
@@ -154,8 +154,8 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
         modalInstance.result
             .then(function (address) {
                 address.ID = Math.floor(Math.random() * 1000000).toString();
-                var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-                var direction = isImpersonating == true ? 'Outgoing': "Incoming";
+                //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+                var direction = /*isImpersonating == true ? 'Outgoing':*/ "Incoming";
                 OrderCloudSDK.LineItems.SetShippingAddress(direction, Order.ID, LineItem.ID, address)
                     .then(function () {
                         $rootScope.$broadcast('LineItemAddressUpdated', LineItem.ID, address);
@@ -166,8 +166,8 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
     function _updateShipping(Order, LineItem, AddressID) {
         OrderCloudSDK.Addresses.Get(Order.xp.BuyerID, AddressID)
             .then(function (address) {
-                var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-                var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+                //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+                var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
                 OrderCloudSDK.LineItems.SetShippingAddress(direction, Order.ID, LineItem.ID, address);
                 $rootScope.$broadcast('LineItemAddressUpdated', LineItem.ID, address);
             });
@@ -182,8 +182,8 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
             'page': 1,
             'pageSize' : 100
         };
-        var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-        var direction = isImpersonating == true ? 'Outgoing' : "Incoming" ;
+        //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+        var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming" ;
         OrderCloudSDK.LineItems.List(direction, orderID, filter)
             .then(function (data) {
                 li = data;

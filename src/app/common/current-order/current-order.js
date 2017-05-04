@@ -19,8 +19,8 @@ function CurrentOrderService($q, $localForage, OrderCloudSDK, appname) {
         var dfd = $q.defer();
         _getID()
             .then(function(OrderID) {
-                var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-                var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+                //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+                var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
                 OrderCloudSDK.Orders.Get(direction, OrderID)
                     .then(function(order) {
                         dfd.resolve(order);
@@ -76,8 +76,8 @@ function CurrentOrderService($q, $localForage, OrderCloudSDK, appname) {
 
         _getID()
             .then(function(OrderID) {
-                var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-                var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+                //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+                var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
                 OrderCloudSDK.LineItems.List(direction, OrderID, { page: 1, pageSize: 100 })
                     .then(function(data) {
                         lineItems = lineItems.concat(data.Items);

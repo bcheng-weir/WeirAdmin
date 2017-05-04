@@ -28,13 +28,14 @@ function orderConfig($stateProvider) {
 	        	Me: function(OrderCloudSDK) {
 	        	    return OrderCloudSDK.Me.Get();
 		        },
-	            Order: function(CurrentOrder, $q){
+	            Order: function(CurrentOrder, $q, $exceptionHandler){
                     var dfd = $q.defer();
                     CurrentOrder.Get().then(function(data){
 	        			 dfd.resolve(data);
 					})
-					.catch(function () {
+					.catch(function (ex) {
 						toastr.error('Your order could not be retrieved.', 'Error');
+                        $exceptionHandler(ex);
 						dfd.resolve({});
 					});
 	        		return dfd.promise;
@@ -48,8 +49,8 @@ function orderConfig($stateProvider) {
 	            },
 	            LineItems: function ($q, $state, toastr, OrderCloudSDK, CurrentOrder, OrderShareService, Order, LineItemHelpers) {
 	                OrderShareService.LineItems.length = 0;
-                    var isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-                    var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+                    //var isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+                    var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 		            var dfd = $q.defer();
 		            OrderCloudSDK.LineItems.List(direction, Order.ID, { 'filters': {'Order.xp.BuyerID' : Order.xp.BuyerID}})
 			            .then(function(data) {
@@ -73,8 +74,8 @@ function orderConfig($stateProvider) {
 			        if(pieces.length > 1) {
 				        var prevId = pieces[0] + "-Rev" + (pieces[1] - 1).toString();
 				        var dfd = $q.defer();
-				        var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-				        var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+				        //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+				        var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 				        OrderCloudSDK.LineItems.List(direction, prevId, { 'filters': { 'Order.xp.BuyerID': Order.xp.BuyerID } })
 					        .then(function(data) {
 						        if (!data.Items.length) {
@@ -99,8 +100,8 @@ function orderConfig($stateProvider) {
                     if(pieces.length > 1) {
                         var prevId = pieces[0] + "-Rev" + (pieces[1] - 1).toString();
                         var dfd = $q.defer();
-                        var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-                        var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+                        //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+                        var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
                         OrderCloudSDK.Orders.Get(/* DIRECTION NEEDED */direction, prevId)
                     .then(function(data) {
 								dfd.resolve( data.ShippingCost );
@@ -114,8 +115,8 @@ function orderConfig($stateProvider) {
                     }
                 },
 	            Payments: function (Order, OrderCloudSDK) {
-	                var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-	                var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+	                //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+	                var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 	                return OrderCloudSDK.Payments.List(direction, Order.ID, { 'filters': { 'Order.xp.BuyerID': Order.xp.BuyerID } });
 	            },
 	            UserGroups: function (UserGroupsService) {
@@ -146,8 +147,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
                          OrderCloudSDK, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService,
                          Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService, FileSaver,
                          UserGroups, BackToListService, Buyer, Catalog, CurrentBuyer) {
-    var isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-    var direction = isImpersonating == true ? 'Outgoing' : "Incoming" ;
+    //var isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+    var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming" ;
 	determineShipping();
     var vm = this;
     vm.Order = Order;
@@ -368,8 +369,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			    data.xp.ReviewerEmail = Me.Email;
 			}
 
-			var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-			var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+			//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+			var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 			OrderCloudSDK.Orders.Patch(direction, vm.Order.ID, data)
 				.then(function (order) {
 					toastr.success(vm.labels.POSaveMessage + order.xp.PONumber, vm.labels.POSaveTitle);
@@ -554,8 +555,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 					OriginalQty: line.xp.OriginalQty
 				}
 			};
-			var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-			var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+			//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+			var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 			OrderCloudSDK.LineItems.Create(direction, vm.Order.ID, item)
 				.then(function () {
 					$rootScope.$broadcast('SwitchCart');
@@ -599,8 +600,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	vm.saveLineItems = function() {
 		var queue = [];
 		var deferred = $q.defer();
-		var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-		var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+		//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+		var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 
 		angular.forEach(vm.LineItems.Items, function(line,key) {
 			console.log(line);
@@ -660,8 +661,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 
     vm.EditOrderShipping = _editShipping;
     function _editShipping() {
-        var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-        var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+        //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+        var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
         var patch = {
             ShippingCost : vm.Order.ShippingCost,
             xp: {
@@ -697,8 +698,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			line.Quantity = line.TempQty;
 			line.DateAdded = new Date();
 			line.xp.OriginalQty = line.xp.OriginalQty ? line.xp.OriginalQty : 0;
-			var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-			var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+			//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+			var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 			OrderCloudSDK.LineItems.Create(direction, vm.Order.ID)
 				.then(function () {
 					$rootScope.$broadcast('SwitchCart');
@@ -735,8 +736,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		}
 
 		if(patch.xp.Status) {
-		    var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-		    var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+		    //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+		    var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 		    OrderCloudSDK.Orders.Patch(direction, vm.Order.ID, patch)
 				.then(function(order) {
 					$state.go($state.current,{}, {reload:true});
@@ -759,8 +760,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 				vm.Order.xp.CommentsToWeir = [];
 			}
 			vm.Order.xp.CommentsToWeir.push(comment);
-			var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-			var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+			//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+			var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 			OrderCloudSDK.Orders.Patch(direction, vm.Order.ID, { xp: { CommentsToWeir: vm.Order.xp.CommentsToWeir } })
 				.then(function(order) {
 					vm.CommentToWeir = "";
@@ -794,8 +795,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		}
 
 		if(patch.xp.Status) {
-		    var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-		    var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+		    //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+		    var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 		    OrderCloudSDK.Orders.Patch(direction, vm.Order.ID, patch)
 				.then(function(order) {
 					vm.order = order;
@@ -906,8 +907,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		};
 
 		// Patch the current order with the updated status, ID and active state.
-		var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-		var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+		//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+		var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 		OrderCloudSDK.Orders.Patch(direction, OrderID, orderPatch)
 			.then(function(order) {
 				angular.forEach(vm.LineItems.Items, function(value, key) {
@@ -952,11 +953,11 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			.then(function() {
 				// Create the line items.
 				angular.forEach(lineItemsCopy.Items, function(value, key) {
-					queue.push(OrderCloudSDK.LineItems.Create("Outgoing", orderCopy.ID, value));
+					queue.push(OrderCloudSDK.LineItems.Create("Incoming", orderCopy.ID, value));
 				});
 				$q.all(queue)
 					.then(function() {
-						return OrderCloudSDK.Orders.Submit("Outgoing", orderCopy.ID);
+						return OrderCloudSDK.Orders.Submit("Incoming", orderCopy.ID);
 					});
 			})
 			.then(function() {
@@ -994,8 +995,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        if (oldID) {
 	            data.xp.PriorReviewerID = oldID;
 	        }
-	        var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-	        var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+	        //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+	        var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 	        OrderCloudSDK.Orders.Patch(direction, vm.Order.ID, data)
             .then(function (order) {
                 vm.Order = order;
@@ -1089,8 +1090,8 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, O
 				Status: orderStatus
 			}
 		};
-		var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-		var direction = isImpersonating == true ? 'Outgoing' : "Incoming";
+		//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+		var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 		OrderCloudSDK.Orders.Patch(direction, Order.ID, patch)
 			.then(function() {
 				$rootScope.$broadcast('SwitchCart');
