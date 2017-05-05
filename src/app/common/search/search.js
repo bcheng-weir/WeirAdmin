@@ -174,7 +174,8 @@ function SearchProductsService(OrderCloudSDK, $q) {
         OrderCloudSDK.Products.List({
             page: 1,
             pageSize: 50, 
-            filters: {"Name": lookForThisPartialPartNumber+"*"}
+            filters: {"Name": lookForThisPartialPartNumber+"*"},
+	        catalogID: Customer.id.substring(0,5)
         })
 		    .then(function(response) {
 		    	if(Customer.id.substring(0,5) == 'WVCUK') {
@@ -184,7 +185,8 @@ function SearchProductsService(OrderCloudSDK, $q) {
 		    		    pageSize: 50,
 		    		    filters: {
 		    		        "xp.AlternatePartNumber": lookForThisPartialPartNumber + '*'
-		    		    }
+		    		    },
+					    catalogID: Customer.id.substring(0,5)
 		    		})
 					    .then(function(altResponse) {
 					    	partResults.push.apply(altResponse.Items);
