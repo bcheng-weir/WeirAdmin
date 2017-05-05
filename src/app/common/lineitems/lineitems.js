@@ -3,7 +3,7 @@ angular.module('ordercloud-lineitems', [])
     .controller('LineItemModalCtrl', LineItemModalController)
 ;
 
-function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderCloud, CurrentOrder, buyernetwork) {
+function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderCloudSDK, CurrentOrder, buyernetwork) {
     return {
         SpecConvert: _specConvert,
         RemoveItem: _removeItem,
@@ -39,14 +39,19 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
     }
 
     function _removeItem(Order, LineItem) {
-        OrderCloud.LineItems.Delete(Order.ID, LineItem.ID)
+        //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+        var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+        OrderCloudSDK.LineItems.Delete(direction, Order.ID, LineItem.ID)
             .then(function () {
+                var filter = {
+                    'Order.xp.BuyerID' : Order.xp.BuyerID
+                };
                 // If all line items are removed delete the order.
-                OrderCloud.LineItems.List(Order.ID,null,null,null,null,null,null,Order.xp.BuyerID)
+                OrderCloudSDK.LineItems.List(direction, Order.ID, {'filters' : filter})
                     .then(function (data) {
                         if (!data.Items.length) {
                             CurrentOrder.Remove();
-                            OrderCloud.Orders.Delete(Order.ID, Order.xp.BuyerID)
+                            OrderCloudSDK.Orders.Delete(direction, Order.ID, Order.xp.BuyerID)
                                 .then(function () {
                                     $state.reload();
                                     $rootScope.$broadcast('OC:RemoveOrder');
@@ -61,7 +66,9 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
 
     function _updateQuantity(Order, LineItem) {
         if (LineItem.Quantity > 0) {
-            OrderCloud.LineItems.Patch(Order.ID, LineItem.ID, {Quantity: LineItem.Quantity}, Order.xp.BuyerID)
+            //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+            var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+            OrderCloudSDK.LineItems.Patch(direction, Order.ID, LineItem.ID, { Quantity: LineItem.Quantity })
                 .then(function () {
                     $rootScope.$broadcast('OC:UpdateOrder', Order.ID);
                     $rootScope.$broadcast('OC:UpdateLineItem',Order);
@@ -76,24 +83,24 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
         var queue = [];
 	    var impersonation = {
 		    ClientID: buyernetwork,
-		    Claims: []
+		    Roles: []
 	    };
 
-	    OrderCloud.Users.Get(Order.FromUserID, Order.xp.BuyerID)
-		    .then(function(buyer) {
-			    // Get an access token for impersonation.
-			    impersonation.Claims = buyer.AvailableRoles;
-			    return OrderCloud.Users.GetAccessToken(Order.FromUserID, impersonation, Order.xp.BuyerID);
-		    })
-		    .then(function(data) {
-			    // Set the local impersonation token so that As() can be used.
-			    return OrderCloud.Auth.SetImpersonationToken(data['access_token']);
-		    })
-		    .then(function() {
+	    //OrderCloudSDK.Users.Get(Order.xp.BuyerID,Order.FromUserID)
+		//    .then(function(buyer) {
+		//	    // Get an access token for impersonation.
+		//	    impersonation.Roles = buyer.AvailableRoles;
+		//	    return OrderCloudSDK.Users.GetAccessToken(Order.xp.BuyerID, Order.FromUserID, impersonation);
+		//    })
+		//    .then(function(data) {
+		//	    // Set the local impersonation token so that As() can be used.
+		//	    return OrderCloudSDK.SetImpersonationToken(data['access_token']);
+		//    })
+		//    .then(function() {
 			    angular.forEach(productIDs, function (productid) {
 				    if(productid != "PLACEHOLDER") {
-					    queue.push(OrderCloud.As().Me.GetProduct(productid));
-					    //queue.push(OrderCloud.Products.Get(productid));
+					    // queue.push(OrderCloudSDK.As().Me.GetProduct(productid));
+					    queue.push(OrderCloudSDK.Products.Get(productid));
 				    }
 			    });
 			    $q.all(queue)
@@ -104,14 +111,15 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
 						    }
 					    });
 					    dfd.resolve(li);
-				    });
-		    })
-		    .then(function() {
-			    // Remove the impersonation token.
-			    return OrderCloud.Auth.RemoveImpersonationToken();
-		    });
-
-
+				    })
+		    //})
+		    //.then(function() {
+			//    // Remove the impersonation token.
+			//    return OrderCloudSDK.RemoveImpersonationToken();
+		    //})
+        .catch(function (e) {
+            console.log("Exception caught: " + JSON.stringify(e));
+        });
         return dfd.promise;
     }
 
@@ -146,7 +154,9 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
         modalInstance.result
             .then(function (address) {
                 address.ID = Math.floor(Math.random() * 1000000).toString();
-                OrderCloud.LineItems.SetShippingAddress(Order.ID, LineItem.ID, address, Order.xp.BuyerID)
+                //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+                var direction = /*isImpersonating == true ? 'Outgoing':*/ "Incoming";
+                OrderCloudSDK.LineItems.SetShippingAddress(direction, Order.ID, LineItem.ID, address)
                     .then(function () {
                         $rootScope.$broadcast('LineItemAddressUpdated', LineItem.ID, address);
                     });
@@ -154,9 +164,11 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
     }
 
     function _updateShipping(Order, LineItem, AddressID) {
-        OrderCloud.Addresses.Get(AddressID)
+        OrderCloudSDK.Addresses.Get(Order.xp.BuyerID, AddressID)
             .then(function (address) {
-                OrderCloud.LineItems.SetShippingAddress(Order.ID, LineItem.ID, address, Order.xp.BuyerID);
+                //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+                var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+                OrderCloudSDK.LineItems.SetShippingAddress(direction, Order.ID, LineItem.ID, address);
                 $rootScope.$broadcast('LineItemAddressUpdated', LineItem.ID, address);
             });
     }
@@ -165,14 +177,26 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
         var li;
         var dfd = $q.defer();
         var queue = [];
-        OrderCloud.LineItems.List(orderID, null, 1, 100, null, null, null, buyerID)
+        var filter = {
+        'filters' : {'buyerID' : buyerID},
+            'page': 1,
+            'pageSize' : 100
+        };
+        //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+        var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming" ;
+        OrderCloudSDK.LineItems.List(direction, orderID, filter)
             .then(function (data) {
                 li = data;
                 if (data.Meta.TotalPages > data.Meta.Page) {
                     var page = data.Meta.Page;
                     while (page < data.Meta.TotalPages) {
                         page += 1;
-                        queue.push(OrderCloud.LineItems.List(orderID, null, page, 100, null, null, null, buyerID));
+                        var filter = {
+                            'page' : page,
+                            'pageSize' : 100,
+                            'filters' : { 'buyerID' : buyerID }
+                        };
+                        queue.push(OrderCloudSDK.LineItems.List(direction, orderID, filter));
                     }
                 }
                 $q.all(queue)

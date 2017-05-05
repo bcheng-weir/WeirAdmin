@@ -1,8 +1,8 @@
 {
 	"appname": "Weir B2B Site Administration",
-	"scope": "CategoryAdmin ProductAdmin ProductAssignmentAdmin FullAccess ",
 	"clientid": "BA7B6918-DDA0-42E3-806D-FE01FCACA5B6",
 	"buyernetwork":  "267E3A43-7997-4DAA-BF76-C6520CDA383C",
+	"scope": ["CategoryAdmin", "ProductAdmin", "ProductAssignmentAdmin", "FullAccess", "Shopper", "BuyerImpersonation"],
 	"buyerid": "weir",
 	"environment": "dev",
 	"anonymous": false,

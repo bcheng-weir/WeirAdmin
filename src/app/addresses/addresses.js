@@ -19,8 +19,8 @@ function AddressesConfig($stateProvider) {
 				Parameters: function($stateParams, OrderCloudParameters) {
 					return OrderCloudParameters.Get($stateParams);
 				},
-				AddressList: function(OrderCloud, Parameters) {
-					return OrderCloud.Addresses.List(Parameters.search, Parameters.page, Parameters.pageSize || 12, Parameters.searchOn, Parameters.sortBy, Parameters.filters);
+				AddressList: function(OrderCloudSDK, Parameters) {
+					return OrderCloudSDK.Addresses.List(Parameters.search, Parameters.page, Parameters.pageSize || 12, Parameters.searchOn, Parameters.sortBy, Parameters.filters);
 				}
 			}
 		})
@@ -30,8 +30,8 @@ function AddressesConfig($stateProvider) {
 			controller: 'AddressEditCtrl',
 			controllerAs: 'addressEdit',
 			resolve: {
-				SelectedAddress: function($stateParams, $state, OrderCloud) {
-					return OrderCloud.Addresses.Get($stateParams.addressid).catch(function() {
+				SelectedAddress: function($stateParams, $state, OrderCloudSDK) {
+					return OrderCloudSDK.Addresses.Get($stateParams.addressid).catch(function() {
                         $state.go('^');
                     });
 				}
@@ -49,14 +49,14 @@ function AddressesConfig($stateProvider) {
 	        controller: 'AddressAssignCtrl',
 	        controllerAs: 'addressAssign',
 	        resolve: {
-                UserGroupList: function(OrderCloud) {
-                    return OrderCloud.UserGroups.List();
+                UserGroupList: function(OrderCloudSDK) {
+                    return OrderCloudSDK.UserGroups.List();
                 },
-                AssignmentsList: function($stateParams, OrderCloud) {
-                    return OrderCloud.Addresses.ListAssignments($stateParams.addressid);
+                AssignmentsList: function($stateParams, OrderCloudSDK) {
+                    return OrderCloudSDK.Addresses.ListAssignments($stateParams.addressid);
                 },
-                SelectedAddress: function($stateParams, $state, OrderCloud) {
-                    return OrderCloud.Addresses.Get($stateParams.addressid).catch(function() {
+                SelectedAddress: function($stateParams, $state, OrderCloudSDK) {
+                    return OrderCloudSDK.Addresses.Get($stateParams.addressid).catch(function() {
                         $state.go('^');
                     });
                 }
@@ -64,7 +64,7 @@ function AddressesConfig($stateProvider) {
         })
 }
 
-function AddressesController($state, $ocMedia, OrderCloud, OrderCloudParameters, AddressList, Parameters) {
+function AddressesController($state, $ocMedia, OrderCloudSDK, OrderCloudParameters, AddressList, Parameters) {
 	var vm = this;
 	vm.list = AddressList;
 	vm.parameters = Parameters;
@@ -131,7 +131,7 @@ function AddressesController($state, $ocMedia, OrderCloud, OrderCloudParameters,
 
 	//Load the next page of results with all of the same parameters
 	vm.loadMore = function() {
-		return OrderCloud.Addresses.List(Parameters.search, vm.list.Meta.Page + 1, Parameters.pageSize || vm.list.Meta.PageSize, Parameters.searchOn, Parameters.sortBy, Parameters.filters)
+		return OrderCloudSDK.Addresses.List(Parameters.search, vm.list.Meta.Page + 1, Parameters.pageSize || vm.list.Meta.PageSize, Parameters.searchOn, Parameters.sortBy, Parameters.filters)
 			.then(function(data) {
 				vm.list.Items = vm.list.Items.concat(data.Items);
 				vm.list.Meta = data.Meta;
@@ -139,7 +139,7 @@ function AddressesController($state, $ocMedia, OrderCloud, OrderCloudParameters,
 	};
 }
 
-function AddressEditController($exceptionHandler, $state, $scope, toastr, OrderCloud, OCGeography, SelectedAddress) {
+function AddressEditController($exceptionHandler, $state, $scope, toastr, OrderCloudSDK, OCGeography, SelectedAddress) {
 	var vm = this,
         addressID = SelectedAddress.ID;
 	vm.addressName = SelectedAddress.AddressName;
@@ -154,7 +154,7 @@ function AddressEditController($exceptionHandler, $state, $scope, toastr, OrderC
     });
 
 	vm.Submit = function() {
-		OrderCloud.Addresses.Update(addressID, vm.address)
+		OrderCloudSDK.Addresses.Update(addressID, vm.address)
 			.then(function() {
 				$state.go('addresses', {}, {reload: true});
                 toastr.success('Address Updated', 'Success');
@@ -165,7 +165,7 @@ function AddressEditController($exceptionHandler, $state, $scope, toastr, OrderC
 	};
 
 	vm.Delete = function() {
-		OrderCloud.Addresses.Delete(SelectedAddress.ID, false)
+		OrderCloudSDK.Addresses.Delete(SelectedAddress.ID, false)
 			.then(function() {
 				$state.go('addresses', {}, {reload: true});
                 toastr.success('Address Deleted', 'Success');
@@ -176,7 +176,7 @@ function AddressEditController($exceptionHandler, $state, $scope, toastr, OrderC
 	};
 }
 
-function AddressCreateController($exceptionHandler, $scope, $state, toastr, OrderCloud, OCGeography) {
+function AddressCreateController($exceptionHandler, $scope, $state, toastr, OrderCloudSDK, OCGeography) {
 	var vm = this;
 	vm.address = {
         Country: 'US' // this is to default 'create' addresses to the country US
@@ -191,7 +191,7 @@ function AddressCreateController($exceptionHandler, $scope, $state, toastr, Orde
     });
 
 	vm.Submit = function() {
-		OrderCloud.Addresses.Create(vm.address)
+		OrderCloudSDK.Addresses.Create(vm.address)
 			.then(function() {
 				$state.go('addresses', {}, {reload: true});
                 toastr.success('Address Created', 'Success');
@@ -202,7 +202,7 @@ function AddressCreateController($exceptionHandler, $scope, $state, toastr, Orde
 	};
 }
 
-function AddressAssignController($q, $scope, $state, Underscore, toastr, OrderCloud, Assignments, AssignmentsList, UserGroupList, SelectedAddress) {
+function AddressAssignController($q, $scope, $state, Underscore, toastr, OrderCloudSDK, Assignments, AssignmentsList, UserGroupList, SelectedAddress) {
     var vm = this;
     vm.list = UserGroupList;
     vm.assignments = AssignmentsList;
@@ -228,7 +228,7 @@ function AddressAssignController($q, $scope, $state, Underscore, toastr, OrderCl
     }
 
     function AssignmentFunc() {
-        return OrderCloud.Addresses.ListAssignments(vm.Address.ID, null, vm.assignments.Meta.PageSize);
+        return OrderCloudSDK.Addresses.ListAssignments(vm.Address.ID, null, vm.assignments.Meta.PageSize);
     }
     
     vm.saveAssignments = SaveAssignments;
@@ -238,7 +238,7 @@ function AddressAssignController($q, $scope, $state, Underscore, toastr, OrderCl
         if (vm.list.Meta.Page < vm.list.Meta.TotalPages) {
             var queue = [];
             var dfd = $q.defer();
-            queue.push(OrderCloud.UserGroups.List(null, vm.list.Meta.Page + 1, vm.list.Meta.PageSize));
+            queue.push(OrderCloudSDK.UserGroups.List(null, vm.list.Meta.Page + 1, vm.list.Meta.PageSize));
             if (AssignmentFunc !== undefined) {
                 queue.push(AssignmentFunc());
             }
@@ -269,7 +269,7 @@ function AddressAssignController($q, $scope, $state, Underscore, toastr, OrderCl
         var dfd = $q.defer();
         angular.forEach(vm.list.Items, function(Item) {
             if ((Item.IsShipping || Item.IsBilling) && toAdd.indexOf(Item.ID) > -1) {
-                queue.push(OrderCloud.Addresses.SaveAssignment({
+                queue.push(OrderCloudSDK.Addresses.SaveAssignment({
                     UserID: null,
                     UserGroupID: Item.ID,
                     AddressID: vm.Address.ID,
@@ -280,7 +280,7 @@ function AddressAssignController($q, $scope, $state, Underscore, toastr, OrderCl
             else if (toUpdate.indexOf(Item.ID) > -1) {
                 var AssignmentObject = Underscore.where(vm.assignments.Items, {UserGroupID: Item.ID})[0]; //Should be only one
                 if (AssignmentObject.IsShipping !== Item.IsShipping || AssignmentObject.IsBilling !== Item.IsBilling) {
-                    queue.push(OrderCloud.Addresses.SaveAssignment({
+                    queue.push(OrderCloudSDK.Addresses.SaveAssignment({
                         UserID: null,
                         UserGroupID: Item.ID,
                         AddressID: vm.Address.ID,
@@ -291,7 +291,7 @@ function AddressAssignController($q, $scope, $state, Underscore, toastr, OrderCl
             }
         });
         angular.forEach(toDelete, function(ItemID) {
-            queue.push(OrderCloud.Addresses.DeleteAssignment(vm.Address.ID, null, ItemID));
+            queue.push(OrderCloudSDK.Addresses.DeleteAssignment(vm.Address.ID, null, ItemID));
         });
         $q.all(queue).then(function() {
             dfd.resolve();

@@ -14,12 +14,12 @@ function WeirGroupSettingsConfig($stateProvider) {
             url: '/carriage',
             data: { componentName: 'WeirGroupSettings' },
             resolve : {
-                Me: function(OrderCloud) {
-                    return OrderCloud.Me.Get();
+                Me: function(OrderCloudSDK) {
+                    return OrderCloudSDK.Me.Get();
                 },
-                WeirGroup: function(OrderCloud, Me) {
+                WeirGroup: function(OrderCloudSDK, Me) {
 	                var groupId = Me.xp.WeirGroup.label;
-                    return OrderCloud.Catalogs.Get(groupId);
+                    return OrderCloudSDK.Catalogs.Get(groupId);
                 }
             }
         })
@@ -31,19 +31,19 @@ function WeirGroupSettingsConfig($stateProvider) {
             url: '/pocontent',
             data: { componentName: 'WeirGroupSettings' },
             resolve: {
-                Me: function (OrderCloud) {
-                    return OrderCloud.Me.Get();
+                Me: function (OrderCloudSDK) {
+                    return OrderCloudSDK.Me.Get();
                 },
-                WeirGroup: function (OrderCloud, Me) {
+                WeirGroup: function (OrderCloudSDK, Me) {
                     var groupId = Me.xp.WeirGroup.label;
-                    return OrderCloud.Catalogs.Get(groupId);
+                    return OrderCloudSDK.Catalogs.Get(groupId);
                 }
             }
         })
     ;
 }
 
-function StandardDeliveryController($state, OrderCloud, toastr, Me, WeirGroup) {
+function StandardDeliveryController($state, OrderCloudSDK, toastr, Me, WeirGroup) {
     var vm = this;
     var weirGroupID = WeirGroup.ID;
     vm.originalRate = (WeirGroup.xp && WeirGroup.xp.StandardCarriage) ? WeirGroup.xp.StandardCarriage : 0.00;
@@ -83,7 +83,7 @@ function StandardDeliveryController($state, OrderCloud, toastr, Me, WeirGroup) {
                     StandardCarriage: vm.newRate
                 }
             };
-            OrderCloud.Catalogs.Patch(upd, weirGroupID)
+            OrderCloudSDK.Catalogs.Patch(weirGroupID, upd)
             .then(function () {
                 vm.editable = false;
                 vm.originalRate = vm.newRate;
@@ -99,7 +99,7 @@ function StandardDeliveryController($state, OrderCloud, toastr, Me, WeirGroup) {
     };
 }
 
-function POPrintContentController($state, OrderCloud, toastr, Me, WeirGroup, $sce) {
+function POPrintContentController($state, OrderCloudSDK, toastr, Me, WeirGroup, $sce) {
     var vm = this;
     vm.weirGroupID = WeirGroup.ID;
     var labels = {
@@ -283,7 +283,7 @@ function POPrintContentController($state, OrderCloud, toastr, Me, WeirGroup, $sc
                 };
                 upd.xp.POContent[name] = tmp.newValue;
                 console.log("Update = " + JSON.stringify(upd));
-                OrderCloud.Catalogs.Patch(upd, vm.weirGroupID)
+                OrderCloudSDK.Catalogs.Patch(vm.weirGroupID, upd)
                 .then(function () {
                     tmp.old = tmp.newValue;
                     toastr.success(tmp.header + ' Updated', 'Success');

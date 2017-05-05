@@ -19,8 +19,8 @@ function BuyerConfig($stateProvider) {
                 Parameters: function($stateParams, OrderCloudParameters) {
                     return OrderCloudParameters.Get($stateParams);
                 },
-                BuyerList: function(OrderCloud, Parameters) {
-                    return OrderCloud.Buyers.List(Parameters.search, Parameters.page, Parameters.pageSize || 12/*, Parameters.searchOn, Parameters.sortBy, Parameters.filters*/);
+                BuyerList: function(OrderCloudSDK, Parameters) {
+                    return OrderCloudSDK.Buyers.List(Parameters.search, Parameters.page, Parameters.pageSize || 12/*, Parameters.searchOn, Parameters.sortBy, Parameters.filters*/);
                     //Commenting out params that don't exist yet in the API
                 }
             }
@@ -31,8 +31,8 @@ function BuyerConfig($stateProvider) {
             controller: 'BuyerEditCtrl',
             controllerAs: 'buyerEdit',
             resolve: {
-                SelectedBuyer: function($stateParams, OrderCloud) {
-                    return OrderCloud.Buyers.Get($stateParams.buyerid);
+                SelectedBuyer: function($stateParams, OrderCloudSDK) {
+                    return OrderCloudSDK.Buyers.Get($stateParams.buyerid);
                 }
             }
         })
@@ -45,15 +45,15 @@ function BuyerConfig($stateProvider) {
 }
 
 
-function BuyerService($q, $state, OrderCloud) {
+function BuyerService($q, $state, OrderCloudSDK) {
     var _divisions = [{id: "1", label: "UK"}, {id: "2", label: "France"}];
     var _customerTypes = [{id: "1", label: "End User"}, {id: "2", label: "Service Company"}];
 
     function _createBuyerAndAddress(buyer, address) {
        address.xp.IsPrimary = true;
-       return OrderCloud.Buyers.Create(buyer)
+       return OrderCloudSDK.Buyers.Create(buyer)
             .then(function(res) {
-		    OrderCloud.Addresses.Create(address, buyer.ID);
+		    OrderCloudSDK.Addresses.Create(address, buyer.ID);
             })
             .catch(function(ex) {
                 $exceptionHandler(ex);
@@ -67,7 +67,7 @@ function BuyerService($q, $state, OrderCloud) {
     };
 }
 
-function BuyerController($state, $ocMedia, OrderCloud, OrderCloudParameters, Parameters, BuyerList) {
+function BuyerController($state, $ocMedia, OrderCloudSDK, OrderCloudParameters, Parameters, BuyerList) {
     var vm = this;
     vm.list = BuyerList;
     vm.parameters = Parameters;
@@ -132,7 +132,7 @@ function BuyerController($state, $ocMedia, OrderCloud, OrderCloudParameters, Par
 
     //Load the next page of results with all of the same parameters
     vm.loadMore = function() {
-        return OrderCloud.Buyers.List(Parameters.search, vm.list.Meta.Page + 1, Parameters.pageSize || vm.list.Meta.PageSize, Parameters.searchOn, Parameters.sortBy, Parameters.filters)
+        return OrderCloudSDK.Buyers.List(Parameters.search, vm.list.Meta.Page + 1, Parameters.pageSize || vm.list.Meta.PageSize, Parameters.searchOn, Parameters.sortBy, Parameters.filters)
             .then(function(data) {
                 vm.list.Items = vm.list.Items.concat(data.Items);
                 vm.list.Meta = data.Meta;
@@ -140,7 +140,7 @@ function BuyerController($state, $ocMedia, OrderCloud, OrderCloudParameters, Par
     };
 }
 
-function BuyerEditController($exceptionHandler, $state, toastr, OrderCloud, SelectedBuyer) {
+function BuyerEditController($exceptionHandler, $state, toastr, OrderCloudSDK, SelectedBuyer) {
     var vm = this;
     vm.buyer = SelectedBuyer;
     vm.buyerName = SelectedBuyer.Name;
@@ -148,7 +148,7 @@ function BuyerEditController($exceptionHandler, $state, toastr, OrderCloud, Sele
     vm.types = BuyerService.CustomerTypes;
 
     vm.Submit = function() {
-        OrderCloud.Buyers.Update(vm.buyer, SelectedBuyer.ID)
+        OrderCloudSDK.Buyers.Update(vm.buyer, SelectedBuyer.ID)
             .then(function() {
                 $state.go('buyers', {}, {reload: true});
                 toastr.success('Buyer Updated', 'Success');
@@ -159,14 +159,14 @@ function BuyerEditController($exceptionHandler, $state, toastr, OrderCloud, Sele
     };
 }
 
-function BuyerCreateController($exceptionHandler, $state, toastr, OrderCloud, BuyerService) {
+function BuyerCreateController($exceptionHandler, $state, toastr, OrderCloudSDK, BuyerService) {
     var vm = this;
     vm.divisions = BuyerService.Divisions;
     vm.types = BuyerService.CustomerTypes;
     vm.primaryAddress = {};
 
     vm.Submit = function() {
-        OrderCloud.Buyers.Create(vm.buyer)
+        OrderCloudSDK.Buyers.Create(vm.buyer)
 	// BuyerService.CreateBuyerWithPrimaryAddress(vm.buyer, vm.primaryAddress)
             .then(function() {
                 $state.go('buyers', {}, {reload: true});

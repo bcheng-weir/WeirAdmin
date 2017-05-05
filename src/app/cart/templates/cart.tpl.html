@@ -23,7 +23,7 @@
                     <td>
                         <form name="{{'lineitem_' + $index + '_quantity'}}" ng-submit="cart.updateQuantity(cart.order, lineItem)" class="form-group">
                             <div ng-form="lineitem_quantity">
-                                <input tabindex="{{$index + 1}}" ng-change="cart.updateQuantity(cart.order, lineItem)" type="number" min="{{lineItem.Product.StandardPriceSchedule.MinQuantity}}" max="{{lineItem.Product.StandardPriceSchedule.MaxQuantity}}" required="true" class="form-control text-center" ng-model="lineItem.Quantity">
+                                <input tabindex="{{$index + 1}}" ng-change="cart.updateQuantity(cart.order, lineItem)" type="number" min="{{lineItem.Product.PriceSchedule.MinQuantity}}" max="{{lineItem.Product.PriceSchedule.MaxQuantity}}" required="true" class="form-control text-center" ng-model="lineItem.Quantity">
                             </div>
                         </form>
                     </td>

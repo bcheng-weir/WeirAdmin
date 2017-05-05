@@ -29,7 +29,7 @@
                         <small class="text-muted" ng-hide="lineItem.ProductID=='PLACEHOLDER'">{{lineItem.ProductID}}</small>
                         </br>
                     </td>
-                    <td ng-switch on="lineItem.Product.StandardPriceSchedule.xp.Currency" style="padding-right: 25px;">
+                    <td ng-switch on="lineItem.Product.PriceSchedule.xp.Currency" style="padding-right: 25px;">
                         <span ng-switch-when="EUR">{{lineItem.LineTotal | currency:'&euro;'}}</span>
                         <span ng-switch-when="GBP">{{lineItem.LineTotal | currency:'&#163; '}}</span>
                         <span ng-switch-default>{{lineItem.LineTotal | currency:'&#163; '}}</span>

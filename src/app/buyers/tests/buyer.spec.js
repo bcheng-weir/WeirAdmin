@@ -5,7 +5,7 @@ describe('Component: Buyers', function() {
         oc;
     beforeEach(module('orderCloud'));
     beforeEach(module('orderCloud.sdk'));
-    beforeEach(inject(function($q, $rootScope, OrderCloud) {
+    beforeEach(inject(function($q, $rootScope, OrderCloudSDK) {
         q = $q;
         scope = $rootScope.$new();
         buyer = {
@@ -13,7 +13,7 @@ describe('Component: Buyers', function() {
             Name: "TestBuyerTest",
             Active: true
         };
-        oc = OrderCloud;
+        oc = OrderCloudSDK;
     }));
 
     describe('State: buyers', function() {

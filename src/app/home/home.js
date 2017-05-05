@@ -12,8 +12,8 @@ function HomeConfig($stateProvider) {
 			controller: 'HomeCtrl',
 			controllerAs: 'home',
             resolve: {
-                Language: function(OrderCloud, $cookieStore, WeirService) {
-                    OrderCloud.Me.Get()
+                Language: function(OrderCloudSDK, $cookieStore, WeirService) {
+                    OrderCloudSDK.Me.Get()
 	                    .then(function (buyer) {
 	                        var lang = WeirService.Locale();
 	                        //set the expiration date of the cookie.

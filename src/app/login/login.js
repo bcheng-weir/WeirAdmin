@@ -15,7 +15,7 @@ function LoginConfig($stateProvider) {
     ;
 }
 
-function LoginService($q, $window, $state, toastr, OrderCloud, TokenRefresh, clientid, buyerid, anonymous, appname, $localForage) {
+function LoginService($q, $window, $state, toastr, OrderCloudSDK, TokenRefresh, clientid, buyerid, anonymous, appname, $localForage, CurrentBuyer) {
     return {
         SendVerificationCode: _sendVerificationCode,
         ResetPassword: _resetPassword,
@@ -55,7 +55,7 @@ function LoginService($q, $window, $state, toastr, OrderCloud, TokenRefresh, cli
             URL: encodeURIComponent($window.location.href) + '{0}'
         };
 
-        OrderCloud.PasswordResets.SendVerificationCode(passwordResetRequest)
+        OrderCloudSDK.PasswordResets.SendVerificationCode(passwordResetRequest)
             .then(function() {
                 deferred.resolve();
             })
@@ -75,7 +75,7 @@ function LoginService($q, $window, $state, toastr, OrderCloud, TokenRefresh, cli
             Password: resetPasswordCredentials.NewPassword
         };
 
-        OrderCloud.PasswordResets.ResetPassword(verificationCode, passwordReset).
+        OrderCloudSDK.PasswordResets.ResetPassword(verificationCode, passwordReset).
             then(function() {
                 deferred.resolve();
             })
@@ -87,9 +87,9 @@ function LoginService($q, $window, $state, toastr, OrderCloud, TokenRefresh, cli
     }
 
     function _logout(){
-        OrderCloud.Auth.RemoveToken();
-        OrderCloud.Auth.RemoveImpersonationToken();
-        OrderCloud.BuyerID.Set(null);
+        OrderCloudSDK.RemoveToken();
+        OrderCloudSDK.RemoveImpersonationToken();
+        CurrentBuyer.SetBuyerID(null);
         TokenRefresh.RemoveToken();
         $state.go(anonymous ? 'home' : 'login', {}, {reload: true});
     }
@@ -100,8 +100,8 @@ function LoginService($q, $window, $state, toastr, OrderCloud, TokenRefresh, cli
                 if (refreshToken) {
                     TokenRefresh.Refresh(refreshToken)
                         .then(function(token) {
-                            OrderCloud.BuyerID.Set(buyerid);
-                            OrderCloud.Auth.SetToken(token.access_token);
+                            CurrentBuyer.SetBuyerID(buyerid);
+                            OrderCloudSDK.SetToken(token.access_token);
                             _routeAfterLogin();
                         })
                         .catch(function () {
@@ -127,7 +127,7 @@ function LoginService($q, $window, $state, toastr, OrderCloud, TokenRefresh, cli
 	}
 }
 
-function LoginController($stateParams, $exceptionHandler, OrderCloud, LoginService, TokenRefresh, buyerid) {
+function LoginController($stateParams, $exceptionHandler, OrderCloudSDK, LoginService, TokenRefresh, buyerid, clientid, scope, CurrentBuyer) {
     var vm = this;
 	var username = null;
 	LoginService.GetUsername()
@@ -152,7 +152,7 @@ function LoginController($stateParams, $exceptionHandler, OrderCloud, LoginServi
     //vm.rememberStatus = false;
 
     vm.submit = function() {
-        OrderCloud.Auth.GetToken(vm.credentials)
+	    OrderCloudSDK.Auth.Login(vm.credentials.Username,vm.credentials.Password,clientid,scope)
             .then(function(data) {
                 //vm.rememberStatus ? TokenRefresh.SetToken(data['refresh_token']) : angular.noop();
 	            if(vm.rememberStatus) {
@@ -160,8 +160,8 @@ function LoginController($stateParams, $exceptionHandler, OrderCloud, LoginServi
 	            } else {
 		            LoginService.SetUsername(null);
 	            }
-                OrderCloud.BuyerID.Set(buyerid);
-                OrderCloud.Auth.SetToken(data['access_token']);
+                CurrentBuyer.SetBuyerID(buyerid);
+                OrderCloudSDK.SetToken(data['access_token']);
                 LoginService.RouteAfterLogin();
             })
             .catch(function(ex) {
