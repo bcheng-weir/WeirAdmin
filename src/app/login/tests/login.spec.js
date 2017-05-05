@@ -10,11 +10,11 @@ describe('Component: Login', function() {
         };
     beforeEach(module('orderCloud'));
     beforeEach(module('orderCloud.sdk'));
-    beforeEach(inject(function($q, $rootScope, OrderCloud, LoginService, TokenRefresh) {
+    beforeEach(inject(function($q, $rootScope, OrderCloudSDK, LoginService, TokenRefresh) {
         q = $q;
         scope = $rootScope.$new();
         loginFactory = LoginService;
-        oc = OrderCloud;
+        oc = OrderCloudSDK;
         Token_Refresh = TokenRefresh;
     }));
 

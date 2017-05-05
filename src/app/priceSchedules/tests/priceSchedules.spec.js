@@ -5,7 +5,7 @@ describe('Component: PriceSchedules', function() {
         oc;
     beforeEach(module('orderCloud'));
     beforeEach(module('orderCloud.sdk'));
-    beforeEach(inject(function($q, $rootScope,OrderCloud) {
+    beforeEach(inject(function($q, $rootScope,OrderCloudSDK) {
         q = $q;
         scope = $rootScope.$new();
         priceSchedule = {
@@ -25,7 +25,7 @@ describe('Component: PriceSchedules', function() {
                     }
                 ]
         };
-        oc = OrderCloud;
+        oc = OrderCloudSDK;
     }));
 
     describe('State: priceSchedules', function() {

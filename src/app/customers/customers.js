@@ -19,17 +19,23 @@ function CustomerConfig($stateProvider) {
             url: '/customers?search&page&pageSize&searchOn&sortBy&filters',
             data: {componentName: 'Customers'},
             resolve: {
-                Me: function(OrderCloud) {
-                    return OrderCloud.Me.Get();
+                Me: function(OrderCloudSDK) {
+                    return OrderCloudSDK.Me.Get();
                 },
                 Parameters: function($stateParams, OrderCloudParameters) {
                     return OrderCloudParameters.Get($stateParams);
                 },
-                BuyerList: function(OrderCloud, Parameters, Me) {
+                BuyerList: function(OrderCloudSDK, Parameters, Me) {
                     var filter = {
                     	"ID":Me.xp.WeirGroup.label+'*'
                     };
-                    return OrderCloud.Buyers.List(Parameters.search, Parameters.page, Parameters.pageSize || 100, null, null, filter);
+                    var opts = {
+                        search: Parameters.search,
+                        page: Parameters.page,
+                        pageSize: Parameters.pageSize || 100,
+                        filters: filter
+                    };
+                    return OrderCloudSDK.Buyers.List(opts);
                 }
             }
         })
@@ -39,17 +45,20 @@ function CustomerConfig($stateProvider) {
             controller: 'CustomerEditCtrl',
             controllerAs: 'customerEdit',
             resolve: {
-                SelectedBuyer: function($stateParams, OrderCloud){
-                    return OrderCloud.Buyers.Get($stateParams.buyerid)
+                SelectedBuyer: function($stateParams, OrderCloudSDK){
+                    return OrderCloudSDK.Buyers.Get($stateParams.buyerid)
                 },
-                AddressList: function(OrderCloud, $stateParams, Parameters, SelectedBuyer) {
+                AddressList: function(OrderCloudSDK, $stateParams, Parameters, SelectedBuyer) {
                     var f = {
                         "xp.active":"true"
                     };
-                    return OrderCloud.Addresses.List(Parameters.search,Parameters.page,Parameters.pageSize,Parameters.searchOn,Parameters.sortBy,f,SelectedBuyer.ID);
+                    var opts = {
+                        filters: f
+                    };
+                    return OrderCloudSDK.Addresses.List(SelectedBuyer.ID, opts);
                 },
-                WeirGroup: function (OrderCloud, SelectedBuyer) {
-                    return OrderCloud.Catalogs.Get(SelectedBuyer.xp.WeirGroup.label)
+                WeirGroup: function (OrderCloudSDK, SelectedBuyer) {
+                    return OrderCloudSDK.Catalogs.Get(SelectedBuyer.xp.WeirGroup.label)
                 }
             }
         })
@@ -59,8 +68,8 @@ function CustomerConfig($stateProvider) {
             controller: 'CustomerAddressEditCtrl',
             controllerAs: 'customerAddressEdit',
             resolve: {
-                SelectedAddress: function($stateParams, $state, OrderCloud, SelectedBuyer) {
-                    return OrderCloud.Addresses.Get($stateParams.addressid,SelectedBuyer.ID)
+                SelectedAddress: function($stateParams, $state, OrderCloudSDK, SelectedBuyer) {
+                    return OrderCloudSDK.Addresses.Get(SelectedBuyer.ID, $stateParams.addressid)
                         .catch(function() {
                             console.writeline("failed to get address");
                         });
@@ -85,14 +94,17 @@ function CustomerConfig($stateProvider) {
             controller: 'CustomerAssignCtrl',
             controllerAs: 'customerAssign',
             resolve: {
-                EndUsers: function(OrderCloud) {
-                    return OrderCloud.Buyers.List();
+                SelectedBuyer: function($stateParams, OrderCloudSDK){
+                    return OrderCloudSDK.Buyers.Get($stateParams.buyerid)
+                },
+                EndUsers: function(OrderCloudSDK) {
+                    return OrderCloudSDK.Buyers.List();
                 }
             }
         });
 }
 
-function CustomerService($sce, OrderCloud, $exceptionHandler) {
+function CustomerService($sce, OrderCloudSDK, $exceptionHandler) {
     var _weirGroups = [{id: "1", label: "WVCUK"}, {id: "2", label: "WPIFR"}];
     var _customerTypes = [{id: "1", label: "End User"}, {id: "2", label: "Service Company"}];
     var _componentLabels = {
@@ -189,21 +201,21 @@ function CustomerService($sce, OrderCloud, $exceptionHandler) {
     };
 
     function _createBuyer(buyer) {
-        return OrderCloud.Buyers.Create(buyer)
+        return OrderCloudSDK.Buyers.Create(buyer)
             .catch(function(ex) {
                 $exceptionHandler(ex);
             });
     }
 
     function _createAddress(address, buyerID){
-        return OrderCloud.Addresses.Create(address, buyerID)
+        return OrderCloudSDK.Addresses.Create(buyerID, address)
             .catch(function(ex) {
                 $exceptionHandler(ex);
             });
     }
 
     function _updateAddress(address, buyerID) {
-        return OrderCloud.Addresses.Update(address.ID, address, buyerID)
+        return OrderCloudSDK.Addresses.Update(buyerID, address.ID, address)
             .catch(function(ex) {
                 $exceptionHandler(ex);
             });
@@ -221,9 +233,9 @@ function CustomerService($sce, OrderCloud, $exceptionHandler) {
             SecurityProfileID: groupName,
             UserGroupID: groupName
         };
-        return OrderCloud.UserGroups.Create(group, buyerID)
+        return OrderCloudSDK.UserGroups.Create(group)
             .then(function(grp) {
-                OrderCloud.SecurityProfiles.SaveAssignment(assignment);
+                OrderCloudSDK.SecurityProfiles.SaveAssignment(assignment);
             })
             .catch(function(ex) {
                 $exceptionHandler(ex);
@@ -235,7 +247,7 @@ function CustomerService($sce, OrderCloud, $exceptionHandler) {
             ProductID: "PLACEHOLDER",
             PriceScheduleID: "PLACEHOLDER"
         };
-        return OrderCloud.Products.SaveAssignment(assign);
+        return OrderCloudSDK.Products.SaveAssignment(assign);
     }
 
     return {
@@ -250,7 +262,7 @@ function CustomerService($sce, OrderCloud, $exceptionHandler) {
     };
 }
 
-function CustomerCtrl($state, $ocMedia, OrderCloud, OrderCloudParameters, Parameters, BuyerList, CustomerService, WeirService) {
+function CustomerCtrl($state, $ocMedia, OrderCloudSDK, OrderCloudParameters, Parameters, BuyerList, CustomerService, WeirService, CurrentBuyer) {
     var vm = this;
     vm.list = BuyerList;
     vm.parameters = Parameters;
@@ -287,7 +299,7 @@ function CustomerCtrl($state, $ocMedia, OrderCloud, OrderCloudParameters, Parame
         vm.filter(true);
     };
     vm.users = function (buyerID) {
-        OrderCloud.BuyerID.Set(buyerID);
+        CurrentBuyer.SetBuyerID(buyerID);
         $state.go('users');
     };
     //Conditionally set, reverse, remove the sortBy parameter & reload the state.
@@ -319,7 +331,15 @@ function CustomerCtrl($state, $ocMedia, OrderCloud, OrderCloudParameters, Parame
 
     //Load the next page of results with all of the same parameters.
     vm.loadMore = function() {
-        return OrderCloud.Buyers.List(Parameters.search, vm.list.Meta.Page + 1, parameters.pageSize || vm.list.Meta.PageSize, Parameters.searchOn, Parameters.sortBy, Parameters.filters)
+        var opts = {
+	    search: Parameters.search,
+	    searchOn: Parameters.searchOn,
+	    sortBy: Parameters.sortBy,
+	    page: vm.list.Meta.Page + 1,
+	    pageSize: Parameters.pageSize || vm.list.Meta.PageSize,
+	    filters: Parameters.filters
+	};
+        return OrderCloudSDK.Buyers.List(opts)
             .then(function(data) {
                 vm.list.Items = vm.list.Items.concat(data.Items);
                 vm.list.Meta = data.Meta;
@@ -327,7 +347,7 @@ function CustomerCtrl($state, $ocMedia, OrderCloud, OrderCloudParameters, Parame
     };
 }
 
-function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, OrderCloud, SelectedBuyer, WeirGroup, AddressList, CustomerService, Parameters, Underscore, OrderCloudParameters, WeirService) {
+function CustomerEditCtrl($exceptionHandler, $state, $ocMedia, toastr, OrderCloudSDK, SelectedBuyer, WeirGroup, AddressList, CustomerService, Parameters, Underscore, OrderCloudParameters, WeirService) {
     var vm = this;
     //$scope.$state = $state;
     vm.Group = WeirGroup;
@@ -397,7 +417,15 @@ function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, O
 
     //Load the next page of results with all of the same parameters.
     vm.loadMore = function() {
-        return OrderCloud.Buyers.List(Parameters.search, vm.list.Meta.Page + 1, parameters.pageSize || vm.list.Meta.PageSize, Parameters.searchOn, Parameters.sortBy, Parameters.filters)
+        var opts = {
+	    search: Parameters.search,
+	    searchOn: Parameters.searchOn,
+	    sortBy: Parameters.sortBy,
+	    page: vm.list.Meta.Page + 1,
+	    pageSize: Parameters.pageSize || vm.list.Meta.PageSize,
+	    filters: Parameters.filters
+	};
+        return OrderCloudSDK.Buyers.List(opts)
             .then(function(data) {
                 vm.list.Items = vm.list.Items.concat(data.Items);
                 vm.list.Meta = data.Meta;
@@ -409,7 +437,7 @@ function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, O
     vm.types = CustomerService.CustomerTypes;
 
     vm.Submit = function() {
-        OrderCloud.Buyers.Patch(vm.buyer, vm.buyer.ID)
+        OrderCloudSDK.Buyers.Patch(vm.buyer.ID, vm.buyer)
             .then(function() {
                 //$state.go('customers', {}, {reload: true});
                 toastr.success('Buyer Updated', 'Success');
@@ -539,7 +567,7 @@ function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, O
 				};
 				upd.xp.POContent[name] = tmp.newValue;
 				console.log("Update = " + JSON.stringify(upd));
-				OrderCloud.Buyers.Patch(upd, vm.buyer.ID)
+				OrderCloudSDK.Buyers.Patch(vm.buyer.ID, upd)
 					.then(function () {
 						tmp.old = tmp.newValue;
 						toastr.success(tmp.header + ' Updated', 'Success');
@@ -570,11 +598,11 @@ function CustomerEditCtrl($exceptionHandler, $scope, $state, $ocMedia, toastr, O
     vm.saveCarriage = function() {
 		var upd = {
 			xp: {
-				UseCustomCarriageRate:	vm.buyer.xp.UseCustomCarriageRate,
+				UseCustomCarriageRate: vm.buyer.xp.UseCustomCarriageRate,
 				CustomCarriageRate: vm.buyer.xp.CustomCarriageRate
 			}
 		};
-	    OrderCloud.Buyers.Patch(upd, vm.buyer.ID)
+	    OrderCloudSDK.Buyers.Patch(vm.buyer.ID, upd)
 		    .then(function() {
 			    toastr.success('Buyer Updated', 'Success');
 			    vm.rateEditable = false;
@@ -627,7 +655,7 @@ function CustomerCreateCtrl($q, $state, toastr, CustomerService, OCGeography, We
     }
 }
 
-function CustomerAddressEditCtrl($exceptionHandler, $state, $scope, toastr, OrderCloud, OCGeography, SelectedBuyer, SelectedAddress, Underscore, WeirService, CustomerService) {
+function CustomerAddressEditCtrl($exceptionHandler, $state, $scope, toastr, OrderCloudSDK, OCGeography, SelectedBuyer, SelectedAddress, Underscore, WeirService, CustomerService) {
     var vm = this,
         addressID = SelectedAddress.ID;
     vm.addressName = SelectedAddress.AddressName;
@@ -654,21 +682,21 @@ function CustomerAddressEditCtrl($exceptionHandler, $state, $scope, toastr, Orde
 
         var primaryAddress = null;
         if(Underscore.contains(dirtyItems,"addressPrimaryInput") && vm.address.xp && vm.address.xp.primary == true && dirtyItems.length == 1) {
-            OrderCloud.Addresses.List(null,null,null,null,null,null,SelectedBuyer.ID)
+            OrderCloudSDK.Addresses.List(SelectedBuyer.ID)
                 .then(function(resp) {
                     primaryAddress = Underscore.find(resp.Items,function(item) {
                         return item.xp.primary == true;
                     });
                     if (primaryAddress && (primaryAddress.ID !== vm.address.ID)) {
                         primaryAddress.xp.primary = false;
-                        return OrderCloud.Addresses.Patch(primaryAddress.ID, primaryAddress, SelectedBuyer.ID)
+                        return OrderCloudSDK.Addresses.Patch(SelectedBuyer.ID, primaryAddress.ID, primaryAddress)
                             .then(toastr.success("Previous primary address unset.","Primary Address Changed"));
                     } else {
                         return resp;
                     }
                 })
                 .then(function(resp) {
-                    return OrderCloud.Addresses.Update(addressID, vm.address, SelectedBuyer.ID)
+                    return OrderCloudSDK.Addresses.Update(SelectedBuyer.ID, addressID, vm.address)
                 })
                 .then(function(resp) {
                     $state.go('customers.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
@@ -678,28 +706,28 @@ function CustomerAddressEditCtrl($exceptionHandler, $state, $scope, toastr, Orde
                     $exceptionHandler(ex);
                 });
         } else if (Underscore.contains(dirtyItems,"addressPrimaryInput") && vm.address.xp && vm.address.xp.primary == true && dirtyItems.length > 1) { //Address updated, but primary is false.
-            OrderCloud.Addresses.List(null, null, null, null, null, null, SelectedBuyer.ID)
+            OrderCloudSDK.Addresses.List(SelectedBuyer.ID)
                 .then(function (resp) {
                     primaryAddress = Underscore.find(resp.Items, function (item) {
                         return item.xp.primary == true;
                     });
                     if (primaryAddress && (primaryAddress.ID !== vm.address.ID)) {
                         primaryAddress.xp.primary = false;
-                        return OrderCloud.Addresses.Patch(primaryAddress.ID, primaryAddress, SelectedBuyer.ID)
+                        return OrderCloudSDK.Addresses.Patch(SelectedBuyer.ID, primaryAddress.ID, primaryAddress)
                             .then(toastr.success("Previous primary address unset.", "Primary Address Changed"));
                     } else {
                         return resp;
                     }
                 })
                 .then(function (resp) {
-                    return OrderCloud.Addresses.Update(original.ID, original, SelectedBuyer.ID)
+                    return OrderCloudSDK.Addresses.Update(SelectedBuyer.ID, original.ID, original)
                 })
                 .then(function (resp) {
                     vm.address.ID = null;
                     vm.address.xp = typeof vm.address.xp == "undefined" ? {} : vm.address.xp;
                     vm.address.xp.active = true;
                     vm.address.xp.primary = typeof vm.address.xp.primary == "undefined" ? false : vm.address.xp.primary;
-                    return OrderCloud.Addresses.Create(vm.address, SelectedBuyer.ID);
+                    return OrderCloudSDK.Addresses.Create(SelectedBuyer.ID, vm.address);
                 })
                 .then(function (resp) {
                     $state.go('customers.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
@@ -709,7 +737,7 @@ function CustomerAddressEditCtrl($exceptionHandler, $state, $scope, toastr, Orde
                     $exceptionHandler(ex);
                 });
         } else if (Underscore.contains(dirtyItems,"addressPrimaryInput") && dirtyItems.length == 1) {
-            OrderCloud.Addresses.Update(vm.address.ID, vm.address, SelectedBuyer.ID)
+            OrderCloudSDK.Addresses.Update(SelectedBuyer.ID, vm.address.ID, vm.address)
                 .then(function() {
                     $state.go('customers.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
                     toastr.success('Address Updated','Success');
@@ -718,10 +746,10 @@ function CustomerAddressEditCtrl($exceptionHandler, $state, $scope, toastr, Orde
                     $exceptionHandler(ex);
                 });
         } else if (dirtyItems.length > 0) {
-            OrderCloud.Addresses.Update(original.ID, original, SelectedBuyer.ID)
+            OrderCloudSDK.Addresses.Update(SelectedBuyer.ID, original.ID, original)
                 .then(function(resp) {
                     vm.address.ID = null;
-                    return OrderCloud.Addresses.Create(vm.address,SelectedBuyer.ID);
+                    return OrderCloudSDK.Addresses.Create(SelectedBuyer.ID, vm.address);
                 })
                 .then(function() {
                     $state.go('customers.edit', {"buyerid": SelectedBuyer.ID}, {reload: true});
@@ -737,7 +765,7 @@ function CustomerAddressEditCtrl($exceptionHandler, $state, $scope, toastr, Orde
         vm.address.xp = typeof vm.address.xp === "undefined" ? {} : vm.address.xp;
         vm.address.xp.active = false;
 
-        OrderCloud.Addresses.Update(addressID, vm.address, SelectedBuyer.ID)
+        OrderCloudSDK.Addresses.Update(SelectedBuyer.ID, addressID, vm.address)
             .then(function() {
                 $state.go('customers.edit', {"buyerid":SelectedBuyer.ID}, {reload: true});
                 toastr.success('Address made inactive.', 'Success');
@@ -748,7 +776,7 @@ function CustomerAddressEditCtrl($exceptionHandler, $state, $scope, toastr, Orde
     };
 }
 
-function CustomerAddressCreateCtrl($exceptionHandler, $state, toastr, OrderCloud, OCGeography, CustomerService, SelectedBuyer, Underscore, WeirService) {
+function CustomerAddressCreateCtrl($exceptionHandler, $state, toastr, OrderCloudSDK, OCGeography, CustomerService, SelectedBuyer, Underscore, WeirService) {
     var vm = this;
     vm.countries = OCGeography.Countries;
     vm.states = OCGeography.States;
@@ -761,14 +789,14 @@ function CustomerAddressCreateCtrl($exceptionHandler, $state, toastr, OrderCloud
     function _submit() {
         var primaryAddress = null;
         if(vm.address.xp && (vm.address.xp.primary === true)) {
-            OrderCloud.Addresses.List(null,null,null,null,null,null,SelectedBuyer.ID)
+            OrderCloudSDK.Addresses.List(SelectedBuyer.ID)
                 .then(function(resp) {
                     primaryAddress = Underscore.find(resp.Items,function(item) {
                         return item.xp.primary == true;
                     });
                     if (primaryAddress && (primaryAddress.ID !== vm.address.ID)) {
                         primaryAddress.xp.primary = false;
-                        return OrderCloud.Addresses.Patch(primaryAddress.ID, primaryAddress, SelectedBuyer.ID)
+                        return OrderCloudSDK.Addresses.Patch(SelectedBuyer.ID, primaryAddress.ID, primaryAddress)
                             .then(toastr.success("Previous primary address unset.","Primary Address Changed"));
                     } else {
                         return resp;
@@ -806,7 +834,7 @@ function CustomerAddressCreateCtrl($exceptionHandler, $state, toastr, OrderCloud
     }
 }
 
-function CustomerAssignCtrl($exceptionHandler, $scope, $state, toastr, Underscore, OrderCloud, SelectedBuyer, EndUsers, Assignments, WeirService, CustomerService) {
+function CustomerAssignCtrl($exceptionHandler, $scope, $state, toastr, Underscore, OrderCloudSDK, SelectedBuyer, EndUsers, Assignments, WeirService, CustomerService) {
     // ToDo: This needs to page!
     var vm = this;
     vm.list = angular.copy(EndUsers);
@@ -861,7 +889,7 @@ function CustomerAssignCtrl($exceptionHandler, $scope, $state, toastr, Underscor
 
         vm.serviceCompany.xp.Customers = vm.assignments;
 
-        return OrderCloud.Buyers.Patch(vm.serviceCompany, vm.serviceCompany.ID)
+        return OrderCloudSDK.Buyers.Patch(vm.serviceCompany.ID, vm.serviceCompany)
             .then(function() {
                 $state.reload($state.current);
                 toastr.success('Assignments updated.','Success');

@@ -7,12 +7,12 @@ describe('Factory: Paging', function() {
     beforeEach(module('orderCloud'));
     beforeEach(module('orderCloud.sdk'));
     beforeEach(module('ordercloud-paging-helpers'));
-    beforeEach(inject(function($rootScope, Paging, OrderCloud) {
+    beforeEach(inject(function($rootScope, Paging, OrderCloudSDK) {
         listArray = [{ID: 1}, {ID: 2}, {ID: 3}];
         assignmentsArray = [{ID: 2}, {ID: 3}];
         scope = $rootScope.$new();
         paging= Paging;
-        oc = OrderCloud;
+        oc = OrderCloudSDK;
     }));
     it('setSelected should create or update a selected property on the first array if it also exists in the second assignments array', function() {
         paging.setSelected(listArray, assignmentsArray, 'ID');

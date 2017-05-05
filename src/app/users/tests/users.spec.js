@@ -6,7 +6,7 @@ describe('Component: Users', function() {
         oc;
     beforeEach(module('orderCloud'));
     beforeEach(module('orderCloud.sdk'));
-    beforeEach(inject(function($q, $rootScope, OrderCloud) {
+    beforeEach(inject(function($q, $rootScope, OrderCloudSDK) {
         q = $q;
         scope = $rootScope.$new();
         today = new Date();
@@ -19,7 +19,7 @@ describe('Component: Users', function() {
             "LastName": "Test",
             "TermsAccepted": today,
         };
-        oc = OrderCloud;
+        oc = OrderCloudSDK;
     }));
 
     describe('State: users', function() {

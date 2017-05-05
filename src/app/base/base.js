@@ -51,37 +51,37 @@ function BaseConfig($stateProvider, $injector, $sceDelegateProvider) {
         abstract: true,
         views: baseViews,
         resolve: {
-            CurrentUser: function($q, $state, OrderCloud, buyerid, anonymous) {
+            CurrentUser: function($q, $state, OrderCloudSDK, buyerid, anonymous, CurrentBuyer) {
                 var dfd = $q.defer();
-                OrderCloud.Me.Get()
+                OrderCloudSDK.Me.Get()
                     .then(function(data) {
                         dfd.resolve(data);
                     })
                     .catch(function(){
                         if (anonymous) {
-                            if (!OrderCloud.Auth.ReadToken()) {
-                                OrderCloud.Auth.GetToken('')
+                            if (!OrderCloudSDK.GetToken()) {
+                                OrderCloudSDK.GetToken('')
                                     .then(function(data) {
-                                        OrderCloud.Auth.SetToken(data['access_token']);
+                                        OrderCloudSDK.SetToken(data['access_token']);
                                     })
                                     .finally(function() {
-                                        OrderCloud.BuyerID.Set(buyerid);
+                                        CurrentBuyer.SetBuyerID(buyerid);
                                         dfd.resolve({});
                                     });
                             }
                         } else {
-                            OrderCloud.Auth.RemoveToken();
-                            OrderCloud.Auth.RemoveImpersonationToken();
-                            OrderCloud.BuyerID.Set(null);
+                            OrderCloudSDK.RemoveToken();
+                            OrderCloudSDK.RemoveImpersonationToken();
+                            CurrentBuyer.SetBuyerID(null);
                             $state.go('login');
                             dfd.resolve();
                         }
                     });
                 return dfd.promise;
             },
-            AnonymousUser: function($q, OrderCloud, CurrentUser) {
-	            var tmp = OrderCloud.Auth.ReadToken();
-                CurrentUser.Anonymous = (tmp) ? angular.isDefined(JSON.parse(atob(OrderCloud.Auth.ReadToken().split('.')[1])).orderid) : tmp;
+            AnonymousUser: function($q, OrderCloudSDK, CurrentUser) {
+	            var tmp = OrderCloudSDK.GetToken();
+                CurrentUser.Anonymous = (tmp) ? angular.isDefined(JSON.parse(atob(OrderCloudSDK.GetToken().split('.')[1])).orderid) : tmp;
             },
             ComponentList: function($state, $q, Underscore) {
                 var deferred = $q.defer();
@@ -160,6 +160,7 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
             quotesForReview: "Quotes Submitted for Review",
             revisedQuotes: "Revised Quotes",
             confirmedQuotes: "Confirmed Quotes",
+            enquiryQuotes: "Enquiries submitted",
             ordersSubmittedPO: "Orders Submitted with PO",
             pendingPO: "Orders submitted pending PO",
             revisedOrders: "Revised Orders",
@@ -200,6 +201,7 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
             "ReviewQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Submitted.id + "|" + WeirService.OrderStatus.Review.id, "xp.Active":true},
             "RevisedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.RevisedQuote.id + "|" + WeirService.OrderStatus.RejectedQuote.id, "xp.Active":true},
             "ConfirmedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.ConfirmedQuote.id, "xp.Active":true},
+            "EnquiryQuotes": {"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Enquiry.id + "|" + WeirService.OrderStatus.EnquiryReview.id, "xp.Active":true},
             "POOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.SubmittedWithPO.id + "|" + WeirService.OrderStatus.Review.id, "xp.Active":true},
             "PendingPO":{"xp.Type":"Order","xp.PendingPO":true, "xp.Active":true},
             "RevisedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.RevisedOrder.id + "|" + WeirService.OrderStatus.RejectedRevisedOrder.id, "xp.Active":true},
@@ -212,6 +214,7 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
             "ReviewQuotes":"ordersMain.quotesReview",
             "RevisedQuotes":"ordersMain.quotesRevised",
             "ConfirmedQuotes":"ordersMain.quotesConfirmed",
+            "EnquiryQuotes":"ordersMain.quotesEnquiry",
             "POOrders":"ordersMain.POOrders",
             "PendingPO":"ordersMain.pendingPO",
             "RevisedOrders":"ordersMain.ordersRevised",
@@ -260,7 +263,7 @@ function occomponents() {
 }
 
 
-function FeedbackController($sce, $uibModalInstance, $state, OrderCloud, WeirService, User) {
+function FeedbackController($sce, $uibModalInstance, $state, OrderCloudSDK, WeirService, User) {
     var vm = this;
     vm.user = User;
     vm.Cancel = cancel;
@@ -272,9 +275,9 @@ function FeedbackController($sce, $uibModalInstance, $state, OrderCloud, WeirSer
             suggestion: "Suggestion"
         },
         fr: {
-            title: $sce.trustAsHtml("FR: Please send us your feedback and suggestions"),
-            bugDefect: $sce.trustAsHtml("FR: Bug or error"),
-            suggestion: $sce.trustAsHtml("FR: Suggestion")
+            title: $sce.trustAsHtml("Please send us your feedback and suggestions"),
+            bugDefect: $sce.trustAsHtml("Bug or error"),
+            suggestion: $sce.trustAsHtml("Suggestion")
         }
     };
     vm.labels = WeirService.LocaleResources(labels);
@@ -301,7 +304,7 @@ function FeedbackController($sce, $uibModalInstance, $state, OrderCloud, WeirSer
         };
         var usr = vm.user;
         if (usr) {
-            OrderCloud.AdminUsers.Patch(usr.ID, data);
+            OrderCloudSDK.AdminUsers.Patch(usr.ID, data);
         }
         $uibModalInstance.close();
     }

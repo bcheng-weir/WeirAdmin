@@ -24,11 +24,9 @@
                 {{orders.labels.businessName}}
             </th>
             <th scope="col">
-                <a href="#" role="button" ng-click="orders.updateSort('FromUserID')">
+		    <span>
                     {{orders.labels.orderedBy}}
-                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'FromUserID'"></i>
-                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!FromUserID'"></i>
-                </a>
+	    </span>
             </th>
             <th scope="col">
                 <a href="#" role="button" ng-click="orders.updateSort('Total')">

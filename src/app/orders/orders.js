@@ -14,17 +14,32 @@ function OrdersConfig($stateProvider, buyerid) {
             url: '/orders?from&to&search&page&pageSize&searchOn&sortBy&sortByXp&filters&buyerid',
             data: { componentName: 'Orders' },
             resolve: {
-            	Me: function(OrderCloud) {
-            	    return OrderCloud.Me.Get();
+            	Me: function(OrderCloudSDK) {
+            	    return OrderCloudSDK.Me.Get();
 	            },
                 Parameters: function ($stateParams, OrderCloudParameters) {
                     return OrderCloudParameters.Get($stateParams);
                 },
-                Orders: function (OrderCloud, Parameters, Me) {
-                    OrderCloud.BuyerID.Set(undefined);
-	                Parameters.searchOn = Parameters.searchOn ? Parameters.searchOn : "ID,FromUserID,Total,xp";
+                Orders: function (OrderCloudSDK, Parameters, Me, CurrentBuyer) {
+                    CurrentBuyer.SetBuyerID(undefined);
+                    var arrSearchOn = Parameters.searchOn;
+                    if(arrSearchOn) {
+                        var indexArr = arrSearchOn.indexOf("xp");
+                        arrSearchOn = indexArr > -1 ? arrSearchOn.splice(index, 1) : arrSearchOn;
+                    }
+                    Parameters.searchOn = (Parameters.search) ? (Parameters.searchOn ? arrSearchOn : "ID") : null; //  "ID,FromUserID,Total";
 	                Parameters.filters["FromCompanyID"] = Me.xp.WeirGroup.label+'*';
-                    return OrderCloud.Orders.ListIncoming(Parameters.from, Parameters.to, Parameters.search, Parameters.page, Parameters.pageSize || 20, Parameters.searchOn, Parameters.sortBy, Parameters.filters, null);
+                    var opts = {
+                        from: Parameters.from,
+                        to: Parameters.to,
+                        search: Parameters.search,
+                        searchOn: Parameters.searchOn,
+                        sortBy: Parameters.sortBy,
+                        page: Parameters.page,
+                        pageSize: Parameters.pageSize || 20,
+                        filters: Parameters.filters
+                    };
+                    return OrderCloudSDK.Orders.List("Incoming", opts);
                 }
             }
         })
@@ -43,6 +58,11 @@ function OrdersConfig($stateProvider, buyerid) {
 		    templateUrl: 'orders/templates/quote.confirm.tpl.html',
 		    parent: 'ordersMain'
 		})
+	    .state('ordersMain.quotesEnquiry', {
+	    	url: '/quotesEnquiry',
+		    templateUrl: 'orders/templates/quote.enquiry.tpl.html',
+		    parent: 'ordersMain'
+	    })
 		.state('ordersMain.ordersRevised', {
 		    url: '/ordersRevised',
 		    templateUrl: 'orders/templates/order.revised.tpl.html',
@@ -87,12 +107,12 @@ function OrdersConfig($stateProvider, buyerid) {
     	    url: '/orders/:buyerID/:orderID',
     	    controller: 'RouteToOrderCtrl',
     	    resolve: {
-    	        Order: function ($q, appname, $localForage, $stateParams, OrderCloud, toastr, $state, $exceptionHandler) {
+    	        Order: function ($q, appname, $localForage, $stateParams, OrderCloudSDK, toastr, $state, $exceptionHandler) {
     	            var d = $q.defer();
     	            var storageName = appname + '.routeto';
     	            $localForage.setItem(storageName, { state: 'gotoOrder', id: $stateParams.orderID, buyer: $stateParams.buyerID })
 	                    .then(function () {
-	                        OrderCloud.Orders.Get($stateParams.orderID, $stateParams.buyerID)
+	                        OrderCloudSDK.Orders.Get("Incoming", $stateParams.orderID)
 		                        .then(function (order) {
 		                            $localForage.removeItem(storageName);
 		                            d.resolve(order);
@@ -112,7 +132,7 @@ function OrdersConfig($stateProvider, buyerid) {
     ;
 }
 
-function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler, OrderCloud, OrderCloudParameters, Orders, Parameters, buyerid, CurrentOrder, WeirService, Me, Underscore) {
+function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler, OrderCloudSDK, OrderCloudParameters, Orders, Parameters, buyerid, CurrentOrder, WeirService, Me, Underscore, CurrentBuyer) {
 	var vm = this;
 	vm.xpType = Parameters.filters ? Parameters.filters["xp.Type"] : {};
 	vm.StateName = $state.current.name;
@@ -186,7 +206,16 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 
 	//Load the next page of results with all of the same parameters
 	vm.loadMore = function() {
-		return OrderCloud.Orders.ListOutgoing(null , null, Parameters.search, vm.list.Meta.Page + 1, Parameters.pageSize || vm.list.Meta.PageSize, Parameters.searchOn, Parameters.sortBy, Parameters.filters, buyerid)
+            var opts = {
+                search: Parameters.search,
+                searchOn: Parameters.searchOn,
+                sortBy: Parameters.sortBy,
+                page: vm.list.Meta.Page + 1,
+                pageSize: Parameters.pageSize || vm.list.Meta.PageSize,
+                filters: Parameters.filters,
+                buyerID: buyerid
+            };
+		return OrderCloudSDK.Orders.List("Incoming", opts)
 			.then(function(data) {
 				vm.list.Items = vm.list.Items.concat(data.Items);
 				vm.list.Meta = data.Meta;
@@ -241,7 +270,10 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			StatusRV: "Status RV = Revised Quote",
 			StatusRO: "Status RO = Revised Order",
 			StatusRR: "Status RR = Rejected Revised Order",
-			StatusRQ: "Status RQ = Rejected Quote"
+			StatusRQ: "Status RQ = Rejected Quote",
+			StatusEN: "Status EN = Enquiry Submitted",
+			StatusER: "Status ER = Enquiry Under Review",
+			enquiriesSubmitted: "Enquiries submitted"
 		},
 		fr: {
 			search:$sce.trustAsHtml("Search"),
@@ -278,10 +310,13 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			revisionsList: $sce.trustAsHtml(vm.xpType + " revisions for " + vm.xpType + "; " + Parameters.filters["xp.OriginalOrderID"]),
 			selectRevision:$sce.trustAsHtml("Select ‘view’ to view previous revisions for reference"),
 			viewRevision: $sce.trustAsHtml("You can view and update the current revision"),
-			StatusRV: $sce.trustAsHtml("FR: Status RV = Revised Quote"),
-			StatusRO: $sce.trustAsHtml("FR: Status RO = Revised Order"),
-			StatusRR: $sce.trustAsHtml("FR: Status RR = Rejected Revised Order"),
-			StatusRQ: $sce.trustAsHtml("FR: Status RQ = Rejected Quote")
+			StatusRV: $sce.trustAsHtml("Status RV = Revised Quote"),
+			StatusRO: $sce.trustAsHtml("Status RO = Revised Order"),
+			StatusRR: $sce.trustAsHtml("Status RR = Rejected Revised Order"),
+			StatusRQ: $sce.trustAsHtml("Status RQ = Rejected Quote"),
+			StatusEN: $sce.trustAsHtml("Status EN = Enquiry Submitted"),
+			StatusER: $sce.trustAsHtml("Status ER = Enquiry Under Review"),
+			enquiriesSubmitted: $sce.trustAsHtml("Enquiries submitted")
 		}
 	};
 	vm.labels = labels.en;
@@ -290,6 +325,7 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 		"ordersMain.quotesReview":"quotesForReview",
 		"ordersMain.quotesRevised":"revisedQuotes",
 		"ordersMain.quotesConfirmed":"confirmedQuotes",
+		"ordersMain.quotesEnquiry":"enquiriesSubmitted",
 		"ordersMain.POOrders":"ordersSubmittedPO",
 		"ordersMain.pendingPO":"ordersPendingPO",
 		"ordersMain.ordersRevised":"revisedOrders",
@@ -301,7 +337,7 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 	};
 
 	vm.View = function(orderId, buyerId, customerId, customerName) {
-		OrderCloud.BuyerID.Set(buyerId);
+		CurrentBuyer.SetBuyerID(buyerId);
 		CurrentOrder.Set(orderId)
 			.then(function() {
 				CurrentOrder.SetCurrentCustomer({
@@ -327,7 +363,7 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 	};
 
 	vm.Update = function(orderId, buyerId) {
-		OrderCloud.BuyerID.Set(buyerId);
+		CurrentBuyer.SetBuyerID(buyerId);
 		WeirService.SetOrderAsCurrentOrder(orderId)
 			.then(function(){
 				$rootScope.$broadcast('SwitchCart');
@@ -338,7 +374,7 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 		});
 	};
 }
-function RouteToOrderController($rootScope, $state, OrderCloud, CurrentOrder, toastr, Order, $exceptionHandler) {
+function RouteToOrderController($rootScope, $state, OrderCloudSDK, CurrentOrder, toastr, Order, $exceptionHandler) {
     if (Order) {
             reviewOrder(Order.ID, Order.xp.Status, Order.xp.BuyerID, Order.xp.CustomerID, Order.xp.CustomerName);
     } else {
@@ -346,7 +382,7 @@ function RouteToOrderController($rootScope, $state, OrderCloud, CurrentOrder, to
         $state.go('ordersMain.ordersAll');
     }
     function reviewOrder(orderId, status, buyerId, customerId, customerName) {
-        OrderCloud.BuyerID.Set(buyerId);
+        CurrentBuyer.SetBuyerID(buyerId);
         CurrentOrder.Set(orderId)
 			.then(function () {
 			    CurrentOrder.SetCurrentCustomer({

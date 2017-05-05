@@ -24,20 +24,27 @@ function ProductSearchConfig($stateProvider) {
 				CurrentCustomer: function(CurrentOrder) {
 					return CurrentOrder.GetCurrentCustomer();
 				},
-				SerialNumbers: function(WeirService, OrderCloud, CurrentCustomer) {
+				SerialNumbers: function(WeirService, OrderCloudSDK, CurrentCustomer) {
 					if (CurrentCustomer) {
-						//return OrderCloud.Me.ListCategories(null, 1, 100, null, null, { "catalogID": cust.id});
-						return OrderCloud.Categories.List(null, 1, 100, null, null, {"ParentID": CurrentCustomer.id}, 2, CurrentCustomer.id.substring(0,5))
+						//return OrderCloudSDK.Me.ListCategories(null, 1, 100, null, null, { "catalogID": cust.id});
+					    return OrderCloudSDK.Categories.List(CurrentCustomer.id.substring(0, 5), {
+					        page: 1,
+					        pageSize: 100,
+					        filters: {
+					            "ParentID": CurrentCustomer.id
+					        },
+					        depth: 2
+					    });
 					} else {
 						return { Items: []};
 					}
 				},
-				PartNumbers: function(OrderCloud) {
-					//return OrderCloud.Me.ListProducts(null, 1, 100, null, null, null);
-					return OrderCloud.Products.List(null, 1, 100, null, null, null);
+				PartNumbers: function(OrderCloudSDK) {
+					//return OrderCloudSDK.Me.ListProducts(null, 1, 100, null, null, null);
+				    return OrderCloudSDK.Products.List({ page: 1, pageSize: 100 });
 				},
-				MyOrg: function(OrderCloud) {
-					return OrderCloud.Buyers.Get(OrderCloud.BuyerID.Get());
+				MyOrg: function(OrderCloudSDK, CurrentBuyer) {
+					return OrderCloudSDK.Buyers.Get(CurrentBuyer.GetBuyerID());
 				}
 			}
 		})
@@ -124,7 +131,7 @@ function ProductSearchConfig($stateProvider) {
 	;
 }
 
-function ProductSearchController($sce, $state, $rootScope, OrderCloud, CurrentOrder, WeirService, CurrentCustomer, SerialNumbers, PartNumbers, MyOrg, imageRoot, SearchProducts) {
+function ProductSearchController($sce, $state, $rootScope, OrderCloudSDK, CurrentOrder, WeirService, CurrentCustomer, SerialNumbers, PartNumbers, MyOrg, imageRoot, SearchProducts) {
 	var vm = this;
 	vm.SearchProducts = SearchProducts;
 	vm.serialNumberList = SerialNumbers.Items;
@@ -190,10 +197,16 @@ function ProductSearchController($sce, $state, $rootScope, OrderCloud, CurrentOr
 					vm.serialNumberList.length = 0;
 					WeirService.FindCart(vm.Customer)
 						.then(function() {
-                            OrderCloud.Categories.List(null, 1, 100, null, null, { "catalogID": vm.Customer.xp.WeirGroup.label, "ParentID" : vm.Customer.id})
-								.then(function(results) {
-									vm.serialNumberList.push.apply(vm.serialNumberList, results.Items);
-								});
+						    OrderCloudSDK.Categories.List(vm.Customer.xp.WeirGroup.label, {
+						        filters: {
+						            page: 1,
+						            pageSize: 100,
+						            "ParentID": vm.Customer.id
+						        }
+						    })
+							.then(function(results) {
+							    vm.serialNumberList.push.apply(vm.serialNumberList, results.Items);
+							});
 						});
 				});
 		}
@@ -221,12 +234,12 @@ function ProductSearchController($sce, $state, $rootScope, OrderCloud, CurrentOr
 			SerialSearch: $sce.trustAsHtml("Recherche par num&eacute;ro de s&eacute;rie"),
 			PartSearch: $sce.trustAsHtml("Recherche par num&eacute;ro de pi&eacute;ce"),
 			TagSearch: $sce.trustAsHtml("Recherche par num&eacute;ro de tag"),
-			CustomerFilter: $sce.trustAsHtml("FR: Results filtered by; "),
-			SelectCustomer: $sce.trustAsHtml("FR: Reset search filter"),
-			SearchMine: $sce.trustAsHtml("FR: Search your products"),
-			SearchOr: $sce.trustAsHtml("FR: Or"),
-			FilterEndUser: $sce.trustAsHtml("FR: Filter by end-user"),
-			Select: $sce.trustAsHtml("FR: Select")
+			CustomerFilter: $sce.trustAsHtml("Results filtered by; "),
+			SelectCustomer: $sce.trustAsHtml("Reset search filter"),
+			SearchMine: $sce.trustAsHtml("Search your products"),
+			SearchOr: $sce.trustAsHtml("Or"),
+			FilterEndUser: $sce.trustAsHtml("Filter by end-user"),
+			Select: $sce.trustAsHtml("Select")
 		}
 	};
 	vm.labels = WeirService.LocaleResources(labels);
@@ -243,7 +256,7 @@ function ProductSearchController($sce, $state, $rootScope, OrderCloud, CurrentOr
 
 }
 
-function SerialController(WeirService, $scope, $q, OrderCloud, $state, $sce, toastr ) {
+function SerialController(WeirService, $scope, $q, OrderCloudSDK, $state, $sce, toastr ) {
 	var vm = this;
 	var labels = {
 		en: {
@@ -318,7 +331,14 @@ function SerialController(WeirService, $scope, $q, OrderCloud, $state, $sce, toa
     };
 
 	vm.getSerialNumbers = function(sn) {
-		return OrderCloud.Categories.List(null, 1, 100, null, null, {"xp.SN": sn+"*", "ParentID":"WVCUK-1352"}, null, "WVCUK")
+	    return OrderCloudSDK.Categories.List(vm.Customer.xp.WeirGroup.label, {
+	        page: 1,
+	        pageSize: 100,
+	        filters: {
+	            "xp.SN": sn + "*",
+	            "ParentID": vm.Customer.ID
+	        }
+	    })
 			.then(function(response) {
 				return response.Items.map(function(item) {
 					return item.xp.SN;
@@ -486,8 +506,8 @@ function TagController(WeirService,$scope, $q, $state, $sce, toastr) {
 		},
 		fr: {
 			// WhereToFind: $sce.trustAsHtml("O&ugrave; trouver votre num&eacute;ro de s&eacute;rie"),
-			EnterTag: $sce.trustAsHtml("FR: Enter Tag number"),
-			AddMore: $sce.trustAsHtml("FR: Add more tag numbers   +"),
+			EnterTag: $sce.trustAsHtml("Enter Tag number"),
+			AddMore: $sce.trustAsHtml("Add more tag numbers   +"),
 			ClearSearch: $sce.trustAsHtml("Effacer la recherche"),
 			Search: "Chercher"
 		}
@@ -581,7 +601,7 @@ function TagResultsController(WeirService, $stateParams, $state, TagNumberResult
 		},
 		fr: {
 			Customer: "Client",
-			ResultsHeader: $sce.trustAsHtml("FR: Showing results for tag numbers; " + numFound.toString() + " of " + TagNumberResults.length.toString() + " searched tag numbers found"),
+			ResultsHeader: $sce.trustAsHtml("Showing results for tag numbers; " + numFound.toString() + " of " + TagNumberResults.length.toString() + " searched tag numbers found"),
 			SerialNumber: $sce.trustAsHtml("Num&eacute;ro de s&eacute;rie"),
 			TagNumber: $sce.trustAsHtml("Num&eacute;ro de tag (si disponible)"),
 			ValveDesc: "Description de soupape",
@@ -627,7 +647,7 @@ function TagDetailController( $stateParams, $rootScope, $sce, $state, WeirServic
 			Outlet: "Out"
 		},
 		fr: {
-			ResultsHeader: $sce.trustAsHtml("FR: Showing results for tag number "),
+			ResultsHeader: $sce.trustAsHtml("Showing results for tag number "),
 			Tag: $sce.trustAsHtml("Num&eacute;ro d'identification (si disponible); "),
 			Customer: $sce.trustAsHtml("Client; "),
 			ManufDate: $sce.trustAsHtml("La date de fabrication de la valve; "),
@@ -662,7 +682,7 @@ function TagDetailController( $stateParams, $rootScope, $sce, $state, WeirServic
 			AddToQuote: "Add to Quote"
 		},
 		fr: {
-			PartList: $sce.trustAsHtml("FR: Parts list for tag number"),
+			PartList: $sce.trustAsHtml("Parts list for tag number"),
 			PartNum: $sce.trustAsHtml("R&eacute;f&eacute;rence"),
 			PartDesc: $sce.trustAsHtml("Description de la partie"),
 			PartQty: $sce.trustAsHtml("Quantit&eacute; de partie"),
@@ -690,7 +710,7 @@ function TagDetailController( $stateParams, $rootScope, $sce, $state, WeirServic
 	};
 }
 
-function PartController( $state, $sce, OrderCloud, WeirService ) {
+function PartController( $state, $sce, OrderCloudSDK, WeirService ) {
 	var vm = this;
 	vm.PartMatches = [];
 	vm.partNumbers = [null];
@@ -745,13 +765,29 @@ function PartController( $state, $sce, OrderCloud, WeirService ) {
 	    if (input.length >= 3) {
 		    var results = [];
 		    // search, page, pageSize, searchOn, sortBy, filters, categoryID, catalogID
-		    OrderCloud.Me.ListProducts(vm.WeirGroup, 1, 20, "ID", "Name", { "Name": input + "*" }, null, null)
+	        OrderCloudSDK.Me.ListProducts({
+	            catalogID: vm.WeirGroup,
+	            page: 1,
+	            pageSize: 20,
+	            searchOn: "ID",
+	            sortBy: "Name",
+	            filters: {
+	                "Name": input + "*"
+	            }
+	        })
 			    .then(function (newList) {
 				    results = newList.Items;
 			    })
 			    .then(function () {
 				    if (vm.WeirGroup == 'WVCUK') {
-					    OrderCloud.Me.ListProducts(vm.WeirGroup, 1, 20, "ID", "Name", { "xp.AlternatePartNumber": input + "*" }, null, null)
+				        OrderCloudSDK.Me.ListProducts({
+				            CatalogID: vm.WeirGroup,
+				            page: 1,
+				            pageSize: 20,
+				            searchOn: "ID",
+				            sortBy: "Name",
+				            filters: { "xp.AlternatePartNumber": input + "*" }
+				        })
 						    .then(function (newList) {
 							    results.push.apply(results, newList.Items);
 							    vm.PartMatches.length = 0;
@@ -777,7 +813,7 @@ function PartResultsController( $rootScope, $sce, $state, WeirService, PartNumbe
 	var numFound = 0;
 	vm.partNumberResults = Underscore.flatten(Underscore.map(vm.partNumberResults, Underscore.values));
 	angular.forEach(vm.partNumberResults, function(entry) {
-		if (entry.Number) numFound++;
+		if (entry.Detail) numFound++;
 	});
 
 	var labels = {

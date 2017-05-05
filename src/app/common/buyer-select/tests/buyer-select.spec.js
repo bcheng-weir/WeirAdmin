@@ -1,13 +1,15 @@
 describe('Buyer-Select:', function() {
     var q,
         scope,
-        oc;
+        oc,
+        cb;
     beforeEach(module('orderCloud'));
     beforeEach(module('orderCloud.sdk'));
-    beforeEach(inject(function($q, $rootScope, OrderCloud){
+    beforeEach(inject(function($q, $rootScope, OrderCloudSDK){
         q = $q;
         scope = $rootScope.$new();
-        oc = OrderCloud;
+        oc = OrderCloudSDK;
+	cb = CurrentBuyer;
     }));
 
     describe('Directive: ordercloudSelectBuyer', function() {
@@ -24,7 +26,7 @@ describe('Buyer-Select:', function() {
         }));
         it('should initialize the controller', function() {
             expect(oc.Buyers.List).toHaveBeenCalled();
-            expect(oc.Buyers.Get).toHaveBeenCalledWith(oc.BuyerID.Get());
+            expect(oc.Buyers.Get).toHaveBeenCalledWith(cb.GetBuyerID());
             expect(element.isolateScope().selectBuyer).not.toBe(undefined);
         });
         it('should initialize a list of buyers', function() {
@@ -63,7 +65,7 @@ describe('Buyer-Select:', function() {
             spyOn(oc.Buyers, 'Get').and.returnValue(deferred1.promise);
             spyOn(oc.Buyers, 'List').and.returnValue(deferred2.promise);
             spyOn($state, 'reload').and.returnValue(true);
-            spyOn(oc.BuyerID, 'Set').and.returnValue(true);
+            // spyOn(oc.BuyerID, 'Set').and.returnValue(true);
             buyerSelectCtrl = $controller('SelectBuyerCtrl', {
                 $scope: scope
             });
@@ -80,7 +82,7 @@ describe('Buyer-Select:', function() {
                 expect(buyerSelectCtrl.selectedBuyer).toBe(mock_buyer);
             });
             it('should call the Set method of BuyerID to change the saved buyer ID value stored in the cookies', function() {
-                expect(oc.BuyerID.Set).toHaveBeenCalledWith(mock_buyer.ID);
+                expect(cb.SetBuyerID).toHaveBeenCalledWith(mock_buyer.ID);
             });
             it('should reload the state', inject(function($state) {
                 expect($state.reload).toHaveBeenCalledWith($state.current);

@@ -5,7 +5,7 @@ describe('Component: UserGroups', function() {
         oc;
     beforeEach(module('orderCloud'));
     beforeEach(module('orderCloud.sdk'));
-    beforeEach(inject(function($q, $rootScope, OrderCloud) {
+    beforeEach(inject(function($q, $rootScope, OrderCloudSDK) {
         q = $q;
         scope = $rootScope.$new();
         userGroup = {
@@ -14,7 +14,7 @@ describe('Component: UserGroups', function() {
             Description: "Test",
             IsReportingGroup: false
         };
-        oc = OrderCloud;
+        oc = OrderCloudSDK;
     }));
 
     describe('State: userGroups', function() {

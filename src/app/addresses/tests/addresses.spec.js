@@ -5,7 +5,7 @@ describe('Component: Addresses', function() {
         oc;
     beforeEach(module('orderCloud'));
     beforeEach(module('orderCloud.sdk'));
-    beforeEach(inject(function($q, $rootScope, OrderCloud) {
+    beforeEach(inject(function($q, $rootScope, OrderCloudSDK) {
         scope = $rootScope.$new();
         q = $q;
         address = {
@@ -21,7 +21,7 @@ describe('Component: Addresses', function() {
             AddressName: "TestAddressTest",
             ID: "TestAddress123456789"
         };
-        oc = OrderCloud
+        oc = OrderCloudSDK
     }));
 
     describe('State: addresses', function() {
