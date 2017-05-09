@@ -56,7 +56,7 @@
                 <span ng-switch-default>{{order.Total | currency:'&#163;'}}</span>
             </td>
             <td>{{order.xp.ReviewerName}}</td>
-            <td style="color: green">{{order.xp.Status + " " + order.xp.StatusDate.substring(0,10)}}</td>
+            <td style="color: green"><span>{{order.xp.Status + " "}}</span><span>{{order.xp.StatusDate | weirdate}}</span></td>
             <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.BuyerID, order.xp.CustomerID, order.xp.CustomerName)">{{orders.labels.view}}</button></td>
         </tr>
         </tbody>
