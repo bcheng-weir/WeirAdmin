@@ -1,1 +1,10 @@
-"" 
+*.sw*
+*~
+/build/
+/compile/
+node_modules/
+bower_components/
+errorShots/
+.idea
+plato/
+app/app.config.json
