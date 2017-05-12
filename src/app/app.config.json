@@ -1,0 +1,23 @@
+{
+	"appname": "Weir B2B Site Administration",
+	"clientid":"17595D62-E8EC-4911-903F-EB24CA3769AB",
+	"buyernetwork":"85DC0813-F2F8-41D6-B741-80FA9EAC0D34",
+	"scope": ["CategoryAdmin", "ProductAdmin", "ProductAssignmentAdmin", "FullAccess", "Shopper", "BuyerImpersonation"],
+	"buyerid": "weir",
+	"environment": "prod",
+	"anonymous": false,
+	"base": {
+	"left": false,
+		"right": false,
+		"top": true,
+		"bottom": false
+	},
+	"imageRoot": "https://store.flowcontrol.weir/hooks/Content/Images/",
+	"fileStore": {
+		"akid":"",
+		"sak":"",
+		"awsRegion":"eu-west-2",
+		"bucket": "ordercloudfiles",
+		"location": "https://s3.eu-west-2.amazonaws.com/ordercloudfiles/"
+	}
+}
