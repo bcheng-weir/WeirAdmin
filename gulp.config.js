@@ -97,7 +97,7 @@ function getConstants() {
         case 'staging':
 	        result.authurl = 'https://stagingauth.ordercloud.io';
 	        result.apiurl = 'https://stagingapi.ordercloud.io';
-	        break
+	        break;
         default:
             result.authurl = 'https://auth.ordercloud.io';
             result.apiurl = 'https://api.ordercloud.io';
