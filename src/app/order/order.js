@@ -974,20 +974,19 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		// Patch the current order with the updated status, ID and active state.
 		//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
 		var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
-		OrderCloudSDK.Orders.Patch(direction, OrderID, orderPatch)
-			.then(function() {
-				// Get the details of the user that placed the order.
-			    return OrderCloudSDK.Users.Get(vm.Order.xp.BuyerID, vm.Order.FromUserID);
-			})
-            .then(function(buyer) {
-            	// Get an access token for impersonation.
-	            impersonation.Roles = buyer.AvailableRoles;
+
+        OrderCloudSDK.Users.Get(vm.Order.xp.BuyerID, vm.Order.FromUserID)
+			.then(function(buyer) {
+                impersonation.Roles = buyer.AvailableRoles;
                 return OrderCloudSDK.Users.GetAccessToken(vm.Order.xp.BuyerID, vm.Order.FromUserID, impersonation);
 			})
             .then(function(data) {
-            	// Set the local impersonation token so that As() can be used.
+                // Set the local impersonation token so that As() can be used.
                 return OrderCloudSDK.SetImpersonationToken(data['access_token']);
             })
+			.then(function() {
+            	return OrderCloudSDK.Orders.Patch(direction, OrderID, orderPatch);
+			})
 			.then(function() {
 				// Create the order as the impersonated user.
 				return OrderCloudSDK.As().Orders.Create("Outgoing", orderCopy);
