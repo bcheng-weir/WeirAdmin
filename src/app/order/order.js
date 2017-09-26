@@ -280,7 +280,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     };
 
     vm.InvalidPO = function() {
-        return vm.Order.xp.Type=="Order" && ((vm.Order.xp.PONumber == "Pending" || vm.Order.xp.PONumber == "") || (vm.Order.xp.PODocument == "" || vm.Order.xp.PODocument == null));
+        return vm.Order.xp.Type=="Order" && ((vm.Order.xp.PONumber == "Pending" || vm.Order.xp.PONumber == "") /* PO-517 || (vm.Order.xp.PODocument == "" || vm.Order.xp.PODocument == null)*/);
     };
 
     var labels = {
