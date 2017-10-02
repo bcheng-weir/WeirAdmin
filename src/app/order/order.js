@@ -430,6 +430,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 					StatusDate: new Date(),
 					ReviewerName: Me.FirstName + " " + Me.LastName,
 					PONumber: vm.Order.xp.PONumber,
+                    POEnteredByWeir: true,
 					PendingPO: false
 				}
 			};
