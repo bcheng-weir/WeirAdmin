@@ -25,7 +25,7 @@
                     <!-- http://plnkr.co/edit/N9Hk9QFIfj3IXfHoWwbt?p=preview -->
                     <label ng-bind-html='info.labels.DeliveryDate'></label><br />
                     <p class="input-group">
-                        <input type="text" class="form-control" uib-datepicker-popup="dd/MM/yyyy" ng-model="info.Order.xp.DeliveryDate"
+                        <input name="DeliveryDate" type="text" class="form-control" uib-datepicker-popup="dd/MM/yyyy" ng-model="info.Order.xp.DeliveryDate"
                             is-open="info.popupDelivery.opened" datepicker-options="info.dateOptions" close-text="Close" width="20"/>
                         <span class="input-group-btn">
                             <button type="button" class="btn btn-default" ng-click="info.openDelivery()"><i class="glyphicon glyphicon-calendar"></i></button>
@@ -36,7 +36,7 @@
                 <div class="form-group">
                     <label ng-bind-html='info.labels.DespatchDate'></label><br />
                     <p class="input-group">
-                        <input type="text" class="form-control" uib-datepicker-popup="dd/MM/yyyy" ng-model="info.Order.xp.DateDespatched"
+                        <input name="DespatchDate" type="text" class="form-control" uib-datepicker-popup="dd/MM/yyyy" ng-model="info.Order.xp.DateDespatched"
                             is-open="info.popupDespatched.opened" datepicker-options="info.dateOptions" close-text="Close" alt-input-formats="info.altInputFormats" width="20"/>
                         <span class="input-group-btn">
                             <button type="button" class="btn btn-default" ng-click="info.openDespatched()"><i class="glyphicon glyphicon-calendar"></i></button>

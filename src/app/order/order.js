@@ -1116,23 +1116,25 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, O
     };
     function save(Order) {
 		var orderStatus = vm.Order.xp.Status;
+		var orderchange = false;
 		//console.log(vm.Order.xp.ContractNumber +  "\n" + Order.xp.DeliveryDate +  "\n" + vm.Order.xp.DateDespatched +  "\n" + vm.Order.xp.InvoiceNumber);
         //if it has a despatch date- it is despatched. if it has an invoice it is in the final stage and is invoiced.
-		if(vm.Order.xp.DateDespatched){
-			orderStatus = 'DP';
+		var patch = {};
+		patch.xp = {};
+		if(updateOrderInfo.ContractNumber.classList.contains("ng-dirty")){
+            patch.xp.ContractNumber = vm.Order.xp.ContractNumber;
 		}
-		if(vm.Order.xp.InvoiceNumber){
-			orderStatus = 'IV';
-		}
-		var patch = {
-			xp: {
-				ContractNumber: vm.Order.xp.ContractNumber,
-				DeliveryDate: vm.Order.xp.DeliveryDate,
-				DateDespatched: vm.Order.xp.DateDespatched,
-				InvoiceNumber: vm.Order.xp.InvoiceNumber,
-				Status: orderStatus
-			}
-		};
+        if(vm.Order.xp.InvoiceNumber){
+            patch.xp.Status = 'IV';
+        }
+        if(vm.Order.xp.DateDespatched && updateOrderInfo.DespatchDate.classList.contains("ng-dirty")){
+            patch.xp.Status = 'DP';
+            patch.xp.DateDespatched = vm.Order.xp.DespatchDate;
+        }
+        if(vm.Order.xp.DeliveryDate && updateOrderInfo.DeliveryDate.classList.contains("ng-dirty")){
+            patch.xp.DeliveryDate = vm.Order.xp.DeliveryDate;
+        }
+
 		//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
 		var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 		OrderCloudSDK.Orders.Patch(direction, Order.ID, patch)
