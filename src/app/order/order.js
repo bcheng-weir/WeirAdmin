@@ -896,8 +896,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 
 		// The copy will be the historical version of the order. This way we maintain the submission status in the original
 		orderCopy.xp.Active = false;
-		if(vm.Order.xp.Type == "Quote") {
-			orderCopy.xp.Status = WeirService.OrderStatus.RevisedQuote.id;
+            if(vm.Order.xp.Type == "Quote") {
+                orderCopy.xp.Status = WeirService.OrderStatus.RevisedQuote.id;
 		} else if (vm.Order.xp.Type == "Order") {
 			orderCopy.xp.Status = WeirService.OrderStatus.RevisedOrder.id;
 		} else {
@@ -985,13 +985,13 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
                 // Set the local impersonation token so that As() can be used.
                 return OrderCloudSDK.SetImpersonationToken(data['access_token']);
             })
+            .then(function() {
+                // Create the order as the impersonated user.
+                return OrderCloudSDK.As().Orders.Create("Outgoing", orderCopy);
+                //ToDo make another then in order to set the shipping address.
+            })
 			.then(function() {
             	return OrderCloudSDK.Orders.Patch(direction, OrderID, orderPatch);
-			})
-			.then(function() {
-				// Create the order as the impersonated user.
-				return OrderCloudSDK.As().Orders.Create("Outgoing", orderCopy);
-				//ToDo make another then in order to set the shipping address.
 			})
 			.then(function() {
 				// Create the line items.
