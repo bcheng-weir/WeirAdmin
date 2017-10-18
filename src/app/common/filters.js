@@ -136,7 +136,7 @@ function weirdate() {
 				day = "0" + day;
 			}
 
-			result = day + '-' + getMonthText(date.getMonth(), locale) + '-' + (date.getFullYear() % 100).toString() + ' ' + t;
+			result = day + '-' + getMonthText(date.getMonth(), locale) + '-' + (date.getFullYear() % 100).toString().slice(-2) + ' ' + t;
 		} else {
 			result = "--";
 		}
