@@ -283,14 +283,15 @@ function ordercloudPoUpload($parse, $exceptionHandler, $sce, Underscore, FileRea
 			console.log(fileName);
 			FilesService.Delete(orderid + fileName)
 				.then(function(fileData) {
+					var xp = {};
 					if(scope.model.xp[scope.keyname]) {
 						scope.model.xp[scope.keyname] = null;
-						var xp = {"xp": {
+						xp = {"xp": {
 							"PODocument": null
 						}};
 					}
-					return OrderCloudSDK.Orders.Patch(orderid,xp,scope.model.xp.BuyerID);
-				})
+					return OrderCloudSDK.Orders.Patch("incoming", orderid, xp);
+				});
 		};
 
 		scope.GetFileUrl = function(fileName) {
@@ -308,7 +309,7 @@ function ordercloudPoUpload($parse, $exceptionHandler, $sce, Underscore, FileRea
 					var xp = {"xp": {
 						"PODocument": fileName
 					}};
-					return OrderCloudSDK.Orders.Patch(scope.model.ID,xp,scope.model.xp.BuyerID);
+					return OrderCloudSDK.Orders.Patch("incoming", scope.model.ID, xp);
 				})
 				.then(function(order) {
 					toastr.success(fileName + " is available in documents section of the order.","PO Document Uploaded");

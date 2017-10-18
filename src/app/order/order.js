@@ -280,7 +280,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     };
 
     vm.InvalidPO = function() {
-        return vm.Order.xp.Type=="Order" && ((vm.Order.xp.PONumber == "Pending" || vm.Order.xp.PONumber == "") || (vm.Order.xp.PODocument == "" || vm.Order.xp.PODocument == null));
+        return vm.Order.xp.Type=="Order" && ((vm.Order.xp.PONumber == "Pending" || vm.Order.xp.PONumber == "") /* PO-517 || (vm.Order.xp.PODocument == "" || vm.Order.xp.PODocument == null)*/);
     };
 
     var labels = {
@@ -430,6 +430,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 					StatusDate: new Date(),
 					ReviewerName: Me.FirstName + " " + Me.LastName,
 					PONumber: vm.Order.xp.PONumber,
+                    POEnteredByWeir: true,
 					PendingPO: false
 				}
 			};
@@ -895,8 +896,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 
 		// The copy will be the historical version of the order. This way we maintain the submission status in the original
 		orderCopy.xp.Active = false;
-		if(vm.Order.xp.Type == "Quote") {
-			orderCopy.xp.Status = WeirService.OrderStatus.RevisedQuote.id;
+            if(vm.Order.xp.Type == "Quote") {
+                orderCopy.xp.Status = WeirService.OrderStatus.RevisedQuote.id;
 		} else if (vm.Order.xp.Type == "Order") {
 			orderCopy.xp.Status = WeirService.OrderStatus.RevisedOrder.id;
 		} else {
@@ -984,13 +985,13 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
                 // Set the local impersonation token so that As() can be used.
                 return OrderCloudSDK.SetImpersonationToken(data['access_token']);
             })
+            .then(function() {
+                // Create the order as the impersonated user.
+                return OrderCloudSDK.As().Orders.Create("Outgoing", orderCopy);
+                //ToDo make another then in order to set the shipping address.
+            })
 			.then(function() {
             	return OrderCloudSDK.Orders.Patch(direction, OrderID, orderPatch);
-			})
-			.then(function() {
-				// Create the order as the impersonated user.
-				return OrderCloudSDK.As().Orders.Create("Outgoing", orderCopy);
-				//ToDo make another then in order to set the shipping address.
 			})
 			.then(function() {
 				// Create the line items.
@@ -1115,23 +1116,25 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, O
     };
     function save(Order) {
 		var orderStatus = vm.Order.xp.Status;
+		var orderchange = false;
 		//console.log(vm.Order.xp.ContractNumber +  "\n" + Order.xp.DeliveryDate +  "\n" + vm.Order.xp.DateDespatched +  "\n" + vm.Order.xp.InvoiceNumber);
         //if it has a despatch date- it is despatched. if it has an invoice it is in the final stage and is invoiced.
-		if(vm.Order.xp.DateDespatched){
-			orderStatus = 'DP';
+		var patch = {};
+		patch.xp = {};
+		if(updateOrderInfo.ContractNumber.classList.contains("ng-dirty")){
+            patch.xp.ContractNumber = vm.Order.xp.ContractNumber;
 		}
-		if(vm.Order.xp.InvoiceNumber){
-			orderStatus = 'IV';
-		}
-		var patch = {
-			xp: {
-				ContractNumber: vm.Order.xp.ContractNumber,
-				DeliveryDate: vm.Order.xp.DeliveryDate,
-				DateDespatched: vm.Order.xp.DateDespatched,
-				InvoiceNumber: vm.Order.xp.InvoiceNumber,
-				Status: orderStatus
-			}
-		};
+        if(vm.Order.xp.InvoiceNumber){
+            patch.xp.Status = 'IV';
+        }
+        if(vm.Order.xp.DateDespatched && updateOrderInfo.DespatchDate.classList.contains("ng-dirty")){
+            patch.xp.Status = 'DP';
+            patch.xp.DateDespatched = vm.Order.xp.DespatchDate;
+        }
+        if(vm.Order.xp.DeliveryDate && updateOrderInfo.DeliveryDate.classList.contains("ng-dirty")){
+            patch.xp.DeliveryDate = vm.Order.xp.DeliveryDate;
+        }
+
 		//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
 		var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 		OrderCloudSDK.Orders.Patch(direction, Order.ID, patch)
