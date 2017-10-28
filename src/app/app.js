@@ -25,7 +25,7 @@ angular.module('orderCloud', [
     'ngCsv',
     'ngFileSaver',
     'ngCookies',
-    'ngResource'
+    'ngResource',
     ])
     .config(Routing)
     .config(ErrorHandling)

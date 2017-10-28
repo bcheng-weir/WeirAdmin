@@ -132,7 +132,7 @@ function OrdersConfig($stateProvider, buyerid) {
     ;
 }
 
-function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler, OrderCloudSDK, OrderCloudParameters, Orders, Parameters, buyerid, CurrentOrder, WeirService, Me, Underscore, CurrentBuyer) {
+function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler, OrderCloudSDK, OrderCloudParameters, Orders, Parameters, buyerid, CurrentOrder, WeirService, CurrentBuyer, Me) {
 	var vm = this;
 	vm.xpType = Parameters.filters ? Parameters.filters["xp.Type"] : {};
 	vm.StateName = $state.current.name;
@@ -154,6 +154,10 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 	//Reload the state with new parameters
 	vm.filter = function(resetPage) {
 		$state.go('.', OrderCloudParameters.Create(vm.parameters, resetPage));
+	};
+
+	vm.dateOf = function(utcDate) {
+		return new Date(utcDate);
 	};
 
 	//Reload the state with new search parameter & reset the page
