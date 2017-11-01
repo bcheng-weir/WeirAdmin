@@ -39,6 +39,9 @@
                     <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!DateSubmitted'"></i>
                 </a>
             </th>
+            <th>
+                <span ng-bind-html="orders.labels.status"></span>
+            </th>
             <th scope="col">
                 {{orders.labels.reviewer}}
             </th>
@@ -50,7 +53,7 @@
             <th scope="row">{{order.ID}}</th>
             <td>{{order.xp.RefNum}}</td>
             <td>{{order.xp.CustomerName}}</td>
-            <td>{{order.FromUserFirstName}} {{order.FromUserLastName}}</td>
+            <td>{{order.FromUser.FirstName}} {{order.FromUser.LastName}}</td>
             <td class="text-left" ng-switch on="order.xp.Currency">
                 <span ng-switch-when="EUR">{{order.Total | currency: '&euro;'}}</span>
                 <span ng-switch-when="GBP">{{order.Total | currency: '&#163;'}}</span>
@@ -58,6 +61,9 @@
             </td>
             <!--<td><span ng-bind-html="order.DateSubmitted | weirdate : orders.WeirGroup"></span></td>-->
             <td><span ng-bind-html="orders.dateOf(order.DateSubmitted) | weirdate : orders.WeirGroup"></span></td>
+            <td>
+                <span ng-bind-html="orders.getStatusLabel(order.xp.Status)" ng-class="{SP:'btn-status btn-order-SP',SE:'btn-status btn-order-SE',RO:'btn-status btn-order-RO',RR:'btn-status btn-order-RR',CO:'btn-status btn-order-CO',DP:'btn-status btn-order-DP',RE:'btn-status btn-order-RE',SV:'btn-status btn-quote-SV',DR:'btn-status btn-quote-DR',CQ:'btn-status btn-quote-CQ',SB:'btn-status btn-quote-SB',RV:'btn-status btn-quote-RV',RE:'btn-status btn-quote-RE',RQ:'btn-status btn-quote-RQ',EN:'btn-status btn-quote-EN'}[order.xp.Status]"></span>
+            </td>
             <td>{{order.xp.ReviewerName}}</td>
             <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.BuyerID, order.xp.CustomerID, order.xp.CustomerName)">{{orders.labels.view}}</button></td>
         </tr>

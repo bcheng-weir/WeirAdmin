@@ -976,10 +976,10 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
 		var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 
-        OrderCloudSDK.Users.Get(vm.Order.xp.BuyerID, vm.Order.FromUserID)
+        OrderCloudSDK.Users.Get(vm.Order.xp.BuyerID, vm.Order.FromUser.ID)
 			.then(function(buyer) {
                 impersonation.Roles = buyer.AvailableRoles;
-                return OrderCloudSDK.Users.GetAccessToken(vm.Order.xp.BuyerID, vm.Order.FromUserID, impersonation);
+                return OrderCloudSDK.Users.GetAccessToken(vm.Order.xp.BuyerID, vm.Order.FromUser.ID, impersonation);
 			})
             .then(function(data) {
                 // Set the local impersonation token so that As() can be used.

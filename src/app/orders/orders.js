@@ -148,6 +148,14 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 	vm.filtersApplied = vm.parameters.filters || vm.parameters.from || vm.parameters.to || ($ocMedia('max-width:767px') && vm.sortSelection); //Sort by is a filter on mobile devices
 	vm.showFilters = vm.filtersApplied;
 
+	//For status label styling.
+    vm.getStatusLabel = function(id) {
+        var status = WeirService.LookupStatus(id);
+        if (status) {
+            return status.label;
+        }
+    };
+
 	//Check if search was used
 	vm.searchResults = Parameters.search && Parameters.search.length > 0;
 

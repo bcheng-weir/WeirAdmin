@@ -59,7 +59,7 @@
             <td>{{order.xp.ContractNumber}}</td>
             <td>{{order.xp.PONumber}}</td>
             <td>{{order.xp.CustomerName}}</td>
-            <td>{{order.FromUserFirstName}} {{order.FromUserLastName}}</td>
+            <td>{{order.FromUser.FirstName}} {{order.FromUser.LastName}}</td>
             <td class="text-left" ng-switch on="order.xp.CustomerID | weirGroupFromBuyersID">
                 <span ng-switch-when="WPIFR">{{order.Total | currency: '&euro;'}}</span>
                 <span ng-switch-when="WVCUK">{{order.Total | currency: '&#163;'}}</span>
