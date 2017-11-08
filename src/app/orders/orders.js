@@ -132,7 +132,7 @@ function OrdersConfig($stateProvider, buyerid) {
     ;
 }
 
-function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler, OrderCloudSDK, OrderCloudParameters, Orders, Parameters, buyerid, CurrentOrder, WeirService, Me, Underscore, CurrentBuyer) {
+function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler, OrderCloudSDK, OrderCloudParameters, Orders, Parameters, buyerid, CurrentOrder, WeirService, CurrentBuyer, Me) {
 	var vm = this;
 	vm.xpType = Parameters.filters ? Parameters.filters["xp.Type"] : {};
 	vm.StateName = $state.current.name;
@@ -148,12 +148,24 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 	vm.filtersApplied = vm.parameters.filters || vm.parameters.from || vm.parameters.to || ($ocMedia('max-width:767px') && vm.sortSelection); //Sort by is a filter on mobile devices
 	vm.showFilters = vm.filtersApplied;
 
+	//For status label styling.
+    vm.getStatusLabel = function(id) {
+        var status = WeirService.LookupStatus(id);
+        if (status) {
+            return status.label;
+        }
+    };
+
 	//Check if search was used
 	vm.searchResults = Parameters.search && Parameters.search.length > 0;
 
 	//Reload the state with new parameters
 	vm.filter = function(resetPage) {
 		$state.go('.', OrderCloudParameters.Create(vm.parameters, resetPage));
+	};
+
+	vm.dateOf = function(utcDate) {
+		return new Date(utcDate);
 	};
 
 	//Reload the state with new search parameter & reset the page

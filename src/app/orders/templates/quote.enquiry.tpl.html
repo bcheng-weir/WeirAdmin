@@ -39,7 +39,7 @@
         <tr ng-repeat="order in orders.list.Items">
             <th scope="row">{{order.ID}}</th>
             <td>{{order.xp.CustomerName}}</td>
-            <td>{{order.FromUserFirstName}} {{order.FromUserLastName}}</td>
+            <td>{{order.FromUser.FirstName}} {{order.FromUser.LastName}}</td>
             <td>{{order.DateCreated | weirdate}}</td>
             <td>{{order.xp.ReviewerName}}</td>
             <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.BuyerID, order.xp.CustomerID, order.xp.CustomerName)">{{orders.labels.view}}</button></td>

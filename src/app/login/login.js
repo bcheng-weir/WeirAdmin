@@ -127,7 +127,7 @@ function LoginService($q, $window, $state, toastr, OrderCloudSDK, TokenRefresh, 
 	}
 }
 
-function LoginController($stateParams, $exceptionHandler, OrderCloudSDK, LoginService, TokenRefresh, buyerid, clientid, scope, CurrentBuyer) {
+function LoginController($stateParams, $exceptionHandler, OrderCloudSDK, LoginService, buyerid, clientid, scope, CurrentBuyer) {
     var vm = this;
 	var username = null;
 	LoginService.GetUsername()
