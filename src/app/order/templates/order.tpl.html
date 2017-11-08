@@ -85,7 +85,8 @@
                     <span ng-bind-html='order.labels.PONumber'></span>
                     <span ng-if="order.showAssign==true" class="text-danger" ng-bind-html="order.Order.xp.PONumber"></span>
                     <span ng-if="order.showAssign!=true">
-                        <input type="text" ng-model="order.Order.xp.PONumber" placeholder="{{order.labels.POPlaceHolder}}" /> <button class="btn btn-sm btn-primary" ng-bind-html="order.labels.Add" ng-click="order.UpdatePO()"></button>
+                        <input type="text" ng-model="order.Order.xp.PONumber" placeholder="{{order.labels.POPlaceHolder}}" ng-enter="order.UpdatePO()" />
+                        <button class="btn btn-sm btn-primary" ng-bind-html="order.labels.Add" ng-click="order.UpdatePO()"></button>
                     </span>
 
                  </b>
