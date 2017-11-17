@@ -112,9 +112,11 @@ function CustomerService($sce, OrderCloudSDK, $exceptionHandler) {
         en: {
             NewCustomer: "New Customer",
             WeirGroup: "Weir Group",
+            CustomerLanguage: "Language setting",
             CustomerType: "Customer Type",
             SelectGroup: "(Select Weir Group)",
             SelectType: "(Select Customer Type)",
+            SelectLanguage: "(Select Customer Language)",
             Active: "Active",
             Terms: "Terms and Conditions",
             ShippingDetails: "Shipping Details",
@@ -152,14 +154,20 @@ function CustomerService($sce, OrderCloudSDK, $exceptionHandler) {
             Customers: "Customers",
             Users: "Users",
             Search: "Search",
-            CarriagePrice: "Carriage Price"
+            CarriagePrice: "Carriage Price",
+            CarriageHeader: "Carriage",
+            StandardCarriageLabel: 'UK Standard carriage (default)',
+            CustomerSpecificLabel: 'Customer specific carriage',
+            Currency: "GBP"
         },
         fr: {
             NewCustomer: $sce.trustAsHtml("New Customer"),
             WeirGroup: $sce.trustAsHtml("Weir Group"),
+            CustomerLanguage: $sce.trustAsHtml("Language setting"),
             CustomerType: $sce.trustAsHtml("Customer Type"),
             SelectGroup: $sce.trustAsHtml("(Select Weir Group)"),
             SelectType: $sce.trustAsHtml("(Select Customer Type)"),
+            SelectLanguage: $sce.trustAsHtml("(Select Customer Language)"),
             Active: $sce.trustAsHtml("Active"),
             Terms: $sce.trustAsHtml("Terms and Conditions"),
             ShippingDetails: $sce.trustAsHtml("Shipping Details"),
@@ -197,7 +205,11 @@ function CustomerService($sce, OrderCloudSDK, $exceptionHandler) {
             Customers: $sce.trustAsHtml("Customers"),
             Users: $sce.trustAsHtml("Users"),
             Search: $sce.trustAsHtml("Search"),
-	        CarriagePrice: $sce.trustAsHtml("Carriage Price")
+	        CarriagePrice: $sce.trustAsHtml("Carriage Price"),
+            CarriageHeader: "Carriage",
+            StandardCarriageLabel: 'FR Standard carriage (default)',
+            CustomerSpecificLabel: 'Customer specific carriage',
+            Currency: "EU"
         }
     };
 
@@ -461,21 +473,8 @@ function CustomerEditCtrl($exceptionHandler, $state, $ocMedia, toastr, OrderClou
             return false;
         }
     };
-    var labels = {
-        WVCUK: {
-            CarriageHeader: "Carriage",
-            StandardCarriageLabel: 'UK Standard carriage (default)',
-            CustomerSpecificLabel: 'Customer specific carriage',
-            Currency: "GBP"
-        },
-        WPIFR: {
-            CarriageHeader: "Carriage",
-            StandardCarriageLabel: 'FR Standard carriage (default)',
-            CustomerSpecificLabel: 'Customer specific carriage',
-            Currency: "EU"
-        }
-    };
-    vm.labels = labels[vm.Group.ID];
+
+    vm.labels = CustomerService.Labels[WeirService.Locale()];
 
 	vm.originalValues = vm.buyer.xp.POContent || {};
 	if (vm.weirGroupID == 'WVCUK') {
