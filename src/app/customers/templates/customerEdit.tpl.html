@@ -23,6 +23,12 @@
                     <label for="buyer_type">Customer Type</label>
                     <input id="buyer_type" type="text" ng-disabled="true" ng-model="customerEdit.buyer.xp.Type.label" />
                 </div>
+                <div class="form-group col-md-6">
+                    <label for="buyer_language">Customer's Language</label>
+                    <select id="buyer_language" class="form-control" ng-model="customerEdit.buyer.xp.Lang" ng-options="d.label for d in customers.languages track by d.id">
+                        <option value="">Select Language</option>
+                    </select>
+                </div>
             </div>
             <div class="row">
                 <div class="form-group col-md-6">

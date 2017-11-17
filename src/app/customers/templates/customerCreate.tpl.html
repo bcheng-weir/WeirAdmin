@@ -25,6 +25,12 @@
                 <option value="">{{customerCreate.labels.SelectType}}</option>
             </select>
         </div>
+        <div class="form-group col-md-6">
+            <label for="buyer_language">Customer's Language</label>
+            <select id="buyer_language" class="form-control" ng-model="customerCreate.buyer.xp.Lang" ng-options="d.label for d in customers.languages track by d.id">
+                <option value="">Select Language</option>
+            </select>
+        </div>
     </div>
     <div class="row">
         <div class="form-group col-md-6">
