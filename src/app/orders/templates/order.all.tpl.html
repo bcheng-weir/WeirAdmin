@@ -21,7 +21,10 @@
                 {{orders.labels.businessName}}
             </th>
             <th scope="col">
-		    <span>
+                {{orders.labels.Language}}
+            </th>
+            <th scope="col">
+		        <span>
                     {{orders.labels.submittedBy}}
                 </span>
             </th>
@@ -53,6 +56,9 @@
             <th scope="row">{{order.ID}}</th>
             <td>{{order.xp.RefNum}}</td>
             <td>{{order.xp.CustomerName}}</td>
+            <td>
+                {{orders.getLanguage(order.FromCompanyID)}}
+            </td>
             <td>{{order.FromUser.FirstName}} {{order.FromUser.LastName}}</td>
             <td class="text-left" ng-switch on="order.xp.Currency">
                 <span ng-switch-when="EUR">{{order.Total | currency: '&euro;'}}</span>

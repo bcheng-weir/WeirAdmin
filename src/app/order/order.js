@@ -159,6 +159,12 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     var userIsInternalSalesAdmin = UserGroups.indexOf(UserGroupsService.Groups.InternalSales) > -1;
     var userIsSuperAdmin = UserGroups.indexOf(UserGroupsService.Groups.SuperAdmin) > -1;
 
+    vm.getLanguage = function() {
+    	Buyer.xp.Lang = Buyer.xp.Lang || {};
+        Buyer.xp.Lang.id = Buyer.xp.Lang.id || "";
+    	return Buyer.xp.Lang.id.toUpperCase();
+	};
+
 	//Part of the label comparison
 	function compare(current,previous) {
 		if(current.Quantity === previous.Quantity &&
@@ -288,6 +294,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
             //header labels
             status: "Status",
             reviewer: "Reviewer; ",
+			Language: "Language;",
             unassigned: "Not assigned",
             AssignToMe: "Assign to me",
             OrderDate: "Order date;",
@@ -353,6 +360,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
             //header labels
             status: $sce.trustAsHtml("Status"),
             reviewer: "Reviewer; ",
+            Language: "Language;",
             unassigned: "Not assigned",
             OrderDate:$sce.trustAsHtml( "Order date;"),
             AssignToMe: "Assign to me",
