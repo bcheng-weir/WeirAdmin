@@ -39,7 +39,8 @@
                     <ul class="list-group">
                         <li class="list-group-item"><a ui-sref="adminUsers" ng-bind-html="home.labels.ManageAdmins"></a></li>
                         <li class="list-group-item"><a href="" ui-sref="standardDelivery" ng-bind-html="home.labels.StandardDelivery"></a></li>
-                        <li class="list-group-item"><a href="" ui-sref="poPrintContent" ng-bind-html="home.labels.POPrintContent"></a></li>
+                        <li ng-if="base.currentUser.xp.WeirGroup.label == 'WPIFR'" class="list-group-item"><a href="" ui-sref="poPrintContent.FR" ng-bind-html="home.labels.POPrintContent"></a></li>
+                        <li ng-if="base.currentUser.xp.WeirGroup.label != 'WPIFR'" class="list-group-item"><a href="" ui-sref="poPrintContent" ng-bind-html="home.labels.POPrintContent"></a></li>
                     </ul>
                </div>
             </div>
