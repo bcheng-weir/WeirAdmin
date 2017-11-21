@@ -1,0 +1,20 @@
+<article id="COMPONENT_Enquiries" class="container-fluid">
+    <table class="table table-hover table-condensed oc-table-responsive">
+        <thead>
+            <tr>
+                <th scope="col">Category ID</th>
+                <th scope="col">Category Name FR</th>
+                <th scope="col">Category Name EN</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="category in enquiries.list">
+                <td>{{category.ID}}</td>
+                <td>{{category.Name}}</td>
+                <td><input type="text" ng-model="category.xp.Name"></td>
+                <td><button class="btn btn-primary" ng-click="enquiries.Save(category)">Save</button></td>
+            </tr>
+        </tbody>
+    </table>
+</article>
