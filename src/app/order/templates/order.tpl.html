@@ -333,7 +333,7 @@
                      </td>
                  </tr>
 
-                 <tr ng-if="order.LineItems.Items.length > 0">
+                 <tr ng-if="order.LineItems.length > 0">
                      <td class="button-th" colspan="5"></td>
                      <td ng-bind-html='order.labels.Total'></td>
                      <td ng-switch on="order.Order.xp.CustomerID | weirGroupFromBuyersID" class='text-right'>
