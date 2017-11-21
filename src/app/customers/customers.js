@@ -263,10 +263,16 @@ function CustomerService($sce, OrderCloudSDK, $exceptionHandler) {
         return OrderCloudSDK.Products.SaveAssignment(assign);
     }
 
+    function _getUpperLanguage(lang) {
+        var l = lang || "";
+        return l.toUpperCase();
+    }
+
     return {
         WeirGroups: _weirGroups,
         CustomerTypes: _customerTypes,
         CustomerLanguages: _customerLanguages,
+        GetUpperLanguage: _getUpperLanguage,
         CreateBuyer: _createBuyer,
         CreateGroup: _createGroup,
         AssignPlaceholderProduct: _assignPlaceholder,
@@ -283,6 +289,7 @@ function CustomerCtrl($state, $ocMedia, OrderCloudSDK, OrderCloudParameters, Par
     vm.sortSelection =  Parameters.sortBy ? (Parameters.sortBy.indexOf('!') == 0 ? Parameters.sortBy.split('!')[1] : Parameters.sortBy) : null;
     vm.labels = CustomerService.Labels[WeirService.Locale()];
     vm.languages = CustomerService.CustomerLanguages;
+    vm.GetUpperLanguage = CustomerService.GetUpperLanguage;
 
     //check if filters are applied
     vm.filtersApplied = vm.parameters.filters || ($ocMedia('max-width:767px') && vm.sortSelection); //Sort by is a filter on mobile devices
