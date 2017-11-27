@@ -146,7 +146,7 @@ function orderConfig($stateProvider) {
 function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGroupsService,
                          OrderCloudSDK, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService,
                          Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService, FileSaver,
-                         UserGroups, BackToListService, Buyer, Catalog, CurrentBuyer) {
+                         UserGroups, BackToListService, Buyer, Catalog) {
     //var isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
     var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming" ;
 	determineShipping();
