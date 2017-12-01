@@ -40,18 +40,22 @@ function orderConfig($stateProvider) {
 					});
 	        		return dfd.promise;
 	            },
-	            DeliveryAddress:function (OrderCloudSDK, Order) {
+	            Buyer: function (OrderCloudSDK, Order) {
+	                return OrderCloudSDK.Buyers.Get(Order.FromCompanyID);
+	            },
+	            DeliveryAddress: function (OrderCloudSDK, Order) {
 	                if(Order.ShippingAddressID) {
 	                    return OrderCloudSDK.Addresses.Get(Order.xp.BuyerID, Order.ShippingAddressID);
 	                } else {
 	                    return null;
 	                }
 	            },
-	            LineItems: function ($q, $state, toastr, OrderCloudSDK, CurrentOrder, OrderShareService, Order, LineItemHelpers) {
+	            LineItems: function ($q, $state, toastr, OrderCloudSDK, CurrentOrder, OrderShareService, Order, LineItemHelpers, Buyer) {
 	                OrderShareService.LineItems.length = 0;
                     //var isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
                     var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
-		            var dfd = $q.defer();
+                    var dfd = $q.defer();
+                    var lang = Buyer.xp.Lang.id;
 		            OrderCloudSDK.LineItems.List(direction, Order.ID, { 'filters': {'Order.xp.BuyerID' : Order.xp.BuyerID}})
 			            .then(function(data) {
 				            if (!data.Items.length) {
@@ -60,7 +64,17 @@ function orderConfig($stateProvider) {
 				            } else {
 					            LineItemHelpers.GetBlankProductInfo(data.Items);
 					            LineItemHelpers.GetProductInfo(data.Items, Order)
-						            .then(function() { dfd.resolve(data); });
+						            .then(function () {
+						                if (lang && data.Items) {
+						                    for (var i = 0; i < data.Items.length; i++) {
+						                        var tmp = data.Items[i];
+						                        if (tmp.Product && tmp.Product.xp && tmp.Product.xp[lang]) {
+						                            tmp.Product.Description = tmp.Product.xp["en"].Description || tmp.Product.Description;
+						                        }
+						                    }
+						                }
+						                dfd.resolve(data);
+						            });
 				            }
 			            })
 			            .catch(function () {
@@ -69,12 +83,13 @@ function orderConfig($stateProvider) {
 		                });
 		            return dfd.promise;
 	            },
-		        PreviousLineItems: function($q, toastr, OrderCloudSDK, Order, LineItemHelpers) {
+		        PreviousLineItems: function($q, toastr, OrderCloudSDK, Order, LineItemHelpers, Buyer) {
 			        var pieces = Order.ID.split('-Rev');
 			        if(pieces.length > 1) {
 				        var prevId = pieces[0] + "-Rev" + (pieces[1] - 1).toString();
 				        var dfd = $q.defer();
-				        //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+				        var lang = Buyer.xp.Lang.id;
+			            //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
 				        var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 				        OrderCloudSDK.LineItems.List(direction, prevId, { 'filters': { 'Order.xp.BuyerID': Order.xp.BuyerID } })
 					        .then(function(data) {
@@ -83,7 +98,17 @@ function orderConfig($stateProvider) {
 						        } else {
 							        LineItemHelpers.GetBlankProductInfo(data.Items);
 							        LineItemHelpers.GetProductInfo(data.Items, Order)
-								        .then(function () { dfd.resolve(data); });
+								        .then(function () {
+								            if (lang && data.Items) {
+								                for (var i = 0; i < data.Items.length; i++) {
+								                    var tmp = data.Items[i];
+								                    if (tmp.Product && tmp.Product.xp && tmp.Product.xp[lang]) {
+								                        tmp.Product.Description = tmp.Product.xp["en"].Description || tmp.Product.Description;
+								                    }
+								                }
+								            }
+								            dfd.resolve(data);
+								        });
 						        }
 					        })
 					        .catch(function () {
@@ -121,9 +146,6 @@ function orderConfig($stateProvider) {
 	            },
 	            UserGroups: function (UserGroupsService) {
 	                return UserGroupsService.UserGroups();
-	            },
-	            Buyer: function(OrderCloudSDK,Order) {
-		            return OrderCloudSDK.Buyers.Get(Order.FromCompanyID);
 	            },
 		        Catalog: function(OrderCloudSDK,Buyer) {
 			        return OrderCloudSDK.Catalogs.Get(Buyer.xp.WeirGroup.label);
