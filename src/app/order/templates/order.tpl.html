@@ -379,6 +379,7 @@
                 <span ng-bind-html='order.DeliveryAddress.FirstName + " " + order.DeliveryAddress.LastName'></span><br />
                 <span ng-bind-html="order.DeliveryAddress.Street1"></span><br>
                 <span ng-bind-html="order.DeliveryAddress.Street2" ng-if="order.DeliveryAddress.Street2"></span><br ng-if="order.DeliveryAddress.Street2">
+                <span ng-bind-html="order.DeliveryAddress.xp.Street3" ng-if="order.DeliveryAddress.xp.Street3"></span><br ng-if="order.DeliveryAddress.xp.Street3">
                 <span ng-bind-html="order.DeliveryAddress.Zip"></span> <span ng-bind-html="order.DeliveryAddress.City"></span><br>
                 <span ng-bind-html="order.country(order.DeliveryAddress.Country)"></span>
             </div>
@@ -386,6 +387,7 @@
                 <span ng-bind-html='order.DeliveryAddress.FirstName + " " + order.DeliveryAddress.LastName'></span><br />
                 <span ng-bind-html="order.DeliveryAddress.Street1"></span><br>
                 <span ng-bind-html="order.DeliveryAddress.Street2" ng-if="order.DeliveryAddress.Street2"></span><br ng-if="order.DeliveryAddress.Street2">
+                <span ng-bind-html="order.DeliveryAddress.xp.Street3" ng-if="order.DeliveryAddress.xp.Street3"></span><br ng-if="order.DeliveryAddress.xp.Street3">
                 <span ng-bind-html="order.DeliveryAddress.City"></span><br>
                 <span ng-bind-html="order.DeliveryAddress.Zip"></span><br>
                 <span ng-bind-html="order.country(order.DeliveryAddress.Country)"></span>
@@ -394,6 +396,7 @@
                 <span ng-bind-html='order.DeliveryAddress.FirstName + " " + order.DeliveryAddress.LastName'></span><br />
                 <span ng-bind-html="order.DeliveryAddress.Street1"></span><br>
                 <span ng-bind-html="order.DeliveryAddress.Street2" ng-if="order.DeliveryAddress.Street2"></span><br ng-if="order.DeliveryAddress.Street2">
+                <span ng-bind-html="order.DeliveryAddress.xp.Street3" ng-if="order.DeliveryAddress.xp.Street3"></span><br ng-if="order.DeliveryAddress.xp.Street3">
                 <span ng-bind-html="order.DeliveryAddress.City"></span>, <span ng-bind-html="order.DeliveryAddress.State"></span> <span ng-bind-html="order.DeliveryAddress.Zip"></span><br>
                 <span ng-bind-html="order.country(order.DeliveryAddress.Country)"></span>
             </div>
