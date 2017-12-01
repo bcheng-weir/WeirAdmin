@@ -110,7 +110,6 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 			$cookieStore.put('language', localeOfUser, {
 				expires: exp
 			});
-
 		}
 		return localeOfUser;
 	}
