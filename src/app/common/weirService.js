@@ -710,7 +710,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 			OrderCloudSDK.LineItems.Patch("Incoming", order.ID, lineItem.ID, li)
 				.then(function(lineItem) {
 					deferred.resolve({Order: order, LineItem: lineItem});
-				})
+				});
 		}
 
 		function addLineItem(order) {
