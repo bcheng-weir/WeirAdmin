@@ -337,7 +337,7 @@ function POPrintContentController($state, OrderCloudSDK, toastr, Me, WeirGroup, 
     }
 }
 
-function POPrintContentFR_ENController($state, OrderCloudSDK, toastr, Me, WeirGroup, $sce) {
+function POPrintContentFR_ENController(OrderCloudSDK, toastr, WeirGroup, $sce) {
     var vm = this;
     vm.weirGroupID = WeirGroup.ID;
     vm.labels = {
@@ -464,7 +464,7 @@ function POPrintContentFR_ENController($state, OrderCloudSDK, toastr, Me, WeirGr
                     }
                 };
                 upd.xp.POContentFR_EN[name] = tmp.newValue;
-                console.log("Update = " + JSON.stringify(upd));
+                //console.log("Update = " + JSON.stringify(upd));
                 OrderCloudSDK.Catalogs.Patch(vm.weirGroupID, upd)
                     .then(function () {
                         tmp.old = tmp.newValue;
