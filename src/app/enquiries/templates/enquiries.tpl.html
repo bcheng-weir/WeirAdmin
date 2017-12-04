@@ -12,7 +12,7 @@
             <tr ng-repeat="category in enquiries.list">
                 <td>{{category.ID}}</td>
                 <td>{{category.Name}}</td>
-                <td><input type="text" ng-model="category.xp.Name"></td>
+                <td><input type="text" ng-model="category.xp.en.Name"></td>
                 <td><button class="btn btn-primary" ng-click="enquiries.Save(category)">Save</button></td>
             </tr>
         </tbody>

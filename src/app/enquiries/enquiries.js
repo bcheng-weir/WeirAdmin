@@ -34,7 +34,9 @@ function EnquiriesController($exceptionHandler, EnquiryCategories, OrderCloudSDK
     vm.Save = function(category) {
         var opts = {
             'xp': {
-                'Name': category.xp.Name
+                'en': {
+                    'Name': category.xp.Name
+                }
             }
         };
 
