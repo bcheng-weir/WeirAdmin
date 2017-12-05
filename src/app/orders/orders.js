@@ -381,10 +381,17 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 		CurrentBuyer.SetBuyerID(buyerId);
 		CurrentOrder.Set(orderId)
 			.then(function() {
+				return OrderCloudSDK.Buyers.Get(customerId);
+			}).then(function(customerRecord) {
+				var lang = "";
+				if (customerRecord.xp && customerRecord.xp.Lang && customerRecord.xp.Lang.id) {
+					lang = customerRecord.xp.Lang.id;
+				}
 				CurrentOrder.SetCurrentCustomer({
 					id: customerId,
-					name: customerName
-				})
+					name: customerName,
+					lang: lang
+				});
 			})
 			.then(function() {
 				$rootScope.$broadcast('SwitchCart');

@@ -221,7 +221,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		) {
 			return null;
 		} else {
-			return "UPDATED"
+			return "UPDATED";
 		}
 	}
 
@@ -1039,7 +1039,9 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			})
 			.then(function() {
 				// Set the current order so that the order details page is updated. The current order ID has been incremented.
-				return WeirService.SetOrderAsCurrentOrder(vm.Order.ID);
+				var lang;
+				if (Buyer.xp.Lang) { lang = Buyer.xp.Lang.id; }
+				return WeirService.SetOrderAsCurrentOrder(vm.Order.ID, lang);
 			})
 			.then(function() {
 				// Update the mini-cart with the new order and refresh the page.

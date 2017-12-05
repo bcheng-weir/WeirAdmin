@@ -242,7 +242,7 @@ function ProductSearchController($sce, $state, $rootScope, OrderCloudSDK, Curren
 			Select: $sce.trustAsHtml("Select")
 		}
 	};
-	vm.labels = WeirService.LocaleResources(labels);
+	vm.labels = labels.en;
 	var searchType = WeirService.GetLastSearchType();
 	searchType = searchType || WeirService.SearchType.Serial;
 	if($state.current.name == 'productSearch.noresults') $state.go('productSearch.noresults');
@@ -274,7 +274,7 @@ function SerialController(WeirService, $scope, $q, OrderCloudSDK, $state, $sce, 
 			Search: "Chercher"
 		}
 	};
-	vm.labels = WeirService.LocaleResources(labels);
+	vm.labels = labels.en;
 	WeirService.SetLastSearchType(WeirService.SearchType.Serial);
 
 	vm.serialNumbers = [null];
@@ -331,19 +331,25 @@ function SerialController(WeirService, $scope, $q, OrderCloudSDK, $state, $sce, 
     };
 
 	vm.getSerialNumbers = function(sn) {
+		var filters = {
+            "xp.SN": sn + "*"
+		};
+		//UK must have the parent id.
+		if(vm.Customer.xp.WeirGroup.label == 1) {
+			filters.ParentID = vm.Customer.ID
+        }
 	    return OrderCloudSDK.Categories.List(vm.Customer.xp.WeirGroup.label, {
 	        page: 1,
 	        pageSize: 100,
-	        filters: {
-	            "xp.SN": sn + "*",
-	            "ParentID": vm.Customer.ID
-	        }
+	        filters: filters,
+            depth:vm.Customer.xp.WeirGroup.id == "1" ? null:"all",
+            catalogID:vm.Customer.xp.WeirGroup.label
 	    })
 			.then(function(response) {
 				return response.Items.map(function(item) {
 					return item.xp.SN;
-				})
-			})
+				});
+			});
 	};
 }
 
@@ -394,7 +400,7 @@ function SerialResultsController(WeirService, $stateParams, $state, SerialNumber
 		}
 	};
 	if(numFound == 0) $state.go('productSearch.noresults');
-	vm.labels = WeirService.LocaleResources(labels);
+	vm.labels = labels.en;
 }
 
 function SerialDetailController( $stateParams, $rootScope, $state, $sce, WeirService, SerialNumberDetail ) {
@@ -477,8 +483,8 @@ function SerialDetailController( $stateParams, $rootScope, $state, $sce, WeirSer
 			AddToQuote: $sce.trustAsHtml("Ajouter &agrave; la proposition")
 		}
 	};
-	vm.labels = WeirService.LocaleResources(labels);
-	vm.headers = WeirService.LocaleResources(headers);
+	vm.labels = labels.en;
+	vm.headers = headers.en;
 
 	vm.addPartToQuote = function(part) {
 	    if (!part.Quantity) return;
@@ -512,7 +518,7 @@ function TagController(WeirService,$scope, $q, $state, $sce, toastr) {
 			Search: "Chercher"
 		}
 	};
-	vm.labels = WeirService.LocaleResources(labels);
+	vm.labels = labels.en;
 	WeirService.SetLastSearchType(WeirService.SearchType.Tag);
 
 	vm.tags = [null];

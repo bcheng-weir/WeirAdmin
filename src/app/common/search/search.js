@@ -118,6 +118,7 @@ function TrackSearchService() {
 
     return service;
 }
+
 function WeirGroupID(customerID) {
     var id = "";
     if (customerID) {
@@ -127,7 +128,8 @@ function WeirGroupID(customerID) {
     }
     return id;
 }
-function SearchProductsService(OrderCloudSDK, $q) {
+
+function SearchProductsService(OrderCloudSDK, $q, WeirService) {
     var service = {
     	GetSerialNumbers: _getSerialNumbers,
 	    GetTagNumbers: _getTagNumbers,
@@ -136,19 +138,24 @@ function SearchProductsService(OrderCloudSDK, $q) {
 
     function _getSerialNumbers(lookForThisPartialSerialNumber, Customer) {
     	var dfd = $q.defer();
+        var filters = {
+            "xp.SN": lookForThisPartialSerialNumber + "*"
+        };
+        //UK must have the parent id.
+        if(Customer.id.substring(0,5) == "WVCUK") {
+            filters.ParentID = Customer.id;
+        }
         OrderCloudSDK.Categories.List(WeirGroupID(Customer.id), {
-    	    page: 1,
-    	    pageSize: 50, 
-    	    filters: {
-    	        "xp.SN": lookForThisPartialSerialNumber + "*",
-    	        "ParentID": Customer.id }
-    	})
-		    .then(function(response) {
-		    	dfd.resolve(response.Items);
-		    })
-        .catch(function (ex) {
-            console.log(JSON.stringify(ex));
-        });
+                page: 1,
+                pageSize: 50,
+                filters: filters,
+                depth:Customer.id.substring(0,5) == "WVCUK" ? null:"all",
+                catalogID:Customer.id.substring(0,5)
+            }).then(function(response) {
+                dfd.resolve(WeirService.SetEnglishTranslationParts(response.Items));
+            }).catch(function (ex) {
+                console.log(JSON.stringify(ex));
+            });
 	    return dfd.promise;
     }
 
@@ -163,7 +170,7 @@ function SearchProductsService(OrderCloudSDK, $q) {
     	    }
     	})
 		    .then(function(response) {
-		    	dfd.resolve(response.Items);
+		    	dfd.resolve(WeirService.SetEnglishTranslationParts(response.Items));
 		    });
 	    return dfd.promise;
     }
@@ -190,7 +197,7 @@ function SearchProductsService(OrderCloudSDK, $q) {
 		    		})
 					    .then(function(altResponse) {
 					    	partResults.push.apply(altResponse.Items);
-						    dfd.resolve(partResults);
+						    dfd.resolve(WeirService.SetEnglishTranslationParts(partResults));
 					    });
 			    } else {
 			    	dfd.resolve(response.Items)
