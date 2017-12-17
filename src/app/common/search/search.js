@@ -129,6 +129,7 @@ function WeirGroupID(customerID) {
     return id;
 }
 
+//Below is the type-ahead search.
 function SearchProductsService(OrderCloudSDK, $q, WeirService) {
     var service = {
     	GetSerialNumbers: _getSerialNumbers,
@@ -168,10 +169,9 @@ function SearchProductsService(OrderCloudSDK, $q, WeirService) {
     	        "xp.TagNumber": lookForThisPartialTagNumber + "*",
     	        "ParentID": Customer.id
     	    }
-    	})
-		    .then(function(response) {
-		    	dfd.resolve(WeirService.SetEnglishTranslationParts(response.Items));
-		    });
+        }).then(function(response) {
+            dfd.resolve(WeirService.SetEnglishTranslationParts(response.Items));
+        });
 	    return dfd.promise;
     }
 
@@ -200,7 +200,7 @@ function SearchProductsService(OrderCloudSDK, $q, WeirService) {
 						    dfd.resolve(WeirService.SetEnglishTranslationParts(partResults));
 					    });
 			    } else {
-			    	dfd.resolve(response.Items)
+			    	dfd.resolve(response.Items);
 			    }
 		    });
 	    return dfd.promise;

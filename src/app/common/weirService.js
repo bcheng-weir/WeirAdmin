@@ -235,6 +235,7 @@ function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork
 		return deferred.promise;
 	}
 
+	//Set the EN translation for FR valves.
 	function updateValve(valve, lang) {
 	    if (valve && lang && valve.xp && valve.xp[lang]) {
 	        var vals = valve.xp[lang];
@@ -249,6 +250,7 @@ function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork
 	    }
 	}
 
+	//Set the EN translation for FR products.
 	function updateProduct(product, lang) {
 	    if (product && lang && product.xp && product.xp[lang]) {
 	        var vals = product.xp[lang];
@@ -363,8 +365,8 @@ function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork
 		        page: 1,
 		        pageSize: 50,
 		        filters: {
-                            "xp.TagNumber": tagNumber,
-                            "ParentID": order.xp.CustomerID
+					"xp.TagNumber": tagNumber,
+					"ParentID": order.xp.CustomerID
 		        }
 		    };
 	            return OrderCloudSDK.As().Me.ListCategories(opts);
@@ -372,7 +374,7 @@ function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork
             .then(function (matches) {
 	            if (matches.Items.length > 0) {
 		            angular.forEach(matches.Items, function (value, key) {
-		                updateValve(value, lang);
+		                updateValve(value, lang); //This sets the xp translation of the valve if it exists.
 		                getParts(value.ID, deferred, value);
 		            });
 	            } else {
@@ -421,7 +423,7 @@ function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork
                         catalogID: result.ParentID.substring(0, 5),
                         categoryID: catId
                     };
-                return OrderCloudSDK.As().Me.ListProducts(opts)
+                return OrderCloudSDK.As().Me.ListProducts(opts);
             })
             .then(function (products) {
                 result.Parts = [];

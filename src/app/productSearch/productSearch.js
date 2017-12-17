@@ -617,7 +617,7 @@ function TagResultsController(WeirService, $stateParams, $state, TagNumberResult
 		}
 	};
 	if(numFound == 0) $state.go('productSearch.noresults');
-	vm.labels = WeirService.LocaleResources(labels);
+	vm.labels = labels.en; //WeirService.LocaleResources(labels);
 }
 
 function TagDetailController( $stateParams, $rootScope, $sce, $state, WeirService, TagNumberDetail ) {
@@ -700,8 +700,8 @@ function TagDetailController( $stateParams, $rootScope, $sce, $state, WeirServic
 			AddToQuote: $sce.trustAsHtml("Ajouter &agrave; la proposition")
 		}
 	};
-	vm.labels = WeirService.LocaleResources(labels);
-	vm.headers = WeirService.LocaleResources(headers);
+	vm.labels = labels.en; //WeirService.LocaleResources(labels);
+	vm.headers = headers.en; //WeirService.LocaleResources(headers);
 
 	vm.addPartToQuote = function(part) {
 	    if (!part.Quantity) return;
@@ -765,7 +765,7 @@ function PartController( $state, $sce, OrderCloudSDK, WeirService ) {
 			Search: "Chercher"
 		}
 	};
-	vm.labels = WeirService.LocaleResources(labels);
+	vm.labels = labels.en; //WeirService.LocaleResources(labels);
 
     vm.updatePartList = function(input) {
 	    if (input.length >= 3) {
@@ -852,7 +852,7 @@ function PartResultsController( $rootScope, $sce, $state, WeirService, PartNumbe
 
 		}
 	};
-	vm.labels = WeirService.LocaleResources(labels);
+	vm.labels = labels.en; //WeirService.LocaleResources(labels);
 	if(numFound == 0) $state.go('productSearch.noresults');
 	vm.addPartToQuote = function (part) {
 	    if (!part.Quantity) return;
