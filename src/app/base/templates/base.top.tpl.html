@@ -18,7 +18,8 @@
                     <a href="#" uib-dropdown-toggle role="button">{{base.labels.admin}} <span class="caret" /></a>
                     <ul uib-dropdown-menu>
                         <li><a href="" ui-sref="adminUsers">{{base.labels.admin}}</a></li>
-                        <li><a href="" ui-sref="standardDelivery">{{base.labels.standardDelivery}}</a></li>
+                        <li ng-if="base.currentUser.xp.WeirGroup.label == 'WPIFR'"><a href="" ui-sref="standardDelivery.FR">{{base.labels.standardDelivery}}</a></li>
+                        <li ng-if="base.currentUser.xp.WeirGroup.label != 'WPIFR'"><a href="" ui-sref="standardDelivery">{{base.labels.standardDelivery}}</a></li>
                         <li ng-if="base.currentUser.xp.WeirGroup.label == 'WPIFR'"><a href="" ui-sref="poPrintContent.FR">{{base.labels.poPrintContent}}</a></li>
                         <li ng-if="base.currentUser.xp.WeirGroup.label != 'WPIFR'"><a href="" ui-sref="poPrintContent">{{base.labels.poPrintContent}}</a></li>
                         <li><a href="" ui-sref="enquiries">Enquiry Administration</a></li> <!-- TODO -->
