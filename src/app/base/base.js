@@ -169,7 +169,8 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
             invoiced: "Invoiced",
             allOrders: "All Orders",
             standardDelivery: "Carriage",
-            poPrintContent: "Fixed Print Content"
+            poPrintContent: "Fixed Print Content",
+            sharedContent: "Shared Content"
         }
     };
 
