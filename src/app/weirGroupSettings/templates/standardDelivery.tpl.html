@@ -1,35 +1,79 @@
-<article id="COMPONENT_StandardDelivery" ui-view class="container-fluid">
-	<div class="page-header">
-		<h3 ng-bind-html='delivery.labels.EditHeader'></h3>
-		<div class="row">
-           <div class="col-md-12">
+<article id="COMPONENT_StandardDelivery" ui-view="standardDelivery" class="container-fluid">
+    <div class="page-header">
+        <h3 ng-bind-html='delivery.labels.EditHeader'></h3>
+        <div class="row">
+            <div class="col-md-12">
                 <p ng-bind-html='delivery.labels.EditInstructions'></p>
             </div>
         </div>
-	</div>
+    </div>
 
     <div class="row">
         <div class='col-md-12'>
             <h4><label for='charge' ng-bind-html='delivery.labels.CarriageLabel'></label></h4>
         </div>
     </div>
-        <form name='myform'>
+    <form name='myform'>
+        <div class='row form-group form-row'>
+            <div class='col-md-12'>
+                <span ng-if='delivery.labels.Currency=="GBP"' style='margin-right: 0.5em; margin-top: 0.3em; float: left;'>&#163;</span>
+                <span ng-if='delivery.labels.Currency=="EU"' style='margin-right: 0.5em; margin-top: 0.3em; float: left;'>&#128;</span>
+                <input ng-if="!delivery.editable" ng-model='delivery.rateStr' ng-disabled="true" />
+                <input ng-if="delivery.editable" type='number' class='form-control' style="width: 10em;" ng-model='delivery.newRate' ng-min='0.00' ng-required='true'
+                       step='0.01' ng-pattern='/^\d+(\.\d{1,2})?$/' name='charge' ng-disabled='!delivery.editable'
+                       pattern-err-type="currencyError" step-err-type="currencyError" />
+            </div>
+        </div>
+        <div class='row' style='margin-top: 0.5em;'>
+            <div class='col-md-12'>
+                <button class='btn btn-default' ng-click='delivery.Edit()' ng-bind-html='delivery.labels.EditAction' ng-disabled='delivery.editable'></button>
+                <button class='btn btn-primary' style="margin-left: 0.25em;" ng-click='delivery.Save()' ng-bind-html='delivery.labels.SaveAction' ng-disabled='myform.$invalid || !delivery.editable'></button>
+                <button class='btn btn-default' type='reset' ng-click='delivery.Cancel()' style='margin-left: 0.25em;' ng-bind-html='delivery.labels.CancelAction' ng-disabled='!delivery.editable'></button>
+            </div>
+        </div>
+        <div class="page-header" ng-class="{WPIFR:'header-pocontent'}[delivery.weirGroupID]">
+            <h3 ng-bind-html='delivery.labels.ChargeDescription'></h3>
+        </div>
+        <div ng-if="delivery.weirGroupID == 'WVCUK'">
             <div class='row form-group form-row'>
                 <div class='col-md-12'>
-                    <span ng-if='delivery.labels.Currency=="GBP"' style='margin-right: 0.5em; margin-top: 0.3em; float: left;'>&#163;</span>
-                    <span ng-if='delivery.labels.Currency=="EU"' style='margin-right: 0.5em; margin-top: 0.3em; float: left;'>&#128;</span>
-                    <input ng-if="!delivery.editable" ng-model='delivery.rateStr' ng-disabled="true" />
-                    <input ng-if="delivery.editable" type='number' class='form-control' style="width: 10em;" ng-model='delivery.newRate' ng-min='0.00' ng-required='true'
-                           step='0.01' ng-pattern='/^\d+(\.\d{1,2})?$/' name='charge' ng-disabled='!delivery.editable'
-                           pattern-err-type="currencyError" step-err-type="currencyError" />
+                    <h4><label for='charge' ng-bind-html='delivery.edits.Line1.header'></label></h4>
+                    <textarea rows="6" cols="80" ng-model='delivery.edits.Line1.old' disabled="disabled" ng-if="!delivery.edits.Line1.editable" />
+                    <textarea rows="6" cols="80" ng-model='delivery.edits.Line1.newValue' ng-if="delivery.edits.Line1.editable" />
+                    <button class='btn btn-default' style="vertical-align: top;" ng-click='delivery.editDeliveryInformation("Line1")' ng-bind-html='delivery.labels.EditAction' ng-disabled='delivery.edits.Line1.editable'></button>
+                    <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='delivery.saveDeliveryInformation("Line1")' ng-bind-html='delivery.labels.SaveAction' ng-disabled='!delivery.edits.Line1.editable'></button>
+                    <button class='btn btn-default' type='reset' ng-click='delivery.cancelDeliveryInformation("Line1")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='delivery.labels.CancelAction' ng-disabled='!delivery.edits.Line1.editable'></button>
                 </div>
             </div>
-            <div class='row' style='margin-top: 0.5em;'>
+            <div class='row form-group form-row'>
                 <div class='col-md-12'>
-                    <button class='btn btn-default' ng-click='delivery.Edit()' ng-bind-html='delivery.labels.EditAction' ng-disabled='delivery.editable'></button>
-                    <button class='btn btn-primary' style="margin-left: 0.25em;" ng-click='delivery.Save()' ng-bind-html='delivery.labels.SaveAction' ng-disabled='myform.$invalid || !delivery.editable'></button>
-                    <button class='btn btn-default' type='reset' ng-click='delivery.Cancel()' style='margin-left: 0.25em;' ng-bind-html='delivery.labels.CancelAction' ng-disabled='!delivery.editable'></button>
+                    <h4><label for='charge' ng-bind-html='delivery.edits.Line2.header'></label></h4>
+                    <textarea rows="6" cols="80" ng-model='delivery.edits.Line2.old' disabled="disabled" ng-if="!delivery.edits.Line2.editable" />
+                    <textarea rows="6" cols="80" ng-model='delivery.edits.Line2.newValue' ng-if="delivery.edits.Line2.editable" />
+                    <button class='btn btn-default' style="vertical-align: top;" ng-click='delivery.editDeliveryInformation("Line2")' ng-bind-html='delivery.labels.EditAction' ng-disabled='delivery.edits.Line2.editable'></button>
+                    <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='delivery.saveDeliveryInformation("Line2")' ng-bind-html='delivery.labels.SaveAction' ng-disabled='!delivery.edits.Line2.editable'></button>
+                    <button class='btn btn-default' type='reset' ng-click='delivery.cancelDeliveryInformation("Line2")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='delivery.labels.CancelAction' ng-disabled='!delivery.edits.Line2.editable'></button>
                 </div>
             </div>
-        </form>
+            <div class='row form-group form-row'>
+                <div class='col-md-12'>
+                    <h4><label for='charge' ng-bind-html='delivery.edits.Line3.header'></label></h4>
+                    <textarea rows="6" cols="80" ng-model='delivery.edits.Line3.old' disabled="disabled" ng-if="!delivery.edits.Line3.editable" />
+                    <textarea rows="6" cols="80" ng-model='delivery.edits.Line3.newValue' ng-if="delivery.edits.Line3.editable" />
+                    <button class='btn btn-default' style="vertical-align: top;" ng-click='delivery.editDeliveryInformation("Line3")' ng-bind-html='delivery.labels.EditAction' ng-disabled='delivery.edits.Line3.editable'></button>
+                    <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='delivery.saveDeliveryInformation("Line3")' ng-bind-html='delivery.labels.SaveAction' ng-disabled='!delivery.edits.Line3.editable'></button>
+                    <button class='btn btn-default' type='reset' ng-click='delivery.cancelDeliveryInformation("Line3")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='delivery.labels.CancelAction' ng-disabled='!delivery.edits.Line3.editable'></button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div ng-if="delivery.weirGroupID == 'WPIFR'">
+        <nav class="navbar">
+            <ul class="nav navbar-nav nav-printContent">
+                <li role="presentation" class="label-printContent" ui-sref-active="active" ui-sref="standardDelivery.FR"><a href="#" ng-bind-html='delivery.labels.UpdateFR'></a></li>
+                <li role="presentation" class="label-printContent" ui-sref-active="active" ui-sref="standardDelivery.FR-EN"><a href="#" ng-bind-html='delivery.labels.UpdateEN'></a></li>
+            </ul>
+        </nav>
+        <div ui-view=""></div>
+    </div>
 </article>

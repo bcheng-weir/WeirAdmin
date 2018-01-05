@@ -1,8 +1,11 @@
 angular.module('orderCloud')
     .config(WeirGroupSettingsConfig)
     .controller('StandardDeliveryCtrl', StandardDeliveryController)
+    .controller('StandardDeliveryFR_ENCtrl', StandardDeliveryFR_ENController)
     .controller('POPrintContentCtrl', POPrintContentController)
     .controller('POPrintContentFR_ENCtrl', POPrintContentFR_ENController)
+    .controller('SharedContentCtrl', SharedContentController)
+    .controller('SharedContentFR_ENCtrl', SharedContentFR_ENController)
 ;
 
 function WeirGroupSettingsConfig($stateProvider) {
@@ -20,6 +23,40 @@ function WeirGroupSettingsConfig($stateProvider) {
                 },
                 WeirGroup: function(OrderCloudSDK, Me) {
 	                var groupId = Me.xp.WeirGroup.label;
+                    return OrderCloudSDK.Catalogs.Get(groupId);
+                }
+            }
+        })
+        .state('standardDelivery.FR', {
+            parent: "standardDelivery",
+            templateUrl: 'weirGroupSettings/templates/standardDelivery.FR.tpl.html',
+            controller: 'StandardDeliveryCtrl',
+            controllerAs: 'delivery',
+            url: '/FR',
+            data: { componentName: 'WeirGroupSettings' },
+            resolve: {
+                Me: function (OrderCloudSDK) {
+                    return OrderCloudSDK.Me.Get();
+                },
+                WeirGroup: function (OrderCloudSDK, Me) {
+                    var groupId = Me.xp.WeirGroup.label;
+                    return OrderCloudSDK.Catalogs.Get(groupId);
+                }
+            }
+        })
+        .state('standardDelivery.FR-EN', {
+            parent: "standardDelivery",
+            templateUrl: 'weirGroupSettings/templates/standardDelivery.FR-EN.tpl.html',
+            controller: 'StandardDeliveryFR_ENCtrl',
+            controllerAs: 'delivery',
+            url: '/FR-EN',
+            data: { componentName: 'WeirGroupSettings' },
+            resolve: {
+                Me: function (OrderCloudSDK) {
+                    return OrderCloudSDK.Me.Get();
+                },
+                WeirGroup: function (OrderCloudSDK, Me) {
+                    var groupId = Me.xp.WeirGroup.label;
                     return OrderCloudSDK.Catalogs.Get(groupId);
                 }
             }
@@ -75,12 +112,63 @@ function WeirGroupSettingsConfig($stateProvider) {
                 }
             }
         })
+        .state('sharedContent', {
+            parent: 'base',
+            templateUrl: 'weirGroupSettings/templates/sharedContent.tpl.html',
+            controller: 'SharedContentCtrl',
+            controllerAs: 'sharedcontent',
+            url: '/sharedcontent',
+            data: { componentName: 'WeirGroupSettings' },
+            resolve: {
+                Me: function (OrderCloudSDK) {
+                    return OrderCloudSDK.Me.Get();
+                },
+                WeirGroup: function (OrderCloudSDK, Me) {
+                    var groupId = Me.xp.WeirGroup.label;
+                    return OrderCloudSDK.Catalogs.Get(groupId);
+                }
+            }
+        })
+        .state('sharedContent.FR', {
+            parent: "sharedContent",
+            templateUrl: 'weirGroupSettings/templates/sharedContent.FR.tpl.html',
+            controller: 'SharedContentCtrl',
+            controllerAs: 'sharedcontent',
+            url: '/FR',
+            data: { componentName: 'WeirGroupSettings' },
+            resolve: {
+                Me: function (OrderCloudSDK) {
+                    return OrderCloudSDK.Me.Get();
+                },
+                WeirGroup: function (OrderCloudSDK, Me) {
+                    var groupId = Me.xp.WeirGroup.label;
+                    return OrderCloudSDK.Catalogs.Get(groupId);
+                }
+            }
+        })
+        .state('sharedContent.FR-EN', {
+            parent: "sharedContent",
+            templateUrl: 'weirGroupSettings/templates/sharedContent.FR-EN.tpl.html',
+            controller: 'SharedContentFR_ENCtrl',
+            controllerAs: 'sharedcontent',
+            url: '/FR-EN',
+            data: { componentName: 'WeirGroupSettings' },
+            resolve: {
+                Me: function (OrderCloudSDK) {
+                    return OrderCloudSDK.Me.Get();
+                },
+                WeirGroup: function (OrderCloudSDK, Me) {
+                    var groupId = Me.xp.WeirGroup.label;
+                    return OrderCloudSDK.Catalogs.Get(groupId);
+                }
+            }
+        })
     ;
 }
 
-function StandardDeliveryController($state, OrderCloudSDK, toastr, Me, WeirGroup) {
+function StandardDeliveryController($state, OrderCloudSDK, toastr, Me, WeirGroup, $sce) {
     var vm = this;
-    var weirGroupID = WeirGroup.ID;
+    vm.weirGroupID = WeirGroup.ID;
     vm.originalRate = (WeirGroup.xp && WeirGroup.xp.StandardCarriage) ? WeirGroup.xp.StandardCarriage : 0.00;
     vm.newRate = vm.originalRate;
     vm.rateStr = vm.newRate.toFixed(2);
@@ -93,7 +181,8 @@ function StandardDeliveryController($state, OrderCloudSDK, toastr, Me, WeirGroup
             EditAction: "Edit",
             SaveAction: "Save",
             CancelAction: "Cancel",
-            Currency: "GBP"
+            Currency: "GBP",
+            ChargeDescription: "Carriage Charge Description"
         },
         WPIFR: {
             EditHeader: "Edit Standard Carriage",
@@ -102,10 +191,14 @@ function StandardDeliveryController($state, OrderCloudSDK, toastr, Me, WeirGroup
             EditAction: "Edit",
             SaveAction: "Save",
             CancelAction: "Cancel",
-            Currency: "EU"
+            Currency: "EU",
+            UpdateFR: "Update French language carriage charge description",
+            UpdateEN: "Update English language carriage charge description",
+            ChargeDescription: "Carriage Charge Description",
+            SubHeader: $sce.trustAsHtml("Carriage Charge Description; <b>Francais</b>")
         }
     };
-    vm.labels = labels[weirGroupID];
+    vm.labels = labels[vm.weirGroupID];
     vm.Edit = function () { vm.editable = true; };
     vm.Cancel = function () {
         vm.newRate = vm.originalRate;
@@ -118,7 +211,7 @@ function StandardDeliveryController($state, OrderCloudSDK, toastr, Me, WeirGroup
                     StandardCarriage: vm.newRate
                 }
             };
-            OrderCloudSDK.Catalogs.Patch(weirGroupID, upd)
+            OrderCloudSDK.Catalogs.Patch(vm.weirGroupID, upd)
             .then(function () {
                 vm.editable = false;
                 vm.originalRate = vm.newRate;
@@ -132,6 +225,68 @@ function StandardDeliveryController($state, OrderCloudSDK, toastr, Me, WeirGroup
             vm.editable = false;
         }
     };
+
+    vm.originalValues = WeirGroup.xp.DeliveryInformation || {};
+    vm.edits = {
+        Line1: {
+            header: "Line 1",
+            old: $sce.trustAsHtml(vm.originalValues.Line1 || ""),
+            newValue: "",
+            editable: false
+        },
+        Line2: {
+            header: "Line 2",
+            old: $sce.trustAsHtml(vm.originalValues.Line2 || ""),
+            newValue: "",
+            editable: false
+        },
+        Line3: {
+            header: "Line 3",
+            old: $sce.trustAsHtml(vm.originalValues.Line3 || ""),
+            newValue: "",
+            editable: false
+        }
+    };
+    vm.editDeliveryInformation = function (name) {
+        if (vm.edits[name]) {
+            var tmp = vm.edits[name];
+            tmp.editable = true;
+            tmp.newValue = tmp.old;
+        }
+    };
+    vm.cancelDeliveryInformation = function (name) {
+        if (vm.edits[name]) {
+            var tmp = vm.edits[name];
+            tmp.editable = false;
+            tmp.newValue = tmp.old;
+        }
+    };
+    vm.saveDeliveryInformation = function (name) {
+        if (vm.edits[name]) {
+            var tmp = vm.edits[name];
+            if (tmp.newValue != tmp.old) {
+                var upd = {
+                    xp: {
+                        DeliveryInformation: {
+                        }
+                    }
+                };
+                upd.xp.DeliveryInformation[name] = tmp.newValue;
+                //console.log("Update = " + JSON.stringify(upd));
+                OrderCloudSDK.Catalogs.Patch(vm.weirGroupID, upd)
+                    .then(function () {
+                        tmp.old = tmp.newValue;
+                        toastr.success(tmp.header + ' Updated', 'Success');
+                        tmp.editable = false;
+                    })
+                    .catch(function (err) {
+                        $exceptionHandler(ex);
+                    });
+            } else {
+                tmp.editable = false;
+            }
+        }
+    }
 }
 
 function POPrintContentController($state, OrderCloudSDK, toastr, Me, WeirGroup, $sce) {
@@ -464,6 +619,275 @@ function POPrintContentFR_ENController(OrderCloudSDK, toastr, WeirGroup, $sce) {
                     }
                 };
                 upd.xp.POContentFR_EN[name] = tmp.newValue;
+                //console.log("Update = " + JSON.stringify(upd));
+                OrderCloudSDK.Catalogs.Patch(vm.weirGroupID, upd)
+                    .then(function () {
+                        tmp.old = tmp.newValue;
+                        toastr.success(tmp.header + ' Updated', 'Success');
+                        tmp.editable = false;
+                    })
+                    .catch(function (err) {
+                        $exceptionHandler(ex);
+                    });
+            } else {
+                tmp.editable = false;
+            }
+        }
+    }
+}
+
+function StandardDeliveryFR_ENController(OrderCloudSDK, toastr, WeirGroup, $sce) {
+    var vm = this;
+    vm.weirGroupID = WeirGroup.ID;
+    vm.labels = {
+        EditAction: "Edit",
+        SaveAction: "Save",
+        CancelAction: "Cancel",
+        SubHeader: $sce.trustAsHtml("Carriage Charge Description; <b>English</b>")
+    };
+    vm.originalValues = WeirGroup.xp.DeliveryInformationFR_EN || {};
+    vm.edits = {
+        Line1: {
+            header: "Line 1",
+            old: $sce.trustAsHtml(vm.originalValues.Line1 || ""),
+            newValue: "",
+            editable: false
+        },
+        Line2: {
+            header: "Line 2",
+            old: $sce.trustAsHtml(vm.originalValues.Line2 || ""),
+            newValue: "",
+            editable: false
+        },
+        Line3: {
+            header: "Line 3",
+            old: $sce.trustAsHtml(vm.originalValues.Line3 || ""),
+            newValue: "",
+            editable: false
+        }
+    };
+    vm.edit = function (name) {
+        if (vm.edits[name]) {
+            var tmp = vm.edits[name];
+            tmp.editable = true;
+            tmp.newValue = tmp.old;
+        }
+    };
+    vm.cancel = function (name) {
+        if (vm.edits[name]) {
+            var tmp = vm.edits[name];
+            tmp.editable = false;
+            tmp.newValue = tmp.old;
+        }
+    };
+    vm.save = function (name) {
+        if (vm.edits[name]) {
+            var tmp = vm.edits[name];
+            if (tmp.newValue != tmp.old) {
+                var upd = {
+                    xp: {
+                        DeliveryInformationFR_EN: {
+                        }
+                    }
+                };
+                upd.xp.DeliveryInformationFR_EN[name] = tmp.newValue;
+                //console.log("Update = " + JSON.stringify(upd));
+                OrderCloudSDK.Catalogs.Patch(vm.weirGroupID, upd)
+                    .then(function () {
+                        tmp.old = tmp.newValue;
+                        toastr.success(tmp.header + ' Updated', 'Success');
+                        tmp.editable = false;
+                    })
+                    .catch(function (err) {
+                        $exceptionHandler(ex);
+                    });
+            } else {
+                tmp.editable = false;
+            }
+        }
+    }
+}
+
+function SharedContentController($state, OrderCloudSDK, toastr, Me, WeirGroup, $sce) {
+    var vm = this;
+    vm.weirGroupID = WeirGroup.ID;
+    var labels = {
+        WVCUK: {
+            Header: "Shared Content",
+            EditAction: "Edit",
+            SaveAction: "Save",
+            CancelAction: "Cancel"
+        },
+        WPIFR: {
+            Header: "Shared Content",
+            EditAction: "Edit",
+            SaveAction: "Save",
+            CancelAction: "Cancel",
+            UpdateFR: "Update French language shared content",
+            UpdateEN: "Update English language shared content",
+            SubHeader: $sce.trustAsHtml("Shared Content; <b>Francais</b>")
+        }
+    };
+    vm.labels = labels[vm.weirGroupID];
+    vm.originalValues = WeirGroup.xp.SharedContent || {};
+    if (vm.weirGroupID == 'WVCUK') {
+        vm.edits = {
+            ReplacementGuidance: {
+                header: "Replacement Guidance",
+                old: vm.originalValues.ReplacementGuidance || "",
+                newValue: "",
+                editable: false
+            },
+            POAGuidance: {
+                header: "POA Guidance",
+                old: vm.originalValues.POAGuidance || "",
+                newValue: "",
+                editable: false
+            },
+            LeadTimeNotice: {
+                header: "Lead Time Notice",
+                old: vm.originalValues.LeadTimeNotice || "",
+                newValue: "",
+                editable: false
+            },
+            PriceDisclaimer: {
+                header: "Price Disclaimer",
+                old: vm.originalValues.PriceDisclaimer || "",
+                newValue: "",
+                editable: false
+            }
+        };
+    } else {
+        vm.edits = {
+            ReplacementGuidance: {
+                header: "Replacement Guidance",
+                old: vm.originalValues.ReplacementGuidance || "",
+                newValue: "",
+                editable: false
+            },
+            POAGuidance: {
+                header: "POA Guidance",
+                old: vm.originalValues.POAGuidance || "",
+                newValue: "",
+                editable: false
+            },
+            LeadTimeNotice: {
+                header: "Lead Time Notice",
+                old: vm.originalValues.LeadTimeNotice || "",
+                newValue: "",
+                editable: false
+            },
+            PriceDisclaimer: {
+                header: "Price Disclaimer",
+                old: vm.originalValues.PriceDisclaimer || "",
+                newValue: "",
+                editable: false
+            }
+        };
+    }
+    vm.edit = function (name) {
+        if (vm.edits[name]) {
+            var tmp = vm.edits[name];
+            tmp.editable = true;
+            tmp.newValue = tmp.old;
+        }
+    };
+    vm.cancel = function (name) {
+        if (vm.edits[name]) {
+            var tmp = vm.edits[name];
+            tmp.editable = false;
+            tmp.newValue = tmp.old;
+        }
+    };
+    vm.save = function (name) {
+        if (vm.edits[name]) {
+            var tmp = vm.edits[name];
+            if (tmp.newValue != tmp.old) {
+                var upd = {
+                    xp: {
+                        SharedContent: {
+                        }
+                    }
+                };
+                upd.xp.SharedContent[name] = tmp.newValue;
+                console.log("Update = " + JSON.stringify(upd));
+                OrderCloudSDK.Catalogs.Patch(vm.weirGroupID, upd)
+                    .then(function () {
+                        tmp.old = tmp.newValue;
+                        toastr.success(tmp.header + ' Updated', 'Success');
+                        tmp.editable = false;
+                    })
+                    .catch(function (err) {
+                        $exceptionHandler(ex);
+                    });
+            } else {
+                tmp.editable = false;
+            }
+        }
+    }
+}
+
+function SharedContentFR_ENController(OrderCloudSDK, toastr, WeirGroup, $sce) {
+    var vm = this;
+    vm.weirGroupID = WeirGroup.ID;
+    vm.labels = {
+        EditAction: "Edit",
+        SaveAction: "Save",
+        CancelAction: "Cancel",
+        SubHeader: $sce.trustAsHtml("Shared Content; <b>English</b>")
+    };
+    vm.originalValues = WeirGroup.xp.SharedContentFR_EN || {};
+    vm.edits = {
+        ReplacementGuidance: {
+            header: "Replacement Guidance",
+            old: vm.originalValues.ReplacementGuidance || "",
+            newValue: "",
+            editable: false
+        },
+        POAGuidance: {
+            header: "POA Guidance",
+            old: vm.originalValues.POAGuidance || "",
+            newValue: "",
+            editable: false
+        },
+        LeadTimeNotice: {
+            header: "Lead Time Notice",
+            old: vm.originalValues.LeadTimeNotice || "",
+            newValue: "",
+            editable: false
+        },
+        PriceDisclaimer: {
+            header: "Price Disclaimer",
+            old: vm.originalValues.PriceDisclaimer || "",
+            newValue: "",
+            editable: false
+        }
+    };
+    vm.edit = function (name) {
+        if (vm.edits[name]) {
+            var tmp = vm.edits[name];
+            tmp.editable = true;
+            tmp.newValue = tmp.old;
+        }
+    };
+    vm.cancel = function (name) {
+        if (vm.edits[name]) {
+            var tmp = vm.edits[name];
+            tmp.editable = false;
+            tmp.newValue = tmp.old;
+        }
+    };
+    vm.save = function (name) {
+        if (vm.edits[name]) {
+            var tmp = vm.edits[name];
+            if (tmp.newValue != tmp.old) {
+                var upd = {
+                    xp: {
+                        SharedContentFR_EN: {
+                        }
+                    }
+                };
+                upd.xp.SharedContentFR_EN[name] = tmp.newValue;
                 //console.log("Update = " + JSON.stringify(upd));
                 OrderCloudSDK.Catalogs.Patch(vm.weirGroupID, upd)
                     .then(function () {
