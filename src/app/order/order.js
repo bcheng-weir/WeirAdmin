@@ -1004,7 +1004,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 
 		// Patch the current order with the updated status, ID and active state.
 		//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-		var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+		var direction = "Incoming"; /*isImpersonating == true ? 'Outgoing' :*/
 
         OrderCloudSDK.Users.Get(vm.Order.xp.BuyerID, vm.Order.FromUser.ID)
 			.then(function(buyer) {
@@ -1016,13 +1016,13 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
                 return OrderCloudSDK.SetImpersonationToken(data['access_token']);
             })
             .then(function() {
+                return OrderCloudSDK.Orders.Patch(direction, OrderID, orderPatch);
+            })
+            .then(function() {
                 // Create the order as the impersonated user.
                 return OrderCloudSDK.As().Orders.Create("Outgoing", orderCopy);
                 //ToDo make another then in order to set the shipping address.
             })
-			.then(function() {
-            	return OrderCloudSDK.Orders.Patch(direction, OrderID, orderPatch);
-			})
 			.then(function() {
 				// Create the line items.
 				angular.forEach(lineItemsCopy, function(value, key) {
