@@ -5,6 +5,7 @@ angular.module('ordercloud-search')
     .controller('ordercloudSearchCtrl', OrdercloudSearchController)
     .factory('TrackSearch', TrackSearchService )
 	.factory('SearchProducts', SearchProductsService)
+    .factory('SearchCustomers', SearchCustomersService)
 ;
 
 function OrdercloudSearch () {
@@ -19,7 +20,7 @@ function OrdercloudSearch () {
         controller: 'ordercloudSearchCtrl',
         controllerAs: 'ocSearch',
         replace: true
-    }
+    };
 }
 
 function OrdercloudSearchController($timeout, $scope, OrderCloudSDK, TrackSearch) {
@@ -204,6 +205,35 @@ function SearchProductsService(OrderCloudSDK, $q, WeirService) {
 			    }
 		    });
 	    return dfd.promise;
+    }
+
+    return service;
+}
+
+function SearchCustomersService(OrderCloudSDK, $q) {
+    var service = {
+        GetCustomers: _getCustomers
+    };
+
+    function _getCustomers(lookForThisPartialCustomerNumber,weirGroup) {
+        var dfd = $q.defer();
+        var filter = {
+            'ID':weirGroup+'*'
+        };
+        var opts = {
+            search: lookForThisPartialCustomerNumber,
+            searchOn: 'ID',
+            filters: filter
+        };
+        OrderCloudSDK.Buyers.List(opts)
+            .then(function(buyers) {
+                dfd.resolve(buyers.Items);
+            })
+            .catch(function(ex) {
+                console.log(JSON.stringify(ex));
+            });
+
+        return dfd.promise;
     }
 
     return service;

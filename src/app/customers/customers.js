@@ -7,6 +7,7 @@ angular.module('orderCloud')
     .controller('CustomerCreateCtrl', CustomerCreateCtrl)
     .controller('CustomerAddressCreateCtrl', CustomerAddressCreateCtrl)
     .controller('CustomerAssignCtrl', CustomerAssignCtrl)
+    .controller('CustomersSharedCtrl', CustomersSharedCtrl)
 ;
 
 function CustomerConfig($stateProvider) {
@@ -46,7 +47,7 @@ function CustomerConfig($stateProvider) {
             controllerAs: 'customerEdit',
             resolve: {
                 SelectedBuyer: function($stateParams, OrderCloudSDK){
-                    return OrderCloudSDK.Buyers.Get($stateParams.buyerid)
+                    return OrderCloudSDK.Buyers.Get($stateParams.buyerid);
                 },
                 AddressList: function(OrderCloudSDK, $stateParams, Parameters, SelectedBuyer) {
                     var f = {
@@ -58,7 +59,24 @@ function CustomerConfig($stateProvider) {
                     return OrderCloudSDK.Addresses.List(SelectedBuyer.ID, opts);
                 },
                 WeirGroup: function (OrderCloudSDK, SelectedBuyer) {
-                    return OrderCloudSDK.Catalogs.Get(SelectedBuyer.xp.WeirGroup.label)
+                    return OrderCloudSDK.Catalogs.Get(SelectedBuyer.xp.WeirGroup.label);
+                },
+                RelatedBuyer: function(OrderCloudSDK, SelectedBuyer) {
+                    var relatedID = null;
+
+                    if(SelectedBuyer.xp && SelectedBuyer.xp.AKA) {
+                        angular.forEach(SelectedBuyer.xp.AKA, function (value, key) {
+                            if (key != 'Active') {
+                                relatedID = key;
+                            }
+                        });
+                    }
+
+                    if(relatedID) {
+                        return OrderCloudSDK.Buyers.Get(relatedID);
+                    } else {
+                        return null;
+                    }
                 }
             }
         })
@@ -99,6 +117,35 @@ function CustomerConfig($stateProvider) {
                 },
                 EndUsers: function(OrderCloudSDK) {
                     return OrderCloudSDK.Buyers.List();
+                }
+            }
+        })
+        .state('customersShared', {
+            parent: 'base',
+            data: {componentName: 'CustomersShared'},
+            url: '/shared',
+            templateUrl: 'customers/templates/customersShared.tpl.html',
+            controller: 'CustomersSharedCtrl',
+            controllerAs: 'customers',
+            resolve: {
+                Me: function(OrderCloudSDK) {
+                    return OrderCloudSDK.Me.Get();
+                },
+                Parameters: function($stateParams, OrderCloudParameters) {
+                    return OrderCloudParameters.Get($stateParams);
+                },
+                BuyerList: function(OrderCloudSDK, Parameters, Me) {
+                    var filter = {
+                        'ID':Me.xp.WeirGroup.label+'*',
+                        'xp.AKA.Active':true
+                    };
+                    var opts = {
+                        search: Parameters.search,
+                        page: Parameters.page,
+                        pageSize: Parameters.pageSize || 100,
+                        filters: filter
+                    };
+                    return OrderCloudSDK.Buyers.List(opts);
                 }
             }
         });
@@ -371,12 +418,18 @@ function CustomerCtrl($state, $ocMedia, OrderCloudSDK, OrderCloudParameters, Par
     };
 }
 
-function CustomerEditCtrl($exceptionHandler, $state, $ocMedia, toastr, OrderCloudSDK, SelectedBuyer, WeirGroup, AddressList, CustomerService, Parameters, Underscore, OrderCloudParameters, WeirService) {
+function CustomerEditCtrl($exceptionHandler, $state, $ocMedia, toastr, OrderCloudSDK, SelectedBuyer, WeirGroup, AddressList, CustomerService, Parameters, Underscore, OrderCloudParameters, WeirService, SearchCustomers, RelatedBuyer) {
     var vm = this;
     //$scope.$state = $state;
+    vm.SearchCustomers = SearchCustomers;
     vm.Group = WeirGroup;
 	vm.weirGroupID = WeirGroup.ID;
     vm.buyer = SelectedBuyer;
+    vm.RelatedBuyer = RelatedBuyer;
+
+    vm.RelatedBuyerID = RelatedBuyer && RelatedBuyer.ID ? angular.copy(RelatedBuyer.ID) : null;
+    vm.relatedWeirGroup = WeirGroup.ID == 'WVCUK' ? 'WPIFR' : 'WVCUK';
+
     vm.list = AddressList;
     vm.parameters = Parameters;
     vm.labels = CustomerService.Labels[WeirService.Locale()];
@@ -461,7 +514,49 @@ function CustomerEditCtrl($exceptionHandler, $state, $ocMedia, toastr, OrderClou
     vm.types = CustomerService.CustomerTypes;
 
     vm.Submit = function() {
-        OrderCloudSDK.Buyers.Patch(vm.buyer.ID, vm.buyer)
+        var RelatedBuyerKey = null;
+
+        // If a value is entered in to the related customer number
+        if(vm.RelatedBuyerID && vm.RelatedBuyerID !== "") { //Update the current buyer with an AKA relationship.
+            RelatedBuyerKey = vm.RelatedBuyerID;
+            vm.buyer.xp.AKA = {
+                'Active':true,
+                [RelatedBuyerKey]:false
+            };
+        } else { //Otherwise the relationship was removed or never existed
+            vm.buyer.xp.AKA = {};
+        }
+
+        OrderCloudSDK.Buyers.Update(vm.buyer.ID, vm.buyer)
+            .then(function() {
+                if(vm.RelatedBuyer && vm.RelatedBuyer.ID && (vm.RelatedBuyer.ID !== vm.RelatedBuyerID)) { //The related buyer is changed.
+                    vm.RelatedBuyer.xp.AKA = {};
+                    return OrderCloudSDK.Buyers.Update(vm.RelatedBuyer.ID, vm.RelatedBuyer);
+                } else if (vm.RelatedBuyerID){ //very first time a relationship is established
+                    return true;
+                } else {
+                    return null;
+                }
+            })
+            .then(function(OldRelation) { //The old relationship was cleared or never existed.
+                if(OldRelation && vm.RelatedBuyerID) {
+                    return OrderCloudSDK.Buyers.Get(vm.RelatedBuyerID); //Get the new relationship.
+                } else {
+                    return null; //There was no old relationship or the relationship was removed. Pass null as the new relationship
+                }
+            })
+            .then(function(NewRelation) {
+                if(NewRelation) {
+                    vm.RelatedBuyer = NewRelation;
+                    vm.RelatedBuyer.xp.AKA = {
+                        'Active':true,
+                        [vm.buyer.ID]:true
+                    };
+                    return OrderCloudSDK.Buyers.Update(vm.RelatedBuyerID,vm.RelatedBuyer);
+                } else {
+                    return null;
+                }
+            })
             .then(function() {
                 //$state.go('customers', {}, {reload: true});
                 toastr.success('Buyer Updated', 'Success');
@@ -907,6 +1002,103 @@ function CustomerAssignCtrl($exceptionHandler, $scope, $state, toastr, Underscor
             })
             .catch(function(ex) {
                 $exceptionHandler(ex);
+            });
+    };
+}
+
+function CustomersSharedCtrl($state, $ocMedia, OrderCloudSDK, OrderCloudParameters, Parameters, BuyerList, CustomerService, WeirService, CurrentBuyer, Me) {
+    var vm = this;
+    vm.list = BuyerList;
+    angular.forEach(vm.list.Items,function(value,key) {
+        if(value && value.xp && value.xp.AKA) {
+            angular.forEach(value.xp.AKA, function(v,k) {
+                if(k != 'Active') {
+                    value.SharedCustomer = k;
+                    value.SharedPrimary = v ? k.substring(0, 5) : Me.xp.WeirGroup.label;
+                }
+            });
+        }
+    });
+    vm.parameters = Parameters;
+    vm.sortSelection =  Parameters.sortBy ? (Parameters.sortBy.indexOf('!') == 0 ? Parameters.sortBy.split('!')[1] : Parameters.sortBy) : null;
+    vm.labels = CustomerService.Labels[WeirService.Locale()];
+    vm.languages = CustomerService.CustomerLanguages;
+    vm.GetUpperLanguage = CustomerService.GetUpperLanguage;
+
+    //check if filters are applied
+    vm.filtersApplied = vm.parameters.filters || ($ocMedia('max-width:767px') && vm.sortSelection); //Sort by is a filter on mobile devices
+    vm.showFilters = vm.filtersApplied;
+
+    //check if search was used
+    vm.searchResults = Parameters.search && Parameters.search.length > 0; //Why parameters instead of vm.parameters?
+
+    //Reload the state with new parameters
+    vm.filter = function(resetPage) {
+        $state.go('.', OrderCloudParameters.Create(vm.parameters, resetPage));
+    };
+
+    //Reload the page with new search parameter & reset the page.
+    vm.search = function() {
+        vm.filter(true);
+    };
+
+    //Clear the search parameter, reload the state and reset the page
+    vm.clearSearch = function() {
+        vm.parameters.search = null;
+        vm.filter(true);
+    };
+
+    //Clear the relevant filters, reload the state and reset the page
+    vm.clearFilters = function() {
+        vm.parameters.filters = null;
+        $ocMedia('max-width:767px') ? vm.parameters.sortBy = null : angular.noop(); //Clear out sort by on mobile devices.
+        vm.filter(true);
+    };
+    vm.users = function (buyerID) {
+        CurrentBuyer.SetBuyerID(buyerID);
+        $state.go('users');
+    };
+    //Conditionally set, reverse, remove the sortBy parameter & reload the state.
+    vm.updateSort = function(value) {
+        value ? angular.noop() : value = vm.sortSelection;
+        switch(vm.parameters.sortBy) {
+            case value:
+                vm.parameters.sortBy = '!' + value;
+                break;
+            case '!' + value:
+                vm.parameters.sortBy = null;
+                break;
+            default:
+                vm.parameters.sortBy = value;
+        }
+        vm.filter(false);
+    };
+
+    //used on mobile devices
+    vm.reverseSort = function() {
+        Parameters.sortBy.indexOf('!') == 0 ? vm.parameters.sortBy = Parameters.sortBy.split('!')[1] : vm.parameters.sortBy = '!' + Parameters.sortBy;
+        vm.filter(false);
+    };
+
+    //Reload the state with the incremented page parameter
+    vm.pageChanged = function() {
+        $state.go('.', {page:vm.list.Meta.Page});
+    };
+
+    //Load the next page of results with all of the same parameters.
+    vm.loadMore = function() {
+        var opts = {
+            search: Parameters.search,
+            searchOn: Parameters.searchOn,
+            sortBy: Parameters.sortBy,
+            page: vm.list.Meta.Page + 1,
+            pageSize: Parameters.pageSize || vm.list.Meta.PageSize,
+            filters: Parameters.filters
+        };
+        return OrderCloudSDK.Buyers.List(opts)
+            .then(function(data) {
+                vm.list.Items = vm.list.Items.concat(data.Items);
+                vm.list.Meta = data.Meta;
             });
     };
 }
