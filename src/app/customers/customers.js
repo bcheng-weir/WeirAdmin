@@ -1004,6 +1004,10 @@ function CustomerAssignCtrl($exceptionHandler, $scope, $state, toastr, Underscor
 
 function CustomersSharedCtrl($state, $ocMedia, OrderCloudSDK, OrderCloudParameters, Parameters, BuyerList, CustomerService, WeirService, CurrentBuyer, Me) {
     var vm = this;
+
+    vm.currentWeirGroup = Me.xp.WeirGroup.label;
+    vm.relatedWeirGroup = Me.xp.WeirGroup.label == 'WVCUK' ? 'WPIFR' : 'WVCUK';
+
     vm.list = BuyerList;
     angular.forEach(vm.list.Items,function(value,key) {
         if(value && value.xp && value.xp.AKA) {
