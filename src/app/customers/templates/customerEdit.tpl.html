@@ -6,15 +6,24 @@
         <form name="CustomerEditForm" novalidate>
             <div class="row">
                 <div class="form-group col-md-3">
-                    <label for="buyer_name">customer name</label>
+                    <label for="buyer_name">
+                        &nbsp<br>
+                        customer name
+                    </label>
                     <input id="buyer_name" type="text" ng-model="customerEdit.buyer.Name" class="form-control" required>
                 </div>
                 <div class="form-group col-md-3">
-                    <label for="customernumber">customer number</label>
+                    <label for="customernumber">
+                        &nbsp<br>
+                        customer number
+                    </label>
                     <input id="customernumber" type="text" ng-model="customerEdit.buyer.xp.CustomerNumber" class="form-control" readonly ng-disabled="true">
                 </div>
                 <div class="form-group col-md-3">
-                    <label for="customernumber">{{customerEdit.relatedWeirGroup}} customer number</label>
+                    <label for="customernumber">
+                        {{customerEdit.relatedWeirGroup}} customer number
+                        <br><span style="font-size: 70%;">Only complete if customer is shared by WVCUK & WPIFR</span>
+                    </label>
                     <!--<input id="customernumber" type="text" ng-model="customerEdit.buyer.xp.CustomerNumber" class="form-control">-->
                     <input type="text"
                            ng-model="customerEdit.RelatedBuyerID"
