@@ -519,10 +519,8 @@ function CustomerEditCtrl($exceptionHandler, $state, $ocMedia, toastr, OrderClou
         // If a value is entered in to the related customer number
         if(vm.RelatedBuyerID && vm.RelatedBuyerID !== "") { //Update the current buyer with an AKA relationship.
             RelatedBuyerKey = vm.RelatedBuyerID;
-            vm.buyer.xp.AKA = {
-                'Active':true,
-                [RelatedBuyerKey]:false
-            };
+            vm.buyer.xp.AKA.Active = true;
+            vm.buyer.xp.AKA[RelatedBuyerKey] = false;
         } else { //Otherwise the relationship was removed or never existed
             vm.buyer.xp.AKA = {};
         }
@@ -548,10 +546,8 @@ function CustomerEditCtrl($exceptionHandler, $state, $ocMedia, toastr, OrderClou
             .then(function(NewRelation) {
                 if(NewRelation) {
                     vm.RelatedBuyer = NewRelation;
-                    vm.RelatedBuyer.xp.AKA = {
-                        'Active':true,
-                        [vm.buyer.ID]:true
-                    };
+                    vm.RelatedBuyer.xp.AKA.Active = true;
+                    vm.RelatedBuyer.xp.AKA[vm.buyer.ID] = true;
                     return OrderCloudSDK.Buyers.Update(vm.RelatedBuyerID,vm.RelatedBuyer);
                 } else {
                     return null;
