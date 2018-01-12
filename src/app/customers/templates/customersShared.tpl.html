@@ -1,6 +1,6 @@
 <article id="COMPONENT_SharedCustomers" ui-view class="container-fluid">
     <div class="page-header">
-        <button type="button" class="btn btn-success pull-right" ui-sref=".create"><i class="fa fa-plus-circle"></i> Create New</button>
+        <!--<button type="button" class="btn btn-success pull-right" ui-sref=".create"><i class="fa fa-plus-circle"></i> Create New</button>-->
         <h3>Customers</h3>
     </div>
     <form name="CustomersSearchForm" class="form-inline" ng-submit="customers.search()">
@@ -23,19 +23,19 @@
         <table class="table table-hover table-condensed oc-table-responsive">
             <thead>
             <tr>
-                <th class="text-center" scope="col">
+                <th class="align-left" scope="col">
                     {{customers.currentWeirGroup}} Customer Number
                 </th>
-                <th class="text-center" scope="col">
+                <th class="align-left" scope="col">
                     {{customers.currentWeirGroup}} Customer Name
                 </th>
-                <th class="text-center" scope="col">
+                <th class="align-left" scope="col">
                     {{customers.relatedWeirGroup}} Customer Number
                 </th>
-                <th class="text-center" scope="col">
+                <th class="align-left" scope="col">
                     {{customers.relatedWeirGroup}} Customer Name
                 </th>
-                <th class="text-center" scope="col">
+                <th class="align-left" scope="col">
                     Primary Weir Group
                 </th>
             </tr>
