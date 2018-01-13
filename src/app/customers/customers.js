@@ -77,6 +77,27 @@ function CustomerConfig($stateProvider) {
                     } else {
                         return null;
                     }
+                },
+                ToLockRelatedCustomerNumber: function(SelectedBuyer)
+                {
+                    var toLock = false;
+                    if(SelectedBuyer != null) {
+                        if (SelectedBuyer.xp != null) {
+                            if(SelectedBuyer.xp.AKA != null)
+                            {
+                                angular.forEach(SelectedBuyer.xp.AKA , function(value, key) {
+                                    if(key != 'Active')
+                                    {
+                                        if(value != true)
+                                        {
+                                            toLock = true;
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    }
+                    return toLock;
                 }
             }
         })
@@ -418,7 +439,7 @@ function CustomerCtrl($state, $ocMedia, OrderCloudSDK, OrderCloudParameters, Par
     };
 }
 
-function CustomerEditCtrl($exceptionHandler, $state, $ocMedia, toastr, OrderCloudSDK, SelectedBuyer, WeirGroup, AddressList, CustomerService, Parameters, Underscore, OrderCloudParameters, WeirService, SearchCustomers, RelatedBuyer) {
+function CustomerEditCtrl($exceptionHandler, $state, $ocMedia, toastr, OrderCloudSDK, SelectedBuyer, WeirGroup, AddressList, CustomerService, Parameters, Underscore, OrderCloudParameters, WeirService, SearchCustomers, RelatedBuyer, ToLockRelatedCustomerNumber) {
     var vm = this;
     //$scope.$state = $state;
     vm.SearchCustomers = SearchCustomers;
@@ -426,7 +447,7 @@ function CustomerEditCtrl($exceptionHandler, $state, $ocMedia, toastr, OrderClou
 	vm.weirGroupID = WeirGroup.ID;
     vm.buyer = SelectedBuyer;
     vm.RelatedBuyer = RelatedBuyer;
-
+    vm.ToLockRelatedBuyer = ToLockRelatedCustomerNumber;
     vm.RelatedBuyerID = RelatedBuyer && RelatedBuyer.ID ? angular.copy(RelatedBuyer.ID) : null;
     vm.relatedWeirGroup = WeirGroup.ID == 'WVCUK' ? 'WPIFR' : 'WVCUK';
 
