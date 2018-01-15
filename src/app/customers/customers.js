@@ -7,6 +7,7 @@ angular.module('orderCloud')
     .controller('CustomerCreateCtrl', CustomerCreateCtrl)
     .controller('CustomerAddressCreateCtrl', CustomerAddressCreateCtrl)
     .controller('CustomerAssignCtrl', CustomerAssignCtrl)
+    .controller('CustomersSharedCtrl', CustomersSharedCtrl)
 ;
 
 function CustomerConfig($stateProvider) {
@@ -46,7 +47,7 @@ function CustomerConfig($stateProvider) {
             controllerAs: 'customerEdit',
             resolve: {
                 SelectedBuyer: function($stateParams, OrderCloudSDK){
-                    return OrderCloudSDK.Buyers.Get($stateParams.buyerid)
+                    return OrderCloudSDK.Buyers.Get($stateParams.buyerid);
                 },
                 AddressList: function(OrderCloudSDK, $stateParams, Parameters, SelectedBuyer) {
                     var f = {
@@ -58,7 +59,40 @@ function CustomerConfig($stateProvider) {
                     return OrderCloudSDK.Addresses.List(SelectedBuyer.ID, opts);
                 },
                 WeirGroup: function (OrderCloudSDK, SelectedBuyer) {
-                    return OrderCloudSDK.Catalogs.Get(SelectedBuyer.xp.WeirGroup.label)
+                    return OrderCloudSDK.Catalogs.Get(SelectedBuyer.xp.WeirGroup.label);
+                },
+                RelatedBuyer: function(OrderCloudSDK, SelectedBuyer) {
+                    var relatedID = null;
+
+                    if(SelectedBuyer.xp && SelectedBuyer.xp.AKA) {
+                        angular.forEach(SelectedBuyer.xp.AKA, function (value, key) {
+                            if (key != 'Active') {
+                                relatedID = key;
+                            }
+                        });
+                    }
+
+                    if(relatedID) {
+                        return OrderCloudSDK.Buyers.Get(relatedID);
+                    } else {
+                        return null;
+                    }
+                },
+                ToLockRelatedCustomerNumber: function(SelectedBuyer)
+                {
+                    var toLock = false;
+                    if(SelectedBuyer && SelectedBuyer.xp && SelectedBuyer.xp.AKA) {
+                        angular.forEach(SelectedBuyer.xp.AKA , function(value, key) {
+                            if(key !== 'Active')
+                            {
+                                if(value === true)
+                                {
+                                    toLock = true;
+                                }
+                            }
+                        });
+                    }
+                    return toLock;
                 }
             }
         })
@@ -101,19 +135,51 @@ function CustomerConfig($stateProvider) {
                     return OrderCloudSDK.Buyers.List();
                 }
             }
+        })
+        .state('customersShared', {
+            parent: 'base',
+            data: {componentName: 'CustomersShared'},
+            url: '/shared',
+            templateUrl: 'customers/templates/customersShared.tpl.html',
+            controller: 'CustomersSharedCtrl',
+            controllerAs: 'customers',
+            resolve: {
+                Me: function(OrderCloudSDK) {
+                    return OrderCloudSDK.Me.Get();
+                },
+                Parameters: function($stateParams, OrderCloudParameters) {
+                    return OrderCloudParameters.Get($stateParams);
+                },
+                BuyerList: function(OrderCloudSDK, Parameters, Me) {
+                    var filter = {
+                        'ID':Me.xp.WeirGroup.label+'*',
+                        'xp.AKA.Active':true
+                    };
+                    var opts = {
+                        search: Parameters.search,
+                        page: Parameters.page,
+                        pageSize: Parameters.pageSize || 100,
+                        filters: filter
+                    };
+                    return OrderCloudSDK.Buyers.List(opts);
+                }
+            }
         });
 }
 
 function CustomerService($sce, OrderCloudSDK, $exceptionHandler) {
     var _weirGroups = [{id: "1", label: "WVCUK"}, {id: "2", label: "WPIFR"}];
     var _customerTypes = [{id: "1", label: "End User"}, {id: "2", label: "Service Company"}];
+    var _customerLanguages = [{id: "fr", label: "French"}, {id: "en", label: "English"}];
     var _componentLabels = {
         en: {
             NewCustomer: "New Customer",
             WeirGroup: "Weir Group",
+            CustomerLanguage: "Language setting",
             CustomerType: "Customer Type",
             SelectGroup: "(Select Weir Group)",
             SelectType: "(Select Customer Type)",
+            SelectLanguage: "(Select Customer Language)",
             Active: "Active",
             Terms: "Terms and Conditions",
             ShippingDetails: "Shipping Details",
@@ -124,11 +190,12 @@ function CustomerService($sce, OrderCloudSDK, $exceptionHandler) {
             CustomerNumber: "Customer Number",
             FirstName: "First Name",
             LastName:"Last Name",
-            StreetOne: "Street 1",
-            StreetTwo: "Street 2",
+            StreetOne: "Address line 1",
+            StreetTwo: "Address line 2",
+            StreetThree: "Address line 3",
             City: "City",
-            County: "County",
-            PostCode: "Post Code",
+            County: "State / Province / Region",
+            PostCode: "Postal code / Zip code",
             Country: "Country",
             PhoneNumber: "Phone Number",
             Primary: "Primary",
@@ -151,14 +218,20 @@ function CustomerService($sce, OrderCloudSDK, $exceptionHandler) {
             Customers: "Customers",
             Users: "Users",
             Search: "Search",
-            CarriagePrice: "Carriage Price"
+            CarriagePrice: "Carriage Price",
+            CarriageHeader: "Carriage",
+            StandardCarriageLabel: 'UK Standard carriage (default)',
+            CustomerSpecificLabel: 'Customer specific carriage',
+            Currency: "GBP"
         },
         fr: {
             NewCustomer: $sce.trustAsHtml("New Customer"),
             WeirGroup: $sce.trustAsHtml("Weir Group"),
+            CustomerLanguage: $sce.trustAsHtml("Language setting"),
             CustomerType: $sce.trustAsHtml("Customer Type"),
             SelectGroup: $sce.trustAsHtml("(Select Weir Group)"),
             SelectType: $sce.trustAsHtml("(Select Customer Type)"),
+            SelectLanguage: $sce.trustAsHtml("(Select Customer Language)"),
             Active: $sce.trustAsHtml("Active"),
             Terms: $sce.trustAsHtml("Terms and Conditions"),
             ShippingDetails: $sce.trustAsHtml("Shipping Details"),
@@ -169,11 +242,12 @@ function CustomerService($sce, OrderCloudSDK, $exceptionHandler) {
             CustomerNumber: $sce.trustAsHtml("Customer Number"),
             FirstName: $sce.trustAsHtml("First Name"),
             LastName: $sce.trustAsHtml("Last Name"),
-            StreetOne: $sce.trustAsHtml("Street 1"),
-            StreetTwo: $sce.trustAsHtml("Street 2"),
+            StreetOne: $sce.trustAsHtml("Address line 1"),
+            StreetTwo: $sce.trustAsHtml("Address line 2"),
+            StreetThree: $sce.trustAsHtml("Address line 3"),
             City: $sce.trustAsHtml("City"),
-            County: $sce.trustAsHtml("County"),
-            PostCode: $sce.trustAsHtml("Post Code"),
+            County: $sce.trustAsHtml("State / Province / Region"),
+            PostCode: $sce.trustAsHtml("Postal code / Zip code"),
             Country: $sce.trustAsHtml("Country"),
             PhoneNumber: $sce.trustAsHtml("Phone Number"),
             Primary: $sce.trustAsHtml("Primary"),
@@ -196,7 +270,11 @@ function CustomerService($sce, OrderCloudSDK, $exceptionHandler) {
             Customers: $sce.trustAsHtml("Customers"),
             Users: $sce.trustAsHtml("Users"),
             Search: $sce.trustAsHtml("Search"),
-	        CarriagePrice: $sce.trustAsHtml("Carriage Price")
+	        CarriagePrice: $sce.trustAsHtml("Carriage Price"),
+            CarriageHeader: "Carriage",
+            StandardCarriageLabel: 'FR Standard carriage (default)',
+            CustomerSpecificLabel: 'Customer specific carriage',
+            Currency: "EU"
         }
     };
 
@@ -250,9 +328,16 @@ function CustomerService($sce, OrderCloudSDK, $exceptionHandler) {
         return OrderCloudSDK.Products.SaveAssignment(assign);
     }
 
+    function _getUpperLanguage(lang) {
+        var l = lang || "";
+        return l.toUpperCase();
+    }
+
     return {
         WeirGroups: _weirGroups,
         CustomerTypes: _customerTypes,
+        CustomerLanguages: _customerLanguages,
+        GetUpperLanguage: _getUpperLanguage,
         CreateBuyer: _createBuyer,
         CreateGroup: _createGroup,
         AssignPlaceholderProduct: _assignPlaceholder,
@@ -268,6 +353,8 @@ function CustomerCtrl($state, $ocMedia, OrderCloudSDK, OrderCloudParameters, Par
     vm.parameters = Parameters;
     vm.sortSelection =  Parameters.sortBy ? (Parameters.sortBy.indexOf('!') == 0 ? Parameters.sortBy.split('!')[1] : Parameters.sortBy) : null;
     vm.labels = CustomerService.Labels[WeirService.Locale()];
+    vm.languages = CustomerService.CustomerLanguages;
+    vm.GetUpperLanguage = CustomerService.GetUpperLanguage;
 
     //check if filters are applied
     vm.filtersApplied = vm.parameters.filters || ($ocMedia('max-width:767px') && vm.sortSelection); //Sort by is a filter on mobile devices
@@ -347,12 +434,18 @@ function CustomerCtrl($state, $ocMedia, OrderCloudSDK, OrderCloudParameters, Par
     };
 }
 
-function CustomerEditCtrl($exceptionHandler, $state, $ocMedia, toastr, OrderCloudSDK, SelectedBuyer, WeirGroup, AddressList, CustomerService, Parameters, Underscore, OrderCloudParameters, WeirService) {
+function CustomerEditCtrl($exceptionHandler, $state, $ocMedia, toastr, OrderCloudSDK, SelectedBuyer, WeirGroup, AddressList, CustomerService, Parameters, Underscore, OrderCloudParameters, WeirService, SearchCustomers, RelatedBuyer, ToLockRelatedCustomerNumber) {
     var vm = this;
     //$scope.$state = $state;
+    vm.SearchCustomers = SearchCustomers;
     vm.Group = WeirGroup;
 	vm.weirGroupID = WeirGroup.ID;
     vm.buyer = SelectedBuyer;
+    vm.RelatedBuyer = RelatedBuyer;
+    vm.ToLockRelatedBuyer = ToLockRelatedCustomerNumber;
+    vm.RelatedBuyerID = RelatedBuyer && RelatedBuyer.ID ? angular.copy(RelatedBuyer.ID) : null;
+    vm.relatedWeirGroup = WeirGroup.ID == 'WVCUK' ? 'WPIFR' : 'WVCUK';
+
     vm.list = AddressList;
     vm.parameters = Parameters;
     vm.labels = CustomerService.Labels[WeirService.Locale()];
@@ -437,7 +530,45 @@ function CustomerEditCtrl($exceptionHandler, $state, $ocMedia, toastr, OrderClou
     vm.types = CustomerService.CustomerTypes;
 
     vm.Submit = function() {
-        OrderCloudSDK.Buyers.Patch(vm.buyer.ID, vm.buyer)
+        var RelatedBuyerKey = null;
+
+        // If a value is entered in to the related customer number
+        if(vm.RelatedBuyerID && vm.RelatedBuyerID !== "") { //Update the current buyer with an AKA relationship.
+            RelatedBuyerKey = vm.RelatedBuyerID;
+            vm.buyer.xp.AKA.Active = true;
+            vm.buyer.xp.AKA[RelatedBuyerKey] = false;
+        } else { //Otherwise the relationship was removed or never existed
+            vm.buyer.xp.AKA = {};
+        }
+
+        OrderCloudSDK.Buyers.Update(vm.buyer.ID, vm.buyer)
+            .then(function() {
+                if(vm.RelatedBuyer && vm.RelatedBuyer.ID && (vm.RelatedBuyer.ID !== vm.RelatedBuyerID)) { //The related buyer is changed.
+                    vm.RelatedBuyer.xp.AKA = {};
+                    return OrderCloudSDK.Buyers.Update(vm.RelatedBuyer.ID, vm.RelatedBuyer);
+                } else if (vm.RelatedBuyerID){ //very first time a relationship is established
+                    return true;
+                } else {
+                    return null;
+                }
+            })
+            .then(function(OldRelation) { //The old relationship was cleared or never existed.
+                if(OldRelation && vm.RelatedBuyerID) {
+                    return OrderCloudSDK.Buyers.Get(vm.RelatedBuyerID); //Get the new relationship.
+                } else {
+                    return null; //There was no old relationship or the relationship was removed. Pass null as the new relationship
+                }
+            })
+            .then(function(NewRelation) {
+                if(NewRelation) {
+                    vm.RelatedBuyer = NewRelation;
+                    vm.RelatedBuyer.xp.AKA.Active = true;
+                    vm.RelatedBuyer.xp.AKA[vm.buyer.ID] = true;
+                    return OrderCloudSDK.Buyers.Update(vm.RelatedBuyerID,vm.RelatedBuyer);
+                } else {
+                    return null;
+                }
+            })
             .then(function() {
                 //$state.go('customers', {}, {reload: true});
                 toastr.success('Buyer Updated', 'Success');
@@ -458,21 +589,8 @@ function CustomerEditCtrl($exceptionHandler, $state, $ocMedia, toastr, OrderClou
             return false;
         }
     };
-    var labels = {
-        WVCUK: {
-            CarriageHeader: "Carriage",
-            StandardCarriageLabel: 'UK Standard carriage (default)',
-            CustomerSpecificLabel: 'Customer specific carriage',
-            Currency: "GBP"
-        },
-        WPIFR: {
-            CarriageHeader: "Carriage",
-            StandardCarriageLabel: 'FR Standard carriage (default)',
-            CustomerSpecificLabel: 'Customer specific carriage',
-            Currency: "EU"
-        }
-    };
-    vm.labels = labels[vm.Group.ID];
+
+    vm.labels = CustomerService.Labels[WeirService.Locale()];
 
 	vm.originalValues = vm.buyer.xp.POContent || {};
 	if (vm.weirGroupID == 'WVCUK') {
@@ -896,6 +1014,107 @@ function CustomerAssignCtrl($exceptionHandler, $scope, $state, toastr, Underscor
             })
             .catch(function(ex) {
                 $exceptionHandler(ex);
+            });
+    };
+}
+
+function CustomersSharedCtrl($state, $ocMedia, OrderCloudSDK, OrderCloudParameters, Parameters, BuyerList, CustomerService, WeirService, CurrentBuyer, Me) {
+    var vm = this;
+
+    vm.currentWeirGroup = Me.xp.WeirGroup.label;
+    vm.relatedWeirGroup = Me.xp.WeirGroup.label == 'WVCUK' ? 'WPIFR' : 'WVCUK';
+
+    vm.list = BuyerList;
+    angular.forEach(vm.list.Items,function(value,key) {
+        if(value && value.xp && value.xp.AKA) {
+            angular.forEach(value.xp.AKA, function(v,k) {
+                if(k != 'Active') {
+                    value.SharedCustomer = k;
+                    value.SharedPrimary = v ? k.substring(0, 5) : Me.xp.WeirGroup.label;
+                }
+            });
+        }
+    });
+    vm.parameters = Parameters;
+    vm.sortSelection =  Parameters.sortBy ? (Parameters.sortBy.indexOf('!') == 0 ? Parameters.sortBy.split('!')[1] : Parameters.sortBy) : null;
+    vm.labels = CustomerService.Labels[WeirService.Locale()];
+    vm.languages = CustomerService.CustomerLanguages;
+    vm.GetUpperLanguage = CustomerService.GetUpperLanguage;
+
+    //check if filters are applied
+    vm.filtersApplied = vm.parameters.filters || ($ocMedia('max-width:767px') && vm.sortSelection); //Sort by is a filter on mobile devices
+    vm.showFilters = vm.filtersApplied;
+
+    //check if search was used
+    vm.searchResults = Parameters.search && Parameters.search.length > 0; //Why parameters instead of vm.parameters?
+
+    //Reload the state with new parameters
+    vm.filter = function(resetPage) {
+        $state.go('.', OrderCloudParameters.Create(vm.parameters, resetPage));
+    };
+
+    //Reload the page with new search parameter & reset the page.
+    vm.search = function() {
+        vm.filter(true);
+    };
+
+    //Clear the search parameter, reload the state and reset the page
+    vm.clearSearch = function() {
+        vm.parameters.search = null;
+        vm.filter(true);
+    };
+
+    //Clear the relevant filters, reload the state and reset the page
+    vm.clearFilters = function() {
+        vm.parameters.filters = null;
+        $ocMedia('max-width:767px') ? vm.parameters.sortBy = null : angular.noop(); //Clear out sort by on mobile devices.
+        vm.filter(true);
+    };
+    vm.users = function (buyerID) {
+        CurrentBuyer.SetBuyerID(buyerID);
+        $state.go('users');
+    };
+    //Conditionally set, reverse, remove the sortBy parameter & reload the state.
+    vm.updateSort = function(value) {
+        value ? angular.noop() : value = vm.sortSelection;
+        switch(vm.parameters.sortBy) {
+            case value:
+                vm.parameters.sortBy = '!' + value;
+                break;
+            case '!' + value:
+                vm.parameters.sortBy = null;
+                break;
+            default:
+                vm.parameters.sortBy = value;
+        }
+        vm.filter(false);
+    };
+
+    //used on mobile devices
+    vm.reverseSort = function() {
+        Parameters.sortBy.indexOf('!') == 0 ? vm.parameters.sortBy = Parameters.sortBy.split('!')[1] : vm.parameters.sortBy = '!' + Parameters.sortBy;
+        vm.filter(false);
+    };
+
+    //Reload the state with the incremented page parameter
+    vm.pageChanged = function() {
+        $state.go('.', {page:vm.list.Meta.Page});
+    };
+
+    //Load the next page of results with all of the same parameters.
+    vm.loadMore = function() {
+        var opts = {
+            search: Parameters.search,
+            searchOn: Parameters.searchOn,
+            sortBy: Parameters.sortBy,
+            page: vm.list.Meta.Page + 1,
+            pageSize: Parameters.pageSize || vm.list.Meta.PageSize,
+            filters: Parameters.filters
+        };
+        return OrderCloudSDK.Buyers.List(opts)
+            .then(function(data) {
+                vm.list.Items = vm.list.Items.concat(data.Items);
+                vm.list.Meta = data.Meta;
             });
     };
 }

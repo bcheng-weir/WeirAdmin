@@ -32,6 +32,10 @@
                             <span ng-bind-html='order.labels.PONumber'></span><br />
                             <h4><span ng-bind-html='order.Order.xp.PONumber'></span></h4>
                         </li>
+                        <li style="padding: 10px 16px 0px 0px;">
+                            <span ng-bind-html='order.labels.Language'></span><br />
+                            <h4><span ng-bind-html="order.getLanguage()"></span></h4>
+                        </li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li ng-if="order.showAssign" ng-click="order.AssignToMe()" style="padding: 0px 10px 0px 0px;">
@@ -57,7 +61,7 @@
                             <a role="button" class="btn btn-lg btn-default" href="#Comments"><span ng-bind-html="order.labels.Comments"></span></a>
                         </li>
                         <li style="padding: 0px 10px 0px 0px;">
-                            <!--<button type="button" class="btn btn-lg btn-default" ng-csv="order.ToCsvJson" filename="{{order.CsvFilename}}" ng-bind-html="order.labels.Download"></button>-->
+                            <button type="button" class="btn btn-lg btn-default" ng-csv="order.ToCsvJson" filename="{{order.CsvFilename}}" ng-bind-html="order.labels.Download"></button>
                         </li>
                     </ul>
                 </li>
@@ -329,7 +333,7 @@
                      </td>
                  </tr>
 
-                 <tr ng-if="order.LineItems.Items.length > 0">
+                 <tr ng-if="order.LineItems.length > 0">
                      <td class="button-th" colspan="5"></td>
                      <td ng-bind-html='order.labels.Total'></td>
                      <td ng-switch on="order.Order.xp.CustomerID | weirGroupFromBuyersID" class='text-right'>
@@ -375,6 +379,7 @@
                 <span ng-bind-html='order.DeliveryAddress.FirstName + " " + order.DeliveryAddress.LastName'></span><br />
                 <span ng-bind-html="order.DeliveryAddress.Street1"></span><br>
                 <span ng-bind-html="order.DeliveryAddress.Street2" ng-if="order.DeliveryAddress.Street2"></span><br ng-if="order.DeliveryAddress.Street2">
+                <span ng-bind-html="order.DeliveryAddress.xp.Street3" ng-if="order.DeliveryAddress.xp.Street3"></span><br ng-if="order.DeliveryAddress.xp.Street3">
                 <span ng-bind-html="order.DeliveryAddress.Zip"></span> <span ng-bind-html="order.DeliveryAddress.City"></span><br>
                 <span ng-bind-html="order.country(order.DeliveryAddress.Country)"></span>
             </div>
@@ -382,6 +387,7 @@
                 <span ng-bind-html='order.DeliveryAddress.FirstName + " " + order.DeliveryAddress.LastName'></span><br />
                 <span ng-bind-html="order.DeliveryAddress.Street1"></span><br>
                 <span ng-bind-html="order.DeliveryAddress.Street2" ng-if="order.DeliveryAddress.Street2"></span><br ng-if="order.DeliveryAddress.Street2">
+                <span ng-bind-html="order.DeliveryAddress.xp.Street3" ng-if="order.DeliveryAddress.xp.Street3"></span><br ng-if="order.DeliveryAddress.xp.Street3">
                 <span ng-bind-html="order.DeliveryAddress.City"></span><br>
                 <span ng-bind-html="order.DeliveryAddress.Zip"></span><br>
                 <span ng-bind-html="order.country(order.DeliveryAddress.Country)"></span>
@@ -390,6 +396,7 @@
                 <span ng-bind-html='order.DeliveryAddress.FirstName + " " + order.DeliveryAddress.LastName'></span><br />
                 <span ng-bind-html="order.DeliveryAddress.Street1"></span><br>
                 <span ng-bind-html="order.DeliveryAddress.Street2" ng-if="order.DeliveryAddress.Street2"></span><br ng-if="order.DeliveryAddress.Street2">
+                <span ng-bind-html="order.DeliveryAddress.xp.Street3" ng-if="order.DeliveryAddress.xp.Street3"></span><br ng-if="order.DeliveryAddress.xp.Street3">
                 <span ng-bind-html="order.DeliveryAddress.City"></span>, <span ng-bind-html="order.DeliveryAddress.State"></span> <span ng-bind-html="order.DeliveryAddress.Zip"></span><br>
                 <span ng-bind-html="order.country(order.DeliveryAddress.Country)"></span>
             </div>

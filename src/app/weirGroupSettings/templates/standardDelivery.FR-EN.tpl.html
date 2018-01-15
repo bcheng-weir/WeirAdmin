@@ -1,0 +1,35 @@
+<article>
+    <h3 style="margin-bottom:2px;" ng-bind-html='delivery.labels.SubHeader'></h3>
+    <form name='myform' style="margin-left:6px;margin-top:14px;">
+        <div class='row form-group form-row'>
+            <div class='col-md-12'>
+                <h4><label for='charge' ng-bind-html='delivery.edits.Line1.header'></label></h4>
+                <textarea rows="6" cols="80" ng-model='delivery.edits.Line1.old' disabled="disabled" ng-if="!delivery.edits.Line1.editable" />
+                <textarea rows="6" cols="80" ng-model='delivery.edits.Line1.newValue' ng-if="delivery.edits.Line1.editable" />
+                <button class='btn btn-default' style="vertical-align: top;" ng-click='delivery.edit("Line1")' ng-bind-html='delivery.labels.EditAction' ng-disabled='delivery.edits.Line1.editable'></button>
+                <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='delivery.save("Line1")' ng-bind-html='delivery.labels.SaveAction' ng-disabled='!delivery.edits.Line1.editable'></button>
+                <button class='btn btn-default' type='reset' ng-click='delivery.cancel("Line1")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='delivery.labels.CancelAction' ng-disabled='!delivery.edits.Line1.editable'></button>
+            </div>
+        </div>
+        <div class='row form-group form-row'>
+            <div class='col-md-12'>
+                <h4><label for='charge' ng-bind-html='delivery.edits.Line2.header'></label></h4>
+                <textarea rows="6" cols="80" ng-model='delivery.edits.Line2.old' disabled="disabled" ng-if="!delivery.edits.Line2.editable" />
+                <textarea rows="6" cols="80" ng-model='delivery.edits.Line2.newValue' ng-if="delivery.edits.Line2.editable" />
+                <button class='btn btn-default' style="vertical-align: top;" ng-click='delivery.edit("Line2")' ng-bind-html='delivery.labels.EditAction' ng-disabled='delivery.edits.Line2.editable'></button>
+                <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='delivery.save("Line2")' ng-bind-html='delivery.labels.SaveAction' ng-disabled='!delivery.edits.Line2.editable'></button>
+                <button class='btn btn-default' type='reset' ng-click='delivery.cancel("Line2")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='delivery.labels.CancelAction' ng-disabled='!delivery.edits.Line2.editable'></button>
+            </div>
+        </div>
+        <div class='row form-group form-row'>
+            <div class='col-md-12'>
+                <h4><label for='charge' ng-bind-html='delivery.edits.Line3.header'></label></h4>
+                <textarea rows="6" cols="80" ng-model='delivery.edits.Line3.old' disabled="disabled" ng-if="!delivery.edits.Line3.editable" />
+                <textarea rows="6" cols="80" ng-model='delivery.edits.Line3.newValue' ng-if="delivery.edits.Line3.editable" />
+                <button class='btn btn-default' style="vertical-align: top;" ng-click='delivery.edit("Line3")' ng-bind-html='delivery.labels.EditAction' ng-disabled='delivery.edits.Line3.editable'></button>
+                <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='delivery.save("Line3")' ng-bind-html='delivery.labels.SaveAction' ng-disabled='!delivery.edits.Line3.editable'></button>
+                <button class='btn btn-default' type='reset' ng-click='delivery.cancel("Line3")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='delivery.labels.CancelAction' ng-disabled='!delivery.edits.Line3.editable'></button>
+            </div>
+        </div>
+    </form>
+</article>

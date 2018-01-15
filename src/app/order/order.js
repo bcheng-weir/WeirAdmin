@@ -40,18 +40,22 @@ function orderConfig($stateProvider) {
 					});
 	        		return dfd.promise;
 	            },
-	            DeliveryAddress:function (OrderCloudSDK, Order) {
+	            Buyer: function (OrderCloudSDK, Order) {
+	                return OrderCloudSDK.Buyers.Get(Order.FromCompanyID);
+	            },
+	            DeliveryAddress: function (OrderCloudSDK, Order) {
 	                if(Order.ShippingAddressID) {
 	                    return OrderCloudSDK.Addresses.Get(Order.xp.BuyerID, Order.ShippingAddressID);
 	                } else {
 	                    return null;
 	                }
 	            },
-	            LineItems: function ($q, $state, toastr, OrderCloudSDK, CurrentOrder, OrderShareService, Order, LineItemHelpers) {
+	            LineItems: function ($q, $state, toastr, OrderCloudSDK, CurrentOrder, OrderShareService, Order, LineItemHelpers, Buyer) {
 	                OrderShareService.LineItems.length = 0;
                     //var isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
                     var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
-		            var dfd = $q.defer();
+                    var dfd = $q.defer();
+                    var lang = Buyer.xp.Lang.id;
 		            OrderCloudSDK.LineItems.List(direction, Order.ID, { 'filters': {'Order.xp.BuyerID' : Order.xp.BuyerID}})
 			            .then(function(data) {
 				            if (!data.Items.length) {
@@ -60,7 +64,17 @@ function orderConfig($stateProvider) {
 				            } else {
 					            LineItemHelpers.GetBlankProductInfo(data.Items);
 					            LineItemHelpers.GetProductInfo(data.Items, Order)
-						            .then(function() { dfd.resolve(data); });
+						            .then(function () {
+						                if (lang && data.Items) {
+						                    for (var i = 0; i < data.Items.length; i++) {
+						                        var tmp = data.Items[i];
+						                        if (tmp.Product && tmp.Product.xp && tmp.Product.xp[lang]) {
+						                            tmp.Product.Description = tmp.Product.xp["en"].Description || tmp.Product.Description;
+						                        }
+						                    }
+						                }
+						                dfd.resolve(data);
+						            });
 				            }
 			            })
 			            .catch(function () {
@@ -69,12 +83,13 @@ function orderConfig($stateProvider) {
 		                });
 		            return dfd.promise;
 	            },
-		        PreviousLineItems: function($q, toastr, OrderCloudSDK, Order, LineItemHelpers) {
+		        PreviousLineItems: function($q, toastr, OrderCloudSDK, Order, LineItemHelpers, Buyer) {
 			        var pieces = Order.ID.split('-Rev');
 			        if(pieces.length > 1) {
 				        var prevId = pieces[0] + "-Rev" + (pieces[1] - 1).toString();
 				        var dfd = $q.defer();
-				        //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
+				        var lang = Buyer.xp.Lang.id;
+			            //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
 				        var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 				        OrderCloudSDK.LineItems.List(direction, prevId, { 'filters': { 'Order.xp.BuyerID': Order.xp.BuyerID } })
 					        .then(function(data) {
@@ -83,7 +98,17 @@ function orderConfig($stateProvider) {
 						        } else {
 							        LineItemHelpers.GetBlankProductInfo(data.Items);
 							        LineItemHelpers.GetProductInfo(data.Items, Order)
-								        .then(function () { dfd.resolve(data); });
+								        .then(function () {
+								            if (lang && data.Items) {
+								                for (var i = 0; i < data.Items.length; i++) {
+								                    var tmp = data.Items[i];
+								                    if (tmp.Product && tmp.Product.xp && tmp.Product.xp[lang]) {
+								                        tmp.Product.Description = tmp.Product.xp["en"].Description || tmp.Product.Description;
+								                    }
+								                }
+								            }
+								            dfd.resolve(data);
+								        });
 						        }
 					        })
 					        .catch(function () {
@@ -122,9 +147,6 @@ function orderConfig($stateProvider) {
 	            UserGroups: function (UserGroupsService) {
 	                return UserGroupsService.UserGroups();
 	            },
-	            Buyer: function(OrderCloudSDK,Order) {
-		            return OrderCloudSDK.Buyers.Get(Order.FromCompanyID);
-	            },
 		        Catalog: function(OrderCloudSDK,Buyer) {
 			        return OrderCloudSDK.Catalogs.Get(Buyer.xp.WeirGroup.label);
 		        }
@@ -146,7 +168,7 @@ function orderConfig($stateProvider) {
 function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGroupsService,
                          OrderCloudSDK, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService,
                          Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService, FileSaver,
-                         UserGroups, BackToListService, Buyer, Catalog, CurrentBuyer) {
+                         UserGroups, BackToListService, Buyer, Catalog) {
     //var isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
     var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming" ;
 	determineShipping();
@@ -158,6 +180,12 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     vm.NoOp = function () { };
     var userIsInternalSalesAdmin = UserGroups.indexOf(UserGroupsService.Groups.InternalSales) > -1;
     var userIsSuperAdmin = UserGroups.indexOf(UserGroupsService.Groups.SuperAdmin) > -1;
+
+    vm.getLanguage = function() {
+    	Buyer.xp.Lang = Buyer.xp.Lang || {};
+        Buyer.xp.Lang.id = Buyer.xp.Lang.id || "";
+    	return Buyer.xp.Lang.id.toUpperCase();
+	};
 
 	//Part of the label comparison
 	function compare(current,previous) {
@@ -193,7 +221,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		) {
 			return null;
 		} else {
-			return "UPDATED"
+			return "UPDATED";
 		}
 	}
 
@@ -288,6 +316,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
             //header labels
             status: "Status",
             reviewer: "Reviewer; ",
+			Language: "Language;",
             unassigned: "Not assigned",
             AssignToMe: "Assign to me",
             OrderDate: "Order date;",
@@ -353,6 +382,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
             //header labels
             status: $sce.trustAsHtml("Status"),
             reviewer: "Reviewer; ",
+            Language: "Language;",
             unassigned: "Not assigned",
             OrderDate:$sce.trustAsHtml( "Order date;"),
             AssignToMe: "Assign to me",
@@ -974,7 +1004,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 
 		// Patch the current order with the updated status, ID and active state.
 		//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-		var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+		var direction = "Incoming"; /*isImpersonating == true ? 'Outgoing' :*/
 
         OrderCloudSDK.Users.Get(vm.Order.xp.BuyerID, vm.Order.FromUser.ID)
 			.then(function(buyer) {
@@ -986,13 +1016,13 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
                 return OrderCloudSDK.SetImpersonationToken(data['access_token']);
             })
             .then(function() {
+                return OrderCloudSDK.Orders.Patch(direction, OrderID, orderPatch);
+            })
+            .then(function() {
                 // Create the order as the impersonated user.
                 return OrderCloudSDK.As().Orders.Create("Outgoing", orderCopy);
                 //ToDo make another then in order to set the shipping address.
             })
-			.then(function() {
-            	return OrderCloudSDK.Orders.Patch(direction, OrderID, orderPatch);
-			})
 			.then(function() {
 				// Create the line items.
 				angular.forEach(lineItemsCopy, function(value, key) {
@@ -1009,7 +1039,9 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			})
 			.then(function() {
 				// Set the current order so that the order details page is updated. The current order ID has been incremented.
-				return WeirService.SetOrderAsCurrentOrder(vm.Order.ID);
+				var lang;
+				if (Buyer.xp.Lang) { lang = Buyer.xp.Lang.id; }
+				return WeirService.SetOrderAsCurrentOrder(vm.Order.ID, lang);
 			})
 			.then(function() {
 				// Update the mini-cart with the new order and refresh the page.

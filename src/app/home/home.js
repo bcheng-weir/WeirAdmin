@@ -67,7 +67,8 @@ function HomeController($sce, WeirService, IsAdmin, IsInternalSales) {
 			Admin: "Admin",
 			ManageAdmins: "Manage admins",
 			StandardDelivery: "Carriage",
-		    POPrintContent: "Fixed Print Content",
+            POPrintContent: "Fixed Print Content",
+            SharedContent: "Shared Content",
 			Customers: "Customers",
 			CustomerManage: "Manage customers and customer addresses",
 			EnquiryQuotes: "Enquiries submitted"
@@ -88,7 +89,8 @@ function HomeController($sce, WeirService, IsAdmin, IsInternalSales) {
 			Admin: $sce.trustAsHtml("Admin"),
 			ManageAdmins: $sce.trustAsHtml("Manage admins"),
 			StandardDelivery: "Carriage",
-			POPrintContent: "Fixed Print Content",
+            POPrintContent: "Fixed Print Content",
+            SharedContent: "Shared Content",
 			Customers: $sce.trustAsHtml("Customers"),
 			CustomerManage: $sce.trustAsHtml("Manage customers and customer addresses"),
 			EnquiryQuotes: $sce.trustAsHtml("Enquiries submitted")

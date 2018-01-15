@@ -24,6 +24,9 @@
                 {{orders.labels.businessName}}
             </th>
             <th scope="col">
+                {{orders.labels.Language}}
+            </th>
+            <th scope="col">
                 <a href="#" role="button" ng-click="orders.updateSort('OrderedBy')">
                     {{orders.labels.orderedBy}}
                     <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'OrderedBy'"></i>
@@ -59,6 +62,9 @@
             <td>{{order.xp.ContractNumber}}</td>
             <td>{{order.xp.PONumber}}</td>
             <td>{{order.xp.CustomerName}}</td>
+            <td>
+                {{orders.getLanguage(order.FromCompanyID)}}
+            </td>
             <td>{{order.FromUser.FirstName}} {{order.FromUser.LastName}}</td>
             <td class="text-left" ng-switch on="order.xp.CustomerID | weirGroupFromBuyersID">
                 <span ng-switch-when="WPIFR">{{order.Total | currency: '&euro;'}}</span>

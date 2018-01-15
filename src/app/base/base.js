@@ -85,7 +85,7 @@ function BaseConfig($stateProvider, $injector, $sceDelegateProvider) {
             },
             ComponentList: function($state, $q, Underscore) {
                 var deferred = $q.defer();
-                var nonSpecific = ['Customers', 'Orders', 'Buyers', 'Products', 'Specs', 'Price Schedules', 'Admin Users', 'Product Facets'];
+                var nonSpecific = ['Customers', 'CustomersShared','Orders', 'Buyers', 'Products', 'Specs', 'Price Schedules', 'Admin Users', 'Product Facets'];
                 var components = {
                     nonSpecific: [],
                     buyerSpecific: []
@@ -156,6 +156,7 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
         en: {
             admin: "Admin",
             customers: "Customers",
+            sharedCustomers: "Shared Customers",
             orders: "Orders",
             quotesForReview: "Quotes Submitted for Review",
             revisedQuotes: "Revised Quotes",
@@ -169,7 +170,8 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
             invoiced: "Invoiced",
             allOrders: "All Orders",
             standardDelivery: "Carriage",
-            poPrintContent: "Fixed Print Content"
+            poPrintContent: "Fixed Print Content",
+            sharedContent: "Shared Content"
         }
     };
 

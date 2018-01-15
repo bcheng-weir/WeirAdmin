@@ -1,0 +1,45 @@
+<article>
+    <h3 style="margin-bottom:2px;" ng-bind-html='sharedcontent.labels.SubHeader'></h3>
+    <form name='myform' style="margin-left:6px;margin-top:14px;">
+        <div class='row form-group form-row'>
+            <div class='col-md-12'>
+                <h4><label for='charge' ng-bind-html='sharedcontent.edits.ReplacementGuidance.header'></label></h4>
+                <textarea rows="6" cols="80" ng-model='sharedcontent.edits.ReplacementGuidance.old' disabled="disabled" ng-if="!sharedcontent.edits.ReplacementGuidance.editable" />
+                <textarea rows="6" cols="80" ng-model='sharedcontent.edits.ReplacementGuidance.newValue' ng-if="sharedcontent.edits.ReplacementGuidance.editable" />
+                <button class='btn btn-default' style="vertical-align: top;" ng-click='sharedcontent.edit("ReplacementGuidance")' ng-bind-html='sharedcontent.labels.EditAction' ng-disabled='sharedcontent.edits.ReplacementGuidance.editable'></button>
+                <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='sharedcontent.save("ReplacementGuidance")' ng-bind-html='sharedcontent.labels.SaveAction' ng-disabled='!sharedcontent.edits.ReplacementGuidance.editable'></button>
+                <button class='btn btn-default' type='reset' ng-click='sharedcontent.cancel("ReplacementGuidance")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='sharedcontent.labels.CancelAction' ng-disabled='!sharedcontent.edits.ReplacementGuidance.editable'></button>
+            </div>
+        </div>
+        <div class='row form-group form-row'>
+            <div class='col-md-12'>
+                <h4><label for='charge' ng-bind-html='sharedcontent.edits.POAGuidance.header'></label></h4>
+                <textarea rows="6" cols="80" ng-model='sharedcontent.edits.POAGuidance.old' disabled="disabled" ng-if="!sharedcontent.edits.POAGuidance.editable" />
+                <textarea rows="6" cols="80" ng-model='sharedcontent.edits.POAGuidance.newValue' ng-if="sharedcontent.edits.POAGuidance.editable" />
+                <button class='btn btn-default' style="vertical-align: top;" ng-click='sharedcontent.edit("POAGuidance")' ng-bind-html='sharedcontent.labels.EditAction' ng-disabled='sharedcontent.edits.POAGuidance.editable'></button>
+                <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='sharedcontent.save("POAGuidance")' ng-bind-html='sharedcontent.labels.SaveAction' ng-disabled='!sharedcontent.edits.POAGuidance.editable'></button>
+                <button class='btn btn-default' type='reset' ng-click='sharedcontent.cancel("POAGuidance")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='sharedcontent.labels.CancelAction' ng-disabled='!sharedcontent.edits.POAGuidance.editable'></button>
+            </div>
+        </div>
+        <div class='row form-group form-row'>
+            <div class='col-md-12'>
+                <h4><label for='charge' ng-bind-html='sharedcontent.edits.LeadTimeNotice.header'></label></h4>
+                <textarea rows="6" cols="80" ng-model='sharedcontent.edits.LeadTimeNotice.old' disabled="disabled" ng-if="!sharedcontent.edits.LeadTimeNotice.editable" />
+                <textarea rows="6" cols="80" ng-model='sharedcontent.edits.LeadTimeNotice.newValue' ng-if="sharedcontent.edits.LeadTimeNotice.editable" />
+                <button class='btn btn-default' style="vertical-align: top;" ng-click='sharedcontent.edit("LeadTimeNotice")' ng-bind-html='sharedcontent.labels.EditAction' ng-disabled='sharedcontent.edits.LeadTimeNotice.editable'></button>
+                <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='sharedcontent.save("LeadTimeNotice")' ng-bind-html='sharedcontent.labels.SaveAction' ng-disabled='!sharedcontent.edits.LeadTimeNotice.editable'></button>
+                <button class='btn btn-default' type='reset' ng-click='sharedcontent.cancel("LeadTimeNotice")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='sharedcontent.labels.CancelAction' ng-disabled='!sharedcontent.edits.LeadTimeNotice.editable'></button>
+            </div>
+        </div>
+        <div class='row form-group form-row'>
+            <div class='col-md-12'>
+                <h4><label for='charge' ng-bind-html='sharedcontent.edits.PriceDisclaimer.header'></label></h4>
+                <textarea rows="6" cols="80" ng-model='sharedcontent.edits.PriceDisclaimer.old' disabled="disabled" ng-if="!sharedcontent.edits.PriceDisclaimer.editable" />
+                <textarea rows="6" cols="80" ng-model='sharedcontent.edits.PriceDisclaimer.newValue' ng-if="sharedcontent.edits.PriceDisclaimer.editable" />
+                <button class='btn btn-default' style="vertical-align: top;" ng-click='sharedcontent.edit("PriceDisclaimer")' ng-bind-html='sharedcontent.labels.EditAction' ng-disabled='sharedcontent.edits.PriceDisclaimer.editable'></button>
+                <button class='btn btn-primary' style="margin-left: 0.25em; vertical-align: top;" ng-click='sharedcontent.save("PriceDisclaimer")' ng-bind-html='sharedcontent.labels.SaveAction' ng-disabled='!sharedcontent.edits.PriceDisclaimer.editable'></button>
+                <button class='btn btn-default' type='reset' ng-click='sharedcontent.cancel("PriceDisclaimer")' style='margin-left: 0.25em; vertical-align: top;' ng-bind-html='sharedcontent.labels.CancelAction' ng-disabled='!sharedcontent.edits.PriceDisclaimer.editable'></button>
+            </div>
+        </div>
+    </form>
+</article>

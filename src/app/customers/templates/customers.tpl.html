@@ -43,6 +43,9 @@
                         Carriage Type
                     </th>
                     <th class="text-center" scope="col">
+                        Language
+                    </th>
+                    <th class="text-center" scope="col">
                         Active
                     </th>
                     <th scope="col"></th>
@@ -58,6 +61,9 @@
 			        <span ng-if="buyer.xp.UseCustomCarriageRate">Customer Specific</span>
 			        <span ng-if="!buyer.xp.UseCustomCarriageRate">Standard</span>
          	    </td>
+                <td>
+                    {{customers.GetUpperLanguage(buyer.xp.Lang.id)}}
+                </td>
                 <td class="text-center" data-title="Active"><i class="fa fa-circle" aria-hidden="true" ng-class="{'active':buyer.Active}"></i></td>
                 <td class="actions-cell">
                     <button type="button" ui-sref="customers.assign({buyerid: buyer.ID})" class="btn btn-default btn-sm" ng-hide="buyer.xp.Type.id==1">Assign
