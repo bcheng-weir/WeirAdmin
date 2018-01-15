@@ -81,21 +81,16 @@ function CustomerConfig($stateProvider) {
                 ToLockRelatedCustomerNumber: function(SelectedBuyer)
                 {
                     var toLock = false;
-                    if(SelectedBuyer != null) {
-                        if (SelectedBuyer.xp != null) {
-                            if(SelectedBuyer.xp.AKA != null)
+                    if(SelectedBuyer && SelectedBuyer.xp && SelectedBuyer.xp.AKA) {
+                        angular.forEach(SelectedBuyer.xp.AKA , function(value, key) {
+                            if(key !== 'Active')
                             {
-                                angular.forEach(SelectedBuyer.xp.AKA , function(value, key) {
-                                    if(key != 'Active')
-                                    {
-                                        if(value != true)
-                                        {
-                                            toLock = true;
-                                        }
-                                    }
-                                });
+                                if(value === true)
+                                {
+                                    toLock = true;
+                                }
                             }
-                        }
+                        });
                     }
                     return toLock;
                 }
