@@ -36,7 +36,7 @@
     <div class="row">
         <div class="col-sm-6 form-group">
             <label for="userPasswordInput">Password</label>
-            <input id="userPasswordInput" type="password" pattern='^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!$%@#£€*?&]{8,}$' pattern-err-type="customPassword" class="form-control" ng-model="userEdit.user.Password" confirmpassword="{{userEdit.PasswordConfirm}}"/>
+            <input id="userPasswordInput" name="userPasswordInput" type="password" pattern='^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!$%@#£€*?&]{8,}$' pattern-err-type="customPassword" class="form-control" ng-model="userEdit.user.Password" confirmpassword="{{userEdit.PasswordConfirm}}"/>
         </div>
         <div class="col-sm-6 form-group">
             <label for="securityProfile">User Group</label>
@@ -46,7 +46,7 @@
     <div class="row">
         <div class="col-sm-6 form-group">
             <label for="userPasswordConfirmInput">Confirm Password</label>
-            <input id="userPasswordConfirmInput" type="password" pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!$%@#£€*?&]{8,}$" pattern-err-type="customPassword" class="form-control" ng-model="userEdit.PasswordConfirm" confirmpassword="{{userEdit.user.Password}}"/>
+            <input id="userPasswordConfirmInput" name="userPasswordConfirmInput" type="password" pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!$%@#£€*?&]{8,}$" pattern-err-type="customPassword" class="form-control" ng-model="userEdit.PasswordConfirm" confirmpassword="{{userEdit.user.Password}}"/>
         </div>
         <div class="col-sm-6 form-group">
             <label>User Type</label>
