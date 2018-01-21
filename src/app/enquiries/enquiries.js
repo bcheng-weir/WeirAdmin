@@ -35,14 +35,14 @@ function EnquiriesController($exceptionHandler, EnquiryCategories, OrderCloudSDK
         var opts = {
             'xp': {
                 'en': {
-                    'Name': category.xp.Name
+                    'Name': category.xp.en.Name
                 }
             }
         };
 
         OrderCloudSDK.Categories.Patch('WPIFR_ENQ', category.ID, opts)
             .then(function(category) {
-                toastr.success(category.xp.Name, 'Success');
+                toastr.success(category.xp.en.Name, 'Success');
             })
             .catch(function(ex) {
                 $exceptionHandler(ex);
