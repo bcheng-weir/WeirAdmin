@@ -50,12 +50,12 @@ function orderConfig($stateProvider) {
 	                    return null;
 	                }
 	            },
-	            LineItems: function ($q, $state, toastr, OrderCloudSDK, CurrentOrder, OrderShareService, Order, LineItemHelpers, Buyer) {
+	            LineItems: function ($q, $state, $cookieStore, toastr, OrderCloudSDK, CurrentOrder, OrderShareService, Order, LineItemHelpers, Buyer) {
 	                OrderShareService.LineItems.length = 0;
                     //var isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
                     var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
                     var dfd = $q.defer();
-                    var lang = Buyer.xp.Lang.id;
+                    var lang = Buyer.xp.Lang != null ? Buyer.xp.Lang.id : (Buyer.ID.substring(0,5) == 'WVCUK' ? 'en' : 'fr');
 		            OrderCloudSDK.LineItems.List(direction, Order.ID, { 'filters': {'Order.xp.BuyerID' : Order.xp.BuyerID}})
 			            .then(function(data) {
 				            if (!data.Items.length) {
@@ -83,12 +83,12 @@ function orderConfig($stateProvider) {
 		                });
 		            return dfd.promise;
 	            },
-		        PreviousLineItems: function($q, toastr, OrderCloudSDK, Order, LineItemHelpers, Buyer) {
+		        PreviousLineItems: function($q, $cookieStore, toastr, OrderCloudSDK, Order, LineItemHelpers, Buyer) {
 			        var pieces = Order.ID.split('-Rev');
 			        if(pieces.length > 1) {
 				        var prevId = pieces[0] + "-Rev" + (pieces[1] - 1).toString();
 				        var dfd = $q.defer();
-				        var lang = Buyer.xp.Lang.id;
+				        var lang = Buyer.xp.Lang != null ? Buyer.xp.Lang.id : (Buyer.ID.substring(0,5) == 'WVCUK' ? 'en' : 'fr');
 			            //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
 				        var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 				        OrderCloudSDK.LineItems.List(direction, prevId, { 'filters': { 'Order.xp.BuyerID': Order.xp.BuyerID } })

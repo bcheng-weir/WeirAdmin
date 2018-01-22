@@ -29,11 +29,17 @@
                         <small class="text-muted" ng-hide="lineItem.ProductID=='PLACEHOLDER'">{{lineItem.ProductID}}</small>
                         </br>
                     </td>
+                    <td ng-switch on="minicart.Order.xp.CustomerID | weirGroupFromBuyersID" style="padding-right: 25px;">
+                        <span ng-switch-when="WPIFR" ng-bind-html="lineItem.LineTotal | currency:'&euro; '"></span>
+                        <span ng-switch-when="WVCUK" ng-bind-html="lineItem.LineTotal | currency:'&#163; '"></span>
+                    </td>
+                    <!--
                     <td ng-switch on="lineItem.Product.PriceSchedule.xp.Currency" style="padding-right: 25px;">
                         <span ng-switch-when="EUR">{{lineItem.LineTotal | currency:'&euro;'}}</span>
                         <span ng-switch-when="GBP">{{lineItem.LineTotal | currency:'&#163; '}}</span>
                         <span ng-switch-default>{{lineItem.LineTotal | currency:'&#163; '}}</span>
                     </td>
+                    -->
 
                 </tr>
             </table>
