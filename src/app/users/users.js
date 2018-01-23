@@ -284,7 +284,7 @@ function UserCreateController($exceptionHandler, $state, toastr, OrderCloudSDK, 
                 });
             })
             .catch(function(ex) {
-                $exceptionHandler(ex)
+                $exceptionHandler(ex);
             });
     };
 }
