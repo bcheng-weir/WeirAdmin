@@ -262,7 +262,20 @@ function UserCreateController($exceptionHandler, $state, toastr, OrderCloudSDK, 
     vm.Submit = function() {
         vm.user.TermsAccepted = new Date();
         vm.user.Username = vm.user.Email;
-        OrderCloudSDK.Users.Create(CurrentBuyer.GetBuyerID(), vm.user)
+        OrderCloudSDK.Buyers.Get(CurrentBuyer.GetBuyerID())
+            .then(function(buyer) {
+                if(buyer && buyer.xp && buyer.xp.AKA && buyer.xp.AKA.Active === true) {
+                    angular.forEach(buyer.xp.AKA, function(val,key) {
+                        if(key !== "Active") { //bypass active and look for the relationship.
+                            if(val === true) { //The other buyer is primary.
+                                vm.user.Username = buyer.ID + "-" + vm.user.Username;
+                            }
+                        }
+                    });
+                }
+
+                return OrderCloudSDK.Users.Create(CurrentBuyer.GetBuyerID(), vm.user);
+            })
             .then(function (user) {
                 UserService.UpdateGroup(CurrentBuyer.GetBuyerID(), user.ID, null, vm.user.UserGroupID)
                 .then(function() {
@@ -271,7 +284,7 @@ function UserCreateController($exceptionHandler, $state, toastr, OrderCloudSDK, 
                 });
             })
             .catch(function(ex) {
-                $exceptionHandler(ex)
+                $exceptionHandler(ex);
             });
     };
 }

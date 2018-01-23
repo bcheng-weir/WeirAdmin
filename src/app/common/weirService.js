@@ -292,7 +292,7 @@ function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork
                 return OrderCloudSDK.Buyers.Get(miniCartBuyer.BuyerID);
             }).then(function (buyer) {
             	if(buyer.xp.Lang) {
-            		lang = buyer.xp.Lang.id;
+            		lang = buyer.xp.Lang != null ? buyer.xp.Lang.id : (buyer.ID.substring(0,5) == 'WVCUK' ? 'en' : 'fr');
                 }
                 var opts = {
                     catalogID: order.xp.CustomerID.substring(0, 5),
@@ -359,7 +359,7 @@ function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork
                 OrderCloudSDK.SetImpersonationToken(data['access_token']);
                 return OrderCloudSDK.Buyers.Get(miniCartBuyer.BuyerID);
             }).then(function (buyer) {
-                lang = buyer.xp.Lang.id;
+                lang = buyer.xp.Lang != null ? buyer.xp.Lang.id : (buyer.ID.substring(0,5) == 'WVCUK' ? 'en' : 'fr');
 	            var opts = {
 		        catalogID: order.xp.CustomerID.substring(0, 5),
 		        page: 1,
@@ -416,7 +416,7 @@ function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork
                 return OrderCloudSDK.Buyers.Get(miniCartBuyer.BuyerID);
             })
 	        .then(function (buyer) {
-	            lang = buyer.xp.Lang.id;
+	            lang = buyer.xp.Lang != null ? buyer.xp.Lang.id : (buyer.ID.substring(0,5) == 'WVCUK' ? 'en' : 'fr');
 	            var opts = {
                         page: 1,
                         pageSize: 100,
@@ -477,7 +477,7 @@ function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork
                 return OrderCloudSDK.Buyers.Get(miniCartBuyer.BuyerID);
             })
             .then(function(buyer){
-                lang = buyer.xp.Lang.id;
+                lang = buyer.xp.Lang != null ? buyer.xp.Lang.id : (buyer.ID.substring(0,5) == 'WVCUK' ? 'en' : 'fr');
                 angular.forEach(serialNumbers, function (number) {
                         if (number) {
                             queue.push((function () {
@@ -549,7 +549,7 @@ function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork
                 return OrderCloudSDK.Buyers.Get(miniCartBuyer.BuyerID);
             })
             .then(function(buyer){
-                lang = buyer.xp.Lang.id;
+                lang = buyer.xp.Lang != null ? buyer.xp.Lang.id : (buyer.ID.substring(0,5) == 'WVCUK' ? 'en' : 'fr');
                 angular.forEach(tagNumbers, function (number) {
                         if (number) {
                             queue.push((function () {
@@ -645,7 +645,7 @@ function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork
                                 OrderCloudSDK.SetImpersonationToken(data['access_token']);
                                 return OrderCloudSDK.Buyers.Get(miniCartBuyer.BuyerID);
                             }).then(function (buyer) {
-                                lang = buyer.xp.Lang.id;
+                                lang = buyer.xp.Lang != null ? buyer.xp.Lang.id : (buyer.ID.substring(0,5) == 'WVCUK' ? 'en' : 'fr');
                                 var opts = {
                                     page: 1,
                                     pageSize: 50,
