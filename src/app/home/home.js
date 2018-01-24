@@ -45,10 +45,11 @@ function HomeConfig($stateProvider) {
 		});
 }
 
-function HomeController($sce, WeirService, IsAdmin, IsInternalSales) {
+function HomeController($sce, WeirService, IsAdmin, IsInternalSales, CurrentUser) {
     var vm = this;
     vm.IsAdmin = IsAdmin;
     vm.CanEditCustomers = IsAdmin || IsInternalSales;
+    vm.currentUser = CurrentUser; //We get this from base.js
 
 	var labels = {
 		en: {
