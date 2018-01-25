@@ -28,13 +28,17 @@
                                 <span ng-if='order.showReviewer && !order.Order.xp.ReviewerName' ng-bind-html='order.labels.unassigned'></span>
                             </h4>
                         </li>
-                        <li style="padding: 10px 0px 0px 10px;" ng-show="order.Order.xp.PONumber!=null">
+                        <li style="padding: 10px 16px 0px 10px;" ng-show="order.Order.xp.PONumber!=null">
                             <span ng-bind-html='order.labels.PONumber'></span><br />
-                            <h4><span ng-bind-html='order.Order.xp.PONumber'></span></h4>
+                            <h4>
+                                <span ng-bind-html='order.Order.xp.PONumber'></span>
+                            </h4>
                         </li>
-                        <li style="padding: 10px 16px 0px 0px;">
+                        <li style="padding: 10px 16px 0px 10px;">
                             <span ng-bind-html='order.labels.Language'></span><br />
-                            <h4><span ng-bind-html="order.getLanguage()"></span></h4>
+                            <h4>
+                                <span ng-bind-html="order.getLanguage()"></span>
+                            </h4>
                         </li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
