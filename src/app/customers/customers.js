@@ -162,6 +162,27 @@ function CustomerConfig($stateProvider) {
                         filters: filter
                     };
                     return OrderCloudSDK.Buyers.List(opts);
+                },
+                BuyerListNames: function(OrderCloudSDK, BuyerList, $q) {
+                    var promises = [];
+                    var deferred = $q.defer();
+                    angular.forEach(BuyerList.Items, function(val,key) {
+                        angular.forEach(val.xp.AKA,function(v,k) {
+                            if(k !== 'Active') {
+                                var promise = OrderCloudSDK.Buyers.Get(k);
+                                promises.push(promise);
+                            }
+                        });
+                    });
+
+                    $q.all(promises)
+                        .then(function(results) {
+                            deferred.resolve(results);
+                        })
+                        .catch(function (ex) {
+                            deferred.reject(ex);
+                        });
+                    return deferred.promise;
                 }
             }
         });
@@ -1020,23 +1041,32 @@ function CustomerAssignCtrl($exceptionHandler, $scope, $state, toastr, Underscor
     };
 }
 
-function CustomersSharedCtrl($state, $ocMedia, OrderCloudSDK, OrderCloudParameters, Parameters, BuyerList, CustomerService, WeirService, CurrentBuyer, Me) {
+function CustomersSharedCtrl($state, $ocMedia, OrderCloudSDK, OrderCloudParameters, Parameters, BuyerList, CustomerService, WeirService, CurrentBuyer, Me, BuyerListNames) {
     var vm = this;
-
     vm.currentWeirGroup = Me.xp.WeirGroup.label;
     vm.relatedWeirGroup = Me.xp.WeirGroup.label == 'WVCUK' ? 'WPIFR' : 'WVCUK';
 
+    //Get the Customer Name for each of the related customers.
     vm.list = BuyerList;
     angular.forEach(vm.list.Items,function(value,key) {
         if(value && value.xp && value.xp.AKA) {
             angular.forEach(value.xp.AKA, function(v,k) {
                 if(k != 'Active') {
                     value.SharedCustomer = k;
+
+                    angular.forEach(BuyerListNames, function(va,ke) {
+                        if(va.ID = k) {
+                            value.SharedCustomerName = va.Name;
+                        }
+                    });
+
+                    //value.SharedCustomerName = Underscore.findWhere(BuyerListNames,{ID:k});
                     value.SharedPrimary = v ? k.substring(0, 5) : Me.xp.WeirGroup.label;
                 }
             });
         }
     });
+
     vm.parameters = Parameters;
     vm.sortSelection =  Parameters.sortBy ? (Parameters.sortBy.indexOf('!') == 0 ? Parameters.sortBy.split('!')[1] : Parameters.sortBy) : null;
     vm.labels = CustomerService.Labels[WeirService.Locale()];
