@@ -44,11 +44,13 @@
                     <label for="buyer_type">Customer Type</label>
                     <input id="buyer_type" type="text" ng-disabled="true" ng-model="customerEdit.buyer.xp.Type.label" />
                 </div>
-                <div class="form-group col-md-6">
+                <div class="form-group col-md-6" ng-if="customerEdit.weirGroupID=='WPIFR'">
                     <label for="buyer_language">{{customerEdit.labels.CustomerLanguage}}</label>
                     <select id="buyer_language" class="form-control" ng-model="customerEdit.buyer.xp.Lang" ng-options="d.label for d in customers.languages track by d.id">
                         <option value="">{{customerEdit.labels.SelectLanguage}}</option>
                     </select>
+                </div>
+                <div class="form-group col-md-6" ng-if="customerEdit.weirGroupID=='WVCUK'">
                 </div>
             </div>
             <div class="row">
