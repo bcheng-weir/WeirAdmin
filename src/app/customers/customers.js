@@ -464,7 +464,7 @@ function CustomerEditCtrl($exceptionHandler, $state, $ocMedia, toastr, OrderClou
     vm.buyer = SelectedBuyer;
     vm.RelatedBuyer = RelatedBuyer;
     vm.ToLockRelatedBuyer = ToLockRelatedCustomerNumber;
-    vm.RelatedBuyerID = RelatedBuyer && RelatedBuyer.ID ? angular.copy(RelatedBuyer.ID) : null;
+    vm.RelatedBuyerID = RelatedBuyer && RelatedBuyer.ID ? angular.copy(RelatedBuyer.ID + ": " + RelatedBuyer.Name) : null;
     vm.relatedWeirGroup = WeirGroup.ID == 'WVCUK' ? 'WPIFR' : 'WVCUK';
 
     vm.list = AddressList;
@@ -552,7 +552,7 @@ function CustomerEditCtrl($exceptionHandler, $state, $ocMedia, toastr, OrderClou
 
     vm.Submit = function() {
         var RelatedBuyerKey = null;
-
+        vm.RelatedBuyerID = vm.RelatedBuyerID.split(": ")[0];
         // If a value is entered in to the related customer number
         if(vm.RelatedBuyerID && vm.RelatedBuyerID !== "") { //Update the current buyer with an AKA relationship.
             RelatedBuyerKey = vm.RelatedBuyerID;
