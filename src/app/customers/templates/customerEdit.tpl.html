@@ -27,7 +27,7 @@
                     <!--<input id="customernumber" type="text" ng-model="customerEdit.buyer.xp.CustomerNumber" class="form-control">-->
                     <input type="text"
                            ng-model="customerEdit.RelatedBuyerID"
-                           uib-typeahead="c.ID as (c.ID + ': ' + c.Name) for c in customerEdit.SearchCustomers.GetCustomers($viewValue, customerEdit.relatedWeirGroup)"
+                           uib-typeahead="c.ID + ': ' + c.Name as (c.ID + ': ' + c.Name) for c in customerEdit.SearchCustomers.GetCustomers($viewValue, customerEdit.relatedWeirGroup)"
                            typeahead-loading="loadingCustomers"
                            typeahead-no-results="noResults"
                            typeahead-min-length="3"
