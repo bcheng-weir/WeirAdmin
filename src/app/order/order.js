@@ -221,7 +221,15 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		) {
 			return null;
 		} else {
-			return "UPDATED";
+			if(current.Product.xp.LeadTime === previous.Product.xp.LeadTime && current.xp.LeadTime === previous.xp.LeadTime
+			&& current.Product.xp.ReplacementSchedule === previous.Product.xp.ReplacementSchedule && current.xp.ReplacementSchedule === previous.xp.ReplacementSchedule
+            && current.Product.Description === previous.Product.Description && current.xp.Description === previous.xp.Description
+				&& current.Product.Name === previous.Product.Name && current.xp.ProductName === previous.xp.ProductName)
+			{
+				return null;
+			}
+			else
+				return "UPDATED";
 		}
 	}
 
@@ -777,7 +785,13 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     vm.ShowUpdatedShipping = function () {
     	if(vm.Order.xp.OldShippingData) {
             if (vm.Order.ShippingCost != vm.Order.xp.OldShippingData.ShippingCost || vm.Order.xp.ShippingDescription != vm.Order.xp.OldShippingData.ShippingDescription) {
-                return true;
+                if(vm.Order.xp.WasEnquiry  == true && vm.Order.xp.OldShippingData.ShippingCost === 0 && vm.Order.ShippingCost > 0
+                    && vm.Order.xp.OldShippingData.ShippingDescription == null)
+                {
+
+                    return false;
+                }
+                else return true;
             } else {
                 return false;
             }
