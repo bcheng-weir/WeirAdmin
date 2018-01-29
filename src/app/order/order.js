@@ -224,7 +224,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			if(current.Product.xp.LeadTime === previous.Product.xp.LeadTime && current.xp.LeadTime === previous.xp.LeadTime
 			&& current.Product.xp.ReplacementSchedule === previous.Product.xp.ReplacementSchedule && current.xp.ReplacementSchedule === previous.xp.ReplacementSchedule
             && current.Product.Description === previous.Product.Description && current.xp.Description === previous.xp.Description
-				&& current.Product.Name === previous.Product.Name && current.xp.ProductName === previous.xp.ProductName)
+				&& current.Product.Name === previous.Product.Name && current.xp.ProductName === previous.xp.ProductName
+			&& current.Quantity === previous.Quantity)
 			{
 				return null;
 			}
