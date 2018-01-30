@@ -186,53 +186,55 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
         Buyer.xp.Lang.id = Buyer.xp.Lang.id || "";
     	return Buyer.xp.Lang.id.toUpperCase();
 	};
-
-	//Part of the label comparison
-	function compare(current,previous) {
-		if(current.Quantity === previous.Quantity &&
-			current.UnitPrice === previous.UnitPrice &&
-			current.xp.TagNumber === previous.xp.TagNumber &&
-			current.xp.SN === previous.xp.SN &&
-			(
-				(typeof current.Product.xp.LeadTime !== "undefined" && typeof previous.Product.xp.LeadTime !== "undefined" &&
-				current.Product.xp.LeadTime === previous.Product.xp.LeadTime) ||
-				(typeof current.xp.LeadTime !== "undefined" && typeof previous.xp.LeadTime !== "undefined" &&
-				current.xp.LeadTime === previous.xp.LeadTime)
-			) &&
-			(
-				(typeof current.Product.xp.ReplacementSchedule !== "undefined" && typeof previous.Product.xp.ReplacementSchedule !== "undefined" &&
-				current.Product.xp.ReplacementSchedule === previous.Product.xp.ReplacementSchedule) ||
-				(typeof current.xp.ReplacementSchedule !== "undefined" && typeof previous.xp.ReplacementSchedule !== "undefined" &&
-				current.xp.ReplacementSchedule === previous.xp.ReplacementSchedule)
-			) &&
-			(
-				(typeof current.Product.Description !== "undefined" && typeof previous.Product.Description !== "undefined" &&
-				current.Product.Description === previous.Product.Description) ||
-				(typeof current.xp.Description !== "undefined" && typeof previous.xp.Description !== "undefined" &&
-				current.xp.Description === previous.xp.Description)
-			)
-			&&
-			(
-				(typeof current.Product.Name !== "undefined" && typeof previous.Product.Name !== "undefined" &&
-				current.Product.Name === previous.Product.Name) ||
-				(typeof current.xp.ProductName !== "undefined" && typeof previous.xp.ProductName !== "undefined" &&
-				current.xp.ProductName === previous.xp.ProductName)
-			)
-		) {
-			return null;
-		} else {
-			if(current.Product.xp.LeadTime === previous.Product.xp.LeadTime && current.xp.LeadTime === previous.xp.LeadTime
-			&& current.Product.xp.ReplacementSchedule === previous.Product.xp.ReplacementSchedule && current.xp.ReplacementSchedule === previous.xp.ReplacementSchedule
-            && current.Product.Description === previous.Product.Description && current.xp.Description === previous.xp.Description
-				&& current.Product.Name === previous.Product.Name && current.xp.ProductName === previous.xp.ProductName
-			&& current.Quantity === previous.Quantity)
+    function notUpdated(newObj, oldObj)
+	{
+		if(typeof newObj !== "undefined" && typeof oldObj !== "undefined" && newObj === oldObj)
+		{
+			return true;
+		}
+		else
+		{
+			if(newObj == oldObj || ((!newObj || newObj == 0) && (typeof oldObj === "undefined" || oldObj == null)))
 			{
-				return null;
+				return true;
 			}
 			else
-				return "UPDATED";
+			{
+				return false;
+			}
 		}
 	}
+	//Part of the label comparison
+	function compare(current,previous) {
+        if (notUpdated(current.Quantity, previous.Quantity) &&
+            notUpdated(current.UnitPrice, previous.UnitPrice) &&
+            notUpdated(current.xp.TagNumber, previous.xp.TagNumber) &&
+            notUpdated(current.xp.SN, previous.xp.SN) &&
+            (
+                notUpdated(current.xp.LeadTime, previous.xp.LeadTime) == false
+				||  notUpdated(current.Product.xp.LeadTime, previous.Product.xp.LeadTime) == false ? false : true
+            ) &&
+            (
+                notUpdated(current.Product.xp.ReplacementSchedule, previous.Product.xp.ReplacementSchedule) == false
+				|| notUpdated(current.xp.ReplacementSchedule , previous.xp.ReplacementSchedule) == false ? false : true
+            ) &&
+            (
+                notUpdated(current.Product.Description , previous.Product.Description) == false ||
+                notUpdated(current.xp.Description , previous.xp.Description) == false ? false : true
+            )
+            &&
+            (
+                notUpdated(current.Product.Name , previous.Product.Name) == false ||
+                notUpdated(current.xp.ProductName , previous.xp.ProductName) == false ? false : true
+            )
+        )
+        {
+            return null;
+        }
+        else {
+            return "UPDATED";
+        }
+    }
 
 	if(LineItems && PreviousLineItems) { //hopefully an easier way to set labels.
 		// For each line item, does it exist in previous line items?  If NO then NEW, else are the fields different between the two? If YES then updated.
@@ -701,7 +703,21 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			vm.BlankItems.push(newItem);
 		}
 	}
-
+	function mapValuesForProperties(obj1, obj2, defaultVal)
+	{
+		if(obj1 || obj1 == "")
+		{
+			return obj1;
+		}
+		else if(obj2)
+		{
+			return obj2;
+		}
+		else
+		{
+			return defaultVal;
+		}
+	}
 	vm.saveLineItems = function() {
 		var queue = [];
 		var deferred = $q.defer();
@@ -714,18 +730,51 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			queue.push((function() {
 				if(line.Quantity > 0) {
 					// Is this a placeholder item?
-					var patch = {
-						UnitPrice: line.UnitPrice,
-						Quantity: line.Quantity,
-						xp: {
-							SN: line.xp.SN,
-							TagNumber: line.xp.TagNumber,
-							ProductName: line.xp.ProductName ? line.xp.ProductName : line.Product.Name,
-							Description: line.xp.Description ? line.xp.Description : line.Product.Description,
-							ReplacementSchedule: line.xp.ReplacementSchedule ? line.xp.ReplacementSchedule : line.Product.xp.ReplacementSchedule,
-							LeadTime: line.xp.LeadTime ? line.xp.LeadTime : line.Product.xp.LeadTime
-						}
-					};
+					var patch;
+					if(line.Product.xp.EnquiryCatalogID)
+					{
+						console.log(line.Product.xp);
+						//can someone edit a product ID ? that would change all enquiries?
+						var enq_unitPrice, enq_Quanitity, enq_xp_SN, enq_xp_TagNumber, enq_xp_ProductName, enq_xp_Description, enq_xp_ReplacementSchedule, enq_xp_LeadTime;
+                        enq_unitPrice = mapValuesForProperties(line.UnitPrice, 0, 0);
+                        enq_Quanitity = mapValuesForProperties(line.Quantity, 0, 0);
+                        enq_xp_SN = mapValuesForProperties(line.xp.SN, "", "");
+                        enq_xp_TagNumber = mapValuesForProperties(line.xp.TagNumber, "", "");
+                        enq_xp_ProductName = mapValuesForProperties(line.xp.ProductName, "", "");
+                        //should this be happening? I have seen notice that we need to use comment section.
+                        enq_xp_Description = mapValuesForProperties(line.xp.Description, "", "");
+                        enq_xp_ReplacementSchedule = mapValuesForProperties(line.xp.ReplacementSchedule, line.Product.xp.ReplacementSchedule, "");
+                        enq_xp_LeadTime = mapValuesForProperties(line.xp.LeadTime , line.Product.xp.LeadTime, "");
+
+                        patch = {
+                            UnitPrice: enq_unitPrice,
+                            Quantity: enq_Quanitity,
+                            xp: {
+                                SN: enq_xp_SN,
+                                TagNumber: enq_xp_TagNumber,
+                                ProductName: enq_xp_ProductName,
+                                Description: enq_xp_Description,
+                                ReplacementSchedule: enq_xp_ReplacementSchedule,
+                                LeadTime: enq_xp_LeadTime
+                            }
+                        };
+
+					}
+					else {
+						//if not enquiry- should we use specific product's values thats in the system? Do certain fields have certain rules?
+                        patch = {
+                            UnitPrice: line.UnitPrice,
+                            Quantity: line.Quantity,
+                            xp: {
+                                SN: line.xp.SN,
+                                TagNumber: line.xp.TagNumber,
+                                ProductName: line.xp.ProductName ? line.xp.ProductName : line.Product.Name,
+                                Description: line.xp.Description ? line.xp.Description : line.Product.Description,
+                                ReplacementSchedule: line.xp.ReplacementSchedule ? line.xp.ReplacementSchedule : line.Product.xp.ReplacementSchedule,
+                                LeadTime: line.xp.LeadTime ? line.xp.LeadTime : line.Product.xp.LeadTime
+                            }
+                        };
+                    }
 					OrderCloudSDK.LineItems.Patch(direction, vm.Order.ID, line.ID, patch)
 						.then(function (results) {
 							d.resolve(results);
