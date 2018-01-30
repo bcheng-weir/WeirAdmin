@@ -1055,7 +1055,7 @@ function CustomersSharedCtrl($state, $ocMedia, OrderCloudSDK, OrderCloudParamete
                     value.SharedCustomer = k;
 
                     angular.forEach(BuyerListNames, function(va,ke) {
-                        if(va.ID = k) {
+                        if(va.ID == k) {
                             value.SharedCustomerName = va.Name;
                         }
                     });
