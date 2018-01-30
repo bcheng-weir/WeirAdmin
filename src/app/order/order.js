@@ -855,7 +855,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 				})
 				.catch(function(ex) {
 					$exceptionHandler(ex);
-				})
+				});
 		}
 	}
 
