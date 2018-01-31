@@ -188,21 +188,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	};
     function notUpdated(newObj, oldObj)
 	{
-		if(typeof newObj !== "undefined" && typeof oldObj !== "undefined" && newObj === oldObj)
-		{
-			return true;
-		}
-		else
-		{
-			if(newObj == oldObj || ((!newObj || newObj == 0) && (typeof oldObj === "undefined" || oldObj == null)))
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
+		return newObj === oldObj;
 	}
 	//Part of the label comparison
 	function compare(current,previous) {
@@ -210,25 +196,11 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
             notUpdated(current.UnitPrice, previous.UnitPrice) &&
             notUpdated(current.xp.TagNumber, previous.xp.TagNumber) &&
             notUpdated(current.xp.SN, previous.xp.SN) &&
-            (
-                notUpdated(current.xp.LeadTime, previous.xp.LeadTime) == false
-				||  notUpdated(current.Product.xp.LeadTime, previous.Product.xp.LeadTime) == false ? false : true
-            ) &&
-            (
-                notUpdated(current.Product.xp.ReplacementSchedule, previous.Product.xp.ReplacementSchedule) == false
-				|| notUpdated(current.xp.ReplacementSchedule , previous.xp.ReplacementSchedule) == false ? false : true
-            ) &&
-            (
-                notUpdated(current.Product.Description , previous.Product.Description) == false ||
-                notUpdated(current.xp.Description , previous.xp.Description) == false ? false : true
-            )
-            &&
-            (
-                notUpdated(current.Product.Name , previous.Product.Name) == false ||
-                notUpdated(current.xp.ProductName , previous.xp.ProductName) == false ? false : true
-            )
-        )
-        {
+            notUpdated(current.xp.LeadTime, previous.xp.LeadTime) &&
+            notUpdated(current.xp.ReplacementSchedule , previous.xp.ReplacementSchedule) &&
+            notUpdated(current.xp.Description , previous.xp.Description) &&
+            notUpdated(current.xp.ProductName , previous.xp.ProductName)
+		) {
             return null;
         }
         else {
@@ -518,25 +490,21 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 				) ||
 				(typeof item.xp.OriginalLeadTime !== "undefined" &&
 					(
-						(typeof item.Product.xp.LeadTime !== "undefined" && (item.xp.OriginalLeadTime !== item.Product.xp.LeadTime)) ||
 						(typeof item.xp.LeadTime !== "undefined" && (item.xp.OriginalLeadTime !== item.xp.LeadTime))
 					)
 				) ||
 				(typeof item.xp.OriginalReplacementSchedule !== "undefined" &&
 					(
-						(typeof item.Product.xp.ReplacementSchedule !== "undefined" && (item.xp.OriginalReplacementSchedule !== item.Product.xp.ReplacementSchedule)) ||
 						(typeof item.xp.ReplacementSchedule !== "undefined" && (item.xp.OriginalReplacementSchedule !== item.xp.ReplacementSchedule))
 					)
 				) ||
 				(typeof item.xp.OriginalDescription !== "undefined" &&
 					(
-						(typeof item.Product.xp.Description !== "undefined" && (item.xp.OriginalDescription !== item.Product.xp.Description)) ||
 						(typeof item.xp.Description !== "undefined" && (item.xp.OriginalDescription !== item.xp.Description))
 					)
 				) ||
 				(typeof item.xp.OriginalProductName !== "undefined" &&
 					(
-						(typeof item.Product.xp.Name !== "undefined" && (item.xp.OriginalProductName !== item.Product.xp.Name)) ||
 						(typeof item.xp.ProductName !== "undefined" && (item.xp.OriginalProductName !== item.xp.ProductName))
 					)
 				) ||
@@ -661,7 +629,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 					ProductName: line.xp.ProductName,
 					Description: line.xp.Description,
 					ReplacementSchedule: line.xp.ReplacementSchedule,
-					LeadTime: line.xp.LeadTime,
+					LeadTime: line.xp.LeadTime
 				}
 			};
 			//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
@@ -705,7 +673,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	}
 	function mapValuesForProperties(obj1, obj2, defaultVal)
 	{
-		if(obj1 || obj1 == "")
+		if(obj1)
 		{
 			return obj1;
 		}
@@ -730,51 +698,18 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			queue.push((function() {
 				if(line.Quantity > 0) {
 					// Is this a placeholder item?
-					var patch;
-					if(line.Product.xp.EnquiryCatalogID)
-					{
-						console.log(line.Product.xp);
-						//can someone edit a product ID ? that would change all enquiries?
-						var enq_unitPrice, enq_Quanitity, enq_xp_SN, enq_xp_TagNumber, enq_xp_ProductName, enq_xp_Description, enq_xp_ReplacementSchedule, enq_xp_LeadTime;
-                        enq_unitPrice = mapValuesForProperties(line.UnitPrice, 0, 0);
-                        enq_Quanitity = mapValuesForProperties(line.Quantity, 0, 0);
-                        enq_xp_SN = mapValuesForProperties(line.xp.SN, "", "");
-                        enq_xp_TagNumber = mapValuesForProperties(line.xp.TagNumber, "", "");
-                        enq_xp_ProductName = mapValuesForProperties(line.xp.ProductName, "", "");
-                        //should this be happening? I have seen notice that we need to use comment section.
-                        enq_xp_Description = mapValuesForProperties(line.xp.Description, "", "");
-                        enq_xp_ReplacementSchedule = mapValuesForProperties(line.xp.ReplacementSchedule, line.Product.xp.ReplacementSchedule, "");
-                        enq_xp_LeadTime = mapValuesForProperties(line.xp.LeadTime , line.Product.xp.LeadTime, "");
-
-                        patch = {
-                            UnitPrice: enq_unitPrice,
-                            Quantity: enq_Quanitity,
+					var patch = {
+                            UnitPrice: line.UnitPrice ? line.UnitPrice : 0,
+                            Quantity: line.Quantity ? line.Quantity : 0,
                             xp: {
-                                SN: enq_xp_SN,
-                                TagNumber: enq_xp_TagNumber,
-                                ProductName: enq_xp_ProductName,
-                                Description: enq_xp_Description,
-                                ReplacementSchedule: enq_xp_ReplacementSchedule,
-                                LeadTime: enq_xp_LeadTime
+                                SN: line.xp.SN ? line.xp.SN : "",
+                                TagNumber: line.xp.TagNumber ? line.xp.TagNumber : "",
+                                ProductName: typeof line.xp.ProductName === 'undefined' ? line.Product.Name: line.xp.ProductName,
+                                Description: typeof line.xp.Description === 'undefined' ? line.Product.Description : line.xp.Description,
+                                ReplacementSchedule: typeof line.xp.ReplacementSchedule === 'undefined' ? line.Product.xp.ReplacementSchedule : line.xp.ReplacementSchedule,
+                                LeadTime: typeof line.xp.LeadTime === 'undefined' ?  line.Product.xp.LeadTime: line.xp.LeadTime
                             }
                         };
-
-					}
-					else {
-						//if not enquiry- should we use specific product's values thats in the system? Do certain fields have certain rules?
-                        patch = {
-                            UnitPrice: line.UnitPrice,
-                            Quantity: line.Quantity,
-                            xp: {
-                                SN: line.xp.SN,
-                                TagNumber: line.xp.TagNumber,
-                                ProductName: line.xp.ProductName ? line.xp.ProductName : line.Product.Name,
-                                Description: line.xp.Description ? line.xp.Description : line.Product.Description,
-                                ReplacementSchedule: line.xp.ReplacementSchedule ? line.xp.ReplacementSchedule : line.Product.xp.ReplacementSchedule,
-                                LeadTime: line.xp.LeadTime ? line.xp.LeadTime : line.Product.xp.LeadTime
-                            }
-                        };
-                    }
 					OrderCloudSDK.LineItems.Patch(direction, vm.Order.ID, line.ID, patch)
 						.then(function (results) {
 							d.resolve(results);

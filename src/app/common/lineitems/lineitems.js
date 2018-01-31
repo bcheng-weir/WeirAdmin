@@ -108,6 +108,10 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
 					    angular.forEach(li, function (item) {
 						    if(item.ProductID != "PLACEHOLDER") {
 							    item.Product = angular.copy(Underscore.where(results, {ID: item.ProductID})[0]);
+                                item.xp.ProductName = typeof item.xp.ProductName === 'undefined' ? item.Product.Name: item.xp.ProductName;
+                                item.xp.Description = typeof item.xp.Description === 'undefined' ? item.Product.Description : item.xp.Description;
+                                item.xp.ReplacementSchedule = typeof item.xp.ReplacementSchedule === 'undefined' ? item.Product.xp.ReplacementSchedule : item.xp.ReplacementSchedule;
+                                item.xp.LeadTime = typeof item.xp.LeadTime === 'undefined' ?  item.Product.xp.LeadTime: item.xp.LeadTime;
 						    }
 					    });
 					    dfd.resolve(li);
@@ -130,13 +134,15 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
 	    	if(item.ProductID == "PLACEHOLDER") {
 	    		item.Product = {
 				    "Name": item.xp.ProductName,
-				    "Description": item.xp.Description,
-				    "xp": {
-					    "ReplacementSchedule": item.xp.ReplacementSchedule,
-					    "LeadTime": item.xp.LeadTime
-				    }
+				    "Description": item.xp.Description
 			    };
-		    }
+                item.xp.ProductName = typeof item.xp.ProductName === 'undefined' ? item.Product.Name: item.xp.ProductName;
+                item.xp.Description = typeof item.xp.Description === 'undefined' ? item.Product.Description : item.xp.Description;
+                item.xp.ReplacementSchedule = typeof item.xp.ReplacementSchedule === 'undefined' ? item.Product.xp.ReplacementSchedule : item.xp.ReplacementSchedule;
+                item.xp.LeadTime = typeof item.xp.LeadTime === 'undefined' ?  item.Product.xp.LeadTime: item.xp.LeadTime;
+                item.xp.TagNumber = typeof item.xp.TagNumber === 'undefined' ? "" : item.xp.TagNumber;
+                item.xp.SN = typeof item.xp.SN === 'undefined' ? "" : item.xp.SN;
+            }
 	    });
 
 	    return li;
