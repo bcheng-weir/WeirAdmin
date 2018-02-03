@@ -186,44 +186,27 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
         Buyer.xp.Lang.id = Buyer.xp.Lang.id || "";
     	return Buyer.xp.Lang.id.toUpperCase();
 	};
-
+    function notUpdated(newObj, oldObj)
+	{
+		return newObj === oldObj;
+	}
 	//Part of the label comparison
 	function compare(current,previous) {
-		if(current.Quantity === previous.Quantity &&
-			current.UnitPrice === previous.UnitPrice &&
-			current.xp.TagNumber === previous.xp.TagNumber &&
-			current.xp.SN === previous.xp.SN &&
-			(
-				(typeof current.Product.xp.LeadTime !== "undefined" && typeof previous.Product.xp.LeadTime !== "undefined" &&
-				current.Product.xp.LeadTime === previous.Product.xp.LeadTime) ||
-				(typeof current.xp.LeadTime !== "undefined" && typeof previous.xp.LeadTime !== "undefined" &&
-				current.xp.LeadTime === previous.xp.LeadTime)
-			) &&
-			(
-				(typeof current.Product.xp.ReplacementSchedule !== "undefined" && typeof previous.Product.xp.ReplacementSchedule !== "undefined" &&
-				current.Product.xp.ReplacementSchedule === previous.Product.xp.ReplacementSchedule) ||
-				(typeof current.xp.ReplacementSchedule !== "undefined" && typeof previous.xp.ReplacementSchedule !== "undefined" &&
-				current.xp.ReplacementSchedule === previous.xp.ReplacementSchedule)
-			) &&
-			(
-				(typeof current.Product.Description !== "undefined" && typeof previous.Product.Description !== "undefined" &&
-				current.Product.Description === previous.Product.Description) ||
-				(typeof current.xp.Description !== "undefined" && typeof previous.xp.Description !== "undefined" &&
-				current.xp.Description === previous.xp.Description)
-			)
-			&&
-			(
-				(typeof current.Product.Name !== "undefined" && typeof previous.Product.Name !== "undefined" &&
-				current.Product.Name === previous.Product.Name) ||
-				(typeof current.xp.ProductName !== "undefined" && typeof previous.xp.ProductName !== "undefined" &&
-				current.xp.ProductName === previous.xp.ProductName)
-			)
+        if (notUpdated(current.Quantity, previous.Quantity) &&
+            notUpdated(current.UnitPrice, previous.UnitPrice) &&
+            notUpdated(current.xp.TagNumber, previous.xp.TagNumber) &&
+            notUpdated(current.xp.SN, previous.xp.SN) &&
+            notUpdated(current.xp.LeadTime, previous.xp.LeadTime) &&
+            notUpdated(current.xp.ReplacementSchedule , previous.xp.ReplacementSchedule) &&
+            notUpdated(current.xp.Description , previous.xp.Description) &&
+            notUpdated(current.xp.ProductName , previous.xp.ProductName)
 		) {
-			return null;
-		} else {
-			return "UPDATED";
-		}
-	}
+            return null;
+        }
+        else {
+            return "UPDATED";
+        }
+    }
 
 	if(LineItems && PreviousLineItems) { //hopefully an easier way to set labels.
 		// For each line item, does it exist in previous line items?  If NO then NEW, else are the fields different between the two? If YES then updated.
@@ -507,25 +490,21 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 				) ||
 				(typeof item.xp.OriginalLeadTime !== "undefined" &&
 					(
-						(typeof item.Product.xp.LeadTime !== "undefined" && (item.xp.OriginalLeadTime !== item.Product.xp.LeadTime)) ||
 						(typeof item.xp.LeadTime !== "undefined" && (item.xp.OriginalLeadTime !== item.xp.LeadTime))
 					)
 				) ||
 				(typeof item.xp.OriginalReplacementSchedule !== "undefined" &&
 					(
-						(typeof item.Product.xp.ReplacementSchedule !== "undefined" && (item.xp.OriginalReplacementSchedule !== item.Product.xp.ReplacementSchedule)) ||
 						(typeof item.xp.ReplacementSchedule !== "undefined" && (item.xp.OriginalReplacementSchedule !== item.xp.ReplacementSchedule))
 					)
 				) ||
 				(typeof item.xp.OriginalDescription !== "undefined" &&
 					(
-						(typeof item.Product.xp.Description !== "undefined" && (item.xp.OriginalDescription !== item.Product.xp.Description)) ||
 						(typeof item.xp.Description !== "undefined" && (item.xp.OriginalDescription !== item.xp.Description))
 					)
 				) ||
 				(typeof item.xp.OriginalProductName !== "undefined" &&
 					(
-						(typeof item.Product.xp.Name !== "undefined" && (item.xp.OriginalProductName !== item.Product.xp.Name)) ||
 						(typeof item.xp.ProductName !== "undefined" && (item.xp.OriginalProductName !== item.xp.ProductName))
 					)
 				) ||
@@ -650,7 +629,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 					ProductName: line.xp.ProductName,
 					Description: line.xp.Description,
 					ReplacementSchedule: line.xp.ReplacementSchedule,
-					LeadTime: line.xp.LeadTime,
+					LeadTime: line.xp.LeadTime
 				}
 			};
 			//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
@@ -692,31 +671,43 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			vm.BlankItems.push(newItem);
 		}
 	}
-
+	function mapValuesForProperties(obj1, obj2, defaultVal)
+	{
+		if(obj1)
+		{
+			return obj1;
+		}
+		else if(obj2)
+		{
+			return obj2;
+		}
+		else
+		{
+			return defaultVal;
+		}
+	}
 	vm.saveLineItems = function() {
 		var queue = [];
 		var deferred = $q.defer();
-		//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-		var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+		var direction = "Incoming";
 
 		angular.forEach(vm.LineItems, function(line,key) {
-			console.log(line);
 			var d = $q.defer();
 			queue.push((function() {
 				if(line.Quantity > 0) {
 					// Is this a placeholder item?
 					var patch = {
-						UnitPrice: line.UnitPrice,
-						Quantity: line.Quantity,
-						xp: {
-							SN: line.xp.SN,
-							TagNumber: line.xp.TagNumber,
-							ProductName: line.xp.ProductName ? line.xp.ProductName : line.Product.Name,
-							Description: line.xp.Description ? line.xp.Description : line.Product.Description,
-							ReplacementSchedule: line.xp.ReplacementSchedule ? line.xp.ReplacementSchedule : line.Product.xp.ReplacementSchedule,
-							LeadTime: line.xp.LeadTime ? line.xp.LeadTime : line.Product.xp.LeadTime
-						}
-					};
+                            UnitPrice: line.UnitPrice,
+                            Quantity: line.Quantity,
+                            xp: {
+                                SN: line.xp.SN,
+                                TagNumber: line.xp.TagNumber,
+                                ProductName: line.xp.ProductName,
+                                Description: line.xp.Description,
+                                ReplacementSchedule: line.xp.ReplacementSchedule,
+                                LeadTime: line.xp.LeadTime
+                            }
+                        };
 					OrderCloudSDK.LineItems.Patch(direction, vm.Order.ID, line.ID, patch)
 						.then(function (results) {
 							d.resolve(results);
@@ -777,7 +768,13 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     vm.ShowUpdatedShipping = function () {
     	if(vm.Order.xp.OldShippingData) {
             if (vm.Order.ShippingCost != vm.Order.xp.OldShippingData.ShippingCost || vm.Order.xp.ShippingDescription != vm.Order.xp.OldShippingData.ShippingDescription) {
-                return true;
+                if(vm.Order.xp.WasEnquiry  == true && vm.Order.xp.OldShippingData.ShippingCost === 0 && vm.Order.ShippingCost > 0
+                    && vm.Order.xp.OldShippingData.ShippingDescription == null)
+                {
+
+                    return false;
+                }
+                else return true;
             } else {
                 return false;
             }
@@ -840,7 +837,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 				})
 				.catch(function(ex) {
 					$exceptionHandler(ex);
-				})
+				});
 		}
 	}
 
