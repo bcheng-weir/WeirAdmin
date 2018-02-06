@@ -65,7 +65,7 @@
                             <a role="button" class="btn btn-lg btn-default" href="#Comments"><span ng-bind-html="order.labels.Comments"></span></a>
                         </li>
                         <li style="padding: 0px 10px 0px 0px;">
-                            <button type="button" class="btn btn-lg btn-default" ng-csv="order.ToCsvJson" filename="{{order.CsvFilename}}" ng-bind-html="order.labels.Download"></button>
+                            <button type="button" class="btn btn-lg btn-default" ng-csv="order.ToCsvJson" add-bom="true" filename="{{order.CsvFilename}}" ng-bind-html="order.labels.Download"></button>
                         </li>
                     </ul>
                 </li>
