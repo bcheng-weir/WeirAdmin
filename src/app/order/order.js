@@ -689,25 +689,23 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	vm.saveLineItems = function() {
 		var queue = [];
 		var deferred = $q.defer();
-		//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-		var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+		var direction = "Incoming";
 
 		angular.forEach(vm.LineItems, function(line,key) {
-			console.log(line);
 			var d = $q.defer();
 			queue.push((function() {
 				if(line.Quantity > 0) {
 					// Is this a placeholder item?
 					var patch = {
-                            UnitPrice: line.UnitPrice ? line.UnitPrice : 0,
-                            Quantity: line.Quantity ? line.Quantity : 0,
+                            UnitPrice: line.UnitPrice,
+                            Quantity: line.Quantity,
                             xp: {
-                                SN: line.xp.SN ? line.xp.SN : "",
-                                TagNumber: line.xp.TagNumber ? line.xp.TagNumber : "",
-                                ProductName: typeof line.xp.ProductName === 'undefined' ? line.Product.Name: line.xp.ProductName,
-                                Description: typeof line.xp.Description === 'undefined' ? line.Product.Description : line.xp.Description,
-                                ReplacementSchedule: typeof line.xp.ReplacementSchedule === 'undefined' ? line.Product.xp.ReplacementSchedule : line.xp.ReplacementSchedule,
-                                LeadTime: typeof line.xp.LeadTime === 'undefined' ?  line.Product.xp.LeadTime: line.xp.LeadTime
+                                SN: line.xp.SN,
+                                TagNumber: line.xp.TagNumber,
+                                ProductName: line.xp.ProductName,
+                                Description: line.xp.Description,
+                                ReplacementSchedule: line.xp.ReplacementSchedule,
+                                LeadTime: line.xp.LeadTime
                             }
                         };
 					OrderCloudSDK.LineItems.Patch(direction, vm.Order.ID, line.ID, patch)
@@ -839,7 +837,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 				})
 				.catch(function(ex) {
 					$exceptionHandler(ex);
-				})
+				});
 		}
 	}
 
