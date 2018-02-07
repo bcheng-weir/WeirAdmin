@@ -41,6 +41,13 @@
                 {{orders.labels.reviewer}}
             </th>
             <th scope="col">
+                <a href="#" role="button" ng-click="orders.updateSort('DateCreated')">
+                    {{orders.labels.dateSubmitted}}
+                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'DateCreated'"></i>
+                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!DateCreated'"></i>
+                </a>
+            </th>
+            <th scope="col">
                 {{orders.labels.status}}
             </th>
             <th scope="col"></th>
@@ -62,6 +69,10 @@
                 <span ng-switch-default>{{order.Total | currency:'&#163;'}}</span>
             </td>
             <td>{{order.xp.ReviewerName}}</td>
+            <td>
+                <span ng-if="order.DateCreated" ng-bind-html="orders.dateOf(order.DateCreated) | weirdate : orders.WeirGroup"></span>
+                <span ng-if="!order.DateCreated"></span>
+            </td>
             <td style="color: green"><span>{{order.xp.Status + " "}}</span><span>{{order.xp.StatusDate | weirdate}}</span></td>
             <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.BuyerID, order.xp.CustomerID, order.xp.CustomerName)">{{orders.labels.view}}</button></td>
         </tr>
