@@ -52,10 +52,13 @@ function orderConfig($stateProvider) {
 	            },
 	            LineItems: function ($q, $state, $cookieStore, toastr, OrderCloudSDK, CurrentOrder, OrderShareService, Order, LineItemHelpers, Buyer) {
 	                OrderShareService.LineItems.length = 0;
-                    //var isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-                    var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+                    var direction = "Incoming";
                     var dfd = $q.defer();
-                    var lang = Buyer.xp.Lang != null ? Buyer.xp.Lang.id : (Buyer.ID.substring(0,5) == 'WVCUK' ? 'en' : 'fr');
+					var lang;
+					if(Buyer.ID.substring(0,5) === 'WPIFR' && Buyer.xp.Lang) {
+						lang = Buyer.xp.Lang.id;
+					}
+
 		            OrderCloudSDK.LineItems.List(direction, Order.ID, { 'filters': {'Order.xp.BuyerID' : Order.xp.BuyerID}})
 			            .then(function(data) {
 				            if (!data.Items.length) {
@@ -68,8 +71,8 @@ function orderConfig($stateProvider) {
 						                if (lang && data.Items) {
 						                    for (var i = 0; i < data.Items.length; i++) {
 						                        var tmp = data.Items[i];
-						                        if (tmp.Product && tmp.Product.xp && tmp.Product.xp[lang]) {
-						                            tmp.Product.Description = tmp.Product.xp["en"].Description || tmp.Product.Description;
+						                        if (!tmp.xp.Description && tmp.Product && tmp.Product.xp && tmp.Product.xp[lang]) {
+						                            tmp.xp.Description = tmp.Product.xp[lang].Description || tmp.xp.Description; //We have to use the xp property instead of the product to accomodate versioning.
 						                        }
 						                    }
 						                }
@@ -88,7 +91,10 @@ function orderConfig($stateProvider) {
 			        if(pieces.length > 1) {
 				        var prevId = pieces[0] + "-Rev" + (pieces[1] - 1).toString();
 				        var dfd = $q.defer();
-				        var lang = Buyer.xp.Lang != null ? Buyer.xp.Lang.id : (Buyer.ID.substring(0,5) == 'WVCUK' ? 'en' : 'fr');
+                        var lang;
+                        if(Buyer.ID.substring(0,5) === 'WPIFR' && Buyer.xp.Lang) {
+                            lang = Buyer.xp.Lang.id;
+                        }
 			            //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
 				        var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 				        OrderCloudSDK.LineItems.List(direction, prevId, { 'filters': { 'Order.xp.BuyerID': Order.xp.BuyerID } })
@@ -103,7 +109,7 @@ function orderConfig($stateProvider) {
 								                for (var i = 0; i < data.Items.length; i++) {
 								                    var tmp = data.Items[i];
 								                    if (tmp.Product && tmp.Product.xp && tmp.Product.xp[lang]) {
-								                        tmp.Product.Description = tmp.Product.xp["en"].Description || tmp.Product.Description;
+								                        tmp.xp.Description = tmp.Product.xp[lang].Description || tmp.xp.Description;
 								                    }
 								                }
 								            }
