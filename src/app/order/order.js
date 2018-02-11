@@ -1104,8 +1104,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, OrderCloudSDK, WeirService, Order) {
 	var vm = this;
     vm.Order = Order;
-    vm.Order.xp.DateDespatched = vm.Order.xp.DateDespatched == null ? null : new Date(vm.Order.xp.DateDespatched);
-    vm.Order.xp.DeliveryDate = vm.Order.xp.DeliveryDate == null ? null : new Date(vm.Order.xp.DeliveryDate);
+    vm.Order.xp.DateDespatched = vm.Order.xp.DateDespatched ? new Date(vm.Order.xp.DateDespatched) : null;
+    vm.Order.xp.DeliveryDate = vm.Order.xp.DeliveryDate ? new Date(vm.Order.xp.DeliveryDate) : null;
 	vm.popupDespatched = {
 		opened: false
 	};
@@ -1164,14 +1164,13 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, O
         }
         if(vm.Order.xp.DateDespatched && updateOrderInfo.DespatchDate.classList.contains("ng-dirty")){
             patch.xp.Status = 'DP';
-            patch.xp.DateDespatched = vm.Order.xp.DespatchDate;
+            patch.xp.DateDespatched = vm.Order.xp.DateDespatched;
         }
         if(vm.Order.xp.DeliveryDate && updateOrderInfo.DeliveryDate.classList.contains("ng-dirty")){
             patch.xp.DeliveryDate = vm.Order.xp.DeliveryDate;
         }
 
-		//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-		var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+		var direction = "Incoming";
 		OrderCloudSDK.Orders.Patch(direction, Order.ID, patch)
 			.then(function() {
 				$rootScope.$broadcast('SwitchCart');
