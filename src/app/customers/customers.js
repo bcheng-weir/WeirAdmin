@@ -552,7 +552,7 @@ function CustomerEditCtrl($exceptionHandler, $state, $ocMedia, toastr, OrderClou
 
     vm.Submit = function() {
         var RelatedBuyerKey = null;
-        vm.RelatedBuyerID = vm.RelatedBuyerID.split(": ")[0];
+        vm.RelatedBuyerID = vm.RelatedBuyerID ? vm.RelatedBuyerID.split(": ")[0] : vm.RelatedBuyerID;
         // If a value is entered in to the related customer number
         if(vm.RelatedBuyerID && vm.RelatedBuyerID !== "") { //Update the current buyer with an AKA relationship.
             RelatedBuyerKey = vm.RelatedBuyerID;
