@@ -175,13 +175,10 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
                          OrderCloudSDK, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService,
                          Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService, FileSaver,
                          UserGroups, BackToListService, Buyer, Catalog) {
-    //var isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-    var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming" ;
 	determineShipping();
     var vm = this;
     vm.Order = Order;
 	vm.Order.xp.PONumber = vm.Order.xp.PONumber != "Pending" ? vm.Order.xp.PONumber : ""; // In the buyer app we were initially setting this to pending.
-    //vm.LineItems = LineItems;
     vm.BlankItems = [];
     vm.NoOp = function () { };
     var userIsInternalSalesAdmin = UserGroups.indexOf(UserGroupsService.Groups.InternalSales) > -1;
@@ -281,11 +278,19 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     vm.Payments = Payments;
 	vm.CommentToWeir = "";
 	vm.fileStore = fileStore;
+
+    OCGeography.Countries()
+        .then(function(countries) {
+            vm.countries = countries;
+        });
+
 	vm.country = function (c) {
-		var result = Underscore.findWhere(OCGeography.Countries, { value: c });
-		return result ? result.label : '';
+		var result = Underscore.findWhere(vm.countries, { code: c });
+        vm.Order.CountryName = result ? result.name : '';
+		return result ? result.name : '';
 	};
-	vm.showReviewer = [WeirService.OrderStatus.Submitted.id, WeirService.OrderStatus.Review.id,
+
+    vm.showReviewer = [WeirService.OrderStatus.Submitted.id, WeirService.OrderStatus.Review.id,
 			WeirService.OrderStatus.SubmittedWithPO.id, WeirService.OrderStatus.SubmittedPendingPO.id,
 			WeirService.OrderStatus.RevisedQuote.id, WeirService.OrderStatus.RevisedOrder.id,
 			WeirService.OrderStatus.SubmittedPendingPO.id, WeirService.OrderStatus.ConfirmedQuote.id,
