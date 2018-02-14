@@ -25,6 +25,7 @@
                     {{orders.labels.submittedBy}}
 	            </span>
             </th>
+
             <th scope="col">
                 <a href="#" role="button" ng-click="orders.updateSort('DateCreated')">
                     {{orders.labels.dateSubmitted}}
@@ -32,6 +33,10 @@
                     <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!DateCreated'"></i>
                 </a>
             </th>
+            <th>
+                {{orders.labels.dateUpdated}}
+            </th>
+
             <th scope="col">
                 {{orders.labels.reviewer}}
             </th>
@@ -46,7 +51,16 @@
                 {{orders.getLanguage(order.FromCompanyID)}}
             </td>
             <td>{{order.FromUser.FirstName}} {{order.FromUser.LastName}}</td>
-            <td>{{order.DateCreated | weirdate}}</td>
+
+            <td>
+                <span ng-if="order.DateCreated" ng-bind-html="orders.dateOf(order.DateCreated) | weirdate : orders.WeirGroup"></span>
+                <span ng-if="!order.DateCreated"></span>
+            </td>
+            <td>
+                <span ng-if="order.xp.StatusDate" ng-bind-html="orders.dateOf(order.xp.StatusDate) | weirdate : orders.WeirGroup"></span>
+                <span ng-if="!order.xp.StatusDate"></span>
+            </td>
+
             <td>{{order.xp.ReviewerName}}</td>
             <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.BuyerID, order.xp.CustomerID, order.xp.CustomerName)">{{orders.labels.view}}</button></td>
         </tr>

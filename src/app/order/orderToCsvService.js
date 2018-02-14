@@ -2,10 +2,6 @@ angular.module('orderCloud')
     .service('OrderToCsvService', OrderToCsvService);
 
 function OrderToCsvService($filter,$sce,OCGeography,Underscore) {
-	function country (c) {
-		var result = Underscore.findWhere(OCGeography.Countries, { value: c });
-		return result ? result.label : '';
-	}
     function ToCsvJson(Order, LineItems, DeliveryAddress, Payments, Labels) {
         var payment = null;
         if (Payments && Payments.length) {
@@ -56,7 +52,8 @@ function OrderToCsvService($filter,$sce,OCGeography,Underscore) {
                 DeliveryAddress.xp.Street3 ? data.push([DeliveryAddress.xp.Street3]) : null;
 			    data.push([DeliveryAddress.City]);
 			    data.push([DeliveryAddress.Zip]);
-			    data.push([country(DeliveryAddress.Country)]);
+			    //data.push([country(DeliveryAddress.Country)]);
+                data.push([Order.CountryName]);
 		    } else if (DeliveryAddress.Country=="FR") {
 			    data.push([DeliveryAddress.FirstName + " " + DeliveryAddress.LastName, ""]);
 			    data.push([DeliveryAddress.CompanyName]);
@@ -64,7 +61,8 @@ function OrderToCsvService($filter,$sce,OCGeography,Underscore) {
                 DeliveryAddress.Street2 ? data.push([DeliveryAddress.Street2]) : null;
                 DeliveryAddress.xp.Street3 ? data.push([DeliveryAddress.xp.Street3]) : null;
 			    data.push([DeliveryAddress.Zip, "", DeliveryAddress.City]);
-			    data.push([country(DeliveryAddress.Country)]);
+			    //data.push([country(DeliveryAddress.Country)]);
+                data.push([Order.CountryName]);
 		    }
 	    }
 

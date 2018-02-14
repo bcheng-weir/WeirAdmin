@@ -52,10 +52,13 @@ function orderConfig($stateProvider) {
 	            },
 	            LineItems: function ($q, $state, $cookieStore, toastr, OrderCloudSDK, CurrentOrder, OrderShareService, Order, LineItemHelpers, Buyer) {
 	                OrderShareService.LineItems.length = 0;
-                    //var isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-                    var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+                    var direction = "Incoming";
                     var dfd = $q.defer();
-                    var lang = Buyer.xp.Lang != null ? Buyer.xp.Lang.id : (Buyer.ID.substring(0,5) == 'WVCUK' ? 'en' : 'fr');
+					var lang;
+					if(Buyer.ID.substring(0,5) === 'WPIFR' && Buyer.xp.Lang) {
+						lang = Buyer.xp.Lang.id;
+					}
+
 		            OrderCloudSDK.LineItems.List(direction, Order.ID, { 'filters': {'Order.xp.BuyerID' : Order.xp.BuyerID}})
 			            .then(function(data) {
 				            if (!data.Items.length) {
@@ -68,8 +71,8 @@ function orderConfig($stateProvider) {
 						                if (lang && data.Items) {
 						                    for (var i = 0; i < data.Items.length; i++) {
 						                        var tmp = data.Items[i];
-						                        if (tmp.Product && tmp.Product.xp && tmp.Product.xp[lang]) {
-						                            tmp.Product.Description = tmp.Product.xp["en"].Description || tmp.Product.Description;
+						                        if (!tmp.xp.Description && tmp.Product && tmp.Product.xp && tmp.Product.xp[lang]) {
+						                            tmp.xp.Description = tmp.Product.xp[lang].Description || tmp.xp.Description; //We have to use the xp property instead of the product to accomodate versioning.
 						                        }
 						                    }
 						                }
@@ -88,7 +91,10 @@ function orderConfig($stateProvider) {
 			        if(pieces.length > 1) {
 				        var prevId = pieces[0] + "-Rev" + (pieces[1] - 1).toString();
 				        var dfd = $q.defer();
-				        var lang = Buyer.xp.Lang != null ? Buyer.xp.Lang.id : (Buyer.ID.substring(0,5) == 'WVCUK' ? 'en' : 'fr');
+                        var lang;
+                        if(Buyer.ID.substring(0,5) === 'WPIFR' && Buyer.xp.Lang) {
+                            lang = Buyer.xp.Lang.id;
+                        }
 			            //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
 				        var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
 				        OrderCloudSDK.LineItems.List(direction, prevId, { 'filters': { 'Order.xp.BuyerID': Order.xp.BuyerID } })
@@ -103,7 +109,7 @@ function orderConfig($stateProvider) {
 								                for (var i = 0; i < data.Items.length; i++) {
 								                    var tmp = data.Items[i];
 								                    if (tmp.Product && tmp.Product.xp && tmp.Product.xp[lang]) {
-								                        tmp.Product.Description = tmp.Product.xp["en"].Description || tmp.Product.Description;
+								                        tmp.xp.Description = tmp.Product.xp[lang].Description || tmp.xp.Description;
 								                    }
 								                }
 								            }
@@ -169,13 +175,10 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
                          OrderCloudSDK, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService,
                          Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService, FileSaver,
                          UserGroups, BackToListService, Buyer, Catalog) {
-    //var isImpersonating = typeof(OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-    var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming" ;
 	determineShipping();
     var vm = this;
     vm.Order = Order;
 	vm.Order.xp.PONumber = vm.Order.xp.PONumber != "Pending" ? vm.Order.xp.PONumber : ""; // In the buyer app we were initially setting this to pending.
-    //vm.LineItems = LineItems;
     vm.BlankItems = [];
     vm.NoOp = function () { };
     var userIsInternalSalesAdmin = UserGroups.indexOf(UserGroupsService.Groups.InternalSales) > -1;
@@ -275,11 +278,19 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     vm.Payments = Payments;
 	vm.CommentToWeir = "";
 	vm.fileStore = fileStore;
+
+    OCGeography.Countries()
+        .then(function(countries) {
+            vm.countries = countries;
+        });
+
 	vm.country = function (c) {
-		var result = Underscore.findWhere(OCGeography.Countries, { value: c });
-		return result ? result.label : '';
+		var result = Underscore.findWhere(vm.countries, { code: c });
+        vm.Order.CountryName = result ? result.name : '';
+		return result ? result.name : '';
 	};
-	vm.showReviewer = [WeirService.OrderStatus.Submitted.id, WeirService.OrderStatus.Review.id,
+
+    vm.showReviewer = [WeirService.OrderStatus.Submitted.id, WeirService.OrderStatus.Review.id,
 			WeirService.OrderStatus.SubmittedWithPO.id, WeirService.OrderStatus.SubmittedPendingPO.id,
 			WeirService.OrderStatus.RevisedQuote.id, WeirService.OrderStatus.RevisedOrder.id,
 			WeirService.OrderStatus.SubmittedPendingPO.id, WeirService.OrderStatus.ConfirmedQuote.id,
@@ -1098,8 +1109,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, OrderCloudSDK, WeirService, Order) {
 	var vm = this;
     vm.Order = Order;
-    vm.Order.xp.DateDespatched = vm.Order.xp.DateDespatched == null ? null : new Date(vm.Order.xp.DateDespatched);
-    vm.Order.xp.DeliveryDate = vm.Order.xp.DeliveryDate == null ? null : new Date(vm.Order.xp.DeliveryDate);
+    vm.Order.xp.DateDespatched = vm.Order.xp.DateDespatched ? new Date(vm.Order.xp.DateDespatched) : null;
+    vm.Order.xp.DeliveryDate = vm.Order.xp.DeliveryDate ? new Date(vm.Order.xp.DeliveryDate) : null;
 	vm.popupDespatched = {
 		opened: false
 	};
@@ -1158,14 +1169,13 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, O
         }
         if(vm.Order.xp.DateDespatched && updateOrderInfo.DespatchDate.classList.contains("ng-dirty")){
             patch.xp.Status = 'DP';
-            patch.xp.DateDespatched = vm.Order.xp.DespatchDate;
+            patch.xp.DateDespatched = vm.Order.xp.DateDespatched;
         }
         if(vm.Order.xp.DeliveryDate && updateOrderInfo.DeliveryDate.classList.contains("ng-dirty")){
             patch.xp.DeliveryDate = vm.Order.xp.DeliveryDate;
         }
 
-		//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-		var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+		var direction = "Incoming";
 		OrderCloudSDK.Orders.Patch(direction, Order.ID, patch)
 			.then(function() {
 				$rootScope.$broadcast('SwitchCart');
