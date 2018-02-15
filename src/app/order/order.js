@@ -71,7 +71,8 @@ function orderConfig($stateProvider) {
 						                if (lang && data.Items) {
 						                    for (var i = 0; i < data.Items.length; i++) {
 						                        var tmp = data.Items[i];
-						                        if (!tmp.xp.Description && tmp.Product && tmp.Product.xp && tmp.Product.xp[lang]) {
+						                        //if (!tmp.xp.Description && tmp.Product && tmp.Product.xp && tmp.Product.xp[lang]) {
+                                                if (tmp.Product && tmp.Product.xp && tmp.Product.xp[lang]) {
 						                            tmp.xp.Description = tmp.Product.xp[lang].Description || tmp.xp.Description; //We have to use the xp property instead of the product to accomodate versioning.
 						                        }
 						                    }
