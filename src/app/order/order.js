@@ -325,6 +325,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
             //paragraph above table
             WeirOrderNo: "Weir Order No;",
 	        WeirQuoteNo: "Weir Quote No;",
+            QuoteName: "Quote Name;",
             QuoteRef: "Your quote ref;",
             PONumber: "Your PO No;",
             //table labels
@@ -391,6 +392,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
             //paragraph above table
             WeirOrderNo:$sce.trustAsHtml( "Weir Order No;"),
 	        WeirQuoteNo: $sce.trustAsHtml( "Weir Quote No;"),
+            QuoteName: $sce.trustAsHtml("Quote Name;"),
             QuoteRef:$sce.trustAsHtml( "Your quote ref;"),
             PONumber:$sce.trustAsHtml( "Your PO No;"),
             //table labels
