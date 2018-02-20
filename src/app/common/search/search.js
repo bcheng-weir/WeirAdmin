@@ -186,7 +186,7 @@ function SearchProductsService(OrderCloudSDK, $q, WeirService) {
 	        catalogID: Customer.id.substring(0,5)
         })
 		    .then(function(response) {
-		    	if(Customer.id.substring(0,5) == 'WVCUK') {
+		    	if(Customer.id.substring(0,5) == 'WPIFR' && Customer.lang == 'en') {
 		    		partResults = response.Items;
 		    		return OrderCloudSDK.Products.List({
 		    		    page: 1,

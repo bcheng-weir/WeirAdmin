@@ -72,8 +72,8 @@ function orderConfig($stateProvider) {
 						                    for (var i = 0; i < data.Items.length; i++) {
 						                        var tmp = data.Items[i];
 						                        if (!tmp.xp.Description && tmp.Product && tmp.Product.xp && tmp.Product.xp[lang]) {
-						                            tmp.xp.Description = tmp.Product.xp[lang].Description || tmp.xp.Description; //We have to use the xp property instead of the product to accomodate versioning.
-						                        }
+													tmp.xp.Description = tmp.Product.xp[lang].Description || tmp.xp.Description; //We have to use the xp property instead of the product to accomodate versioning.
+                                                }
 						                    }
 						                }
 						                dfd.resolve(data);
@@ -324,6 +324,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
             //paragraph above table
             WeirOrderNo: "Weir Order No;",
 	        WeirQuoteNo: "Weir Quote No;",
+            QuoteName: "Quote Name;",
             QuoteRef: "Your quote ref;",
             PONumber: "Your PO No;",
             //table labels
@@ -390,6 +391,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
             //paragraph above table
             WeirOrderNo:$sce.trustAsHtml( "Weir Order No;"),
 	        WeirQuoteNo: $sce.trustAsHtml( "Weir Quote No;"),
+            QuoteName: $sce.trustAsHtml("Quote Name;"),
             QuoteRef:$sce.trustAsHtml( "Your quote ref;"),
             PONumber:$sce.trustAsHtml( "Your PO No;"),
             //table labels

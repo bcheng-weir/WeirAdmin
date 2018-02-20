@@ -87,7 +87,8 @@
                      <span class="text-danger" ng-bind-html="order.Order.ID"></span>
                  </b>
              </p>
-             <p><b><span ng-bind-html='order.labels.QuoteRef'></span><span class="text-danger" ng-bind-html="order.Order.xp.RefNum"></span></b></p>
+             <p><b><span ng-bind-html="order.labels.QuoteRef"></span><span class="text-danger" ng-bind-html="order.Order.xp.RefNum"></span></b></p>
+             <p><b><span ng-bind-html="order.labels.QuoteName"></span><span class="text-danger" ng-bind-html="order.Order.xp.Name"></span></b></p>
              <p ng-show="(order.Order.xp.Status=='CQ'||order.Order.xp.Status=='SE')&&order.showAssign==false">
                  <b>
                     <span ng-bind-html='order.labels.PONumber'></span>
@@ -344,22 +345,6 @@
      </div>
 
     <div class="row" style="padding: 5px 5px 5px 5px;">
-        <div class="col-md-6">
-            <!-- ToDo footer stuff -->
-            <strong><span ng-bind-html='order.labels.YourRefNo'></span></strong><br /><span ng-bind-html='order.Order.xp.RefNum'></span>
-        </div>
-        <div class="col-md-6" style="float: right">
-            <!-- ToDo footer stuff -->
-            <strong><span ng-bind-html='order.labels.YourAttachments'></span></strong><br />
-            <p ng-repeat="fileName in order.Order.xp.Files">
-                <a href="" ng-click="order.GetFile(fileName)" target="_blank" ng-bind-html="fileName"></a>
-            </p>
-            <p ng-hide="order.Order.xp.Status=='SE'||order.Order.xp.Status=='CQ'">
-                <a href="" ng-click="order.GetFile(order.Order.xp.PODocument)" target="_blank" ng-bind-html="order.Order.xp.PODocument"></a>
-            </p>
-        </div>
-    </div>
-    <div class="row" style="padding: 5px 5px 5px 5px;">
         <div class="col-xs-6">
             <!-- ToDo footer stuff -->
             <strong><span ng-bind-html='order.labels.DelieveryAddress'></span></strong><br />
@@ -388,6 +373,20 @@
                 <span ng-bind-html="order.DeliveryAddress.City"></span>, <span ng-bind-html="order.DeliveryAddress.State"></span> <span ng-bind-html="order.DeliveryAddress.Zip"></span><br>
                 <span ng-bind-html="order.country(order.DeliveryAddress.Country)"></span>
             </div>
+        </div>
+        <div class="col-md-6" style="float: right">
+            <!-- ToDo footer stuff -->
+            <strong><span ng-bind-html='order.labels.YourAttachments'></span></strong><br />
+            <p ng-repeat="fileName in order.Order.xp.Files">
+                <a href="" ng-click="order.GetFile(fileName)" target="_blank" ng-bind-html="fileName"></a>
+            </p>
+            <p ng-hide="order.Order.xp.Status=='SE'||order.Order.xp.Status=='CQ'">
+                <a href="" ng-click="order.GetFile(order.Order.xp.PODocument)" target="_blank" ng-bind-html="order.Order.xp.PODocument"></a>
+            </p>
+        </div>
+    </div>
+    <div class="row" style="padding: 5px 5px 5px 5px;">
+        <div class="col-xs-6">
         </div>
         <div class="col-xs-6">
             <div class="row">
