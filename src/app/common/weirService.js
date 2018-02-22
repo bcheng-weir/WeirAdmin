@@ -786,7 +786,11 @@ function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork
 				UnitPrice: price,
 				xp: {
 					SN: part.xp.SN,
-					TagNumber: part.xp.TagNumber
+					TagNumber: part.xp.TagNumber,
+                    ProductName:part.Detail.Name,
+                    Description:part.Detail.Description,
+                    ReplacementSchedule:part.Detail.xp.ReplacementSchedule,
+                    LeadTime:part.Detail.xp.LeadTime
 				}
 			};
 
