@@ -76,7 +76,7 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
         }
     }
 
-    function _getProductInfo(LineItems, Order) {
+    function _getProductInfo(LineItems, Order, lang) {
         var li = LineItems.Items || LineItems;
         var productIDs = Underscore.uniq(Underscore.pluck(li, 'ProductID'));
         var dfd = $q.defer();
@@ -93,7 +93,15 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
                         item.Product = angular.copy(Underscore.where(results, {ID: item.ProductID})[0]);
                         item.xp.TagNumber = typeof item.xp.TagNumber === 'undefined' ? item.Product.xp.TagNumber: item.xp.TagNumber;
                         item.xp.ProductName = typeof item.xp.ProductName === 'undefined' ? item.Product.Name: item.xp.ProductName;
-                        item.xp.Description = typeof item.xp.Description === 'undefined' ? item.Product.Description : item.xp.Description;
+                        if (lang) {
+                            if (typeof item.xp.Description === 'undefined' || !item.xp.Description) {
+                                item.xp.Description = item.Product.xp[lang].Description ? item.Product.xp[lang].Description : item.Product.Description;
+                            } else {
+                                item.xp.Description = item.xp.Description ? item.xp.Description : item.Product.Description;
+                            }
+                        } else {
+                            item.xp.Description = typeof item.xp.Description === 'undefined' ? item.Product.Description : item.xp.Description;
+                        }
                         item.xp.ReplacementSchedule = typeof item.xp.ReplacementSchedule === 'undefined' ? item.Product.xp.ReplacementSchedule : item.xp.ReplacementSchedule;
                         item.xp.LeadTime = typeof item.xp.LeadTime === 'undefined' ?  item.Product.xp.LeadTime: item.xp.LeadTime;
                     }
