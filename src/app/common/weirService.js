@@ -52,7 +52,7 @@ function UserGroupsService($q, OrderCloudSDK) {
     }
 }
 
-function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyernetwork, buyerid) {
+function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork) {
     var orderStatuses = {
 	    Draft: {id: "DR", label: "Draft", desc: "This is the current quote under construction"},
 	    Saved: {id: "SV", label: "Saved", desc: "Quote has been saved but not yet submitted to weir as quote or order"},
@@ -110,7 +110,6 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 			$cookieStore.put('language', localeOfUser, {
 				expires: exp
 			});
-
 		}
 		return localeOfUser;
 	}
@@ -149,7 +148,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 			});
 	}
 
-	function setOrderAsCurrentOrder(orderId) {
+	function setOrderAsCurrentOrder(orderId, lang) {
 		var deferred = $q.defer();
 
 		CurrentOrder.Set(orderId)
@@ -159,7 +158,8 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 			.then(function(order) {
 				return CurrentOrder.SetCurrentCustomer({
 					id: order.xp.CustomerID,
-					name: order.xp.CustomerName
+					name: order.xp.CustomerName,
+					lang: lang
 				});
 			})
 			.then(function() {
@@ -173,9 +173,11 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 	}
 
 	var lastSearchType = "";
+
 	function setLastSearchType(type) {
 		lastSearchType = type;
 	}
+
 	function getLastSearchType() {
 		return lastSearchType;
 	}
@@ -233,6 +235,36 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 		return deferred.promise;
 	}
 
+	//Set the EN translation for FR valves.
+	function updateValve(valve, lang) {
+	    if (valve && lang && valve.xp && valve.xp[lang]) {
+	        var vals = valve.xp[lang];
+	        for (var key in vals) {
+	            if (!vals.hasOwnProperty(key)) continue;
+	            if (!key.startsWith("xp")) {
+	                valve[key] = vals[key];
+	            } else {
+	                valve.xp.Specs[key.substring(2)] = vals[key];
+	            }
+	        }
+	    }
+	}
+
+	//Set the EN translation for FR products.
+	function updateProduct(product, lang) {
+	    if (product && lang && product.xp && product.xp[lang]) {
+	        var vals = product.xp[lang];
+	        for (var key in vals) {
+	            if (!vals.hasOwnProperty(key)) continue;
+	            if (!key.startsWith("xp")) {
+	                product[key] = vals[key];
+	            } else {
+	                product.xp[key.substring(2)] = vals[key];
+	            }
+	        }
+	    }
+	}
+
     function serialNumber(serialNumber) {
         var deferred = $q.defer();
         var result;
@@ -242,34 +274,44 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
             Roles: []
         };
         var miniCartBuyer = {};
+        var lang = null;
         CurrentOrder.Get()
             .then(function (co) {
                 order = co;
                 miniCartBuyer = {"FromUserID": co.FromUser.ID, "BuyerID": co.xp.BuyerID};
-                return OrderCloudSDK.Users.Get(co.xp.BuyerID, co.FromUser.ID)
+                return OrderCloudSDK.Users.Get(co.xp.BuyerID, co.FromUser.ID);
             })
-	        .then(function (buyer) {
+	        .then(function (usr) {
 	            // Get an access token for impersonation.
-	            impersonation.Roles = buyer.AvailableRoles;
+	            impersonation.Roles = usr.AvailableRoles;
 	            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
             })
             .then(function (data) {
                 // Set the local impersonation token so that As() can be used.
                 OrderCloudSDK.SetImpersonationToken(data['access_token']);
-            }).then(function () {
+                return OrderCloudSDK.Buyers.Get(miniCartBuyer.BuyerID);
+            }).then(function (buyer) {
+            	if(buyer.xp.Lang) {
+            		lang = buyer.xp.Lang != null ? buyer.xp.Lang.id : (buyer.ID.substring(0,5) == 'WVCUK' ? 'en' : 'fr');
+                }
                 var opts = {
                     catalogID: order.xp.CustomerID.substring(0, 5),
                     page: 1,
                     pageSize: 50,
+                    depth: order.xp.CustomerID.substring(0, 5) == "WVCUK" ? null : "all",
                     filters: {
-                        "xp.SN": serialNumber,
-                        "ParentID": order.xp.CustomerID
+                        "xp.SN": serialNumber
                     }
                 };
-		return OrderCloudSDK.As().Me.ListCategories(opts)
-                .then(function (matches) {
+                if (buyer.xp.WeirGroup.id == 1) {
+                    opts.filters.ParentID = order.xp.CustomerID;
+				}
+
+				return OrderCloudSDK.As().Me.ListCategories(opts)
+                	.then(function (matches) {
                     if (matches.Items.length == 1) {
                         result = matches.Items[0];
+                        updateValve(result, lang);
                         getParts(result.ID, deferred, result);
                     } else if (matches.Items.length == 0) {
                         //throw { message: "No matches found for serial number " + serialNumber};
@@ -297,32 +339,34 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 	    var order = {};
         var impersonation = {
             ClientID: buyernetwork,
-            Claims: []
+            Roles: []
         };
         var miniCartBuyer = {};
+        var lang = null;
         CurrentOrder.Get()
-	        .then(function (co) {
-	        	order = co;
-	            miniCartBuyer = {"FromUserID": co.FromUser.ID, "BuyerID": co.xp.BuyerID};
-	            return OrderCloudSDK.Users.Get(co.xp.BuyerID, co.FromUser.ID);
+            .then(function (co) {
+                order = co;
+                miniCartBuyer = { "FromUserID": co.FromUser.ID, "BuyerID": co.xp.BuyerID };
+                return OrderCloudSDK.Users.Get(co.xp.BuyerID, co.FromUser.ID)
             })
-	        .then(function (buyer) {
+	        .then(function (usr) {
 	            // Get an access token for impersonation.
-	            impersonation.Claims = buyer.AvailableRoles;
+	            impersonation.Roles = usr.AvailableRoles;
 	            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
-            })
+	        })
             .then(function (data) {
                 // Set the local impersonation token so that As() can be used.
-               return OrderCloudSDK.SetImpersonationToken(data['access_token']);
-            })
-	        .then(function () {
-                    var opts = {
+                OrderCloudSDK.SetImpersonationToken(data['access_token']);
+                return OrderCloudSDK.Buyers.Get(miniCartBuyer.BuyerID);
+            }).then(function (buyer) {
+                lang = buyer.xp.Lang != null ? buyer.xp.Lang.id : (buyer.ID.substring(0,5) == 'WVCUK' ? 'en' : 'fr');
+	            var opts = {
 		        catalogID: order.xp.CustomerID.substring(0, 5),
 		        page: 1,
 		        pageSize: 50,
 		        filters: {
-                            "xp.TagNumber": tagNumber,
-                            "ParentID": order.xp.CustomerID
+					"xp.TagNumber": tagNumber,
+					"ParentID": order.xp.CustomerID
 		        }
 		    };
 	            return OrderCloudSDK.As().Me.ListCategories(opts);
@@ -330,7 +374,8 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
             .then(function (matches) {
 	            if (matches.Items.length > 0) {
 		            angular.forEach(matches.Items, function (value, key) {
-			            getParts(value.ID, deferred, value);
+		                updateValve(value, lang); //This sets the xp translation of the valve if it exists.
+		                getParts(value.ID, deferred, value);
 		            });
 	            } else {
 		            return deferred.resolve("No matches found for tag number " + tagNumber);
@@ -353,35 +398,39 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
         };
         var order = {};
         var miniCartBuyer = {};
+        var lang = null;
         CurrentOrder.Get()
 	        .then(function (co) {
 	        	order = co;
 	            miniCartBuyer = {"FromUserID": co.FromUser.ID, "BuyerID": co.xp.BuyerID};
 	            return OrderCloudSDK.Users.Get(co.xp.BuyerID, co.FromUser.ID);
             })
-	        .then(function (buyer) {
+	        .then(function (usr) {
 	            // Get an access token for impersonation.
-	            impersonation.Roles = buyer.AvailableRoles;
+	            impersonation.Roles = usr.AvailableRoles;
 	            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
             })
             .then(function (data) {
                 // Set the local impersonation token so that As() can be used.
                 OrderCloudSDK.SetImpersonationToken(data['access_token']);
+                return OrderCloudSDK.Buyers.Get(miniCartBuyer.BuyerID);
             })
-	        .then(function () {
-                    var opts = {
+	        .then(function (buyer) {
+	            lang = buyer.xp.Lang != null ? buyer.xp.Lang.id : (buyer.ID.substring(0,5) == 'WVCUK' ? 'en' : 'fr');
+	            var opts = {
                         page: 1,
                         pageSize: 100,
                         catalogID: result.ParentID.substring(0, 5),
                         categoryID: catId
                     };
-                return OrderCloudSDK.As().Me.ListProducts(opts)
+                return OrderCloudSDK.As().Me.ListProducts(opts);
             })
             .then(function (products) {
                 result.Parts = [];
                 var hasPrices = [];
                 var noPrices = [];
                 angular.forEach(products.Items, function (product) {
+                    updateProduct(product, lang);
                     if (product.PriceSchedule && product.PriceSchedule.PriceBreaks && product.PriceSchedule.PriceBreaks.length > 0 && product.PriceSchedule.PriceBreaks[0].Price) {
                         hasPrices.push({ Number: product.ID, Detail: product });
                     } else {
@@ -411,22 +460,25 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
         };
         var miniCartBuyer = {};
         var order = {};
+        var lang = null;
 
         CurrentOrder.Get().then(function(co) {
 	            order = co;
 	            miniCartBuyer = {"FromUserID" : co.FromUser.ID, "BuyerID": co.xp.BuyerID };
 	            return OrderCloudSDK.Users.Get(co.xp.BuyerID, co.FromUser.ID);
-	        }).then(function(buyer) {
+	        }).then(function(usr) {
 	            // Get an access token for impersonation.
-	            impersonation.Roles = buyer.AvailableRoles;
+	            impersonation.Roles = usr.AvailableRoles;
 	            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
 	        })
             .then(function(data) {
                 // Set the local impersonation token so that As() can be used.
                 OrderCloudSDK.SetImpersonationToken(data['access_token']);
+                return OrderCloudSDK.Buyers.Get(miniCartBuyer.BuyerID);
             })
-            .then(function(){
-                    angular.forEach(serialNumbers, function(number) {
+            .then(function(buyer){
+                lang = buyer.xp.Lang != null ? buyer.xp.Lang.id : (buyer.ID.substring(0,5) == 'WVCUK' ? 'en' : 'fr');
+                angular.forEach(serialNumbers, function (number) {
                         if (number) {
                             queue.push((function () {
                                 var d = $q.defer();
@@ -442,6 +494,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
                                 return OrderCloudSDK.As().Me.ListCategories(opts)
                                     .then(function (matches) {
                                         if (matches.Items.length == 1) {
+                                            updateValve(matches.Items[0], lang);
                                             results.push({Number: number, Detail: matches.Items[0]});
                                         } else {
                                             results.push({Number: number, Detail: null});
@@ -478,23 +531,26 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
         };
         var miniCartBuyer = {};
         var order = {};
+        var lang = null;
         CurrentOrder.Get()
 	        .then(function(co) {
 	            order = co;
 	            miniCartBuyer = {"FromUserID" : co.FromUser.ID, "BuyerID": co.xp.BuyerID };
 	            return OrderCloudSDK.Users.Get(co.xp.BuyerID, co.FromUser.ID);
             })
-	        .then(function(buyer) {
+	        .then(function(usr) {
 	            // Get an access token for impersonation.
-	            impersonation.Roles = buyer.AvailableRoles;
+	            impersonation.Roles = usr.AvailableRoles;
 	            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
             })
             .then(function(data) {
                 // Set the local impersonation token so that As() can be used.
                 OrderCloudSDK.SetImpersonationToken(data['access_token']);
+                return OrderCloudSDK.Buyers.Get(miniCartBuyer.BuyerID);
             })
-            .then(function(){
-                    angular.forEach(tagNumbers, function(number) {
+            .then(function(buyer){
+                lang = buyer.xp.Lang != null ? buyer.xp.Lang.id : (buyer.ID.substring(0,5) == 'WVCUK' ? 'en' : 'fr');
+                angular.forEach(tagNumbers, function (number) {
                         if (number) {
                             queue.push((function () {
                                 var d = $q.defer();
@@ -510,6 +566,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
                                 return OrderCloudSDK.As().Me.ListCategories(opts)
                                     .then(function (matches) {
                                         if (matches.Items.length == 1) {
+                                            updateValve(matches.Items[0], lang);
                                             results.push({Number: number, Detail: matches.Items[0]});
                                         } else {
                                             results.push({Number: number, Detail: null});
@@ -561,6 +618,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
                 Roles: []
             };
             var order = {};
+            var lang = null;
             angular.forEach(partNumbers, function (number) {
                 if (number) {
                     var d = $q.defer();
@@ -577,15 +635,17 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 	                        	    }
 	                        	}
 	                        	return OrderCloudSDK.Users.Get(co.xp.BuyerID, co.FromUser.ID)
-                            }).then(function (buyer) {
+                            }).then(function (usr) {
 	                            // Get an access token for impersonation.
-	                            impersonation.Roles = buyer.AvailableRoles;
+                                impersonation.Roles = usr.AvailableRoles;
 	                            return OrderCloudSDK.Users.GetAccessToken(miniCartBuyer.BuyerID, miniCartBuyer.FromUserID, impersonation);
                             })
                             .then(function (data) {
                                 // Set the local impersonation token so that As() can be used.
                                 OrderCloudSDK.SetImpersonationToken(data['access_token']);
-                            }).then(function () {
+                                return OrderCloudSDK.Buyers.Get(miniCartBuyer.BuyerID);
+                            }).then(function (buyer) {
+                                lang = buyer.xp.Lang != null ? buyer.xp.Lang.id : (buyer.ID.substring(0,5) == 'WVCUK' ? 'en' : 'fr');
                                 var opts = {
                                     page: 1,
                                     pageSize: 50,
@@ -601,6 +661,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
                                     results.Parts.push({Number: number, Detail: null});
                                 } else {
                                     angular.forEach(products.Items, function (product) {
+                                        updateProduct(product, lang);
                                         var result = {Number: number, Detail: product};
                                         results.Parts.push(result);
                                     });
@@ -622,6 +683,57 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
         }
 
 	}
+
+    function _setEnglishTranslationValve(valve) {
+        var deferred = $q.defer();
+		CurrentOrder.GetCurrentCustomer()
+			.then(function(c) {
+                if(c.lang == "en") {
+                    //ToDO Move the translated xp vals to the standard places.
+                    if (valve.xp && valve.xp.en) {
+                        valve.Description = valve.xp.en.Description;
+                        if (valve.xp.Specs) {
+                            valve.xp.Specs.Inlet = valve.xp.en.xpInlet;
+                            valve.xp.Specs.Outlet = valve.xp.en.xpOutlet;
+                        }
+                    }
+                    if (valve.Parts && valve.Parts.length > 0) {
+                        angular.forEach(valve.Parts, function(value, key) {
+                            if (value.Product && value.Product.xp && value.Product.xp.en) {
+                                value.Product.Description = value.Product.xp.en.Description;
+                            }
+                            if (value.xp && value.xp.en) {
+                                value.Description = value.xp.en.Description;
+                            }
+                        });
+                    }
+                    deferred.resolve(valve);
+                }
+			});
+
+        return deferred.promise; //valve;
+    }
+
+    function _setEnglishTranslationParts(searchResults) {
+        var deferred = $q.defer();
+		CurrentOrder.GetCurrentCustomer()
+			.then(function(c) {
+                if(c.lang == "en") {
+                    //ToDO Move the translated xp vals to the standard places.
+                    angular.forEach(searchResults, function(value, key) {
+                        if (value.Product && value.Product.xp && value.Product.xp.en) {
+                            value.Product.Description = value.Product.xp.en.Description;
+                        }
+                        if (value.xp && value.xp.en) {
+                            value.Description = value.xp.en.Description;
+                        }
+                    });
+                }
+                deferred.resolve(searchResults);
+			})
+		;
+        return deferred.promise; //searchResults;
+    }
 
 	function addPartToQuote(part) {
 		var deferred = $q.defer();
@@ -662,7 +774,7 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 			OrderCloudSDK.LineItems.Patch("Incoming", order.ID, lineItem.ID, li)
 				.then(function(lineItem) {
 					deferred.resolve({Order: order, LineItem: lineItem});
-				})
+				});
 		}
 
 		function addLineItem(order) {
@@ -674,7 +786,11 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 				UnitPrice: price,
 				xp: {
 					SN: part.xp.SN,
-					TagNumber: part.xp.TagNumber
+					TagNumber: part.xp.TagNumber,
+                    ProductName:part.Detail.Name,
+                    Description:part.Detail.Description,
+                    ReplacementSchedule:part.Detail.xp.ReplacementSchedule,
+                    LeadTime:part.Detail.xp.LeadTime
 				}
 			};
 
@@ -772,7 +888,9 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 		TagNumber: tagNumber,
 		TagNumbers: tagNumbers,
 		AddPartToQuote: addPartToQuote,
-		AddPartsToQuote: addPartsToQuote
+		AddPartsToQuote: addPartsToQuote,
+        SetEnglishTranslationValve: _setEnglishTranslationValve,
+        SetEnglishTranslationParts: _setEnglishTranslationParts
     };
 
     return service;

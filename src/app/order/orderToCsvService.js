@@ -2,26 +2,19 @@ angular.module('orderCloud')
     .service('OrderToCsvService', OrderToCsvService);
 
 function OrderToCsvService($filter,$sce,OCGeography,Underscore) {
-	function country (c) {
-		var result = Underscore.findWhere(OCGeography.Countries, { value: c });
-		return result ? result.label : '';
-	}
     function ToCsvJson(Order, LineItems, DeliveryAddress, Payments, Labels) {
         var payment = null;
         if (Payments && Payments.length) {
             payment = Payments[0];
         }
 
-        var currency = {
-        	'WVCUK':'GBP',
-	        'WPIFR':'EUR'
-        };
-
-	    angular.forEach(Labels, function(value, key) {
-		    value = value.toString().replace(/&eacute;/g,'é').replace(/&egrave;/g,'è');
-		    Labels[key] = value;
-	    });
-
+        angular.forEach(Labels, function(value, key) {
+            var result =  $sce.getTrustedHtml(value);
+            if (result !== "[object Object]") {
+                result = result.toString().replace(/&eacute;/g, 'é').replace(/&egrave;/g, 'è');
+                Labels[key] = result;
+            }
+        });
         var data = [
             [Labels.status, Order.xp.Status],
             [Labels.WeirOrderNo, Order.ID],
@@ -30,15 +23,18 @@ function OrderToCsvService($filter,$sce,OCGeography,Underscore) {
             ["", ""],
             [Labels.SerialNum, Labels.TagNum, Labels.PartNum, Labels.Description, Labels.RecReplacement, Labels.LeadTimeAvailability, Labels.Currency, Labels.PricePerItem, Labels.Quantity]
         ];
-        angular.forEach(LineItems.Items, function (item) {
+
+        var currency = (Order.FromCompanyID.substr(0,5) == "WVCUK") ? ("£") : ((Order.FromCompanyID.substr(0,5) == "WPIFR") ? ("€") : (""));
+
+        angular.forEach(LineItems, function (item) {
             var line = [];
-            line.push((item.xp.SN) ? item.xp.SN : "");
-            line.push((item.xp.TagNumber) ? item.xp.TagNumber : "");
-            line.push((item.Product.Name) ? item.Product.Name : "");
-            line.push((item.Product.Description) ? item.Product.Description : "");
-            line.push((item.Product.xp.ReplacementSchedule) ? item.Product.xp.ReplacementSchedule : "");
-            line.push((item.Product.xp.LeadTime) ? item.Product.xp.LeadTime : "");
-	        line.push(currency[Order.xp.BuyerID.substring(0,5)]);
+            line.push(item.xp.SN);
+            line.push(item.xp.TagNumber);
+            line.push(item.xp.ProductName);
+            line.push(item.xp.Description);
+            line.push(item.xp.ReplacementSchedule);
+            line.push(item.xp.LeadTime);
+            line.push(currency);
             line.push(item.UnitPrice);
             line.push(item.Quantity);
             data.push(line);
@@ -52,17 +48,21 @@ function OrderToCsvService($filter,$sce,OCGeography,Underscore) {
 			    data.push([DeliveryAddress.FirstName + " " + DeliveryAddress.LastName, ""]);
 			    data.push([DeliveryAddress.CompanyName]);
 			    data.push([DeliveryAddress.Street1]);
-			    DeliveryAddress.Street2 ? data.push([DeliveryAddress.Street2]) : null;
+                DeliveryAddress.Street2 ? data.push([DeliveryAddress.Street2]) : null;
+                DeliveryAddress.xp.Street3 ? data.push([DeliveryAddress.xp.Street3]) : null;
 			    data.push([DeliveryAddress.City]);
 			    data.push([DeliveryAddress.Zip]);
-			    data.push([country(DeliveryAddress.Country)]);
+			    //data.push([country(DeliveryAddress.Country)]);
+                data.push([Order.CountryName]);
 		    } else if (DeliveryAddress.Country=="FR") {
 			    data.push([DeliveryAddress.FirstName + " " + DeliveryAddress.LastName, ""]);
 			    data.push([DeliveryAddress.CompanyName]);
 			    data.push([DeliveryAddress.Street1]);
-			    DeliveryAddress.Street2 ? data.push([DeliveryAddress.Street2]) : null;
+                DeliveryAddress.Street2 ? data.push([DeliveryAddress.Street2]) : null;
+                DeliveryAddress.xp.Street3 ? data.push([DeliveryAddress.xp.Street3]) : null;
 			    data.push([DeliveryAddress.Zip, "", DeliveryAddress.City]);
-			    data.push([country(DeliveryAddress.Country)]);
+			    //data.push([country(DeliveryAddress.Country)]);
+                data.push([Order.CountryName]);
 		    }
 	    }
 

@@ -45,10 +45,11 @@ function HomeConfig($stateProvider) {
 		});
 }
 
-function HomeController($sce, WeirService, IsAdmin, IsInternalSales) {
+function HomeController($sce, WeirService, IsAdmin, IsInternalSales, CurrentUser) {
     var vm = this;
     vm.IsAdmin = IsAdmin;
     vm.CanEditCustomers = IsAdmin || IsInternalSales;
+    vm.currentUser = CurrentUser; //We get this from base.js
 
 	var labels = {
 		en: {
@@ -67,7 +68,8 @@ function HomeController($sce, WeirService, IsAdmin, IsInternalSales) {
 			Admin: "Admin",
 			ManageAdmins: "Manage admins",
 			StandardDelivery: "Carriage",
-		    POPrintContent: "Fixed Print Content",
+            POPrintContent: "Fixed Print Content",
+            SharedContent: "Shared Content",
 			Customers: "Customers",
 			CustomerManage: "Manage customers and customer addresses",
 			EnquiryQuotes: "Enquiries submitted"
@@ -88,7 +90,8 @@ function HomeController($sce, WeirService, IsAdmin, IsInternalSales) {
 			Admin: $sce.trustAsHtml("Admin"),
 			ManageAdmins: $sce.trustAsHtml("Manage admins"),
 			StandardDelivery: "Carriage",
-			POPrintContent: "Fixed Print Content",
+            POPrintContent: "Fixed Print Content",
+            SharedContent: "Shared Content",
 			Customers: $sce.trustAsHtml("Customers"),
 			CustomerManage: $sce.trustAsHtml("Manage customers and customer addresses"),
 			EnquiryQuotes: $sce.trustAsHtml("Enquiries submitted")

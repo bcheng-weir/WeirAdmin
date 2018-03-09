@@ -40,7 +40,25 @@ function OrdersConfig($stateProvider, buyerid) {
                         filters: Parameters.filters
                     };
                     return OrderCloudSDK.Orders.List("Incoming", opts);
-                }
+                },
+				Languages: function (OrderCloudSDK, Orders) {
+            		var filter;
+            		angular.forEach(Orders.Items, function(value,key) {
+            			if (filter) {
+            				filter = filter + "|" + value.FromCompanyID;
+						} else {
+            				filter = value.FromCompanyID;
+						}
+					});
+
+            		var opts = {
+            			filters: {
+            				ID: filter
+						}
+					};
+
+            		return OrderCloudSDK.Buyers.List(opts);
+				}
             }
         })
 		.state('ordersMain.quotesRevised', {
@@ -132,7 +150,7 @@ function OrdersConfig($stateProvider, buyerid) {
     ;
 }
 
-function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler, OrderCloudSDK, OrderCloudParameters, Orders, Parameters, buyerid, CurrentOrder, WeirService, CurrentBuyer, Me) {
+function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler, OrderCloudSDK, OrderCloudParameters, Orders, Parameters, buyerid, CurrentOrder, WeirService, CurrentBuyer, Languages, Underscore) {
 	var vm = this;
 	vm.xpType = Parameters.filters ? Parameters.filters["xp.Type"] : {};
 	vm.StateName = $state.current.name;
@@ -147,6 +165,15 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 	//Check if filters are applied
 	vm.filtersApplied = vm.parameters.filters || vm.parameters.from || vm.parameters.to || ($ocMedia('max-width:767px') && vm.sortSelection); //Sort by is a filter on mobile devices
 	vm.showFilters = vm.filtersApplied;
+	vm.getLanguage = function(customer) { //Given a customer ID, return their language.
+		var buyer = Underscore.findWhere(Languages.Items, {"ID": customer});
+
+		buyer.xp = buyer.xp || {};
+		buyer.xp.Lang = buyer.xp.Lang || {};
+        buyer.xp.Lang.id = buyer.xp.Lang.id || "";
+
+		return buyer.xp.Lang.id.toUpperCase();
+	};
 
 	//For status label styling.
     vm.getStatusLabel = function(id) {
@@ -243,7 +270,9 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			businessName: "Business Name",
 			submittedBy: "Submitted By",
 			quoteValue: "Quote Value",
-			dateSubmitted: "Date Submitted",
+			dateSubmitted: "Submitted Date",
+			dateUpdated: "Date Updated",
+			statusDate: "Status Date",
 			dateRevised: "Date Revised",
 			reviewer: "Reviewer",
 			view: "View",
@@ -285,7 +314,8 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			StatusRQ: "Status RQ = Rejected Quote",
 			StatusEN: "Status EN = Enquiry Submitted",
 			StatusER: "Status ER = Enquiry Under Review",
-			enquiriesSubmitted: "Enquiries submitted"
+			enquiriesSubmitted: "Enquiries submitted",
+			Language: "Language"
 		},
 		fr: {
 			search:$sce.trustAsHtml("Search"),
@@ -295,7 +325,9 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			businessName: $sce.trustAsHtml("Business Name"),
 			submittedBy: $sce.trustAsHtml("Submitted By"),
 			quoteValue: $sce.trustAsHtml("Quote Value"),
-			dateSubmitted: $sce.trustAsHtml("Date Submitted"),
+            dateSubmitted: $sce.trustAsHtml("Submitted Date"),
+            dateUpdated: $sce.trustAsHtml("Date Updated"),
+            statusDate: $sce.trustAsHtml("Status Date"),
 			dateRevised: $sce.trustAsHtml("Date Revised"),
 			reviewer: $sce.trustAsHtml("Reviewer"),
 			view: $sce.trustAsHtml("View"),
@@ -328,7 +360,8 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			StatusRQ: $sce.trustAsHtml("Status RQ = Rejected Quote"),
 			StatusEN: $sce.trustAsHtml("Status EN = Enquiry Submitted"),
 			StatusER: $sce.trustAsHtml("Status ER = Enquiry Under Review"),
-			enquiriesSubmitted: $sce.trustAsHtml("Enquiries submitted")
+			enquiriesSubmitted: $sce.trustAsHtml("Enquiries submitted"),
+            Language: $sce.trustAsHtml("Language")
 		}
 	};
 	vm.labels = labels.en;
@@ -352,10 +385,17 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 		CurrentBuyer.SetBuyerID(buyerId);
 		CurrentOrder.Set(orderId)
 			.then(function() {
+				return OrderCloudSDK.Buyers.Get(customerId);
+			}).then(function(customerRecord) {
+				var lang = "";
+				if (customerRecord.xp && customerRecord.xp.Lang && customerRecord.xp.Lang.id) {
+					lang = customerRecord.xp.Lang.id;
+				}
 				CurrentOrder.SetCurrentCustomer({
 					id: customerId,
-					name: customerName
-				})
+					name: customerName,
+					lang: lang
+				});
 			})
 			.then(function() {
 				$rootScope.$broadcast('SwitchCart');
@@ -386,7 +426,8 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 		});
 	};
 }
-function RouteToOrderController($rootScope, $state, OrderCloudSDK, CurrentBuyer, CurrentOrder, toastr, Order, $exceptionHandler) {
+
+function RouteToOrderController($rootScope, $state, OrderCloudSDK, CurrentOrder, CurrentBuyer,  toastr, Order, $exceptionHandler) {
     if (Order) {
             reviewOrder(Order.ID, Order.xp.Status, Order.xp.BuyerID, Order.xp.CustomerID, Order.xp.CustomerName);
     } else {

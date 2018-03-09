@@ -184,7 +184,7 @@ function UsersController($state, $ocMedia, OrderCloudSDK, OrderCloudParameters, 
     };
 }
 
-function UserEditController($exceptionHandler, $state, toastr, OrderCloudSDK, SelectedUser, GroupsAvailable, CurrentGroups, UserService, CurrentBuyer) {
+function UserEditController($exceptionHandler, $state, $scope, toastr, OrderCloudSDK, SelectedUser, GroupsAvailable, CurrentGroups, UserService, CurrentBuyer) {
     var vm = this,
         userid = SelectedUser.ID;
     vm.userName = SelectedUser.Username;
@@ -202,7 +202,26 @@ function UserEditController($exceptionHandler, $state, toastr, OrderCloudSDK, Se
     vm.Submit = function() {
         var today = new Date();
         vm.user.TermsAccepted = today;
-        OrderCloudSDK.Users.Update(CurrentBuyer.GetBuyerID(), userid, vm.user)
+
+        //TODO - only include updated fields
+        var opts = {
+            'ID':vm.user.ID,
+            'FirstName':vm.user.FirstName,
+            'LastName':vm.user.LastName,
+            'Phone':vm.user.Phone,
+            'Email':vm.user.Email,
+            'UserGroupID':vm.groupsAvailable[vm.user.UserGroupID],
+            'Active':vm.user.Active,
+            'TermsAccepted':vm.user.TermsAccepted,
+            'xp': {
+                'type':vm.user.xp.type
+            }
+        }; //Will replace vm.user below.
+        if ($scope.UserEditForm.userPasswordInput.$dirty) {
+            opts.Password = vm.user.Password;
+        }
+
+        OrderCloudSDK.Users.Patch(CurrentBuyer.GetBuyerID(), userid, opts)
             .then(function (user) {
                 UserService.UpdateGroup(CurrentBuyer.GetBuyerID(), user.ID, vm.oldGroupId, vm.user.UserGroupID)
                 .then(function () {
@@ -211,7 +230,7 @@ function UserEditController($exceptionHandler, $state, toastr, OrderCloudSDK, Se
                 });
             })
             .catch(function(ex) {
-                $exceptionHandler(ex)
+                $exceptionHandler(ex);
             });
     };
 
@@ -222,7 +241,7 @@ function UserEditController($exceptionHandler, $state, toastr, OrderCloudSDK, Se
                 toastr.success('User Deleted', 'Success');
             })
             .catch(function(ex) {
-                $exceptionHandler(ex)
+                $exceptionHandler(ex);
             });
     };
 }
@@ -243,7 +262,20 @@ function UserCreateController($exceptionHandler, $state, toastr, OrderCloudSDK, 
     vm.Submit = function() {
         vm.user.TermsAccepted = new Date();
         vm.user.Username = vm.user.Email;
-        OrderCloudSDK.Users.Create(CurrentBuyer.GetBuyerID(), vm.user)
+        OrderCloudSDK.Buyers.Get(CurrentBuyer.GetBuyerID())
+            .then(function(buyer) {
+                if(buyer && buyer.xp && buyer.xp.AKA && buyer.xp.AKA.Active === true) {
+                    angular.forEach(buyer.xp.AKA, function(val,key) {
+                        if(key !== "Active") { //bypass active and look for the relationship.
+                            if(val === true) { //The other buyer is primary.
+                                vm.user.Username = buyer.ID + "-" + vm.user.Username;
+                            }
+                        }
+                    });
+                }
+
+                return OrderCloudSDK.Users.Create(CurrentBuyer.GetBuyerID(), vm.user);
+            })
             .then(function (user) {
                 UserService.UpdateGroup(CurrentBuyer.GetBuyerID(), user.ID, null, vm.user.UserGroupID)
                 .then(function() {
@@ -252,7 +284,7 @@ function UserCreateController($exceptionHandler, $state, toastr, OrderCloudSDK, 
                 });
             })
             .catch(function(ex) {
-                $exceptionHandler(ex)
+                $exceptionHandler(ex);
             });
     };
 }

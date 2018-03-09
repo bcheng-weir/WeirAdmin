@@ -21,6 +21,9 @@
                 {{orders.labels.businessName}}
             </th>
             <th scope="col">
+                {{orders.labels.Language}}
+            </th>
+            <th scope="col">
                 <a href="#" role="button" ng-click="orders.updateSort('OrderedBy')">
                     {{orders.labels.orderedBy}}
                     <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'OrderedBy'"></i>
@@ -34,13 +37,18 @@
                     <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!Total'"></i>
                 </a>
             </th>
+
             <th scope="col">
-                <a href="#" role="button" ng-click="orders.updateSort('DateSubmitted')">
+                <a href="#" role="button" ng-click="orders.updateSort('DateCreated')">
                     {{orders.labels.dateSubmitted}}
-                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'DateSubmitted'"></i>
-                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!DateSubmitted'"></i>
+                    <i class="fa fa-caret-down" ng-show="orders.parameters.sortBy == 'DateCreated'"></i>
+                    <i class="fa fa-caret-up" ng-show="orders.parameters.sortBy == '!DateCreated'"></i>
                 </a>
             </th>
+            <th>
+                {{orders.labels.dateUpdated}}
+            </th>
+
             <th scope="col">
                 {{orders.labels.reviewer}}
             </th>
@@ -53,13 +61,25 @@
             <th scope="row">{{order.ID}}</th>
             <td>{{order.xp.PONumber}}</td>
             <td>{{order.xp.CustomerName}}</td>
+            <td>
+                {{orders.getLanguage(order.FromCompanyID)}}
+            </td>
             <td>{{order.FromUser.FirstName}} {{order.FromUser.LastName}}</td>
             <td class="text-left" ng-switch on="order.xp.CustomerID | weirGroupFromBuyersID">
                 <span ng-switch-when="WPIFR">{{order.Total | currency: '&euro;'}}</span>
                 <span ng-switch-when="WVCUK">{{order.Total | currency: '&#163;'}}</span>
                 <span ng-switch-default>{{order.Total | currency:'&#163;'}}</span>
             </td>
-            <td style="color: green">{{order.DateSubmitted | weirdate}}</td>
+
+            <td>
+                <span ng-if="order.DateCreated" ng-bind-html="orders.dateOf(order.DateCreated) | weirdate : orders.WeirGroup"></span>
+                <span ng-if="!order.DateCreated"></span>
+            </td>
+            <td>
+                <span ng-if="order.xp.StatusDate" ng-bind-html="orders.dateOf(order.xp.StatusDate) | weirdate : orders.WeirGroup"></span>
+                <span ng-if="!order.xp.StatusDate"></span>
+            </td>
+
             <td>{{order.xp.ReviewerName}}</td>
             <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.BuyerID, order.xp.CustomerID, order.xp.CustomerName)">{{orders.labels.view}}</button></td>
         </tr>

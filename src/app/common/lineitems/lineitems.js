@@ -76,50 +76,41 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
         }
     }
 
-    function _getProductInfo(LineItems, Order) {
+    function _getProductInfo(LineItems, Order, lang) {
         var li = LineItems.Items || LineItems;
         var productIDs = Underscore.uniq(Underscore.pluck(li, 'ProductID'));
         var dfd = $q.defer();
         var queue = [];
-	    var impersonation = {
-		    ClientID: buyernetwork,
-		    Roles: []
-	    };
-
-	    //OrderCloudSDK.Users.Get(Order.xp.BuyerID,Order.FromUserID)
-		//    .then(function(buyer) {
-		//	    // Get an access token for impersonation.
-		//	    impersonation.Roles = buyer.AvailableRoles;
-		//	    return OrderCloudSDK.Users.GetAccessToken(Order.xp.BuyerID, Order.FromUserID, impersonation);
-		//    })
-		//    .then(function(data) {
-		//	    // Set the local impersonation token so that As() can be used.
-		//	    return OrderCloudSDK.SetImpersonationToken(data['access_token']);
-		//    })
-		//    .then(function() {
-			    angular.forEach(productIDs, function (productid) {
-				    if(productid != "PLACEHOLDER") {
-					    // queue.push(OrderCloudSDK.As().Me.GetProduct(productid));
-					    queue.push(OrderCloudSDK.Products.Get(productid));
-				    }
-			    });
-			    $q.all(queue)
-				    .then(function (results) {
-					    angular.forEach(li, function (item) {
-						    if(item.ProductID != "PLACEHOLDER") {
-							    item.Product = angular.copy(Underscore.where(results, {ID: item.ProductID})[0]);
-						    }
-					    });
-					    dfd.resolve(li);
-				    })
-		    //})
-		    //.then(function() {
-			//    // Remove the impersonation token.
-			//    return OrderCloudSDK.RemoveImpersonationToken();
-		    //})
-        .catch(function (e) {
-            console.log("Exception caught: " + JSON.stringify(e));
+        angular.forEach(productIDs, function (productid) {
+            if(productid != "PLACEHOLDER") {
+                queue.push(OrderCloudSDK.Products.Get(productid));
+            }
         });
+        $q.all(queue)
+            .then(function (results) {
+                angular.forEach(li, function (item) {
+                    if(item.ProductID != "PLACEHOLDER") {
+                        item.Product = angular.copy(Underscore.where(results, {ID: item.ProductID})[0]);
+                        item.xp.TagNumber = typeof item.xp.TagNumber === 'undefined' ? item.Product.xp.TagNumber: item.xp.TagNumber;
+                        item.xp.ProductName = typeof item.xp.ProductName === 'undefined' ? item.Product.Name: item.xp.ProductName;
+                        if (lang) {
+                            if (typeof item.xp.Description === 'undefined' || !item.xp.Description) {
+                                item.xp.Description = item.Product.xp[lang].Description ? item.Product.xp[lang].Description : item.Product.Description;
+                            } else {
+                                item.xp.Description = item.xp.Description ? item.xp.Description : item.Product.Description;
+                            }
+                        } else {
+                            item.xp.Description = typeof item.xp.Description === 'undefined' ? item.Product.Description : item.xp.Description;
+                        }
+                        item.xp.ReplacementSchedule = typeof item.xp.ReplacementSchedule === 'undefined' ? item.Product.xp.ReplacementSchedule : item.xp.ReplacementSchedule;
+                        item.xp.LeadTime = typeof item.xp.LeadTime === 'undefined' ?  item.Product.xp.LeadTime: item.xp.LeadTime;
+                    }
+                });
+                dfd.resolve(li);
+            })
+            .catch(function (e) {
+                console.log("Exception caught: " + JSON.stringify(e));
+            });
         return dfd.promise;
     }
 
@@ -130,13 +121,15 @@ function LineItemFactory($rootScope, $q, $state, $uibModal, Underscore, OrderClo
 	    	if(item.ProductID == "PLACEHOLDER") {
 	    		item.Product = {
 				    "Name": item.xp.ProductName,
-				    "Description": item.xp.Description,
-				    "xp": {
-					    "ReplacementSchedule": item.xp.ReplacementSchedule,
-					    "LeadTime": item.xp.LeadTime
-				    }
+				    "Description": item.xp.Description
 			    };
-		    }
+                item.xp.ProductName = typeof item.xp.ProductName === 'undefined' ? item.Product.Name: item.xp.ProductName;
+                item.xp.Description = typeof item.xp.Description === 'undefined' ? item.Product.Description : item.xp.Description;
+                item.xp.ReplacementSchedule = typeof item.xp.ReplacementSchedule === 'undefined' ? item.Product.xp.ReplacementSchedule : item.xp.ReplacementSchedule;
+                item.xp.LeadTime = typeof item.xp.LeadTime === 'undefined' ?  item.Product.xp.LeadTime: item.xp.LeadTime;
+                item.xp.TagNumber = typeof item.xp.TagNumber === 'undefined' ? "" : item.xp.TagNumber;
+                item.xp.SN = typeof item.xp.SN === 'undefined' ? "" : item.xp.SN;
+            }
 	    });
 
 	    return li;
