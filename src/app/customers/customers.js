@@ -192,6 +192,10 @@ function CustomerService($sce, OrderCloudSDK, $exceptionHandler) {
     var _weirGroups = [{id: "1", label: "WVCUK"}, {id: "2", label: "WPIFR"}];
     var _customerTypes = [{id: "1", label: "End User"}, {id: "2", label: "Service Company"}];
     var _customerLanguages = [{id: "fr", label: "French"}, {id: "en", label: "English"}];
+    var _customerCurrencies = {
+        WPIFR: ["GBP","EUR","USD"],
+        WVCUK: ["GBP","EUR","USD","AUD","ZAR"]
+    };
     var _componentLabels = {
         en: {
             NewCustomer: "New Customer",
@@ -243,7 +247,9 @@ function CustomerService($sce, OrderCloudSDK, $exceptionHandler) {
             CarriageHeader: "Carriage",
             StandardCarriageLabel: 'UK Standard carriage (default)',
             CustomerSpecificLabel: 'Customer specific carriage',
-            Currency: "GBP"
+            Currency: "GBP",
+            CustomerCurrency:"Default currency setting",
+            SelectCurrency:"(Select currency)"
         },
         fr: {
             NewCustomer: $sce.trustAsHtml("New Customer"),
@@ -295,7 +301,9 @@ function CustomerService($sce, OrderCloudSDK, $exceptionHandler) {
             CarriageHeader: "Carriage",
             StandardCarriageLabel: 'FR Standard carriage (default)',
             CustomerSpecificLabel: 'Customer specific carriage',
-            Currency: "EU"
+            Currency: "EU",
+            CustomerCurrency:$sce.trustAsHtml("Default currency setting"),
+            SelectCurrency:$sce.trustAsHtml("(Select currency)")
         }
     };
 
@@ -358,6 +366,7 @@ function CustomerService($sce, OrderCloudSDK, $exceptionHandler) {
         WeirGroups: _weirGroups,
         CustomerTypes: _customerTypes,
         CustomerLanguages: _customerLanguages,
+        CustomerCurrencies: _customerCurrencies,
         GetUpperLanguage: _getUpperLanguage,
         CreateBuyer: _createBuyer,
         CreateGroup: _createGroup,
@@ -466,6 +475,7 @@ function CustomerEditCtrl($exceptionHandler, $state, $ocMedia, toastr, OrderClou
     vm.ToLockRelatedBuyer = ToLockRelatedCustomerNumber;
     vm.RelatedBuyerID = RelatedBuyer && RelatedBuyer.ID ? angular.copy(RelatedBuyer.ID + ": " + RelatedBuyer.Name) : null;
     vm.relatedWeirGroup = WeirGroup.ID == 'WVCUK' ? 'WPIFR' : 'WVCUK';
+    vm.currencies = CustomerService.CustomerCurrencies[vm.weirGroupID];
 
     vm.list = AddressList;
     vm.parameters = Parameters;

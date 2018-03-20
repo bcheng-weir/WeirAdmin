@@ -46,6 +46,9 @@
                         Language
                     </th>
                     <th class="text-center" scope="col">
+                        Currency
+                    </th>
+                    <th class="text-center" scope="col">
                         Active
                     </th>
                     <th scope="col"></th>
@@ -63,6 +66,9 @@
          	    </td>
                 <td>
                     {{customers.GetUpperLanguage(buyer.xp.Lang.id)}}
+                </td>
+                <td>
+                    {{buyer.xp.Curr}}
                 </td>
                 <td class="text-center" data-title="Active"><i class="fa fa-circle" aria-hidden="true" ng-class="{'active':buyer.Active}"></i></td>
                 <td class="actions-cell">

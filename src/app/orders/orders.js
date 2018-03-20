@@ -315,7 +315,8 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			StatusEN: "Status EN = Enquiry Submitted",
 			StatusER: "Status ER = Enquiry Under Review",
 			enquiriesSubmitted: "Enquiries submitted",
-			Language: "Language"
+			Language: "Language",
+			Currency: "Currency"
 		},
 		fr: {
 			search:$sce.trustAsHtml("Search"),
@@ -361,7 +362,8 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			StatusEN: $sce.trustAsHtml("Status EN = Enquiry Submitted"),
 			StatusER: $sce.trustAsHtml("Status ER = Enquiry Under Review"),
 			enquiriesSubmitted: $sce.trustAsHtml("Enquiries submitted"),
-            Language: $sce.trustAsHtml("Language")
+            Language: $sce.trustAsHtml("Language"),
+            Currency: $sce.trustAsHtml("Currency")
 		}
 	};
 	vm.labels = labels.en;

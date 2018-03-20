@@ -24,7 +24,7 @@ function OrderToCsvService($filter,$sce,OCGeography,Underscore) {
             [Labels.SerialNum, Labels.TagNum, Labels.PartNum, Labels.Description, Labels.RecReplacement, Labels.LeadTimeAvailability, Labels.Currency, Labels.PricePerItem, Labels.Quantity]
         ];
 
-        var currency = (Order.FromCompanyID.substr(0,5) == "WVCUK") ? ("£") : ((Order.FromCompanyID.substr(0,5) == "WPIFR") ? ("€") : (""));
+        //var currency = (Order.FromCompanyID.substr(0,5) == "WVCUK") ? ("£") : ((Order.FromCompanyID.substr(0,5) == "WPIFR") ? ("€") : (""));
 
         angular.forEach(LineItems, function (item) {
             var line = [];
@@ -34,13 +34,13 @@ function OrderToCsvService($filter,$sce,OCGeography,Underscore) {
             line.push(item.xp.Description);
             line.push(item.xp.ReplacementSchedule);
             line.push(item.xp.LeadTime);
-            line.push(currency);
+            line.push(Order.xp.currency);
             line.push(item.UnitPrice);
             line.push(item.Quantity);
             data.push(line);
         });
-        data.push(["","","",Order.xp.ShippingDescription,"","",currency,Order.ShippingCost,""]);
-        data.push(["", "", "", "", "", Labels.Total, currency[Order.xp.BuyerID.substring(0,5)], Order.Total]);
+        data.push(["","","",Order.xp.ShippingDescription,"","",Order.xp.currency,Order.ShippingCost,""]);
+        data.push(["", "", "", "", "", Labels.Total, Order.xp.currency, Order.Total]);
         data.push(["", ""]);
         data.push([Labels.DeliveryAddress]);
 	    if (DeliveryAddress) {

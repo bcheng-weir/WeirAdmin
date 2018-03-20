@@ -62,6 +62,12 @@
                 {{orders.getLanguage(order.FromCompanyID)}}
             </td>
             <td>{{order.FromUser.FirstName}} {{order.FromUser.LastName}}</td>
+            <th scope="col">
+                {{orders.labels.Currency}}
+            </th>
+            <td>
+                {{order.xp.Curr}}
+            </td>
             <td class="text-left" ng-switch on="order.xp.CustomerID | weirGroupFromBuyersID">
                 <span ng-switch-when="WPIFR">{{order.Total | currency: '&euro;'}}</span>
                 <span ng-switch-when="WVCUK">{{order.Total | currency: '&#163;'}}</span>
