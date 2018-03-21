@@ -1045,14 +1045,13 @@ function CurrencyAdminController(OrderCloudSDK, toastr, Me, BaseRateId, StartCur
             var future = -1;
             if (res && res.xp && res.xp.rates) {
                 var tmp = res.xp.rates;
-                var today = new Date();
                 for (var i = 0; i < tmp.length && (future < 0 || current < 0); i++) {
                     var rte = tmp[i];
                     var start = todate(rte.Start);
                     var end = todate(rte.End);
                     if (end == null) {
                         future = i;
-                    } else if (start <= today && end >= today) {
+                    } else if (start <= vm.Today && end >= vm.Today) {
                         current = i;
                     }
                 }
@@ -1095,7 +1094,6 @@ function CurrencyAdminController(OrderCloudSDK, toastr, Me, BaseRateId, StartCur
             var current = -1;
             if (res && res.xp && res.xp.rates) {
                 var tmp = res.xp.rates;
-                var today = new Date();
                 for (var i = 0; i < tmp.length && current < 0; i++) {
                     var rte = tmp[i];
                     var end = todate(rte.End);
