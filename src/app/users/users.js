@@ -184,13 +184,14 @@ function UsersController($state, $ocMedia, OrderCloudSDK, OrderCloudParameters, 
     };
 }
 
-function UserEditController($exceptionHandler, $state, $scope, toastr, OrderCloudSDK, SelectedUser, GroupsAvailable, CurrentGroups, UserService, CurrentBuyer) {
+function UserEditController($exceptionHandler, $state, $scope, toastr, OrderCloudSDK, SelectedUser, GroupsAvailable, CurrentGroups, UserService, CurrentBuyer, Underscore) {
     var vm = this,
         userid = SelectedUser.ID;
     vm.userName = SelectedUser.Username;
     vm.user = SelectedUser;
     vm.groupsAvailable = GroupsAvailable.Items;
-    vm.user.UserGroupID = (CurrentGroups.Items.length > 0) ? CurrentGroups.Items[0].UserGroupID : null;
+    var UGID = Underscore.findWhere(CurrentGroups.Items, { UserID: vm.user.ID });
+    vm.user.UserGroupID = UGID ? UGID.UserGroupID : null;
     vm.oldGroupId = vm.user.UserGroupID;
 
     vm.groupsAvailable = GroupsAvailable.Items;
