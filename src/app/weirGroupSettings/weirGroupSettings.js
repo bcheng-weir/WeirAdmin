@@ -834,7 +834,7 @@ function SharedContentController($state, OrderCloudSDK, toastr, Me, WeirGroup, $
                     }
                 };
                 upd.xp.SharedContent[name] = tmp.newValue;
-                console.log("Update = " + JSON.stringify(upd));
+                // console.log("Update = " + JSON.stringify(upd));
                 OrderCloudSDK.Catalogs.Patch(vm.weirGroupID, upd)
                     .then(function () {
                         tmp.old = tmp.newValue;
@@ -938,6 +938,8 @@ function CurrencyAdminController(OrderCloudSDK, toastr, Me, BaseRateId, StartCur
     vm.NewRate = 0.0;
     var today= new Date();
     vm.Today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    vm.MinDate = today.getFullYear().toString() + "-" + (today.getMonth() + 1).toString() + "-" + today.getDate();
+    vm.MaxDate = (today.getFullYear()+1).toString() + "-" + (today.getMonth() + 1).toString() + "-" + today.getDate();
     vm.labels = {
         Selection: "Currency; ",
         AddNew: "Set new Exchange rate",
@@ -958,19 +960,35 @@ function CurrencyAdminController(OrderCloudSDK, toastr, Me, BaseRateId, StartCur
     };
     vm.SaveNewRate = function () {
         var start = (typeof (vm.NewStartDate)) == 'object' ? vm.NewStartDate : Date.parse(vm.NewStartDate);
-        //var end = vm.NewEndDate ? (typeof(vm.NewEndDate) == 'object' ? vm.NewEndDate : Date.parse(vm.NewEndDate)) : null;
         var rate = parseFloat(vm.NewRate);
+        if (!newRateIsValid(start, rate)) return;
         if (hasFutureRate) {
-            console.log("Replace existing future rate, updating prior rate end date if necessary");
             updateExistingFutureRate(vm.SelectedCurrency);
         } else {
-            console.log("Set end date on current rate and create new future rate");
             createNewFutureRate(vm.SelectedCurrency);
         }
-        console.log(JSON.stringify({ start: start, /*end: end, */ rate: rate }));
-        // TOD: Refresh rate list (just in case)
     };
     processRates(Rates);
+
+    function newRateIsValid(start, rate) {
+        var msg = "";
+        if (!start || (start < vm.Today)) {
+            msg = "A start date no earlier than today must be provided";
+        } else {
+            var oneYear = new Date(vm.Today.getFullYear() + 1, vm.Today.getMonth(), vm.Today.getDate());
+            if (start > oneYear) {
+                msg = "The new rate start date must be within one year of today";
+            }
+        }
+        if (!rate || rate <= 0.0) {
+            if (msg, length > 0) msg = msg + " \r\n";
+            msg = msg + "A postive conversion rate is required";
+        }
+        if (msg) {
+            toastr.error(msg, "Invalid rate requested");
+        }
+        return (msg.length == 0);
+    }
 
     function processRates(rates) {
         hasFutureRate = false;
@@ -987,7 +1005,6 @@ function CurrencyAdminController(OrderCloudSDK, toastr, Me, BaseRateId, StartCur
             ratelist.sort(function (a, b) { return b.Start - a.Start; });
             var first = ratelist[0];
             if (first.Start > new Date()) {
-                //ratelist.shift();
                 vm.NewStartDate = first.Start;
                 vm.NewRate = first.Rate;
                 vm.OldStartDate = vm.NewRate;
@@ -1052,19 +1069,21 @@ function CurrencyAdminController(OrderCloudSDK, toastr, Me, BaseRateId, StartCur
                     tmp[current].End = newEndDate;
                     tmp[future].Start = start;
                     tmp[future].Rate = vm.NewRate;
-                    console.log("Patch request: " + JSON.stringify(upd));
+                    // console.log("Patch request: " + JSON.stringify(upd));
                     OrderCloudSDK.Specs.Patch(specId, upd)
                     .then(function () {
-                        console.log("Update succeeded");
                         vm.SelectCurrency(curr);
+                        toastr.success('Exchange rate updated', 'Success');
                     })
                     .catch(function(ex) {
+                        toastr.error("Unable to update exchange rate", "Failure");
                         console.log("Update failed: " + ex);
                     });
                 }
             }
         })
         .catch(function (ex) {
+            toastr.error("Unable to update exchange rate", "Failure");
             console.log("Error: " + ex);
         });
     }
@@ -1096,19 +1115,21 @@ function CurrencyAdminController(OrderCloudSDK, toastr, Me, BaseRateId, StartCur
                     upd.xp.rates = tmp;
                     tmp[current].End = newEndDate;
                     tmp.unshift({ Start: start, End: null, Rate: vm.NewRate });
-                    console.log("Patch request: " + JSON.stringify(upd));
+                    // console.log("Patch request: " + JSON.stringify(upd));
                     OrderCloudSDK.Specs.Patch(specId, upd)
                     .then(function () {
-                        console.log("Update succeeded");
+                        toastr.success('Exchange rate created', 'Success');
                         vm.SelectCurrency(curr);
                     })
                     .catch(function (ex) {
+                        toastr.error("Unable to create new exchange rate", "Failure");
                         console.log("Update failed: " + ex);
                     });
                 }
             }
         })
         .catch(function (ex) {
+            toastr.error("Unable to create new exchange rate", "Failure");
             console.log("Error: " + ex);
         });
     }
