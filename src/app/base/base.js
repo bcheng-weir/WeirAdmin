@@ -171,7 +171,8 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
             allOrders: "All Orders",
             standardDelivery: "Carriage",
             poPrintContent: "Fixed Print Content",
-            sharedContent: "Shared Content"
+            sharedContent: "Shared Content",
+            currencyRates: "Manage Currencies"
         }
     };
 

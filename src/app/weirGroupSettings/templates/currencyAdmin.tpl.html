@@ -1,0 +1,73 @@
+<h3 class="page-header">
+    <b>Manage Currencies</b>
+</h3>
+    <!-- header -->
+<nav>
+    <ol class="cd-breadcrumb triangle">
+        <li role="presentation" ng-class="{active: currency.SelectedCurrency == 'EUR'}" ng-if="currency.Group == 'WVCUK'"><a href="#" ng-click="currency.SelectCurrency('EUR')">EUR</a></li>
+        <li role="presentation" ng-class="{active: currency.SelectedCurrency == 'GBP'}" ng-if="currency.Group == 'WPIFR'"><a href="#" ng-click="currency.SelectCurrency('GBP')">GBP</a></li>
+        <li role="presentation" ng-class="{active: currency.SelectedCurrency == 'USD'}"><a href="#" ng-click="currency.SelectCurrency('USD')">USD</a></li>
+        <li role="presentation" ng-class="{active: currency.SelectedCurrency == 'AUD'}" ng-if="currency.Group == 'WVCUK'"><a href="#" ng-click="currency.SelectCurrency('AUD')">AUD</a></li>
+        <li role="presentation" ng-class="{active: currency.SelectedCurrency == 'ZUR'}" ng-if="currency.Group == 'WVCUK'"><a href="#" ng-click="currency.SelectCurrency('ZAR')">ZAR</a></li>
+    </ol>
+</nav>
+
+<div class="row">
+    <div class='col-md-12'>
+        <h3>{{currency.labels.Selection + currency.SelectedCurrency}}</h3>
+    </div>
+</div>
+<div class="row">
+    <div class='col-md-12'>
+        <h4>{{currency.labels.AddNew}}</h4>
+    </div>
+</div>
+
+<form name="NewRateForm" novalidate>
+    <div class="row">
+        <div class="form-group col-md-2">
+            <label for="from">From</label>
+            <input id="from" type="date" ng-model="currency.NewStartDate" class="form-control" required>
+        </div>
+        <div class="form-group col-md-2">
+            <label for="rate">Exchange rate</label>
+            <input id="rate" type="number" ng-model="currency.NewRate" class="form-control" required>
+        </div>
+        <div class="form-group col-md-2">
+            <br/>
+            <button id="save" class="btn btn-primary" type="button" ng-click="currency.SaveNewRate()" ng-disabled="NewRateForm.$invalid">Save</button>
+        </div>
+    </div>
+</form>
+<div class="row">
+    <div class="form-group col-md-8">
+        <hr />
+    </div>
+</div>
+<div class="row">
+    <div class='col-md-12'>
+        <h4>{{currency.labels.HistoryHeader}}</h4>
+    </div>
+</div>
+<div class="row" style="font-weight: bold;">
+    <div class="form-group col-md-2">
+        <span>From</span>
+    </div>
+    <div class="form-group col-md-2">
+        <span for="to">To</span>
+    </div>
+    <div class="form-group col-md-2">
+        <span for="rate">Exchange rate</span>
+    </div>
+</div>
+    <div class="row" ng-repeat="rate in currency.SelectedRateHistory">
+        <div class="form-group col-md-2">{{rate.Start | weirdateonly}}
+        </div>
+        <div class="form-group col-md-2">{{rate.End | weirdateonly}}
+        </div>
+        <div class="form-group col-md-2"><span>{{rate.Rate}}</span> <span ng-if="currency.Today >= rate.Start && (!rate.End || rate.End >= currency.Today)" style="color: red">** Current rate</span>
+        </div>
+    </div>
+    <!--
+
+    -->

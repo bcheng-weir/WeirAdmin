@@ -6,6 +6,7 @@ angular.module('orderCloud')
     .controller('POPrintContentFR_ENCtrl', POPrintContentFR_ENController)
     .controller('SharedContentCtrl', SharedContentController)
     .controller('SharedContentFR_ENCtrl', SharedContentFR_ENController)
+    .controller('CurrencyAdminCtrl', CurrencyAdminController)
 ;
 
 function WeirGroupSettingsConfig($stateProvider) {
@@ -17,12 +18,12 @@ function WeirGroupSettingsConfig($stateProvider) {
             controllerAs: 'delivery',
             url: '/carriage',
             data: { componentName: 'WeirGroupSettings' },
-            resolve : {
-                Me: function(OrderCloudSDK) {
+            resolve: {
+                Me: function (OrderCloudSDK) {
                     return OrderCloudSDK.Me.Get();
                 },
-                WeirGroup: function(OrderCloudSDK, Me) {
-	                var groupId = Me.xp.WeirGroup.label;
+                WeirGroup: function (OrderCloudSDK, Me) {
+                    var groupId = Me.xp.WeirGroup.label;
                     return OrderCloudSDK.Catalogs.Get(groupId);
                 }
             }
@@ -163,7 +164,30 @@ function WeirGroupSettingsConfig($stateProvider) {
                 }
             }
         })
-    ;
+        .state('currencyAdmin', {
+            parent: 'base',
+            templateUrl: 'weirGroupSettings/templates/currencyAdmin.tpl.html',
+            controller: 'CurrencyAdminCtrl',
+            controllerAs: 'currency',
+            url: '/currency',
+            data: { componentName: 'currencyAdmin' },
+            resolve: {
+                Me: function (OrderCloudSDK) {
+                    return OrderCloudSDK.Me.Get();
+                },
+                BaseRateId: function (OrderCloudSDK, Me) {
+                    return (Me.xp.WeirGroup.label === "WPIFR") ? "WPIFR-EUR" : "WVCUK-GBP";
+                },
+                StartCurrency: function (OrderCloudSDK, Me) {
+                    return (Me.xp.WeirGroup.label === "WPIFR") ? "GBP" : "EUR";
+                },
+                Rates: function (OrderCloudSDK, BaseRateId, StartCurrency) {
+                    try {
+                        return OrderCloudSDK.Specs.Get(BaseRateId + "-" + StartCurrency);
+                    } catch (ex) { return []; }
+                }
+            }
+        });
 }
 
 function StandardDeliveryController($state, OrderCloudSDK, toastr, Me, WeirGroup, $sce) {
@@ -902,5 +926,190 @@ function SharedContentFR_ENController(OrderCloudSDK, toastr, WeirGroup, $sce) {
                 tmp.editable = false;
             }
         }
+    }
+}
+
+function CurrencyAdminController(OrderCloudSDK, toastr, Me, BaseRateId, StartCurrency, Rates) {
+    var vm = this;
+    var hasFutureRate = false;
+    vm.Group = Me.xp.WeirGroup.label;
+    vm.NewStartDate = new Date();
+    vm.OldStartDate = null;
+    vm.NewRate = 0.0;
+    var today= new Date();
+    vm.Today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    vm.labels = {
+        Selection: "Currency; ",
+        AddNew: "Set new Exchange rate",
+        HistoryHeader: "Current / Previous Exchange rates"
+    };
+    vm.SelectedCurrency = StartCurrency;
+    vm.SelectedRateHistory = [];
+    vm.SelectCurrency = function (curr) {
+        vm.SelectedCurrency = curr;
+        var specId = BaseRateId + "-" + curr;
+        OrderCloudSDK.Specs.Get(specId)
+        .then(function (result) {
+            processRates(result);
+        })
+        .catch(function (ex) {
+            console.log("Failure: " + ex);
+        });
+    };
+    vm.SaveNewRate = function () {
+        var start = (typeof (vm.NewStartDate)) == 'object' ? vm.NewStartDate : Date.parse(vm.NewStartDate);
+        //var end = vm.NewEndDate ? (typeof(vm.NewEndDate) == 'object' ? vm.NewEndDate : Date.parse(vm.NewEndDate)) : null;
+        var rate = parseFloat(vm.NewRate);
+        if (hasFutureRate) {
+            console.log("Replace existing future rate, updating prior rate end date if necessary");
+            updateExistingFutureRate(vm.SelectedCurrency);
+        } else {
+            console.log("Set end date on current rate and create new future rate");
+            createNewFutureRate(vm.SelectedCurrency);
+        }
+        console.log(JSON.stringify({ start: start, /*end: end, */ rate: rate }));
+        // TOD: Refresh rate list (just in case)
+    };
+    processRates(Rates);
+
+    function processRates(rates) {
+        hasFutureRate = false;
+        vm.SelectedRateHistory = [];
+        var ratelist = [];
+        if (rates && rates.xp && rates.xp.rates) {
+            var tmp = rates.xp.rates;
+            for (var i = 0; i < tmp.length; i++) {
+                var rte = tmp[i];
+                ratelist.push({ Start: todate(rte.Start), End: todate(rte.End), Rate: rte.Rate });
+            }
+        }
+        if (ratelist.length > 0) {
+            ratelist.sort(function (a, b) { return b.Start - a.Start; });
+            var first = ratelist[0];
+            if (first.Start > new Date()) {
+                //ratelist.shift();
+                vm.NewStartDate = first.Start;
+                vm.NewRate = first.Rate;
+                vm.OldStartDate = vm.NewRate;
+                hasFutureRate = true;
+            } else {
+                vm.NewStartDate = new Date();
+                vm.NewRate = first.Rate;
+                vm.OldStartDate = null;
+            }
+            vm.SelectedRateHistory.push.apply(vm.SelectedRateHistory, ratelist);
+        }
+    }
+
+    function todate(num) {
+        if (num) {
+            var year = num / 10000;
+            var month = (num / 100) % 100 - 1;
+            var day = (num % 100);
+            return new Date(year, month, day);
+        }
+        return null;
+    }
+    function tonum(dte) {
+        if (dte) {
+            var val = (dte.getFullYear() * 100 + (dte.getMonth() + 1)) * 100 + dte.getDate();
+            return val;
+        }
+        return null;
+    }
+
+    // TODO: Move these to a service - may be able to share partially with current rate retrieval method
+    function updateExistingFutureRate(curr) {
+        var specId = BaseRateId + "-" + curr;
+        OrderCloudSDK.Specs.Get(specId)
+        .then(function (res) {
+            var tmp = [];
+            var current = -1;
+            var future = -1;
+            if (res && res.xp && res.xp.rates) {
+                var tmp = res.xp.rates;
+                var today = new Date();
+                for (var i = 0; i < tmp.length && (future < 0 || current < 0); i++) {
+                    var rte = tmp[i];
+                    var start = todate(rte.Start);
+                    var end = todate(rte.End);
+                    if (end == null) {
+                        future = i;
+                    } else if (start <= today && end >= today) {
+                        current = i;
+                    }
+                }
+                if (current >= 0 && future >= 0) {
+                    var tmpEnd = new Date(vm.NewStartDate.getTime());
+                    tmpEnd.setDate(tmpEnd.getDate() - 1);
+                    var newEndDate = tonum(tmpEnd);
+                    var start = tonum(vm.NewStartDate);
+                    var upd = {
+                        xp: {
+                        }
+                    };
+                    upd.xp.rates = tmp;
+                    tmp[current].End = newEndDate;
+                    tmp[future].Start = start;
+                    tmp[future].Rate = vm.NewRate;
+                    console.log("Patch request: " + JSON.stringify(upd));
+                    OrderCloudSDK.Specs.Patch(specId, upd)
+                    .then(function () {
+                        console.log("Update succeeded");
+                        vm.SelectCurrency(curr);
+                    })
+                    .catch(function(ex) {
+                        console.log("Update failed: " + ex);
+                    });
+                }
+            }
+        })
+        .catch(function (ex) {
+            console.log("Error: " + ex);
+        });
+    }
+    function createNewFutureRate(curr) {
+        var specId = BaseRateId + "-" + curr;
+        OrderCloudSDK.Specs.Get(specId)
+        .then(function (res) {
+            var tmp = [];
+            var current = -1;
+            if (res && res.xp && res.xp.rates) {
+                var tmp = res.xp.rates;
+                var today = new Date();
+                for (var i = 0; i < tmp.length && current < 0; i++) {
+                    var rte = tmp[i];
+                    var end = todate(rte.End);
+                    if (end == null) {
+                        current = i;
+                    }
+                }
+                if (current >= 0) {
+                    var tmpEnd = new Date(vm.NewStartDate.getTime());
+                    tmpEnd.setDate(tmpEnd.getDate() - 1);
+                    var newEndDate = tonum(tmpEnd);
+                    var start = tonum(vm.NewStartDate);
+                    var upd = {
+                        xp: {
+                        }
+                    };
+                    upd.xp.rates = tmp;
+                    tmp[current].End = newEndDate;
+                    tmp.unshift({ Start: start, End: null, Rate: vm.NewRate });
+                    console.log("Patch request: " + JSON.stringify(upd));
+                    OrderCloudSDK.Specs.Patch(specId, upd)
+                    .then(function () {
+                        console.log("Update succeeded");
+                        vm.SelectCurrency(curr);
+                    })
+                    .catch(function (ex) {
+                        console.log("Update failed: " + ex);
+                    });
+                }
+            }
+        })
+        .catch(function (ex) {
+            console.log("Error: " + ex);
+        });
     }
 }

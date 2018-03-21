@@ -5,7 +5,8 @@ angular.module( 'orderCloud' )
 	.filter( 'partPreSearch', partPreSearch )
 	.filter( 'serialnumber', serialnumber )
 	.filter( 'searchresults', searchresults )
-	.filter( 'weirdate', weirdate )
+	.filter('weirdate', weirdate)
+	.filter('weirdateonly', weirdateonly)
 	.filter('weirGroupFromBuyersID', weirGroupFromBuyersID)
 	.filter('reverseComments',reverseComments)
 ;
@@ -142,6 +143,30 @@ function weirdate() {
 		}
 		return result;
 	};
+}
+function weirdateonly() {
+    //POC-522: format should be 04-Aug-17 15:24
+    return function (date, locale) {
+        var result;
+
+        if (date) {
+            date = new Date(date);
+            var h = date.getHours();
+            var m = date.getMinutes();
+            if (h < 10) { h = "0" + h; }
+            if (m < 10) { m = "0" + m; }
+            var t = h + ":" + m;
+            var day = date.getDate();
+            if (day < 10) {
+                day = "0" + day;
+            }
+
+            result = day + '-' + getMonthText(date.getMonth(), locale) + '-' + (date.getFullYear() % 100).toString().slice(-2);
+        } else {
+            result = "";
+        }
+        return result;
+    };
 }
 
 function weirGroupFromBuyersID() {

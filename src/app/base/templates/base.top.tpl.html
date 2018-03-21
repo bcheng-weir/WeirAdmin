@@ -25,6 +25,7 @@
                         <li ng-if="base.currentUser.xp.WeirGroup.label == 'WPIFR'"><a href="" ui-sref="sharedContent.FR">{{base.labels.sharedContent}}</a></li>
                         <li ng-if="base.currentUser.xp.WeirGroup.label != 'WPIFR'"><a href="" ui-sref="sharedContent">{{base.labels.sharedContent}}</a></li>
                         <li ng-if="base.currentUser.xp.WeirGroup.label=='WPIFR'"><a href="" ui-sref="enquiries">Enquiry Administration</a></li> <!-- TODO -->
+                        <li><a href="" ui-sref="currencyAdmin">{{base.labels.currencyRates}}</a></li>
                     </ul>
                 </li>
                 <li uib-dropdown ng-if="!base.currentUser.Anonymous && base.CanEditCustomers">
