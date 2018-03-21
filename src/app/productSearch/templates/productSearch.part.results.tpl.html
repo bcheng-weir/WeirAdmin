@@ -33,11 +33,8 @@
                     <td>{{part.Detail.Description}}</td>
                     <td>{{part.Detail.xp.ReplacementSchedule}}</td>
                     <td>{{part.Detail.xp.LeadTime}}</td>
-                    <td ng-switch on="part.Detail.PriceSchedule.xp.Currency">
-                        <span ng-switch-when="EUR">{{part.Detail.PriceSchedule.PriceBreaks[0].Price | currency:'&#8364; '}}</span>
-                        <span ng-switch-when="GBP">{{part.Detail.PriceSchedule.PriceBreaks[0].Price | currency:'&#163; '}}</span>
-                        <span ng-switch-default>{{part.Detail.PriceSchedule.PriceBreaks[0].Price | currency:'&#163; '}}</span>
-                        <!-- <span ng-switch-default>{{part.Detail.StandardPriceSchedule.PriceBreaks[0].Price | currency:'&#163;'}}</span> -->
+                    <td>
+                        <span ng-bind-html="part.Detail.PriceSchedule.PriceBreaks[0].Price | defaultCurrency:partResults.Currency"></span>
                     </td>
                     <td>
                         <form class="form-group">

@@ -43,7 +43,7 @@ function ProductSearchConfig($stateProvider) {
 					//return OrderCloudSDK.Me.ListProducts(null, 1, 100, null, null, null);
 				    return OrderCloudSDK.Products.List({ page: 1, pageSize: 100 });
 				},
-				MyOrg: function(OrderCloudSDK, CurrentBuyer) {
+                MyOrg: function(OrderCloudSDK, CurrentBuyer) {
 					return OrderCloudSDK.Buyers.Get(CurrentBuyer.GetBuyerID());
 				}
 			}
@@ -73,7 +73,10 @@ function ProductSearchConfig($stateProvider) {
 			resolve: {
 				SerialNumberDetail: function( $stateParams, WeirService ) {
 					return WeirService.SerialNumber($stateParams.number);
-				}
+                },
+                MyOrg: function (OrderCloudSDK, CurrentBuyer) {
+                    return OrderCloudSDK.Buyers.Get(CurrentBuyer.GetBuyerID());
+                }
 			}
 		})
 		.state( 'productSearch.part', {
@@ -90,7 +93,10 @@ function ProductSearchConfig($stateProvider) {
 			resolve: {
 				PartNumberResults: function( $stateParams, WeirService) {
 					return WeirService.PartNumbers($stateParams.numbers.split(','));
-				}
+                },
+                MyOrg: function (OrderCloudSDK, CurrentBuyer) {
+                    return OrderCloudSDK.Buyers.Get(CurrentBuyer.GetBuyerID());
+                }
 			}
 		})
 		.state( 'productSearch.tag', {
@@ -118,7 +124,10 @@ function ProductSearchConfig($stateProvider) {
 			resolve: {
 				TagNumberDetail: function( $stateParams, WeirService ) {
 					return WeirService.TagNumber($stateParams.number);
-				}
+                },
+                MyOrg: function (OrderCloudSDK, CurrentBuyer) {
+                    return OrderCloudSDK.Buyers.Get(CurrentBuyer.GetBuyerID());
+                }
 			}
 		})
 		.state( 'productSearch.noresults', {
@@ -143,7 +152,7 @@ function ProductSearchController($sce, $state, $rootScope, OrderCloudSDK, Curren
 	vm.ImageBaseUrl = imageRoot;
 	vm.GetValveImageUrl = function (img) {
 	    return vm.ImageBaseUrl + "Valves/" + img;
-	};
+    };
 
 
 	if (!vm.IsServiceOrg) {
@@ -403,10 +412,11 @@ function SerialResultsController(WeirService, $stateParams, $state, SerialNumber
 	vm.labels = labels.en;
 }
 
-function SerialDetailController( $stateParams, $rootScope, $state, $sce, WeirService, SerialNumberDetail ) {
+function SerialDetailController( $stateParams, $rootScope, $state, $sce, WeirService, SerialNumberDetail, MyOrg ) {
 	var vm = this;
 	vm.serialNumber = SerialNumberDetail;
-	vm.searchNumbers = $stateParams.searchNumbers;
+    vm.searchNumbers = $stateParams.searchNumbers;
+    vm.Currency = MyOrg.xp.Curr;
 	vm.PartQuantity = function(partId) {
 		return SerialNumberDetail.xp.Parts[partId];
 	};
@@ -620,10 +630,11 @@ function TagResultsController(WeirService, $stateParams, $state, TagNumberResult
 	vm.labels = labels.en; //WeirService.LocaleResources(labels);
 }
 
-function TagDetailController( $stateParams, $rootScope, $sce, $state, WeirService, TagNumberDetail ) {
+function TagDetailController( $stateParams, $rootScope, $sce, $state, WeirService, TagNumberDetail, MyOrg ) {
 	var vm = this;
 	vm.tagNumber = TagNumberDetail;
-	vm.searchNumbers = $stateParams.searchNumbers;
+    vm.searchNumbers = $stateParams.searchNumbers;
+    vm.Currency = MyOrg.xp.Curr;
 	if(typeof vm.tagNumber != 'object') {
 		$state.go('productSearch.noresults', {}, {reload:true});
 	}
@@ -810,12 +821,13 @@ function PartController( $state, $sce, OrderCloudSDK, WeirService ) {
     };
 }
 
-function PartResultsController( $rootScope, $sce, $state, WeirService, PartNumberResults, Underscore ) {
+function PartResultsController( $rootScope, $sce, $state, WeirService, PartNumberResults, Underscore, MyOrg ) {
 	var vm = this;
 	vm.partNumberResults = PartNumberResults;
 	if (vm.partNumberResults && vm.partNumberResults.length == 0) $state.go('productSearch.noresults');
 	vm.Customer = ""; //PartNumberResults.Customer;
-	vm.MultipleCustomers = (vm.Customer == "*");
+    vm.MultipleCustomers = (vm.Customer == "*");
+    vm.Currency = MyOrg.xp.Curr;
 	var numFound = 0;
 	vm.partNumberResults = Underscore.flatten(Underscore.map(vm.partNumberResults, Underscore.values));
 	angular.forEach(vm.partNumberResults, function(entry) {

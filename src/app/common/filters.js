@@ -7,7 +7,8 @@ angular.module( 'orderCloud' )
 	.filter( 'searchresults', searchresults )
 	.filter( 'weirdate', weirdate )
 	.filter('weirGroupFromBuyersID', weirGroupFromBuyersID)
-	.filter('reverseComments',reverseComments)
+    .filter('reverseComments',reverseComments)
+    .filter('defaultCurrency', defaultCurrency)
 ;
 
 function serialnumber() {
@@ -160,4 +161,20 @@ function reverseComments(Underscore) {
 			return Underscore.sortBy(comments, 'date').reverse();
 		}
 	}
+}
+
+function defaultCurrency($filter) {
+    return function (amount, currency) {
+        if (!currency)
+            currency = 'GBP';
+
+        var currency_symbols = {
+            'GBP': '&#163;',
+            'EUR': '&#8364;',
+            'USD': '&#36;',
+            'AUD': '&#36;',
+            'ZAR': 'R'
+        };
+        return $filter('currency')(amount, currency_symbols[currency] + ' ');
+    }
 }
