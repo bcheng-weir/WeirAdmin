@@ -942,11 +942,14 @@ function CurrencyAdminController(OrderCloudSDK, toastr, Me, BaseRateId, StartCur
     vm.MaxDate = (today.getFullYear()+1).toString() + "-" + (today.getMonth() + 1).toString() + "-" + today.getDate();
     vm.labels = {
         Selection: "Currency; ",
-        AddNew: "Set new Exchange rate",
+        AddNew: "Add new Exchange rate",
         HistoryHeader: "Current / Previous Exchange rates"
     };
     vm.SelectedCurrency = StartCurrency;
     vm.SelectedRateHistory = [];
+    vm.popupStart = {
+        opened: false
+    }; //For the date picker.
     vm.SelectCurrency = function (curr) {
         vm.SelectedCurrency = curr;
         var specId = BaseRateId + "-" + curr;
@@ -1131,4 +1134,8 @@ function CurrencyAdminController(OrderCloudSDK, toastr, Me, BaseRateId, StartCur
             console.log("Error: " + ex);
         });
     }
+
+    vm.openStart = function() {
+        vm.popupStart.opened = true;
+    };
 }
