@@ -38,6 +38,7 @@
                 <li uib-dropdown ng-if="!base.currentUser.Anonymous">
                     <a href="#" uib-dropdown-toggle role="button">{{base.labels.orders}} <span class="caret"></span></a>
                     <ul uib-dropdown-menu>
+                        <li><a href="" ng-click="base.OrderAction('AllOrders')">{{base.labels.allOrders}}</a></li>
                         <li ng-if="base.currentUser.xp.WeirGroup.label=='WPIFR'"><a href="" ng-click="base.OrderAction('EnquiryQuotes')">{{base.labels.enquiryQuotes}}</a></li>
                         <li><a href="" ng-click="base.OrderAction('ReviewQuotes')">{{base.labels.quotesForReview}}</a></li>
                         <li><a href="" ng-click="base.OrderAction('RevisedQuotes')">{{base.labels.revisedQuotes}}</a></li>
@@ -47,7 +48,6 @@
                         <li><a href="" ng-click="base.OrderAction('RevisedOrders')">{{base.labels.revisedOrders}}</a></li>
                         <li><a href="" ng-click="base.OrderAction('ConfirmedOrders')">{{base.labels.confirmedOrders}}</a></li>
                         <li><a href="" ng-click="base.OrderAction('DespatchedOrders')">{{base.labels.despatched}}</a></li>
-                        <li><a href="" ng-click="base.OrderAction('AllOrders')">{{base.labels.allOrders}}</a></li>
                     </ul>
                 </li>
                 <li uib-dropdown ng-if="!base.currentUser.Anonymous">

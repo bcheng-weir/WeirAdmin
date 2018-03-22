@@ -169,10 +169,8 @@
                      <td>
                          <span ng-bind-html="line.xp.LeadTime"></span>
                      </td>
-                     <td ng-switch on="order.Order.xp.CustomerID | weirGroupFromBuyersID" class='text-right'>
-                         <span ng-switch-when="WPIFR" ng-bind-html="line.UnitPrice | currency:'&euro; '"></span>
-                         <span ng-switch-when="WVCUK" ng-bind-html="line.UnitPrice | currency:'&#163; '"></span>
-                         <span ng-switch-default ng-bind-html="line.UnitPrice | currency:'&#163; '"></span>
+                     <td class='text-right'>
+                         <span ng-bind-html="line.UnitPrice | defaultCurrency:order.Currency"></span>
                      </td>
                      <td ng-bind-html="line.Quantity"></td>
                      <td style="border:0;width:100px;">
@@ -252,10 +250,8 @@
                      <td>
                          <span ng-bind-html="line.xp.LeadTime"></span>
                      </td>
-                     <td ng-switch on="order.Order.xp.CustomerID | weirGroupFromBuyersID" class='text-right'>
-                         <span ng-switch-when="WPIFR" ng-bind-html="line.UnitPrice | currency:'&euro; '"></span>
-                         <span ng-switch-when="WVCUK" ng-bind-html="line.UnitPrice | currency:'&#163; '"></span>
-                         <span ng-switch-default ng-bind-html="line.UnitPrice | currency:'&#163; '"></span>
+                     <td class='text-right'>
+                         <span ng-bind-html="line.UnitPrice | defaultCurrency:order.Currency"></span>
                      </td>
                      <td ng-bind-html="line.TempQty"></td>
                      <td style="border:0;width:100px;">
@@ -314,10 +310,8 @@
                          <input type="text" class="form-control" name="ShippingPrice" ng-model="order.Order.ShippingCost"
                                 ng-pattern="/^[0-9\.]*$/" required ng-trim="false" palceholder="Carriage Rate">
                      </td>
-                     <td ng-switch on="order.Order.xp.CustomerID | weirGroupFromBuyersID" class='text-right' ng-if="order.Order.xp.Status!='RE' && order.Order.xp.Status!='ER'">
-                         <span ng-switch-when="WPIFR" ng-bind-html="order.Order.ShippingCost | currency:'&euro; '"></span>
-                         <span ng-switch-when="WVCUK" ng-bind-html="order.Order.ShippingCost | currency:'&#163; '"></span>
-                         <span ng-switch-default ng-bind-html="order.Order.ShippingCost | currency:'&#163; '"></span>
+                     <td class='text-right' ng-if="order.Order.xp.Status!='RE' && order.Order.xp.Status!='ER'">
+                         <span ng-bind-html="order.Order.ShippingCost | defaultCurrency:order.Currency"></span>
                      </td>
                      <td></td>
                      <td style="border:0;width:100px;">
@@ -331,10 +325,8 @@
                  <tr ng-if="order.LineItems.length > 0">
                      <td class="button-th" colspan="5"></td>
                      <td ng-bind-html='order.labels.Total'></td>
-                     <td ng-switch on="order.Order.xp.CustomerID | weirGroupFromBuyersID" class='text-right'>
-                         <span ng-switch-when="WPIFR" ng-bind-html="order.Order.Total | currency:'&euro; '"></span>
-                         <span ng-switch-when="WVCUK" ng-bind-html="order.Order.Total | currency:'&#163; '"></span>
-                         <span ng-switch-default ng-bind-html="order.Order.Total | currency:'&#163; '"></span>
+                     <td class='text-right'>
+                         <span ng-bind-html="order.Order.Total | defaultCurrency:order.Currency"></span>
                      </td>
                  </tr>
                  </tbody>

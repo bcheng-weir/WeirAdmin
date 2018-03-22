@@ -175,7 +175,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     vm.NoOp = function () { };
     var userIsInternalSalesAdmin = UserGroups.indexOf(UserGroupsService.Groups.InternalSales) > -1;
     var userIsSuperAdmin = UserGroups.indexOf(UserGroupsService.Groups.SuperAdmin) > -1;
-
+    vm.Currency = Buyer.xp.Curr;
     vm.getLanguage = function() {
     	Buyer.xp.Lang = Buyer.xp.Lang || {};
         Buyer.xp.Lang.id = Buyer.xp.Lang.id || "";
