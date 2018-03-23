@@ -170,7 +170,7 @@
                          <span ng-bind-html="line.xp.LeadTime"></span>
                      </td>
                      <td class='text-right'>
-                         <span ng-bind-html="line.UnitPrice | defaultCurrency:order.Currency"></span>
+                         <span ng-bind-html="line.UnitPrice | defaultCurrency:order.Order.xp.Currency.ConvertTo:(order.Order.xp.CustomerID | weirGroupFromBuyersID)"></span>
                      </td>
                      <td ng-bind-html="line.Quantity"></td>
                      <td style="border:0;width:100px;">
@@ -251,7 +251,7 @@
                          <span ng-bind-html="line.xp.LeadTime"></span>
                      </td>
                      <td class='text-right'>
-                         <span ng-bind-html="line.UnitPrice | defaultCurrency:order.Currency"></span>
+                         <span ng-bind-html="line.UnitPrice | defaultCurrency:order.Order.xp.Currency.ConvertTo:(order.Order.xp.CustomerID | weirGroupFromBuyersID)"></span>
                      </td>
                      <td ng-bind-html="line.TempQty"></td>
                      <td style="border:0;width:100px;">
@@ -311,7 +311,7 @@
                                 ng-pattern="/^[0-9\.]*$/" required ng-trim="false" palceholder="Carriage Rate">
                      </td>
                      <td class='text-right' ng-if="order.Order.xp.Status!='RE' && order.Order.xp.Status!='ER'">
-                         <span ng-bind-html="order.Order.ShippingCost | defaultCurrency:order.Currency"></span>
+                         <span ng-bind-html="order.Order.ShippingCost | defaultCurrency:order.Order.xp.Currency.ConvertTo:(order.Order.xp.CustomerID | weirGroupFromBuyersID)"></span>
                      </td>
                      <td></td>
                      <td style="border:0;width:100px;">
@@ -326,7 +326,7 @@
                      <td class="button-th" colspan="5"></td>
                      <td ng-bind-html='order.labels.Total'></td>
                      <td class='text-right'>
-                         <span ng-bind-html="order.Order.Total | defaultCurrency:order.Currency"></span>
+                         <span ng-bind-html="order.Order.Total | defaultCurrency:order.Order.xp.Currency.ConvertTo:(order.Order.xp.CustomerID | weirGroupFromBuyersID)"></span>
                      </td>
                  </tr>
                  </tbody>

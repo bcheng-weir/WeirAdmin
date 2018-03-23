@@ -189,9 +189,9 @@ function reverseComments(Underscore) {
 }
 
 function defaultCurrency($filter) {
-    return function (amount, currency) {
+    return function (amount, currency, weirGroup) {
         if (!currency)
-            currency = 'GBP';
+            currency = weirGroup == 'WPIFR' ? 'EUR' : 'GBP';
 
         var currency_symbols = {
             'GBP': '&#163;',
@@ -200,6 +200,6 @@ function defaultCurrency($filter) {
             'AUD': '&#36;',
             'ZAR': 'R'
         };
-        return $filter('currency')(amount, currency_symbols[currency] + ' ');
+        return $filter('currency')(amount, currency_symbols[currency]);
     }
 }

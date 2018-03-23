@@ -30,15 +30,15 @@
                         </br>
                     </td>
                     <td style="padding-right: 25px;">
-                        <span ng-bind-html="lineItem.LineTotal | defaultCurrency:minicart.Currency"></span>
+                        <span ng-bind-html="lineItem.LineTotal | defaultCurrency:minicart.Order.xp.Currency.ConvertTo:(minicart.Order.xp.CustomerID | weirGroupFromBuyersID)"></span>
                     </td>
                     <!--
-                    <td ng-switch on="lineItem.Product.PriceSchedule.xp.Currency" style="padding-right: 25px;">
-                        <span ng-switch-when="EUR">{{lineItem.LineTotal | currency:'&euro;'}}</span>
-                        <span ng-switch-when="GBP">{{lineItem.LineTotal | currency:'&#163; '}}</span>
-                        <span ng-switch-default>{{lineItem.LineTotal | currency:'&#163; '}}</span>
-                    </td>
-                    -->
+    <td ng-switch on="lineItem.Product.PriceSchedule.xp.Currency" style="padding-right: 25px;">
+        <span ng-switch-when="EUR">{{lineItem.LineTotal | currency:'&euro;'}}</span>
+        <span ng-switch-when="GBP">{{lineItem.LineTotal | currency:'&#163; '}}</span>
+        <span ng-switch-default>{{lineItem.LineTotal | currency:'&#163; '}}</span>
+    </td>
+    -->
 
                 </tr>
             </table>

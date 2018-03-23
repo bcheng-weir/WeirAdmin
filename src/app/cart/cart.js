@@ -126,20 +126,12 @@ function MiniCartController($q, $state, $rootScope,$uibModal, $ocMedia, $sce, Or
 	vm.showLineItems = false;
 	vm.$ocMedia = $ocMedia;
     vm.TotalItems = 0;
-    vm.Currency = null;
 
 	vm.getLI = function() {
 		CurrentOrder.Get()
 			.then(function(data) {
 				vm.Order = data;
-                if (data) {
-                    vm.lineItemCall(data);
-
-                    OrderCloudSDK.Buyers.Get(data.FromCompanyID)
-                        .then(function(buyer) {
-                            vm.Currency = buyer.xp.Curr;
-                        });
-                }
+                if (data) vm.lineItemCall(data);
 			});
 	};
 
