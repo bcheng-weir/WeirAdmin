@@ -43,7 +43,7 @@
                         <li style="padding: 10px 16px 0px 10px;">
                             <span ng-bind-html='order.labels.Currency'></span><br />
                             <h4>
-                                <span ng-bind-html="order.xp.Curr"></span>
+                                <span ng-bind-html="order.Order.xp.Currency.ConvertTo || ((order.Order.xp.CustomerID | weirGroupFromBuyersID) == 'WPIFR' ? 'EUR' : 'GBP')"></span>
                             </h4>
                         </li>
                     </ul>

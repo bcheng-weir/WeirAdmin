@@ -67,12 +67,10 @@
             </td>
             <td>{{order.FromUser.FirstName}} {{order.FromUser.LastName}}</td>
             <td>
-                {{order.xp.Curr}}
+                {{order.xp.Currency.ConvertTo || ((order.xp.CustomerID | weirGroupFromBuyersID) == 'WPIFR' ? 'EUR' : 'GBP')}}
             </td>
-            <td class="text-left" ng-switch on="order.xp.CustomerID | weirGroupFromBuyersID">
-                <span ng-switch-when="WPIFR">{{order.Total | currency: '&euro;'}}</span>
-                <span ng-switch-when="WVCUK">{{order.Total | currency: '&#163;'}}</span>
-                <span ng-switch-default>{{order.Total | currency:'&#163;'}}</span>
+            <td class="text-left">
+                <span ng-bind-html="order.Total | defaultCurrency:order.xp.Currency.ConvertTo:(order.xp.CustomerID | weirGroupFromBuyersID)"></span>
             </td>
             <td>{{order.xp.ReviewerName}}</td>
             <td>
