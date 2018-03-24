@@ -26,6 +26,21 @@ function OrderToCsvService($filter,$sce,OCGeography,Underscore) {
 
         //var currency = (Order.FromCompanyID.substr(0,5) == "WVCUK") ? ("£") : ((Order.FromCompanyID.substr(0,5) == "WPIFR") ? ("€") : (""));
 
+        var currencySymbol = function () {
+            var currency = (Order.xp.Currency && Order.xp.Currency.ConvertTo) ? Order.xp.Currency.ConvertTo : null;
+            if (!currency)
+                currency = $filter('weirGroupFromBuyersID')(Order.xp.CustomerID) == 'WPIFR' ? 'EUR' : 'GBP';
+
+            var currency_symbols = {
+                'GBP': '£',
+                'EUR': '€',
+                'USD': '$',
+                'AUD': '$',
+                'ZAR': 'R'
+            };
+            return currency_symbols[currency];
+        }
+
         angular.forEach(LineItems, function (item) {
             var line = [];
             line.push(item.xp.SN);
@@ -34,13 +49,13 @@ function OrderToCsvService($filter,$sce,OCGeography,Underscore) {
             line.push(item.xp.Description);
             line.push(item.xp.ReplacementSchedule);
             line.push(item.xp.LeadTime);
-            line.push(Order.xp.currency);
+            line.push(currencySymbol());
             line.push(item.UnitPrice);
             line.push(item.Quantity);
             data.push(line);
         });
-        data.push(["","","",Order.xp.ShippingDescription,"","",Order.xp.currency,Order.ShippingCost,""]);
-        data.push(["", "", "", "", "", Labels.Total, Order.xp.currency, Order.Total]);
+        data.push(["","","",Order.xp.ShippingDescription,"","",currencySymbol(),Order.ShippingCost,""]);
+        data.push(["", "", "", "", "", Labels.Total, currencySymbol(), Order.Total]);
         data.push(["", ""]);
         data.push([Labels.DeliveryAddress]);
 	    if (DeliveryAddress) {
