@@ -82,13 +82,8 @@
                 <span ng-if="order.xp.StatusDate" ng-bind-html="orders.dateOf(order.xp.StatusDate) | weirdate : orders.WeirGroup"></span>
                 <span ng-if="!order.xp.StatusDate"></span>
             </td>
-            <!--<td>
-                <span ng-if="order.xp.Status!='EN' && order.xp.Status!='ER' && order.xp.Status!='SV' && order.xp.Status!='DR' && order.xp.Status!='RV' && order.xp.Status!='RE'" ng-bind-html="orders.dateOf(order.DateSubmitted) | weirdate : orders.WeirGroup"></span>
-                <span ng-if="order.xp.Status=='EN' || order.xp.Status=='ER' || order.xp.Status=='RV' || order.xp.Status=='RE'" ng-bind-html="orders.dateOf(order.xp.StatusDate) | weirdate : orders.WeirGroup"></span>
-                <span ng-if="order.xp.Status=='SV' || order.xp.Status=='DR'" ng-bind-html="orders.dateOf(order.DateCreated) | weirdate : orders.WeirGroup"></span>
-            </td>-->
             <td>
-                <span ng-bind-html="orders.getStatusLabel(order.xp.Status)" ng-class="{SP:'btn-status btn-order-SP',SE:'btn-status btn-order-SE',RO:'btn-status btn-order-RO',RR:'btn-status btn-order-RR',CO:'btn-status btn-order-CO',DP:'btn-status btn-order-DP',RE:'btn-status btn-order-RE',SV:'btn-status btn-quote-SV',DR:'btn-status btn-quote-DR',CQ:'btn-status btn-quote-CQ',SB:'btn-status btn-quote-SB',RV:'btn-status btn-quote-RV',RE:'btn-status btn-quote-RE',RQ:'btn-status btn-quote-RQ',EN:'btn-status btn-quote-EN'}[order.xp.Status]"></span>
+                <span ng-bind-html="orders.getStatusLabel(order.xp.Status)" ng-class="{SP:'btn-status btn-order-SP',SE:'btn-status btn-order-SE',RO:'btn-status btn-order-RO',RR:'btn-status btn-order-RR',CO:'btn-status btn-order-CO',DP:'btn-status btn-order-DP',SV:'btn-status btn-quote-SV',DR:'btn-status btn-quote-DR',CQ:'btn-status btn-quote-CQ',SB:'btn-status btn-quote-SB',RV:'btn-status btn-quote-RV',RE:'btn-status btn-quote-RE',RQ:'btn-status btn-quote-RQ',EN:'btn-status btn-quote-EN'}[order.xp.Status]"></span>
             </td>
             <td>{{order.xp.ReviewerName}}</td>
             <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.BuyerID, order.xp.CustomerID, order.xp.CustomerName)">{{orders.labels.view}}</button></td>
