@@ -154,11 +154,6 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 	var vm = this;
 	vm.xpType = Parameters.filters ? Parameters.filters["xp.Type"] : {};
 	vm.StateName = $state.current.name;
-	/*Orders.Items = Underscore.filter(Orders.Items, function(item) {
-		if(item.xp && item.xp.BuyerID && Me.xp && Me.xp.WeirGroup) {
-			return item.xp.BuyerID.indexOf(Me.xp.WeirGroup.label) > -1;
-		}
-	});*/
 	vm.list = Orders;
 	vm.parameters = Parameters;
 	vm.sortSelection = Parameters.sortBy ? (Parameters.sortBy.indexOf('!') == 0 ? Parameters.sortBy.split('!')[1] : Parameters.sortBy) : null;

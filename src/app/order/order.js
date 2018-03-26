@@ -173,6 +173,9 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	vm.Order.xp.PONumber = vm.Order.xp.PONumber != "Pending" ? vm.Order.xp.PONumber : ""; // In the buyer app we were initially setting this to pending.
     vm.BlankItems = [];
     vm.NoOp = function () { };
+    vm.popupStart = {
+        opened: false
+    }; //For the date picker.
     var userIsInternalSalesAdmin = UserGroups.indexOf(UserGroupsService.Groups.InternalSales) > -1;
     var userIsSuperAdmin = UserGroups.indexOf(UserGroupsService.Groups.SuperAdmin) > -1;
     vm.getLanguage = function() {
@@ -1097,6 +1100,10 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			Order.ShippingCost = Catalog.xp.StandardCarriage;
 		}
 	}
+
+    vm.openStart = function() {
+        vm.popupStart.opened = true;
+    };
 }
 
 function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, OrderCloudSDK, WeirService, Order) {

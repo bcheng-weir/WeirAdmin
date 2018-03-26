@@ -110,6 +110,33 @@
                 <ordercloud-po-upload model="order.Order" keyname="PODocument" label=''></ordercloud-po-upload>
              </span>
          </div>
+         <div class="col-md-3">
+             <div class="row">
+                 <div class="col-md-12">
+                     <p class="fx-area">
+                        <button class="btn btn-sm btn-primary">Apply current FX rate</button>
+                     </p>
+                 </div>
+             </div>
+             <div class="row">
+                 <div class="col-md-12">
+                     <p class="fx-area-lbl">
+                         Extend Validity Period
+                     </p>
+                 </div>
+             </div>
+             <div class="row">
+                 <div class="col-md-5">
+                     <p class="input-group fx-area">
+                         <input name="ExtendedValidityDate" type="text" class="form-control text-calendar" uib-datepicker-popup="dd/MM/yyyy" ng-model="order.ExtendedValidity"
+                                is-open="order.popupStart.opened" close-text="Close" width="20" />
+                         <span class="input-group-btn">
+                        <button type="button" class="btn btn-default btn-calendar" ng-click="order.openStart()"><i class="glyphicon glyphicon-calendar"></i></button>
+                    </span>
+                     </p>
+                 </div>
+             </div>
+         </div>
      </div>
 
      <div class="row">
