@@ -311,7 +311,8 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			StatusER: "Status ER = Enquiry Under Review",
 			enquiriesSubmitted: "Enquiries submitted",
 			Language: "Language",
-			Currency: "Currency"
+			Currency: "Currency",
+			validUntil: "Valid Until"
 		},
 		fr: {
 			search:$sce.trustAsHtml("Search"),
@@ -358,7 +359,8 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			StatusER: $sce.trustAsHtml("Status ER = Enquiry Under Review"),
 			enquiriesSubmitted: $sce.trustAsHtml("Enquiries submitted"),
             Language: $sce.trustAsHtml("Language"),
-            Currency: $sce.trustAsHtml("Currency")
+            Currency: $sce.trustAsHtml("Currency"),
+            validUntil: $sce.trustAsHtml("Valid Until")
 		}
 	};
 	vm.labels = labels.en;

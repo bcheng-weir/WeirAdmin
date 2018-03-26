@@ -365,7 +365,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        //Eunquiry table
 	        PartTypes: "Part types for;",
 	        Brand: "Brand",
-	        ValveType: "Valve type"
+	        ValveType: "Valve type",
+            validUntil: "Valid Until"
         },
         fr: {
             //header labels
@@ -432,7 +433,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        //Enquiry table
 	        PartTypes: $sce.trustAsHtml("Part types for;"),
 	        Brand: $sce.trustAsHtml("Brand"),
-	        ValveType: $sce.trustAsHtml("Valve type")
+	        ValveType: $sce.trustAsHtml("Valve type"),
+            validUntil: $sce.trustAsHtml("Valid Until")
         }
     };
     vm.labels = labels[WeirService.Locale()];

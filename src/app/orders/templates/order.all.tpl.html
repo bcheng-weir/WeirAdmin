@@ -49,7 +49,9 @@
             <th>
                 {{orders.labels.dateUpdated}}
             </th>
-
+            <th>
+                {{orders.labels.validUntil}}
+            </th>
             <th>
                 <span ng-bind-html="orders.labels.status"></span>
             </th>
@@ -81,6 +83,10 @@
             <td>
                 <span ng-if="order.xp.StatusDate" ng-bind-html="orders.dateOf(order.xp.StatusDate) | weirdate : orders.WeirGroup"></span>
                 <span ng-if="!order.xp.StatusDate"></span>
+            </td>
+            <td>
+                <span ng-if="order.xp.ValidUntil" ng-bind-html="orders.dateOf(order.xp.ValidUntil) | weirdate : orders.WeirGroup"></span>
+                <span ng-if="!order.xp.ValidUntil"></span>
             </td>
             <td>
                 <span ng-bind-html="orders.getStatusLabel(order.xp.Status)" ng-class="{SP:'btn-status btn-order-SP',SE:'btn-status btn-order-SE',RO:'btn-status btn-order-RO',RR:'btn-status btn-order-RR',CO:'btn-status btn-order-CO',DP:'btn-status btn-order-DP',SV:'btn-status btn-quote-SV',DR:'btn-status btn-quote-DR',CQ:'btn-status btn-quote-CQ',SB:'btn-status btn-quote-SB',RV:'btn-status btn-quote-RV',RE:'btn-status btn-quote-RE',RQ:'btn-status btn-quote-RQ',EN:'btn-status btn-quote-EN'}[order.xp.Status]"></span>

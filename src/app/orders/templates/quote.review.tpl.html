@@ -49,7 +49,9 @@
             <th>
                 {{orders.labels.dateUpdated}}
             </th>
-
+            <th>
+                {{orders.labels.validUntil}}
+            </th>
             <th scope="col">
                 {{orders.labels.reviewer}}
             </th>
@@ -71,7 +73,6 @@
             <td class="text-left">
                 <span ng-bind-html="order.Total | defaultCurrency:order.xp.Currency.ConvertTo:(order.xp.CustomerID | weirGroupFromBuyersID)"></span>
             </td>
-
             <td>
                 <span ng-if="order.DateCreated" ng-bind-html="orders.dateOf(order.DateCreated) | weirdate : orders.WeirGroup"></span>
                 <span ng-if="!order.DateCreated"></span>
@@ -80,7 +81,10 @@
                 <span ng-if="order.xp.StatusDate" ng-bind-html="orders.dateOf(order.xp.StatusDate) | weirdate : orders.WeirGroup"></span>
                 <span ng-if="!order.xp.StatusDate"></span>
             </td>
-
+            <td>
+                <span ng-if="order.xp.ValidUntil" ng-bind-html="orders.dateOf(order.xp.ValidUntil) | weirdate : orders.WeirGroup"></span>
+                <span ng-if="!order.xp.ValidUntil"></span>
+            </td>
             <td>{{order.xp.ReviewerName}}</td>
             <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.BuyerID, order.xp.CustomerID, order.xp.CustomerName)">{{orders.labels.view}}</button></td>
         </tr>

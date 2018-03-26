@@ -46,6 +46,12 @@
                                 <span ng-bind-html="order.Order.xp.Currency.ConvertTo || ((order.Order.xp.CustomerID | weirGroupFromBuyersID) == 'WPIFR' ? 'EUR' : 'GBP')"></span>
                             </h4>
                         </li>
+                        <li style="padding: 10px 16px 0px 10px;">
+                            <span ng-bind-html='order.labels.validUntil'></span><br />
+                            <h4>
+                                <span ng-bind-html="order.xp.ValidUntil | weirdate"></span>
+                            </h4>
+                        </li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li ng-if="order.showAssign" ng-click="order.AssignToMe()" style="padding: 0px 10px 0px 0px;">

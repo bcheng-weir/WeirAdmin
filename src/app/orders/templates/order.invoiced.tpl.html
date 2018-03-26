@@ -59,7 +59,9 @@
             <th>
                 {{orders.labels.dateUpdated}}
             </th>
-
+            <th>
+                {{orders.labels.validUntil}}
+            </th>
             <th scope="col">
                 {{orders.labels.confirmedBy}}
             </th>
@@ -94,7 +96,10 @@
                 <span ng-if="order.xp.StatusDate" ng-bind-html="orders.dateOf(order.xp.StatusDate) | weirdate : orders.WeirGroup"></span>
                 <span ng-if="!order.xp.StatusDate"></span>
             </td>
-
+            <td>
+                <span ng-if="order.xp.ValidUntil" ng-bind-html="orders.dateOf(order.xp.ValidUntil) | weirdate : orders.WeirGroup"></span>
+                <span ng-if="!order.xp.ValidUntil"></span>
+            </td>
             <td></td>
             <td>{{order.xp.dateDespatched | weirdate}}</td>
         </tr>
