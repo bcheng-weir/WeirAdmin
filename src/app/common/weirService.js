@@ -217,7 +217,7 @@ function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork
 									"CustomerName": customer.name,
 									"Status": "DR"
 								}
-							}
+							};
 							OrderCloudSDK.Orders.Create("Incoming", cart)
 								.then(function(ct) {
 									CurrentOrder.Set(ct.ID);
@@ -225,7 +225,7 @@ function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork
 								})
 								.catch(function(ex) {
 									deferred.reject(ex);
-								})
+								});
 						}
 					});
 			})

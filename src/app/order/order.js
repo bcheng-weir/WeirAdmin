@@ -4,16 +4,102 @@ angular.module('orderCloud')
     .controller('OrderCtrl', OrderController)
     .controller('FinalOrderInfoCtrl',FinalOrderInfoController);
 
-function OrderShareService() {
+function OrderShareService(OrderCloudSDK, $q) {
+    function todate(num) {
+        if (num) {
+            var year = num / 10000;
+            var month = (num / 100) % 100 - 1;
+            var day = (num % 100);
+            return new Date(year, month, day);
+        }
+        return null;
+    }
+
+    function tonum(dte) {
+        if (dte) {
+            var val = (dte.getFullYear() * 100 + (dte.getMonth() + 1)) * 100 + dte.getDate();
+            return val;
+        }
+        return null;
+    }
+
+    var _fx = {
+        canApplyFx: function(ValidUntil) {
+			var _today = new Date();
+			var _validUntil = new Date(ValidUntil ? ValidUntil : _today);
+            return _validUntil <= _today;
+        },
+        applyFxToOrder: function(FXSpec, Buyer, Order) {
+			//find the current rate
+            var deferred = $q.defer();
+            var today = new Date();
+            var Today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            var tmp = [];
+            var patch = {};
+            var current = -1;
+            var future = -1;
+            if (FXSpec && FXSpec.xp && FXSpec.xp.rates) {
+                var tmp = FXSpec.xp.rates;
+                for (var i = 0; i < tmp.length && (future < 0 || current < 0); i++) {
+                    var rte = tmp[i];
+                    var start = todate(rte.Start);
+                    var end = todate(rte.End);
+                    if (end === null) {
+                        future = i;
+                    } else if (start <= Today && end >= Today) {
+                        current = i;
+                    }
+                }
+			}
+
+            if(current > -1) {
+            	patch.xp = {}; patch.xp.Currency = {};
+                patch.xp.Currency.ConvertTo = Buyer.xp.Curr;
+                patch.xp.Currency.Rate = FXSpec.xp.rates[current].Rate;
+                var vu = new Date(today.setDate(today.getDate() + 30));
+                patch.xp.ValidUntil = vu;
+                OrderCloudSDK.Orders.Patch("Incoming",Order.ID,patch)
+					.then(function(order) {
+						deferred.resolve(order);
+					})
+					.catch(function(ex) {
+						deferred.reject(ex);
+					});
+            } else {
+            	deferred.reject("No rates available.");
+			}
+
+            return deferred.promise;
+        },
+        extendOrderValidity: function(OrderID, validity ) {
+            // Update the orders Valid Until date to a future date.
+            var deferred = $q.defer();
+			var ev = new Date(validity);
+			var patch = {
+				xp: {
+					ValidUntil: ev
+				}
+			};
+			OrderCloudSDK.Orders.Patch("Incoming",OrderID,patch)
+				.then(function(order) {
+					deferred.resolve(order);
+				})
+				.catch(function(ex) {
+					deferred.reject(ex);
+				});
+			return deferred.promise;
+        }
+    };
+
     var svc = {
         LineItems: [],
         Payments: [],
         Quote: null,
-        Me: null
+        Me: null,
+		FX: _fx
     };
     return svc;
 }
-
 
 function orderConfig($stateProvider) {
     $stateProvider
@@ -147,7 +233,21 @@ function orderConfig($stateProvider) {
 	            },
 		        Catalog: function(OrderCloudSDK,Buyer) {
 			        return OrderCloudSDK.Catalogs.Get(Buyer.xp.WeirGroup.label);
-		        }
+		        },
+				FXSpec: function(OrderCloudSDK, Buyer) {
+					var specID;
+                    if(Buyer.xp.WeirGroup.label === "WPIFR" && Buyer.xp.Curr) {
+                        specID = "WPIFR-EUR-" + Buyer.xp.Curr;
+                    } else if (Buyer.xp.WeirGroup.label === "WVCUK" && Buyer.xp.Curr) {
+                        specID = "WVCUK-GBP-" + Buyer.xp.Curr;
+                    }
+
+                    if(specID) {
+                        return OrderCloudSDK.Specs.Get(specID);
+                    } else {
+                    	return null;
+					}
+				}
 	        }
         })
 	    .state('order.addinfo', {
@@ -166,7 +266,7 @@ function orderConfig($stateProvider) {
 function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGroupsService,
                          OrderCloudSDK, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService,
                          Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService, FileSaver,
-                         UserGroups, BackToListService, Buyer, Catalog) {
+                         UserGroups, BackToListService, Buyer, Catalog, OrderShareService, FXSpec) {
 	determineShipping();
     var vm = this;
     vm.Order = Order;
@@ -208,7 +308,6 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	if(LineItems && PreviousLineItems) { //hopefully an easier way to set labels.
 		// For each line item, does it exist in previous line items?  If NO then NEW, else are the fields different between the two? If YES then updated.
 		vm.LineItems = Underscore.filter(LineItems.Items, function(item) {
-			console.log(item);
 			var found = false;
 			if(item.ProductID == "PLACEHOLDER") { //Match a blank line item
 				angular.forEach(PreviousLineItems.Items, function(value, key) {
@@ -619,7 +718,6 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		var orderid = vm.Order.xp.OriginalOrderID ? vm.Order.xp.OriginalOrderID : vm.Order.ID;
 		FilesService.Get(orderid + fileName)
 			.then(function(fileData) {
-				console.log(fileData);
 				var file = new Blob([fileData.Body], {type: fileData.ContentType});
 				FileSaver.saveAs(file, fileName);
 			});
@@ -1106,6 +1204,33 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     vm.openStart = function() {
         vm.popupStart.opened = true;
     };
+
+    vm.applyFxRate = function() {
+        if(OrderShareService.FX.canApplyFx(Order.ValidUntil)) {
+            OrderShareService.FX.applyFxToOrder(FXSpec, Buyer, Order)
+				.then(function(order) {
+					vm.Order = order;
+				})
+				.catch(function(ex) {
+					console.log(ex);
+				});
+        }
+    };
+
+    vm.cancelExtendedValidity = function() {
+    	vm.ExtendedValidity = null;
+	};
+
+    vm.saveExtendedValidity = function() {
+        OrderShareService.FX.extendOrderValidity(vm.Order.ID, vm.ExtendedValidity)
+			.then(function(order) {
+                vm.ExtendedValidity = null;
+				vm.Order = order;
+			})
+			.catch(function(ex) {
+				console.log(ex);
+			});
+	}
 }
 
 function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, OrderCloudSDK, WeirService, Order) {
@@ -1159,7 +1284,6 @@ function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, O
     function save(Order) {
 		var orderStatus = vm.Order.xp.Status;
 		var orderchange = false;
-		//console.log(vm.Order.xp.ContractNumber +  "\n" + Order.xp.DeliveryDate +  "\n" + vm.Order.xp.DateDespatched +  "\n" + vm.Order.xp.InvoiceNumber);
         //if it has a despatch date- it is despatched. if it has an invoice it is in the final stage and is invoiced.
 		var patch = {};
 		patch.xp = {};
