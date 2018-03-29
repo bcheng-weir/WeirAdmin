@@ -43,32 +43,34 @@
                 {{orders.labels.reviewer}}
             </th>
             <th scope="col"></th>
+            <th scope="col"></th>
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="order in orders.list.Items">
-            <th scope="row">{{order.ID}}</th>
-            <td>{{order.xp.CustomerName}}</td>
-            <td>
-                {{orders.getLanguage(order.FromCompanyID)}}
-            </td>
-            <td>{{order.FromUser.FirstName}} {{order.FromUser.LastName}}</td>
+            <tr ng-repeat="order in orders.list.Items">
+                <th scope="row">{{order.ID}}</th>
+                <td>{{order.xp.CustomerName}}</td>
+                <td>
+                    {{orders.getLanguage(order.FromCompanyID)}}
+                </td>
+                <td>{{order.FromUser.FirstName}} {{order.FromUser.LastName}}</td>
 
-            <td>
-                <span ng-if="order.DateCreated" ng-bind-html="orders.dateOf(order.DateCreated) | weirdate : orders.WeirGroup"></span>
-                <span ng-if="!order.DateCreated"></span>
-            </td>
-            <td>
-                <span ng-if="order.xp.StatusDate" ng-bind-html="orders.dateOf(order.xp.StatusDate) | weirdate : orders.WeirGroup"></span>
-                <span ng-if="!order.xp.StatusDate"></span>
-            </td>
-            <td>
-                <span ng-if="order.xp.ValidUntil" ng-bind-html="orders.dateOf(order.xp.ValidUntil) | weirdate : orders.WeirGroup"></span>
-                <span ng-if="!order.xp.ValidUntil"></span>
-            </td>
-            <td>{{order.xp.ReviewerName}}</td>
-            <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.BuyerID, order.xp.CustomerID, order.xp.CustomerName)">{{orders.labels.view}}</button></td>
-        </tr>
+                <td>
+                    <span ng-if="order.DateCreated" ng-bind-html="orders.dateOf(order.DateCreated) | weirdate : orders.WeirGroup"></span>
+                    <span ng-if="!order.DateCreated"></span>
+                </td>
+                <td>
+                    <span ng-if="order.xp.StatusDate" ng-bind-html="orders.dateOf(order.xp.StatusDate) | weirdate : orders.WeirGroup"></span>
+                    <span ng-if="!order.xp.StatusDate"></span>
+                </td>
+                <td>
+                    <span ng-if="order.xp.ValidUntil" ng-bind-html="orders.dateOf(order.xp.ValidUntil) | weirdate : orders.WeirGroup"></span>
+                    <span ng-if="!order.xp.ValidUntil"></span>
+                </td>
+                <td>{{order.xp.ReviewerName}}</td>
+                <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.BuyerID, order.xp.CustomerID, order.xp.CustomerName)">{{orders.labels.view}}</button></td>
+                <td><button class="btn-archive" ng-click="orders.archive(order.ID);"></button></td>
+            </tr>
         </tbody>
     </table>
 </div>

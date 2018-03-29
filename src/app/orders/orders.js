@@ -150,7 +150,7 @@ function OrdersConfig($stateProvider, buyerid) {
     ;
 }
 
-function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler, OrderCloudSDK, OrderCloudParameters, Orders, Parameters, buyerid, CurrentOrder, WeirService, CurrentBuyer, Languages, Underscore) {
+function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler, OrderCloudSDK, OrderCloudParameters, Orders, Parameters, buyerid, CurrentOrder, WeirService, CurrentBuyer, Languages, Underscore, $uibModal, $document) {
 	var vm = this;
 	vm.xpType = Parameters.filters ? Parameters.filters["xp.Type"] : {};
 	vm.StateName = $state.current.name;
@@ -403,7 +403,49 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			.catch(function(ex) {
 				$exceptionHandler(ex);
 			});
-	};
+    };
+
+    vm.archive = function (id) {
+        var parentElem = angular.element($document[0].querySelector('body'));
+        $uibModal.open({
+            animation: true,
+            size: 'md',
+            templateUrl: 'orders/templates/archiveordermodal.tpl.html',
+            controller: function ($uibModalInstance, $state, WeirService, toastr, $exceptionHandler) {
+                var vm = this;
+                vm.labels = {
+                        ArchiveOrder: "Archive Quote / Order?",
+                        ConfirmArchive: "Archive quote number " + id + "?",
+                        CancelArchive: "Cancel",
+                        ArchivedTitle: "Success",
+                        ArchivedMessage: "Your order has been archived"
+                };
+                vm.close = function () {
+                    $uibModalInstance.dismiss();
+                };
+                vm.archiveOrder = function () {
+                    var mods = {
+                        xp: {
+                            Archive: true
+                        }
+                    };
+                    OrderCloudSDK.Orders.Patch("Incoming", id, mods)
+                        .then(function () {
+                            $uibModalInstance.close();
+                            toastr.success(vm.labels.ArchivedMessage, vm.labels.ArchivedTitle);
+                            $state.go($state.current, {}, {
+                                reload: true
+                            });
+                        })
+                        .catch(function (ex) {
+                            $exceptionHandler(ex);
+                        });
+                };
+            },
+            controllerAs: 'archiveModal',
+            appendTo: parentElem
+        });
+    };
 
 	vm.Revisions = function(orderid, orderType) {
 		var filter = {

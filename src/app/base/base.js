@@ -201,17 +201,17 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
     vm.OrderAction = _actions;
     function _actions(action) {
         var filter = {
-            "ReviewQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Submitted.id + "|" + WeirService.OrderStatus.Review.id, "xp.Active":true},
-            "RevisedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.RevisedQuote.id + "|" + WeirService.OrderStatus.RejectedQuote.id, "xp.Active":true},
-            "ConfirmedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.ConfirmedQuote.id, "xp.Active":true},
-            "EnquiryQuotes": {"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Enquiry.id + "|" + WeirService.OrderStatus.EnquiryReview.id, "xp.Active":true},
-            "POOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.SubmittedWithPO.id + "|" + WeirService.OrderStatus.Review.id, "xp.Active":true},
-            "PendingPO":{"xp.Type":"Order","xp.PendingPO":true, "xp.Active":true},
-            "RevisedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.RevisedOrder.id + "|" + WeirService.OrderStatus.RejectedRevisedOrder.id, "xp.Active":true},
-            "ConfirmedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.ConfirmedOrder.id, "xp.Active":true},
-            "DespatchedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Despatched.id, "xp.Active":true},
-            "InvoicedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Invoiced.id, "xp.Active":true},
-            "AllOrders":{"xp.Type":"Order|Quote","xp.Active":true}
+            "ReviewQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Submitted.id + "|" + WeirService.OrderStatus.Review.id, "xp.Active":true,"xp.Archive":"!true"},
+            "RevisedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.RevisedQuote.id + "|" + WeirService.OrderStatus.RejectedQuote.id, "xp.Active":true,"xp.Archive":"!true"},
+            "ConfirmedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.ConfirmedQuote.id, "xp.Active":true,"xp.Archive":"!true"},
+            "EnquiryQuotes": {"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Enquiry.id + "|" + WeirService.OrderStatus.EnquiryReview.id, "xp.Active":true,"xp.Archive":"!true"},
+            "POOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.SubmittedWithPO.id + "|" + WeirService.OrderStatus.Review.id, "xp.Active":true,"xp.Archive":"!true"},
+            "PendingPO":{"xp.Type":"Order","xp.PendingPO":true, "xp.Active":true,"xp.Archive":"!true"},
+            "RevisedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.RevisedOrder.id + "|" + WeirService.OrderStatus.RejectedRevisedOrder.id, "xp.Active":true,"xp.Archive":"!true"},
+            "ConfirmedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.ConfirmedOrder.id, "xp.Active":true,"xp.Archive":"!true"},
+            "DespatchedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Despatched.id, "xp.Active":true,"xp.Archive":"!true"},
+            "InvoicedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Invoiced.id, "xp.Active":true,"xp.Archive":"!true"},
+            "AllOrders":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":"!true"}
         };
         var destination = {
             "ReviewQuotes":"ordersMain.quotesReview",

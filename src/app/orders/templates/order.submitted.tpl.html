@@ -59,6 +59,7 @@
             </th>
             <th scope="col"></th>
             <th scope="col"></th>
+            <th scope="col"></th>
         </tr>
         </thead>
         <tbody>
@@ -92,6 +93,7 @@
             </td>
             <td>{{order.xp.ReviewerName}}</td>
             <td><button class="btn btn-primary" ng-click="orders.View(order.ID, order.xp.BuyerID, order.xp.CustomerID, order.xp.CustomerName)">{{orders.labels.view}}</button></td>
+            <td><button class="btn-archive" ng-click="orders.archive(order.ID);"></button></td>
         </tr>
         </tbody>
     </table>
