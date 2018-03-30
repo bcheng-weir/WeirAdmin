@@ -266,7 +266,7 @@ function orderConfig($stateProvider) {
 function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGroupsService,
                          OrderCloudSDK, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService,
                          Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService, FileSaver,
-                         UserGroups, BackToListService, Buyer, Catalog, OrderShareService, FXSpec) {
+                         UserGroups, BackToListService, Buyer, Catalog, OrderShareService, FXSpec, $uibModal, $document) {
 	determineShipping();
     var vm = this;
     vm.Order = Order;
@@ -413,6 +413,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        Update: "Update",
             Comments: "Comments",
             Download: "Download",
+            Archive: "Archive",
+            Archived: "Archived",
             Print: "Print",
             //paragraph above table
             WeirOrderNo: "Weir Order No;",
@@ -481,6 +483,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        Update: $sce.trustAsHtml("Update"),
             Comments:$sce.trustAsHtml( "Comments"),
             Download:$sce.trustAsHtml( "Download"),
+            Archive: $sce.trustAsHtml("Archive"),
+            Archived: $sce.trustAsHtml("Archived"),
             Print:$sce.trustAsHtml( "Print"),
             //paragraph above table
             WeirOrderNo:$sce.trustAsHtml( "Weir Order No;"),
@@ -1230,7 +1234,49 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			.catch(function(ex) {
 				console.log(ex);
 			});
-	}
+    }
+
+    vm.archive = function (id) {
+        var parentElem = angular.element($document[0].querySelector('body'));
+        $uibModal.open({
+            animation: true,
+            size: 'md',
+            templateUrl: 'orders/templates/archiveordermodal.tpl.html',
+            controller: function ($uibModalInstance, $state, WeirService, toastr, $exceptionHandler) {
+                var vm = this;
+                vm.labels = {
+                    ArchiveOrder: "Archive Quote / Order?",
+                    ConfirmArchive: "Archive quote number " + id + "?",
+                    CancelArchive: "Cancel",
+                    ArchivedTitle: "Success",
+                    ArchivedMessage: "Your order has been archived"
+                };
+                vm.close = function () {
+                    $uibModalInstance.dismiss();
+                };
+                vm.archiveOrder = function () {
+                    var mods = {
+                        xp: {
+                            Archive: true
+                        }
+                    };
+                    OrderCloudSDK.Orders.Patch("Incoming", id, mods)
+                        .then(function () {
+                            $uibModalInstance.close();
+                            toastr.success(vm.labels.ArchivedMessage, vm.labels.ArchivedTitle);
+                            $state.go($state.current, {}, {
+                                reload: true
+                            });
+                        })
+                        .catch(function (ex) {
+                            $exceptionHandler(ex);
+                        });
+                };
+            },
+            controllerAs: 'archiveModal',
+            appendTo: parentElem
+        });
+    };
 }
 
 function FinalOrderInfoController($sce, $state, $rootScope, $exceptionHandler, OrderCloudSDK, WeirService, Order) {
