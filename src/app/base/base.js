@@ -169,6 +169,7 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
             despatched: "Despatched",
             invoiced: "Invoiced",
             allOrders: "All Orders",
+            archived: "Archived Orders",
             standardDelivery: "Carriage",
             poPrintContent: "Fixed Print Content",
             sharedContent: "Shared Content",
@@ -211,7 +212,8 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
             "ConfirmedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.ConfirmedOrder.id, "xp.Active":true,"xp.Archive":"!true"},
             "DespatchedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Despatched.id, "xp.Active":true,"xp.Archive":"!true"},
             "InvoicedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Invoiced.id, "xp.Active":true,"xp.Archive":"!true"},
-            "AllOrders":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":"!true"}
+            "AllOrders":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":"!true"},
+            "ArchivedOrders":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":"true"}
         };
         var destination = {
             "ReviewQuotes":"ordersMain.quotesReview",
@@ -224,7 +226,8 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
             "ConfirmedOrders":"ordersMain.ordersConfirmed",
             "DespatchedOrders":"ordersMain.ordersDespatched",
             "InvoicedOrders":"ordersMain.ordersInvoiced",
-            "AllOrders":"ordersMain.ordersAll"
+            "AllOrders":"ordersMain.ordersAll",
+            "ArchivedOrders": "ordersMain.ordersArchived"
         };
         $state.go(destination[action], {filters:JSON.stringify(filter[action])},{reload:true});
     }

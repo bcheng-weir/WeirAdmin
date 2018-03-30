@@ -65,6 +65,7 @@ function HomeController($sce, WeirService, IsAdmin, IsInternalSales, CurrentUser
 			Despatched: "Despatched",
 			Invoiced: "Invoiced",
 			All: "All",
+            Archived: "Archived Orders",
 			Admin: "Admin",
 			ManageAdmins: "Manage admins",
 			StandardDelivery: "Carriage",
@@ -87,6 +88,7 @@ function HomeController($sce, WeirService, IsAdmin, IsInternalSales, CurrentUser
 			Despatched: $sce.trustAsHtml("Despatched"),
 			Invoiced: $sce.trustAsHtml("Invoiced"),
 			All: $sce.trustAsHtml("All"),
+            Archived: $sce.trustAsHtml("Archived Orders"),
 			Admin: $sce.trustAsHtml("Admin"),
 			ManageAdmins: $sce.trustAsHtml("Manage admins"),
 			StandardDelivery: "Carriage",
@@ -112,7 +114,8 @@ function HomeController($sce, WeirService, IsAdmin, IsInternalSales, CurrentUser
 			"ordersMain.ordersConfirmed":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.ConfirmedOrder.id, "xp.Active":true,"xp.Archive":"!true"},
 			"ordersMain.ordersDespatched":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Despatched.id, "xp.Active":true,"xp.Archive":"!true"},
 			"ordersMain.ordersInvoiced":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Invoiced.id, "xp.Active":true,"xp.Archive":"!true"},
-			"ordersMain.ordersAll":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":"!true"}
+			"ordersMain.ordersAll":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":"!true"},
+            "ordersMain.ordersArchived":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":"true"}
 		};
 		return JSON.stringify(filter[action]);
 	}

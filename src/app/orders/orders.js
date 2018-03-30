@@ -120,7 +120,12 @@ function OrdersConfig($stateProvider, buyerid) {
 		    url: '/ordersAll',
 		    templateUrl: 'orders/templates/order.all.tpl.html',
 		    parent: 'ordersMain'
-		})
+        })
+        .state('ordersMain.ordersArchived', {
+            url: '/orderArchived',
+            templateUrl: 'orders/templates/order.archived.tpl.html',
+            parent: 'ordersMain'
+        })
     	.state('gotoOrder', {
     	    url: '/orders/:buyerID/:orderID',
     	    controller: 'RouteToOrderCtrl',
@@ -296,6 +301,7 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			despatched: "Despatched Orders",
 			invoiced: "Invoiced Orders",
 			allOrders: "All Orders",
+            archived: "Archived Orders",
 			viewQuote: "Select ‘view’ to review quote and revise or confirm the quote",
 			viewOrder: "Select ‘view’ to review order and to revise or confirm order",
 			viewQuoteRevisions: "Select ‘revisions’ to view list of quote revisions",
@@ -344,6 +350,7 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			despatched: $sce.trustAsHtml("Despatched Orders"),
 			invoiced: $sce.trustAsHtml("Invoiced Orders"),
 			allOrders: $sce.trustAsHtml("All Orders"),
+            archived: $sce.trustAsHtml("Archived Orders"),
 			viewQuote: $sce.trustAsHtml("Select ‘view’ to review quote and revise or confirm the quote"),
 			viewOrder: $sce.trustAsHtml("Select ‘view’ to review order and to revise or confirm order"),
 			viewQuoteRevision: $sce.trustAsHtml("Select ‘revisions’ to view list of quote revisions"),
@@ -377,6 +384,7 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 		"ordersMain.ordersDespatched":"despatched",
 		"ordersMain.ordersInvoiced":"invoiced",
 		"ordersMain.ordersAll":"allOrders",
+        "ordersMain.ordersArchived": "archived",
 		"ordersMain.listOfRevisions":"revisionsList"
 	};
 
