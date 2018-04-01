@@ -1,15 +1,15 @@
-<div id="ARCHIVEORDERMODAL">
+<div class="ARCHIVEORDERMODAL">
     <div class="modal-header">
         <span ng-click="archiveModal.close()" class="pull-right">X</span>
-        <H3 ng-bind-html="archiveModal.labels.ArchiveOrder" class="pull-left"></H3>
+        <H3 ng-bind-html="archiveModal.labels.ArchiveOrder"></H3>
     </div>
     <div class="modal-body">
         <div class="container-fluid">
-            <div class="row">
+            <div class="row perform-archive">
                 <div class="col-md-12" ng-bind-html="archiveModal.labels.ConfirmArchive" ng-click="archiveModal.archiveOrder()"></div>
             </div>
-            <br>
-            <div class="row">
+            <hr>
+            <div class="row cancel-archive">
                 <div class="col-md-12">
                     <H3 ng-bind-html="archiveModal.labels.CancelArchive" ng-click="archiveModal.close()"></H3>
                 </div>

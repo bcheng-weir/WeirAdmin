@@ -1257,7 +1257,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
                 vm.archiveOrder = function () {
                     var mods = {
                         xp: {
-                            Archive: true
+                            Archive: true,
+                            DateArchived: new Date()
                         }
                     };
                     OrderCloudSDK.Orders.Patch("Incoming", id, mods)

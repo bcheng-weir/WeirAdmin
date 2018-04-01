@@ -68,6 +68,7 @@ function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork
 	    Despatched: {id: "DP", label: "Despatched", desc: "Order marked as despatched"},
 	    Invoiced: {id: "IV", label: "Invoiced", desc: "Order marked as invoiced"},
 	    Review: {id: "RE", label: "Under review", desc: "Order or Quote has been submitted to Weir, but a change or additional information is needed"},
+        Deleted: {id: "DEL", label: "Deleted", desc: "Quote has been deleted by Buyer user"},
 	    Enquiry: {id: "EN", label: "Enquiry Submitted",desc: "An enquiry submitted for review."},
 	    EnquiryReview: {id: "ER", label: "Enquiry Submitted",desc: "An enquiry under administrator review."}
 	    /*Shared: {id: "SH", label: "Shared", desc: "Shopper quote has been shared with a buyer"}, //Should this be an XP?
@@ -83,7 +84,7 @@ function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork
 	    orderStatuses.Draft, orderStatuses.Saved, orderStatuses.Submitted, orderStatuses.RevisedQuote,
 	    orderStatuses.RejectedQuote, orderStatuses.ConfirmedQuote, orderStatuses.SubmittedWithPO, orderStatuses.RevisedOrder,
 	    orderStatuses.RejectedRevisedOrder, orderStatuses.ConfirmedOrder, orderStatuses.Despatched, orderStatuses.Invoiced,
-        orderStatuses.SubmittedPendingPO, orderStatuses.Review, orderStatuses.Enquiry, orderStatuses.EnquiryReview
+        orderStatuses.SubmittedPendingPO, orderStatuses.Review, orderStatuses.Deleted, orderStatuses.Enquiry, orderStatuses.EnquiryReview
     ];
     // TODO - add localized label/description, include locale in selection
     function getStatus(id) {

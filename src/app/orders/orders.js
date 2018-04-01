@@ -76,6 +76,11 @@ function OrdersConfig($stateProvider, buyerid) {
 		    templateUrl: 'orders/templates/quote.confirm.tpl.html',
 		    parent: 'ordersMain'
 		})
+        .state('ordersMain.quotesDeleted', {
+		    url: '/quotesDeleted',
+		    templateUrl: 'orders/templates/quote.deleted.tpl.html',
+		    parent: 'ordersMain'
+		})
 	    .state('ordersMain.quotesEnquiry', {
 	    	url: '/quotesEnquiry',
 		    templateUrl: 'orders/templates/quote.enquiry.tpl.html',
@@ -104,6 +109,11 @@ function OrdersConfig($stateProvider, buyerid) {
 		.state('ordersMain.ordersDespatched', {
 		    url: '/orderDespatched',
 		    templateUrl: 'orders/templates/order.despatched.tpl.html',
+		    parent: 'ordersMain'
+		})
+        .state('ordersMain.ordersDeleted', {
+		    url: '/orderDeleted',
+		    templateUrl: 'orders/templates/order.deleted.tpl.html',
 		    parent: 'ordersMain'
 		})
 		.state('ordersMain.ordersInvoiced', {
@@ -274,6 +284,8 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			dateUpdated: "Date Updated",
 			statusDate: "Status Date",
 			dateRevised: "Date Revised",
+            dateDeleted: "Date Deleted",
+            dateArchived: "Date Archived",
 			reviewer: "Reviewer",
 			view: "View",
 			update: "Update",
@@ -294,11 +306,13 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			quotesForReview: "Quotes Submitted for Review",
 			revisedQuotes: "Revised Quotes",
 			confirmedQuotes: "Confirmed Quotes",
+            deletedQuotes: "Deleted Quotes",
 			ordersPendingPO: "Orders Submitted pending PO",
 			ordersSubmittedPO: "Orders Submitted with PO",
 			revisedOrders: "Revised Orders",
 			confirmedOrders: "Confirmed Orders",
 			despatched: "Despatched Orders",
+            deletedOrders: "Deleted Orders",
 			invoiced: "Invoiced Orders",
 			allOrders: "All Orders",
             archived: "Archived Orders",
@@ -332,6 +346,8 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
             dateUpdated: $sce.trustAsHtml("Date Updated"),
             statusDate: $sce.trustAsHtml("Status Date"),
 			dateRevised: $sce.trustAsHtml("Date Revised"),
+            dateDeleted: $sce.trustAsHtml("Date Deleted"),
+            dateArchived: $sce.trustAsHtml("Date Archived"),
 			reviewer: $sce.trustAsHtml("Reviewer"),
 			view: $sce.trustAsHtml("View"),
 			revisions: $sce.trustAsHtml("Revisions"),
@@ -343,11 +359,13 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			quotesForReview: $sce.trustAsHtml("Quotes Submitted for Review"),
 			revisedQuotes: $sce.trustAsHtml("Revised Quotes"),
 			confirmedQuotes: $sce.trustAsHtml("Confirmed Quotes"),
+            deletedQuotes: $sce.trustAsHtml("Deleted Quotes"),
 			ordersPendingPO: $sce.trustAsHtml("Orders Submitted pending PO"),
 			ordersSubmittedPO: $sce.trustAsHtml("Orders Submitted with PO"),
 			revisedOrders: $sce.trustAsHtml("Revised Orders"),
 			confirmedOrders: $sce.trustAsHtml("Confirmed Orders"),
 			despatched: $sce.trustAsHtml("Despatched Orders"),
+            deletedOrders: $sce.trustAsHtml("Deleted Orders"),
 			invoiced: $sce.trustAsHtml("Invoiced Orders"),
 			allOrders: $sce.trustAsHtml("All Orders"),
             archived: $sce.trustAsHtml("Archived Orders"),
@@ -376,12 +394,14 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 		"ordersMain.quotesReview":"quotesForReview",
 		"ordersMain.quotesRevised":"revisedQuotes",
 		"ordersMain.quotesConfirmed":"confirmedQuotes",
+        "ordersMain.quotesDeleted":"deletedQuotes",
 		"ordersMain.quotesEnquiry":"enquiriesSubmitted",
 		"ordersMain.POOrders":"ordersSubmittedPO",
 		"ordersMain.pendingPO":"ordersPendingPO",
 		"ordersMain.ordersRevised":"revisedOrders",
 		"ordersMain.ordersConfirmed":"confirmedOrders",
 		"ordersMain.ordersDespatched":"despatched",
+        "ordersMain.ordersDeleted":"deletedOrders",
 		"ordersMain.ordersInvoiced":"invoiced",
 		"ordersMain.ordersAll":"allOrders",
         "ordersMain.ordersArchived": "archived",
@@ -434,7 +454,8 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
                 vm.archiveOrder = function () {
                     var mods = {
                         xp: {
-                            Archive: true
+                            Archive: true,
+                            DateArchived: new Date()
                         }
                     };
                     OrderCloudSDK.Orders.Patch("Incoming", id, mods)
