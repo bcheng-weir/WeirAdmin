@@ -833,8 +833,9 @@ function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork
 				addLineItems(order);
 			})
 			.catch(function() {
-				OrderCloudSDK.Orders.Create("Incoming", {ID: randomQuoteID()})
-					.then(function(order) {
+			    // OrderCloudSDK.Orders.Create("Incoming", { ID: randomQuoteID() })
+			    OrderCloudSDK.Orders.Create("Incoming", { ID: "E{ORDERID}"})
+					.then(function (order) {
 						CurrentOrder.Set(order.ID);
 						addLineItems(order);
 					});
