@@ -39,7 +39,7 @@
                     <a href="#" uib-dropdown-toggle role="button">{{base.labels.orders}} <span class="caret"></span></a>
                     <ul uib-dropdown-menu>
                         <li><a href="" ng-click="base.OrderAction('AllOrders')">{{base.labels.allOrders}}</a></li>
-                        <li ng-if="base.currentUser.xp.WeirGroup.label=='WPIFR'"><a href="" ng-click="base.OrderAction('EnquiryQuotes')">{{base.labels.enquiryQuotes}}</a></li>
+                        <li><a href="" ng-click="base.OrderAction('EnquiryQuotes')">{{base.labels.enquiryQuotes}}</a></li>
                         <li><a href="" ng-click="base.OrderAction('ReviewQuotes')">{{base.labels.quotesForReview}}</a></li>
                         <li><a href="" ng-click="base.OrderAction('RevisedQuotes')">{{base.labels.revisedQuotes}}</a></li>
                         <li><a href="" ng-click="base.OrderAction('ConfirmedQuotes')">{{base.labels.confirmedQuotes}}</a></li>

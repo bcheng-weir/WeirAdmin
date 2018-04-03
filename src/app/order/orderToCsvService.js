@@ -29,7 +29,7 @@ function OrderToCsvService($filter,$sce,OCGeography,Underscore) {
         var currencySymbol = function () {
             var currency = (Order.xp.Currency && Order.xp.Currency.ConvertTo) ? Order.xp.Currency.ConvertTo : null;
             if (!currency)
-                currency = $filter('weirGroupFromBuyersID')(Order.xp.CustomerID) == 'WPIFR' ? 'EUR' : 'GBP';
+                currency = $filter('weirGroupFromBuyersID')(Order.xp.CustomerID) === 'WPIFR' ? 'EUR' : 'GBP';
 
             var currency_symbols = {
                 'GBP': '£',
@@ -39,7 +39,7 @@ function OrderToCsvService($filter,$sce,OCGeography,Underscore) {
                 'ZAR': 'R'
             };
             return currency_symbols[currency];
-        }
+        };
 
         angular.forEach(LineItems, function (item) {
             var line = [];
@@ -59,7 +59,7 @@ function OrderToCsvService($filter,$sce,OCGeography,Underscore) {
         data.push(["", ""]);
         data.push([Labels.DeliveryAddress]);
 	    if (DeliveryAddress) {
-		    if(DeliveryAddress.Country=="GB") {
+		    if(DeliveryAddress.Country==="GB") {
 			    data.push([DeliveryAddress.FirstName + " " + DeliveryAddress.LastName, ""]);
 			    data.push([DeliveryAddress.CompanyName]);
 			    data.push([DeliveryAddress.Street1]);
@@ -69,7 +69,7 @@ function OrderToCsvService($filter,$sce,OCGeography,Underscore) {
 			    data.push([DeliveryAddress.Zip]);
 			    //data.push([country(DeliveryAddress.Country)]);
                 data.push([Order.CountryName]);
-		    } else if (DeliveryAddress.Country=="FR") {
+		    } else if (DeliveryAddress.Country==="FR") {
 			    data.push([DeliveryAddress.FirstName + " " + DeliveryAddress.LastName, ""]);
 			    data.push([DeliveryAddress.CompanyName]);
 			    data.push([DeliveryAddress.Street1]);
