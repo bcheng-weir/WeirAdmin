@@ -45,8 +45,10 @@ function OrderShareService(OrderCloudSDK, $q) {
                     var start = todate(rte.Start);
                     var end = todate(rte.End);
                     if (end === null) {
-                        future = i;
-                    } else if (start <= Today && end >= Today) {
+                        //future = i;
+						end = Today;
+                    }
+                    if (start <= Today && end >= Today) {
                         current = i;
                     }
                 }
