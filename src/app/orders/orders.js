@@ -175,6 +175,9 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 	//Check if filters are applied
 	vm.filtersApplied = vm.parameters.filters || vm.parameters.from || vm.parameters.to || ($ocMedia('max-width:767px') && vm.sortSelection); //Sort by is a filter on mobile devices
 	vm.showFilters = vm.filtersApplied;
+    vm.OrderCurrency = function (order) {
+        return WeirService.CurrentCurrency(order).curr;
+    };
 	vm.getLanguage = function(customer) { //Given a customer ID, return their language.
 		var buyer = Underscore.findWhere(Languages.Items, {"ID": customer});
 

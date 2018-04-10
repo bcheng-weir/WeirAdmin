@@ -52,7 +52,7 @@ function UserGroupsService($q, OrderCloudSDK) {
     }
 }
 
-function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork) {
+function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyernetwork) {
     var orderStatuses = {
 	    Draft: {id: "DR", label: "Draft", desc: "This is the current quote under construction"},
 	    Saved: {id: "SV", label: "Saved", desc: "Quote has been saved but not yet submitted to weir as quote or order"},
@@ -909,6 +909,22 @@ function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork
 	    return deferred.promise;
     }
 
+    // pass in an order and the current buyers.xp.curr
+    function getCurrentCurrency(order, cur) {
+        var info = {};
+        if (order && order.xp && order.xp.Currency) info.curr = order.xp.Currency.ConvertTo;
+        info.curr = info.curr  || cur;
+        switch(info.curr) {
+            case "USD": info.symbol = $sce.trustAsHtml('&#36;'); return info;
+            case "AUD": info.symbol = $sce.trustAsHtml('&#36;'); return info;
+            case "EUR": info.symbol = $sce.trustAsHtml('&#128;'); return info;
+            case "ZAR": info.symbol = 'R'; return info;
+            case "GBP":
+            default:
+                info.symbol = $sce.trustAsHtml('&#163;'); return info;
+        }
+    }
+
 	var service = {
 		OrderStatus: orderStatuses,
 		OrderStatusList: orderStatusList,
@@ -930,7 +946,8 @@ function WeirService($q, $cookieStore, OrderCloudSDK, CurrentOrder, buyernetwork
 		AddPartsToQuote: addPartsToQuote,
         SetEnglishTranslationValve: _setEnglishTranslationValve,
         SetEnglishTranslationParts: _setEnglishTranslationParts,
-        GetExchangeRate: getConversionRate
+        GetExchangeRate: getConversionRate,
+        CurrentCurrency: getCurrentCurrency
     };
 
     return service;

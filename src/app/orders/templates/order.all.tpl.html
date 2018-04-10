@@ -74,8 +74,14 @@
                 <td>
                     {{order.xp.Currency.ConvertTo || ((order.xp.CustomerID | weirGroupFromBuyersID) == 'WPIFR' ? 'EUR' : 'GBP')}}
                 </td>
-                <td class="text-left">
-                    <span ng-bind-html="order.Total | defaultCurrency:order.xp.Currency.ConvertTo:(order.xp.CustomerID | weirGroupFromBuyersID)"></span>
+                <td class="text-left" ng-switch on="quotes.OrderCurrency(order)">
+                    <!--<span ng-bind-html="order.Total | defaultCurrency:order.xp.Currency.ConvertTo:(order.xp.CustomerID | weirGroupFromBuyersID)"></span>-->
+                    <span ng-switch-when="USD">{{order.Total | OrderConversion: order | currency:'&#36;'}}</span>
+                    <span ng-switch-when="AUD">{{order.Total | OrderConversion: order | currency:'&#36;'}}</span>
+                    <span ng-switch-when="GBP">{{order.Total | OrderConversion: order| currency:'&#163;'}}</span>
+                    <span ng-switch-when="EUR">{{order.Total | OrderConversion: order| currency:'&#128;'}}</span>
+                    <span ng-switch-when="ZAR">{{order.Total | OrderConversion: order| currency:'R'}}</span>
+                    <span ng-switch-default>{{order.Total | OrderConversion: order | currency:'&#163;'}}</span>
                 </td>
                 <td>
                     <span ng-if="order.DateCreated" ng-bind-html="orders.dateOf(order.DateCreated) | weirdate : orders.WeirGroup"></span>

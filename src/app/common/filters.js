@@ -1,21 +1,22 @@
 angular.module( 'orderCloud' )
-	.filter( 'customerPresearch', customerPresearch )
-	.filter( 'serialPreSearch', serialPreSearch )
-	.filter( 'tagPreSearch', tagPreSearch )
-	.filter( 'partPreSearch', partPreSearch )
-	.filter( 'serialnumber', serialnumber )
-	.filter( 'searchresults', searchresults )
+	.filter('customerPresearch', customerPresearch)
+	.filter('serialPreSearch', serialPreSearch)
+	.filter('tagPreSearch', tagPreSearch)
+	.filter('partPreSearch', partPreSearch)
+	.filter('serialnumber', serialnumber)
+	.filter('searchresults', searchresults)
 	.filter('weirdate', weirdate)
 	.filter('weirdateonly', weirdateonly)
 	.filter('weirGroupFromBuyersID', weirGroupFromBuyersID)
     .filter('reverseComments',reverseComments)
     .filter('defaultCurrency', defaultCurrency)
+	.filter('OrderConversion', orderconversion)
 ;
 
 function serialnumber() {
 	return function(number) {
 		return number.substr(0,3) + '-' + number.substr(3,3) + '/' + number.substr(6,4);
-	}
+	};
 }
 
 function customerPresearch() {
@@ -41,6 +42,7 @@ function tagPreSearch() {
 		});
 	};
 }
+
 function partPreSearch() {
 	return function(items, partno) {
 		return items.filter(function(part, index, array) {
@@ -63,7 +65,7 @@ function searchresults() {
 		});
 
 		return results;
-	}
+	};
 }
 
 function daySuffix(day) {
@@ -145,6 +147,7 @@ function weirdate() {
 		return result;
 	};
 }
+
 function weirdateonly() {
     //POC-522: format should be 04-Aug-17 15:24
     return function (date, locale) {
@@ -170,6 +173,25 @@ function weirdateonly() {
     };
 }
 
+function roundHalfEven(x) {
+    return (Math.floor(100 * x + 0.5)) / 100;
+}
+
+function conversion($cookieStore) {
+    return function (amt) {
+        var rte = $cookieStore.get('rate');
+        return (rte) ? roundHalfEven(amt * rte) : amt;
+    };
+}
+
+function orderconversion($cookieStore) {
+    return function (amt, order) {
+        var orderRate = (order.xp && order.xp.Currency && order.xp.Currency.Rate) ? order.xp.Currency.Rate : 0;
+        var rte = orderRate || $cookieStore.get('rate');
+        return (rte) ? roundHalfEven(amt * rte) : amt;
+    };
+}
+
 function weirGroupFromBuyersID() {
 	return function (currentBuyerID) {
 		if(currentBuyerID) {
@@ -177,7 +199,7 @@ function weirGroupFromBuyersID() {
 		} else {
 			return currentBuyerID;
 		}
-	}
+	};
 }
 
 function reverseComments(Underscore) {
@@ -185,13 +207,13 @@ function reverseComments(Underscore) {
 		if(comments && comments.length) {
 			return Underscore.sortBy(comments, 'date').reverse();
 		}
-	}
+	};
 }
 
 function defaultCurrency($filter) {
     return function (amount, currency, weirGroup) {
         if (!currency)
-            currency = weirGroup == 'WPIFR' ? 'EUR' : 'GBP';
+            currency = weirGroup === 'WPIFR' ? 'EUR' : 'GBP';
 
         var currency_symbols = {
             'GBP': '&#163;',
@@ -201,5 +223,5 @@ function defaultCurrency($filter) {
             'ZAR': 'R'
         };
         return $filter('currency')(amount, currency_symbols[currency]);
-    }
+    };
 }

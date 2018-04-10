@@ -217,7 +217,8 @@
                          <span ng-bind-html="line.xp.LeadTime"></span>
                      </td>
                      <td class='text-right'>
-                         <span ng-bind-html="line.UnitPrice | defaultCurrency:order.Order.xp.Currency.ConvertTo:(order.Order.xp.CustomerID | weirGroupFromBuyersID)"></span>
+                         <span ng-bind-html="line.UnitPrice | OrderConversion:order.Order | currency:order.currency"></span>
+                         <!--<span ng-bind-html="myquote.Quote.Subtotal | OrderConversion: myquote.Quote  | currency:myquote.currency"></span>-->
                      </td>
                      <td ng-bind-html="line.Quantity"></td>
                      <td style="border:0;width:100px;">

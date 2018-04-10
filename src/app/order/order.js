@@ -236,20 +236,17 @@ function orderConfig($stateProvider) {
 		        Catalog: function(OrderCloudSDK,Buyer) {
 			        return OrderCloudSDK.Catalogs.Get(Buyer.xp.WeirGroup.label);
 		        },
-				FXSpec: function(OrderCloudSDK, Buyer) {
-					var specID;
-                    if(Buyer.xp.WeirGroup.label === "WPIFR" && Buyer.xp.Curr) {
-                        specID = "WPIFR-EUR-" + Buyer.xp.Curr;
-                    } else if (Buyer.xp.WeirGroup.label === "WVCUK" && Buyer.xp.Curr) {
-                        specID = "WVCUK-GBP-" + Buyer.xp.Curr;
-                    }
-
-                    if(specID) {
-                        return OrderCloudSDK.Specs.Get(specID);
-                    } else {
-                    	return null;
-					}
-				}
+                FXSpec: function(FxRate, Buyer, $q) {
+                    var deferred = $q.defer;
+                    FxRate.SetFxSpec(Buyer)
+                        .then(function() {
+                            deferred.resolve();
+                        })
+                        .catch(function(ex) {
+                            deferred.resolve();
+                        });
+                    return deferred.promise;
+                }
 	        }
         })
 	    .state('order.addinfo', {
@@ -267,9 +264,11 @@ function orderConfig($stateProvider) {
 
 function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGroupsService,
                          OrderCloudSDK, Order, DeliveryAddress, LineItems, PreviousLineItems, Payments, Me, WeirService,
-                         Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService, FileSaver,
-                         UserGroups, BackToListService, Buyer, Catalog, OrderShareService, FXSpec, $uibModal, $document) {
+                         Underscore, OrderToCsvService, buyernetwork, fileStore, OCGeography, toastr, FilesService,
+						 FileSaver, UserGroups, BackToListService, Buyer, Catalog, OrderShareService, $uibModal,
+						 $document, FxRate) {
 	determineShipping();
+    FxRate.SetCurrentFxRate(Buyer); //This is used by the filter.
     var vm = this;
     vm.Order = Order;
 	vm.Order.xp.PONumber = vm.Order.xp.PONumber != "Pending" ? vm.Order.xp.PONumber : ""; // In the buyer app we were initially setting this to pending.
@@ -278,6 +277,10 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     vm.popupStart = {
         opened: false
     }; //For the date picker.
+
+    var curr = WeirService.CurrentCurrency(vm.Quote, Buyer.xp.Curr);
+    vm.currency = curr.symbol;
+
     var userIsInternalSalesAdmin = UserGroups.indexOf(UserGroupsService.Groups.InternalSales) > -1;
     var userIsSuperAdmin = UserGroups.indexOf(UserGroupsService.Groups.SuperAdmin) > -1;
     vm.getLanguage = function() {
@@ -311,9 +314,9 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		// For each line item, does it exist in previous line items?  If NO then NEW, else are the fields different between the two? If YES then updated.
 		vm.LineItems = Underscore.filter(LineItems.Items, function(item) {
 			var found = false;
-			if(item.ProductID == "PLACEHOLDER") { //Match a blank line item
+			if(item.ProductID === "PLACEHOLDER") { //Match a blank line item
 				angular.forEach(PreviousLineItems.Items, function(value, key) {
-					if(value.xp.SN == item.xp.SN) {
+					if(value.xp.SN === item.xp.SN) {
 						found = true;
 						item.displayStatus = compare(item,value);
 					}
@@ -340,10 +343,10 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 
 	if(PreviousLineItems) {
 		vm.PreviousLineItems = Underscore.filter(PreviousLineItems.Items, function (item) {
-			if(item.ProductID == "PLACEHOLDER") {
+			if(item.ProductID === "PLACEHOLDER") {
 				var found = false;
 				angular.forEach(LineItems.Items, function(value, key) {
-					if(value.xp.SN == item.xp.SN) {
+					if(value.xp.SN === item.xp.SN) {
 						found = true;
 						return;
 					}
@@ -368,7 +371,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	}
     vm.DeliveryAddress = DeliveryAddress;
     vm.Status = Underscore.find(WeirService.OrderStatus, function(status) {
-        return status.id == vm.Order.xp.Status;
+        return status.id === vm.Order.xp.Status;
     });
     vm.Payments = Payments;
 	vm.CommentToWeir = "";
@@ -390,14 +393,14 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			WeirService.OrderStatus.RevisedQuote.id, WeirService.OrderStatus.RevisedOrder.id,
 			WeirService.OrderStatus.SubmittedPendingPO.id, WeirService.OrderStatus.ConfirmedQuote.id,
 			WeirService.OrderStatus.Enquiry.id, WeirService.OrderStatus.EnquiryReview.id].indexOf(vm.Order.xp.Status) > -1;
-	vm.showAssign = vm.showReviewer && (Me.ID != vm.Order.xp.ReviewerID) && (userIsInternalSalesAdmin || userIsSuperAdmin);
+	vm.showAssign = vm.showReviewer && (Me.ID !== vm.Order.xp.ReviewerID) && (userIsInternalSalesAdmin || userIsSuperAdmin);
 
     vm.LineItemZero = function() {
     	return Underscore.findWhere(vm.LineItems,{LineTotal:0});
     };
 
     vm.InvalidPO = function() {
-        return vm.Order.xp.Type=="Order" && ((vm.Order.xp.PONumber == "Pending" || vm.Order.xp.PONumber == "") /* PO-517 || (vm.Order.xp.PODocument == "" || vm.Order.xp.PODocument == null)*/);
+        return vm.Order.xp.Type=="Order" && (vm.Order.xp.PONumber == "Pending" || vm.Order.xp.PONumber == "");
     };
 
     var labels = {
@@ -549,7 +552,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	};
 
 	vm.UpdatePO = function() {
-		if(vm.Order.xp.PONumber != "Pending" && vm.Order.xp.PONumber != '') {
+		if(vm.Order.xp.PONumber !== "Pending" && vm.Order.xp.PONumber !== '') {
 			var data = {
 				xp: {
 					Type: 'Order',
@@ -561,7 +564,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 					PendingPO: false
 				}
 			};
-			if (vm.Order.xp.ReviewerID != Me.ID) {
+			if (vm.Order.xp.ReviewerID !== Me.ID) {
 			    data.xp.ReviewerID = Me.ID;
 			    data.xp.ReviewerEmail = Me.Email;
 			}
@@ -593,12 +596,12 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	vm.ShowUpdated = function (item) {
 		// return true if qty <> xp.originalQty and qty > 0
 		if(item.xp) {
-			return (item.xp.OriginalQty && (item.Quantity != item.xp.OriginalQty)) ||
+			return (item.xp.OriginalQty && (item.Quantity !== item.xp.OriginalQty)) ||
 				(typeof item.xp.OriginalUnitPrice !== "undefined" &&
 					(
 						item.xp.OriginalUnitPrice !== 0 &&
 						(
-							item.UnitPrice != item.xp.OriginalUnitPrice
+							item.UnitPrice !== item.xp.OriginalUnitPrice
 						)
 					)
 				) ||
@@ -634,7 +637,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	vm.ShowRemoved = _showRemoved;
 	function _showRemoved(line) {
 		if(line.xp) {
-			return line.Quantity == 0 && line.xp.OriginalQty != 0;
+			return line.Quantity === 0 && line.xp.OriginalQty !== 0;
 		} else {
 			return false;
 		}
@@ -643,7 +646,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	vm.ShowNew = _showNew;
 	function _showNew(line) {
 		if(line.xp) {
-			return line.xp.OriginalQty==0 || (vm.Order.ID.indexOf("Rev") != -1 && line.xp.OriginalQty==null); //Second part matches items added in admin search.
+			return line.xp.OriginalQty===0 || (vm.Order.ID.indexOf("Rev") !== -1 && line.xp.OriginalQty==null); //Second part matches items added in admin search.
 		} else {
 			return false;
 		}
@@ -657,7 +660,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			SE: true
 		};
 		if(vm.Order.xp) {
-			return validStatus[vm.Order.xp.Status] && vm.Order.xp.ReviewerID == Me.ID;
+			return validStatus[vm.Order.xp.Status] && vm.Order.xp.ReviewerID === Me.ID;
 		} else {
 			return false;
 		}
@@ -674,7 +677,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			EN: true
 		};
 		if(vm.Order.xp) {
-			return validStatus[vm.Order.xp.Status] && vm.Order.xp.ReviewerID == Me.ID;
+			return validStatus[vm.Order.xp.Status] && vm.Order.xp.ReviewerID === Me.ID;
 		} else {
 			return false;
 		}
@@ -1036,9 +1039,9 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 
 		// The copy will be the historical version of the order. This way we maintain the submission status in the original
 		orderCopy.xp.Active = false;
-            if(vm.Order.xp.Type == "Quote") {
+            if(vm.Order.xp.Type === "Quote") {
                 orderCopy.xp.Status = WeirService.OrderStatus.RevisedQuote.id;
-		} else if (vm.Order.xp.Type == "Order") {
+		} else if (vm.Order.xp.Type === "Order") {
 			orderCopy.xp.Status = WeirService.OrderStatus.RevisedOrder.id;
 		} else {
 			return; //shouldn't have an order with no xp.Type
@@ -1050,7 +1053,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			var rev = null;
 			var pieces = orderID.split("-Rev");
 			angular.forEach(pieces, function(value, key) {
-				if(key==1) {
+				if(key===1) {
 					value++;
 					rev = pieces[0] + "-Rev" + value.toString();
 				} else {
@@ -1064,7 +1067,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			var rev = null;
 			var pieces = orderID.split("-Rev");
 			angular.forEach(pieces, function(value, key) {
-				if(key==1) {
+				if(key===1) {
 					rev = pieces[0] + "-Rev" + value.toString();
 				} else {
 					rev = orderID + "-Rev0"; //There is no revision. Set it to 0.
@@ -1078,7 +1081,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		vm.Order.ID = _determineRevision(vm.Order.ID);
 		//ToDo Use EnquiryReview status.
 		// if current status is Enquiry, then set to EnquiryReview, else set to
-		var status = vm.Order.xp.Status == "EN" ? WeirService.OrderStatus.EnquiryReview.id : WeirService.OrderStatus.Review.id;
+		var status = vm.Order.xp.Status === "EN" ? WeirService.OrderStatus.EnquiryReview.id : WeirService.OrderStatus.Review.id;
 		var orderPatch = {
 			ID: vm.Order.ID,
             ShippingCost: vm.Order.ShippingCost,
@@ -1097,12 +1100,12 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 				}
 			}
 		};
-		if (orderPatch.xp.WasEnquiry && (orderPatch.xp.Status == WeirService.OrderStatus.EnquiryReview.id)) { //The first revision.
+		if (orderPatch.xp.WasEnquiry && (orderPatch.xp.Status === WeirService.OrderStatus.EnquiryReview.id)) { //The first revision.
 			orderPatch.xp.WasEnquiry = vm.Order.xp.WasEnquiry; //Needed for the enquiry webhook.
-		} else if (orderPatch.xp.WasEnquiry && orderPatch.xp.WasEnquiry == true) { //second revision.
+		} else if (orderPatch.xp.WasEnquiry && orderPatch.xp.WasEnquiry === true) { //second revision.
 			orderPatch.xp.WasEnquiry = false;
 		}
-		if (vm.Order.xp.ReviewerID != currentUser.ID) {
+		if (vm.Order.xp.ReviewerID !== currentUser.ID) {
 		    orderPatch.xp.ReviewerID = currentUser.ID;
 		    orderPatch.xp.ReviewerEmail = currentUser.Email;
         }
@@ -1169,7 +1172,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	function _assignToMe() {
 	    var newID = Me.ID;
 	    var oldID = vm.Order.xp.ReviewerID;
-	    if (newID && (newID != oldID)) {
+	    if (newID && (newID !== oldID)) {
 	        var data = {
 	            xp: {
 	                ReviewerID: newID,
@@ -1186,7 +1189,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
             .then(function (order) {
                 vm.Order = order;
                 vm.showAssign = false;
-                if (vm.Order.xp.Type == 'Quote') {
+                if (vm.Order.xp.Type === 'Quote') {
                     toastr.success(vm.labels.QuoteAssignedMsg);
                 } else {
                     toastr.success(vm.labels.OrderAssignedMsg);
@@ -1212,8 +1215,9 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     };
 
     vm.applyFxRate = function() {
+    	//TODO We no longer have an FXSpec. Use the FxRate service.
         if(OrderShareService.FX.canApplyFx(Order.ValidUntil)) {
-            OrderShareService.FX.applyFxToOrder(FXSpec, Buyer, Order)
+            OrderShareService.FX.applyFxToOrder(FxRate.GetFxSpec(), Buyer, Order) //<-- TODO fix this
 				.then(function(order) {
 					vm.Order = order;
 				})
@@ -1236,7 +1240,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			.catch(function(ex) {
 				console.log(ex);
 			});
-    }
+    };
 
     vm.archive = function (id) {
         var parentElem = angular.element($document[0].querySelector('body'));
