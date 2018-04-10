@@ -388,11 +388,12 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		return result ? result.name : '';
 	};
 
-    vm.showReviewer = [WeirService.OrderStatus.Submitted.id, WeirService.OrderStatus.Review.id,
+    vm.showReviewer = true; /* [WeirService.OrderStatus.Submitted.id, WeirService.OrderStatus.Review.id,
 			WeirService.OrderStatus.SubmittedWithPO.id, WeirService.OrderStatus.SubmittedPendingPO.id,
 			WeirService.OrderStatus.RevisedQuote.id, WeirService.OrderStatus.RevisedOrder.id,
 			WeirService.OrderStatus.SubmittedPendingPO.id, WeirService.OrderStatus.ConfirmedQuote.id,
-			WeirService.OrderStatus.Enquiry.id, WeirService.OrderStatus.EnquiryReview.id].indexOf(vm.Order.xp.Status) > -1;
+			WeirService.OrderStatus.Enquiry.id, WeirService.OrderStatus.EnquiryReview.id].indexOf(vm.Order.xp.Status) > -1;*/
+
 	vm.showAssign = vm.showReviewer && (Me.ID !== vm.Order.xp.ReviewerID) && (userIsInternalSalesAdmin || userIsSuperAdmin);
 
     vm.LineItemZero = function() {
@@ -660,7 +661,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			SE: true
 		};
 		if(vm.Order.xp) {
-			return validStatus[vm.Order.xp.Status] && vm.Order.xp.ReviewerID === Me.ID;
+			//return validStatus[vm.Order.xp.Status] && vm.Order.xp.ReviewerID === Me.ID;
+            return vm.Order.xp.ReviewerID === Me.ID;
 		} else {
 			return false;
 		}
@@ -677,7 +679,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			EN: true
 		};
 		if(vm.Order.xp) {
-			return validStatus[vm.Order.xp.Status] && vm.Order.xp.ReviewerID === Me.ID;
+			//return validStatus[vm.Order.xp.Status] && vm.Order.xp.ReviewerID === Me.ID;
+            return vm.Order.xp.ReviewerID === Me.ID;
 		} else {
 			return false;
 		}
@@ -787,6 +790,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			vm.BlankItems.push(newItem);
 		}
 	}
+
 	function mapValuesForProperties(obj1, obj2, defaultVal)
 	{
 		if(obj1)
@@ -802,6 +806,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			return defaultVal;
 		}
 	}
+
 	vm.saveLineItems = function() {
 		var queue = [];
 		var deferred = $q.defer();

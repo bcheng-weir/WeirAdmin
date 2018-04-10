@@ -57,7 +57,7 @@
                         <li ng-if="order.showAssign" ng-click="order.AssignToMe()" style="padding: 0px 10px 0px 0px;">
                             <button type="button" class="btn btn-lg btn-primary"><span ng-bind-html='order.labels.AssignToMe'></span></button>
                         </li>
-                        <li style="padding: 0px 10px 0px 0px;" ng-if="order.ShowConfirm()">
+                        <li style="padding: 0px 10px 0px 0px;" ng-if="order.ShowConfirm()"> <!--  ng-if="order.ShowConfirm()" -->
                             <button type="button" ng-click="order.Confirm(base.currentUser)" class="btn btn-lg btn-success" ng-disabled="order.LineItemZero() || order.InvalidPO()">
                                 <span ng-bind-html='order.labels.Confirm'></span>
                             </button>
@@ -107,13 +107,12 @@
              <p><b><span ng-bind-html="order.labels.QuoteName"></span><span class="text-danger" ng-bind-html="order.Order.xp.Name"></span></b></p>
              <p ng-show="(order.Order.xp.Status=='CQ'||order.Order.xp.Status=='SE')&&order.showAssign==false">
                  <b>
-                    <span ng-bind-html='order.labels.PONumber'></span>
+                    <!--<span ng-bind-html='order.labels.PONumber'></span>-->
                     <span ng-if="order.showAssign==true" class="text-danger" ng-bind-html="order.Order.xp.PONumber"></span>
                     <span ng-if="order.showAssign!=true">
                         <input type="text" ng-model="order.Order.xp.PONumber" placeholder="{{order.labels.POPlaceHolder}}" ng-enter="order.UpdatePO()" />
                         <button class="btn btn-sm btn-primary" ng-bind-html="order.labels.Add" ng-click="order.UpdatePO()"></button>
                     </span>
-
                  </b>
              </p>
              <span ng-show="(order.Order.xp.Status=='CQ'||(order.Order.xp.Type=='Order'&&(!order.Order.xp.PODocument||order.Order.xp.PODocument=='undefined')))&&order.showAssign==false">
