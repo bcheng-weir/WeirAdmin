@@ -78,10 +78,10 @@
                         </li>
 
                         <li style="padding: 0px 10px 0px 0px;"> <!-- Print Button -->
-                            <print-order-button buyer="order.Buyer" order="order.Order" items="order.LineItems" address="order.DeliveryAddress"></print-order-button>
+                            <print-order-button buyer="order.Buyer" order="order.Order" items="order.LineItems" address="order.DeliveryAddress" pocontent="order.POContent"></print-order-button>
                         </li>
 
-                        <li style="padding: 0px 10px 0px 0px;">
+                        <li style="padding: 0px 10px 0px 0px;" class="panelButton">
                             <button type="button" class="btn btn-lg btn-default" ng-csv="order.ToCsvJson" add-bom="true" filename="{{order.CsvFilename}}" ng-bind-html="order.labels.Download"></button>
                         </li>
                         <li style="padding: 0px 10px 0px 0px;">

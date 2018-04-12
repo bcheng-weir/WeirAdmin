@@ -272,7 +272,9 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     var vm = this;
     vm.Buyer = Buyer;
     vm.Order = Order;
-	vm.Order.xp.PONumber = vm.Order.xp.PONumber != "Pending" ? vm.Order.xp.PONumber : ""; // In the buyer app we were initially setting this to pending.
+    vm.Catalog = Catalog;
+    vm.POContent = vm.Buyer.xp.WeirGroup.id === 2 && WeirService.Locale() === "en" ? Catalog.xp.POContentFR_EN : Catalog.xp.POContent;
+	vm.Order.xp.PONumber = vm.Order.xp.PONumber !== "Pending" ? vm.Order.xp.PONumber : ""; // In the buyer app we were initially setting this to pending.
     vm.BlankItems = [];
     vm.NoOp = function () { };
     vm.popupStart = {

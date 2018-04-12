@@ -9,6 +9,7 @@ function PrintOrderController(printData,$timeout,$window,$uibModalInstance,WeirS
     vm.order = printData.order;
     vm.items = printData.items;
     vm.address = printData.address;
+    vm.pocontent = printData.pocontent;
     var curr = WeirService.CurrentCurrency(vm.Quote);
     vm.currency = curr.symbol;
 
@@ -91,7 +92,8 @@ function PrintOrderButtonControl($scope,imageRoot,WeirService,$uibModal,$sce,$do
             buyer:$scope.buyer,
             order:$scope.order,
             items:$scope.items,
-            address:$scope.address
+            address:$scope.address,
+            pocontent:$scope.pocontent,
         };
         var templates = {
             WVCUK:'common/print-order/templates/printorder.tpl.html',
@@ -119,7 +121,8 @@ function PrintOrderButtonDirective () {
             buyer:'=buyer',
             order:'=order',
             items:'=items',
-            address:'=address'
+            address:'=address',
+            pocontent:'=pocontent',
         },
         templateUrl:'common/print-order/templates/printorderbutton.tpl.html',
         controller:'printOrderBtnCtrl',
