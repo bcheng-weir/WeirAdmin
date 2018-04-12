@@ -105,17 +105,19 @@
              </p>
              <p><b><span ng-bind-html="order.labels.QuoteRef"></span><span class="text-danger" ng-bind-html="order.Order.xp.RefNum"></span></b></p>
              <p><b><span ng-bind-html="order.labels.QuoteName"></span><span class="text-danger" ng-bind-html="order.Order.xp.Name"></span></b></p>
-             <p ng-show="(order.Order.xp.Status=='CQ'||order.Order.xp.Status=='SE')&&order.showAssign==false">
+             <!--<p ng-show="(order.Order.xp.Status=='CQ'||order.Order.xp.Status=='SE')&&order.showAssign==false">-->
+             <p ng-show="order.showAssign==false">
                  <b>
-                    <!--<span ng-bind-html='order.labels.PONumber'></span>-->
-                    <span ng-if="order.showAssign==true" class="text-danger" ng-bind-html="order.Order.xp.PONumber"></span>
-                    <span ng-if="order.showAssign!=true">
+                    <!--<span ng-if="order.showAssign==true" class="text-danger" ng-bind-html="order.Order.xp.PONumber"></span>-->
+                    <!--<span ng-if="order.showAssign!=true">-->
+                     <span>
                         <input type="text" ng-model="order.Order.xp.PONumber" placeholder="{{order.labels.POPlaceHolder}}" ng-enter="order.UpdatePO()" />
                         <button class="btn btn-sm btn-primary" ng-bind-html="order.labels.Add" ng-click="order.UpdatePO()"></button>
                     </span>
                  </b>
              </p>
-             <span ng-show="(order.Order.xp.Status=='CQ'||(order.Order.xp.Type=='Order'&&(!order.Order.xp.PODocument||order.Order.xp.PODocument=='undefined')))&&order.showAssign==false">
+             <!--<span ng-show="(order.Order.xp.Status=='CQ'||(order.Order.xp.Type=='Order'&&(!order.Order.xp.PODocument||order.Order.xp.PODocument=='undefined')))&&order.showAssign==false">-->
+             <span ng-show="order.showAssign==false">
                 <ordercloud-po-upload model="order.Order" keyname="PODocument" label=''></ordercloud-po-upload>
              </span>
          </div>

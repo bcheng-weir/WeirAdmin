@@ -661,8 +661,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			SE: true
 		};
 		if(vm.Order.xp) {
-			//return validStatus[vm.Order.xp.Status] && vm.Order.xp.ReviewerID === Me.ID;
-            return vm.Order.xp.ReviewerID === Me.ID;
+			return validStatus[vm.Order.xp.Status] && vm.Order.xp.ReviewerID === Me.ID;
+            //return vm.Order.xp.ReviewerID === Me.ID;
 		} else {
 			return false;
 		}
@@ -679,8 +679,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			EN: true
 		};
 		if(vm.Order.xp) {
-			//return validStatus[vm.Order.xp.Status] && vm.Order.xp.ReviewerID === Me.ID;
-            return vm.Order.xp.ReviewerID === Me.ID;
+			return validStatus[vm.Order.xp.Status] && vm.Order.xp.ReviewerID === Me.ID;
+            //return vm.Order.xp.ReviewerID === Me.ID;
 		} else {
 			return false;
 		}
