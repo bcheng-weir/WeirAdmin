@@ -11,6 +11,7 @@ angular.module( 'orderCloud' )
     .filter('reverseComments',reverseComments)
     .filter('defaultCurrency', defaultCurrency)
 	.filter('OrderConversion', orderconversion)
+    .filter('MaskedQuoteID', MaskedQuoteID)
 ;
 
 function serialnumber() {
@@ -223,5 +224,18 @@ function defaultCurrency($filter) {
             'ZAR': 'R'
         };
         return $filter('currency')(amount, currency_symbols[currency]);
+    };
+}
+
+function MaskedQuoteID() {
+    return function(serialNumber) {
+        var fields = serialNumber.split("-");
+        if (fields.length < 3) {
+            return serialNumber;
+        } else if (fields.length == 3) {
+            return fields[2];
+        } else {
+            return fields[2] + "-" + fields[3];
+        }
     };
 }

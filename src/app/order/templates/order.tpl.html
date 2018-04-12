@@ -76,6 +76,11 @@
                         <li ng-click="order.Comments()" style="padding: 0px 10px 0px 5px;">
                             <a role="button" class="btn btn-lg btn-default" href="#Comments"><span ng-bind-html="order.labels.Comments"></span></a>
                         </li>
+
+                        <li style="padding: 0px 10px 0px 0px;"> <!-- Print Button -->
+                            <print-order-button buyer="order.Buyer" order="order.Order" items="order.LineItems" address="order.DeliveryAddress"></print-order-button>
+                        </li>
+
                         <li style="padding: 0px 10px 0px 0px;">
                             <button type="button" class="btn btn-lg btn-default" ng-csv="order.ToCsvJson" add-bom="true" filename="{{order.CsvFilename}}" ng-bind-html="order.labels.Download"></button>
                         </li>

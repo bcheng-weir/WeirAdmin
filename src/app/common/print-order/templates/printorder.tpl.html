@@ -1,0 +1,172 @@
+<div class="printable" id="PRINTORDER">
+    <div class="modal-header">
+        <div width="100%">
+            <table width="100%">
+                <tbody>
+                <tr>
+                    <td>
+                            <span class="pull-left">
+                                <img style="height: 2.0em" src="https://www.global.weir/assets/template/img/logo.jpg">
+                            </span>
+                    </td>
+                    <td align="right">
+                            <span class="pull-right" ng-click="printctrl.close()">
+                                X
+                            </span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <br>
+        <pre ng-bind-html="printctrl.pocontent.Address"></pre>
+    </div>
+    <br>
+    <div class="modal-body">
+        <table id="quoteData">
+            <tr>
+                <td ng-bind-html="printctrl.labels.QuoteNumber"></td>
+                <td><span ng-bind-html="printctrl.order.ID | MaskedQuoteID"></span></td>
+            </tr>
+            <tr>
+                <td ng-bind-html="printctrl.labels.QuoteName"></td>
+                <td><span ng-bind-html="printctrl.order.xp.Name"></span></td>
+            </tr>
+            <tr>
+                <td ng-bind-html="printctrl.labels.YourReference"></td>
+                <td><span ng-bind-html="printctrl.order.xp.RefNum"></span></td>
+            </tr>
+            <tr>
+                <td ng-bind-html="printctrl.labels.PONumber"></td>
+                <td><span ng-bind-html="printctrl.order.xp.PONumber"></span></td>
+            </tr>
+        </table>
+        <br>
+        <pre ng-bind-html="printctrl.pocontent.Message"></pre>
+        <br>
+        <table id="lineItems">
+            <thead>
+            <tr>
+                <th>Serial Number</th>
+                <th>Tag Number (if available)</th>
+                <th>Part Number</th>
+                <th>Description of Part</th>
+                <th>Recommended Replacement (yrs)</th>
+                <th>Lead Time (days)</th>
+                <th>Price Per Item or Set</th>
+                <th>Quantity</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="item in printctrl.items track by $index">
+                <td><span ng-bind-html="item.xp.SN"></span></td>
+                <td><span ng-bind-html="item.xp.TagNumber"></span></td>
+                <td>
+                    <!--<span ng-bind-html="item.Product.Name"></span>-->
+                    <span ng-bind-html="item.xp.ProductName"></span>
+                </td>
+                <td>
+                    <!--<span ng-bind-html="item.Product.Description"></span>-->
+                    <span ng-bind-html="item.xp.Description"></span>
+                </td>
+                <td>
+                    <!--<span ng-bind-html="item.Product.xp.ReplacementSchedule"></span>-->
+                    <span ng-bind-html="item.xp.ReplacementSchedule"></span>
+                </td>
+                <td>
+                    <!--<span ng-show="item.xp.LeadTime==null" ng-bind-html="item.Product.xp.LeadTime"></span>-->
+                    <span ng-bind-html="item.xp.LeadTime"></span>
+                </td>
+                <td ng-if="!item.UnitPrice||item.UnitPrice=='0'">POA</td>
+                <td ng-if="item.UnitPrice">
+                    <span ng-bind-html="item.UnitPrice  | OrderConversion: printctrl.order | currency:printctrl.currency"></span>
+                </td>
+                <td><span ng-bind-html="item.Quantity"></span></td>
+            </tr>
+            <tr ng-if="printctrl.order.xp.ShippingDescription">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td ng-bind-html="printctrl.order.xp.ShippingDescription"></td>
+                <td></td>
+                <td></td>
+                <td>
+                    <!-- No rate conversion here - it is in the controller since applying fixed(2) to the output -->
+                    <span ng-if="printctrl.CarriageRateForBuyer!='POA'" ng-bind-html="printctrl.CarriageRateForBuyer | currency:printctrl.currency"></span>
+                    <span ng-if="printctrl.CarriageRateForBuyer=='POA'" ng-bind-html="printctrl.labels.POAShipping"></span>
+                </td>
+                <td></td>
+            </tr>
+            <tr class="totals" >
+                <td colspan="5"></td>
+                <td>Total</td>
+                <td class='text-right' style="font-weight:bold;">
+                    <!-- No rate conversion here - it is in the controller since applying fixed(2) to the output -->
+                    <span ng-bind-html="printctrl.uitotal | currency:printctrl.currency"></span>
+                </td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table>
+        <br>
+        <div>
+            <p class="bold" ng-bind-html="printctrl.order.xp.CustomerName"></p>
+        </div>
+        <div>
+            <br>
+            <span class="bold">Delivery Address</span><br>
+            <span ng-bind-html="printctrl.address.FirstName"></span> <span ng-bind-html="printctrl.address.LastName"></span><br>
+            <span ng-bind-html="printctrl.address.CompanyName"></span><br>
+            <span ng-bind-html="printctrl.address.Street1"></span><br>
+            <span ng-if="printctrl.address.Street2" ng-bind-html="printctrl.address.Street2"></span><br ng-if="printctrl.address.Street2">
+            <span ng-if="printctrl.address.xp.Street3" ng-bind-html="printctrl.address.xp.Street3"></span><br ng-if="printctrl.address.xp.Street3">
+            <span ng-bind-html="printctrl.address.City"></span><br>
+            <span ng-bind-html="printctrl.address.Zip"></span><br>
+            <span ng-bind-html="printctrl.country(printctrl.address.Country)"></span>
+        </div>
+        <div>
+            <br>
+            <pre ng-bind-html="printctrl.buyer.xp.POContent.PriceQuote"></pre>
+        </div>
+        <div>
+            <br>
+            <pre ng-bind-html="printctrl.pocontent.VATDisclaimer"></pre>
+        </div>
+        <div>
+            <br>
+            <pre ng-bind-html="printctrl.pocontent.DocDisclaimer"></pre>
+        </div>
+        <div>
+            <br>
+            <pre ng-bind-html="printctrl.pocontent.SalesDisclaimer"></pre>
+        </div>
+        <div>
+            <br>
+            <pre ng-bind-html="printctrl.buyer.xp.POContent.PaymentTerms"></pre>
+        </div>
+        <div>
+            <br>
+            <pre ng-bind-html="printctrl.buyer.xp.POContent.DeliveryTerms"></pre>
+        </div>
+        <div>
+            <br>
+            <pre ng-bind-html="printctrl.pocontent.VatExtraNotice"></pre>
+        </div>
+        <div>
+            <br>
+            <pre ng-bind-html="printctrl.buyer.xp.POContent.Packing"></pre>
+        </div>
+        <div>
+            <br>
+            <pre ng-bind-html="printctrl.buyer.xp.POContent.CarriagePrice"></pre>
+        </div>
+        <div>
+            <br>
+            <span ng-bind-html="printctrl.order.xp.ReviewerName"></span>
+        </div>
+        <div>
+            <br ng-if="printctrl.order.xp.ReviewerName">
+            <pre ng-bind-html="printctrl.pocontent.RegisteredAddress"></pre>
+        </div>
+    </div>
+</div>

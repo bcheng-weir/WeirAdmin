@@ -270,6 +270,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	determineShipping();
     FxRate.SetCurrentFxRate(Buyer); //This is used by the filter.
     var vm = this;
+    vm.Buyer = Buyer;
     vm.Order = Order;
 	vm.Order.xp.PONumber = vm.Order.xp.PONumber != "Pending" ? vm.Order.xp.PONumber : ""; // In the buyer app we were initially setting this to pending.
     vm.BlankItems = [];
@@ -788,22 +789,6 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 				}
 			};
 			vm.BlankItems.push(newItem);
-		}
-	}
-
-	function mapValuesForProperties(obj1, obj2, defaultVal)
-	{
-		if(obj1)
-		{
-			return obj1;
-		}
-		else if(obj2)
-		{
-			return obj2;
-		}
-		else
-		{
-			return defaultVal;
 		}
 	}
 
