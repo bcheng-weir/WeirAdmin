@@ -661,7 +661,11 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		var validStatus = {
 			SB: true,
 			SP: true,
-			SE: true
+			SE: true,
+            CO: true,
+			DEL: true,
+            CQ: true,
+			RV: true
 		};
 		if(vm.Order.xp) {
 			return validStatus[vm.Order.xp.Status] && vm.Order.xp.ReviewerID === Me.ID;
@@ -679,7 +683,11 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			RQ: true,
 			RR: true,
 			SE: true,
-			EN: true
+			EN: true,
+            CO: true,
+			DEL: true,
+            CQ: true,
+			RV: true
 		};
 		if(vm.Order.xp) {
 			return validStatus[vm.Order.xp.Status] && vm.Order.xp.ReviewerID === Me.ID;
