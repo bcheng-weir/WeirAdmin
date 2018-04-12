@@ -6,6 +6,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
     <!-- OrderCloud will appear as the tab's title until Angular loads application.title's value -->
     <title ng-bind="application.title">OrderCloud</title>
+    <style type="text/css" media="print">
+        ui-view { /* was body*/
+            background-color: white;
+            visibility: hidden;
+            display: none;
+        }
+        .mce-container-body {
+            background-color: white;
+            visibility: hidden;
+            display: none;
+        }
+        pre {
+            font-family: Calibri !important;
+            margin: 0em !important;
+            overflow: auto !important;
+            white-space: pre-wrap;       /* css-3 */
+            white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+            white-space: -pre-wrap;      /* Opera 4-6 */
+            white-space: -o-pre-wrap;    /* Opera 7 */
+            word-wrap: break-word;       /* Internet Explorer 5.5+ */
+        }
+        .printable {
+            visibility: visible;
+            z-index: 9;
+            font-family:Calibri;
+            font-size: 8pt;
+        }
+        #quoteData { width:50%; }
+        #lineItems { page-break-inside:auto; border-collapse: collapse; border-spacing: 0px !important; }
+        #lineItems tr    { page-break-inside:avoid; page-break-after:auto; font-size:10pt; }
+        #lineItems td    { page-break-inside:avoid; page-break-after:auto; border: 1px solid lightgrey }
+        #lineItems th    { background-color:blue; color:white; border: 1px solid lightgrey }
+        #lineItems thead { display:table-header-group; }
+        #lineItems tbody { display:table-row-group; }
+        #lineItems tfoot { display:table-footer-group; }
+        .totals td { font-weight:bold }
+        .bold { font-weight:bold; }
+        * { overflow: visible !important; } /* This was the trick to get multi-page printing in Chrome. */
+    </style>
     <base href="/">
     <!-- bower:css -->
     <!-- endinject -->
