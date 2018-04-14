@@ -198,6 +198,7 @@
                      <th ng-bind-html='order.labels.Description'></th>
                      <th ng-bind-html='order.labels.RecReplacement'></th>
                      <th ng-bind-html='order.labels.LeadTimeAvailability'></th>
+                     <th>Base Price</th>
                      <th ng-bind-html='order.labels.PricePerItem'></th>
                      <th ng-bind-html='order.labels.Quantity'></th>
                      <th style="border:0;background-color: white;width:200px"></th>
@@ -222,9 +223,11 @@
                      <td>
                          <span ng-bind-html="line.xp.LeadTime"></span>
                      </td>
+                     <td>
+                         <span ng-bind-html="line.UnitPrice | currency:order.currency"></span>
+                     </td>
                      <td class='text-right'>
                          <span ng-bind-html="line.UnitPrice | OrderConversion:order.Order | currency:order.currency"></span>
-                         <!--<span ng-bind-html="myquote.Quote.Subtotal | OrderConversion: myquote.Quote  | currency:myquote.currency"></span>-->
                      </td>
                      <td ng-bind-html="line.Quantity"></td>
                      <td style="border:0;width:100px;">
@@ -256,6 +259,9 @@
                      </td>
                      <td>
                          <input type="text" class="form-control input-sm" ng-model="line.UnitPrice" ng-enter="order.NoOp()" />
+                     </td>
+                     <td>
+                         <span ng-bind-html="line.UnitPrice | OrderConversion:order.Order | currency:order.currency"></span>
                      </td>
                      <td>
                          <input type="number" class="form-control input-sm" ng-model="line.Quantity" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" ng-enter="order.NoOp()" />

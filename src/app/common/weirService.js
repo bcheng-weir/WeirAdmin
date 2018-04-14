@@ -53,6 +53,12 @@ function UserGroupsService($q, OrderCloudSDK) {
 }
 
 function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyernetwork) {
+    Date.prototype.addDays = function(days) {
+        var d = new Date(this.valueOf());
+        d.setDate(d.getDate() + days);
+        return d;
+    };
+
     var orderStatuses = {
 	    Draft: {id: "DR", label: "Draft", desc: "This is the current quote under construction"},
 	    Saved: {id: "SV", label: "Saved", desc: "Quote has been saved but not yet submitted to weir as quote or order"},

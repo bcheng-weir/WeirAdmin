@@ -74,7 +74,7 @@
                 <td>
                     {{order.xp.Currency.ConvertTo || ((order.xp.CustomerID | weirGroupFromBuyersID) == 'WPIFR' ? 'EUR' : 'GBP')}}
                 </td>
-                <td class="text-left" ng-switch on="quotes.OrderCurrency(order)">
+                <td class="text-left" ng-switch on="orders.OrderCurrency(order)">
                     <!--<span ng-bind-html="order.Total | defaultCurrency:order.xp.Currency.ConvertTo:(order.xp.CustomerID | weirGroupFromBuyersID)"></span>-->
                     <span ng-switch-when="USD">{{order.Total | OrderConversion: order | currency:'&#36;'}}</span>
                     <span ng-switch-when="AUD">{{order.Total | OrderConversion: order | currency:'&#36;'}}</span>

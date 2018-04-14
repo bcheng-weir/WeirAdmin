@@ -78,7 +78,7 @@
                 <span ng-if="order.DateCreated" ng-bind-html="orders.dateOf(order.DateCreated) | weirdate : orders.WeirGroup"></span>
                 <span ng-if="!order.DateCreated"></span>
             </td>
-            <td>
+            <td> <!-- Initial submission from buyerapp has these values one month in the future. Check buyer app. -->
                 <span ng-if="order.xp.StatusDate" ng-bind-html="orders.dateOf(order.xp.StatusDate) | weirdate : orders.WeirGroup"></span>
                 <span ng-if="!order.xp.StatusDate"></span>
             </td>
