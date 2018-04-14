@@ -46,7 +46,7 @@
                                 <span ng-bind-html="order.Order.xp.Currency.ConvertTo || ((order.Order.xp.CustomerID | weirGroupFromBuyersID) == 'WPIFR' ? 'EUR' : 'GBP')"></span>
                             </h4>
                         </li>
-                        <li style="padding: 10px 16px 0px 10px;">
+                        <li style="padding: 10px 16px 0px 10px;" ng-show="order.ShowFX()">
                             <span ng-bind-html='order.labels.validUntil'></span><br />
                             <h4>
                                 <span ng-bind-html="order.Order.xp.ValidUntil | weirdate"></span>
@@ -126,7 +126,8 @@
                 <ordercloud-po-upload model="order.Order" keyname="PODocument" label=''></ordercloud-po-upload>
              </span>
          </div>
-         <div class="col-md-3" ng-if="order.ShowShareRevision()">
+
+         <div class="col-md-3" ng-if="order.ShowShareRevision() && order.ShowFX()">
              <div class="row">
                  <div class="col-md-12">
                      <p class="fx-area">
@@ -198,8 +199,8 @@
                      <th ng-bind-html='order.labels.Description'></th>
                      <th ng-bind-html='order.labels.RecReplacement'></th>
                      <th ng-bind-html='order.labels.LeadTimeAvailability'></th>
-                     <th>Base Price</th>
                      <th ng-bind-html='order.labels.PricePerItem'></th>
+                     <th ng-show="order.ShowFX()" ng-bind-html='order.labels.PricePerItem'></th>
                      <th ng-bind-html='order.labels.Quantity'></th>
                      <th style="border:0;background-color: white;width:200px"></th>
                  </tr>
@@ -223,8 +224,8 @@
                      <td>
                          <span ng-bind-html="line.xp.LeadTime"></span>
                      </td>
-                     <td>
-                         <span ng-bind-html="line.UnitPrice | currency:order.currency"></span>
+                     <td ng-show="order.ShowFX()">
+                         <span ng-bind-html="line.UnitPrice"></span>
                      </td>
                      <td class='text-right'>
                          <span ng-bind-html="line.UnitPrice | OrderConversion:order.Order | currency:order.currency"></span>
@@ -260,7 +261,7 @@
                      <td>
                          <input type="text" class="form-control input-sm" ng-model="line.UnitPrice" ng-enter="order.NoOp()" />
                      </td>
-                     <td>
+                     <td ng-show="order.ShowFX()">
                          <span ng-bind-html="line.UnitPrice | OrderConversion:order.Order | currency:order.currency"></span>
                      </td>
                      <td>
@@ -366,14 +367,16 @@
                      </td>
                      <td></td>
                      <td></td>
+                     <td ng-if="order.Order.xp.Status!='RE' && order.Order.xp.Status!='ER'"></td>
+                     <td ng-if="(order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER') && order.ShowFX()"></td>
                      <td ng-if="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'">
                          <input type="text" class="form-control" name="ShippingPrice" ng-model="order.Order.ShippingCost"
-                                ng-pattern="/^[0-9\.]*$/" required ng-trim="false" palceholder="Carriage Rate">
+                                ng-pattern="/^[0-9\.]*$/" required ng-trim="false" placeholder="Carriage Rate">
                      </td>
                      <td class='text-right' ng-if="order.Order.xp.Status!='RE' && order.Order.xp.Status!='ER'">
                          <span ng-bind-html="order.Order.ShippingCost | defaultCurrency:order.Order.xp.Currency.ConvertTo:(order.Order.xp.CustomerID | weirGroupFromBuyersID)"></span>
                      </td>
-                     <td></td>
+                     <td ng-if="order.Order.xp.Status!='RE' || order.Order.xp.Status!='ER'"></td>
                      <td style="border:0;width:100px;">
                          <h4>
                              <span class="label label-default" ng-show="order.ShowEdit(order.Order.xp.Status, order.ShippingCost)" ng-bind-html="order.labels.Edit" ng-click="order.EditOrderShipping()"></span>
@@ -383,7 +386,7 @@
                  </tr>
 
                  <tr ng-if="order.LineItems.length > 0">
-                     <td class="button-th" colspan="5"></td>
+                     <td class="button-th" colspan="6"></td>
                      <td ng-bind-html='order.labels.Total'></td>
                      <td class='text-right'>
                          <span ng-bind-html="order.Order.Total | defaultCurrency:order.Order.xp.Currency.ConvertTo:(order.Order.xp.CustomerID | weirGroupFromBuyersID)"></span>

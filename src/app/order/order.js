@@ -29,7 +29,7 @@ function OrderShareService(OrderCloudSDK, $q) {
 			var _validUntil = new Date(ValidUntil ? ValidUntil : _today);
             return _validUntil <= _today;
         },
-        applyFxToOrder: function(FXSpec, Buyer, Order) {
+        applyFxToOrder: function(FXSpec, Buyer, Order) {// Updates the action order in the OC. Used by button on the Order form.
 			//find the current rate
             var deferred = $q.defer();
             var today = new Date();
@@ -90,7 +90,21 @@ function OrderShareService(OrderCloudSDK, $q) {
 					deferred.reject(ex);
 				});
 			return deferred.promise;
-        }
+        },
+		setFx: function(FX, Buyer, Order) {
+        	if(Order && Order.xp && Order.xp.Currency && Order.xp.Currency.Rate && Order.xp.Currency.ConvertTo) { //Already set.
+        		return Order;
+			}
+
+			if(Buyer && Buyer.xp && Buyer.xp.Curr) {
+        		// Apply Currency to Order
+				Order.xp.Currency = {};
+				Order.xp.Currency.Rate = FX.Rate;
+				Order.xp.Currency.ConvertTo = FX.ConvertTo;
+			}
+
+			return Order;
+		}
     };
 
     var svc = {
@@ -271,7 +285,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
     FxRate.SetCurrentFxRate(Buyer); //This is used by the filter.
     var vm = this;
     vm.Buyer = Buyer;
-    vm.Order = Order;
+    vm.Order = OrderShareService.FX.setFx(FxRate.GetCurrentFxRate(), Buyer, Order);
     vm.Catalog = Catalog;
     vm.POContent = vm.Buyer.xp.WeirGroup.id === 2 && WeirService.Locale() === "en" ? Catalog.xp.POContentFR_EN : Catalog.xp.POContent;
 	vm.Order.xp.PONumber = vm.Order.xp.PONumber !== "Pending" ? vm.Order.xp.PONumber : ""; // In the buyer app we were initially setting this to pending.
@@ -736,6 +750,12 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			return false;
 		}
 	}
+
+	vm.ShowFX = function() {
+		//If the Buyer has a currency setting, then show this.
+
+		return FxRate.GetCurrentFxRate() ? true:false;
+	};
 
 	vm.GetFile = function(fileName) {
 		var orderid = vm.Order.xp.OriginalOrderID ? vm.Order.xp.OriginalOrderID : vm.Order.ID;
