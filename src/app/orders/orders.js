@@ -124,8 +124,16 @@ function OrdersConfig($stateProvider) {
 
 function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler, OrderCloudSDK, OrderCloudParameters,
 						  Orders, Quotes, Parameters, buyerid, CurrentOrder, WeirService, CurrentBuyer, Languages,
-						  Underscore, $uibModal, $document) {
+						  Underscore, $uibModal, $document, Me) {
 	var vm = this;
+	vm.SearchAssigned = (Parameters.filters && Parameters.filters["xp.ReviewerID"]) ? true : false; //Toggle thh X button by the "Search orders assigned to me button"
+
+    vm.SearchCustomer = (Parameters.filters && Parameters.filters["xp.CustomerName"]) ? true : false; //This is the customer name search.
+    vm.buyerSearch = vm.SearchCustomer ? Parameters.filters["xp.CustomerName"] : null;
+
+    vm.SearchOrder = (Parameters && Parameters.searchOn && Parameters.searchOn == "ID") ? true : false; // This is the order number search.
+    vm.orderSearch = vm.SearchOrder ? Parameters.search : null;
+
 	vm.xpType = Parameters.filters ? Parameters.filters["xp.Type"] : {};
 	vm.StateName = $state.current.name;
 	vm.list = Orders;
@@ -479,19 +487,65 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 		});
 	};
 
-	vm.FilterActions = function(action) {
+	function FilterActions(action) {
 		var filter = {
-            "ordersAll":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":"!true"},
-            "quotesRequested":{"xp.Type":"Quote","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.Enquiry.id + "|" + WeirService.OrderStatus.EnquiryReview.id + "|" + WeirService.OrderStatus.Submitted.id + "|" + WeirService.OrderStatus.RevisedQuote.id + "|" + WeirService.OrderStatus.RejectedQuote.id},
-            "quotesConfirmed":{"xp.Type":"Quote","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.ConfirmedQuote.id},
-            "quotesDeleted":{"xp.Type":"Quote","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.Deleted.id},
-            "ordersDraft":{"xp.Type":"Order","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.SubmittedPendingPO.id + "|" + WeirService.OrderStatus.RevisedOrder.id + "|" + WeirService.OrderStatus.RejectedRevisedOrder.id},
-            "ordersConfirmed":{"xp.Type":"Order","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.ConfirmedOrder.id + "|" + WeirService.OrderStatus.SubmittedWithPO.id + "|" + WeirService.OrderStatus.Despatched.id},
-            "ordersDeleted":{"xp.Type":"Order","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.Deleted.id},
-            "archived":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":true}
+			"ordersMain.default":{},
+            "ordersMain.ordersAll":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":"!true"},
+            "ordersMain.quotesRequested":{"xp.Type":"Quote","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.Enquiry.id + "|" + WeirService.OrderStatus.EnquiryReview.id + "|" + WeirService.OrderStatus.Submitted.id + "|" + WeirService.OrderStatus.RevisedQuote.id + "|" + WeirService.OrderStatus.RejectedQuote.id},
+            "ordersMain.quotesConfirmed":{"xp.Type":"Quote","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.ConfirmedQuote.id},
+            "ordersMain.quotesDeleted":{"xp.Type":"Quote","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.Deleted.id},
+            "ordersMain.ordersDraft":{"xp.Type":"Order","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.SubmittedPendingPO.id + "|" + WeirService.OrderStatus.RevisedOrder.id + "|" + WeirService.OrderStatus.RejectedRevisedOrder.id},
+            "ordersMain.ordersConfirmed":{"xp.Type":"Order","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.ConfirmedOrder.id + "|" + WeirService.OrderStatus.SubmittedWithPO.id + "|" + WeirService.OrderStatus.Despatched.id},
+            "ordersMain.ordersDeleted":{"xp.Type":"Order","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.Deleted.id},
+            "ordersMain.archived":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":true}
 		};
-        return JSON.stringify(filter[action]);
+		return filter[action];
+	}
+
+	vm.OrderNavigation = function(action) {
+		var filter = FilterActions(action);
+        return JSON.stringify(filter);
 	};
+
+	vm.ShowAssignedOrders = function(currentState) {
+        vm.SearchAssigned = true;
+		var filter = FilterActions(currentState);
+		filter["xp.ReviewerID"] = Me.ID;
+        $state.go($state.current, {filters:JSON.stringify(filter)}, {reload:true});
+	};
+
+	vm.ClearAssignedOrders = function(currentState) {
+        vm.SearchAssigned = false;
+        var filter = FilterActions(currentState);
+        $state.go($state.current, {filters:JSON.stringify(filter)}, {reload:true});
+	};
+
+	vm.SearchCustomerName = function(currentState) {
+        vm.SearchCustomer = true;
+		var filter = FilterActions(currentState);
+		if(vm.buyerSearch) {
+            filter["xp.CustomerName"] = vm.buyerSearch;
+		}
+        $state.go($state.current, {filters:JSON.stringify(filter)}, {reload:true});
+	};
+
+	vm.ClearCustomerName = function(currentState) {
+        vm.SearchCustomer = false;
+        var filter = FilterActions(currentState);
+        $state.go($state.current, {filters:JSON.stringify(filter)}, {reload:true});
+	};
+
+    vm.SearchOrderID = function(currentState) {
+        vm.SearchOrder = true;
+        var filter = FilterActions(currentState);
+        $state.go($state.current, {filters:JSON.stringify(filter), search:vm.orderSearch,searchOn:"ID"}, {reload:true});
+    };
+
+    vm.ClearOrderID = function(currentState) {
+        vm.SearchOrder = false;
+        var filter = FilterActions(currentState);
+        $state.go($state.current, {filters:JSON.stringify(filter), search:null,searchOn:null}, {reload:true});
+    };
 }
 
 function RouteToOrderController($rootScope, $state, OrderCloudSDK, CurrentOrder, CurrentBuyer, toastr, Order, $exceptionHandler) {

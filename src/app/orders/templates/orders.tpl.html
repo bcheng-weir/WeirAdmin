@@ -1,42 +1,4 @@
 <article id="COMPONENT_Orders" class="container-fluid">
-
-    <!--====== SEARCH/FILTERS ======-->
-    <!-- ORIGINAL
-    <form name="OrderSearchForm" class="form-inline" ng-submit="orders.search()">
-        <fieldset class="form-group">
-            <input type="search" placeholder="{{orders.labels.SearchPlaceholder}}" ng-model="orders.parameters.search" class="form-control">
-        </fieldset>
-        <fieldset class="form-group" ng-class="{'text-center':application.$ocMedia('max-width:767px')}">
-            <span ng-class="{'btn-group':orders.searchResults}">
-                <button type="submit" class="btn btn-primary">Search</button>
-                <button ng-if="orders.searchResults" ng-click="orders.clearSearch()" type="button" class="btn btn-default"><i class="fa fa-times"></i></button>
-            </span>
-            <span ng-class="{'btn-group':addresses.filtersApplied}" ng-if="application.$ocMedia('max-width:767px')">
-                <button type="button" class="btn btn-default" ng-click="orders.showFilters=!orders.showFilters"><i class="fa fa-filter"></i> Filters</button>
-                <button ng-if="orders.filtersApplied" ng-click="orders.clearFilters()" type="button" class="btn btn-default"><i class="fa fa-times"></i></button>
-            </span>
-        </fieldset>
-    </form>
-    <div class="row" uib-collapse="!orders.showFilters">
-        <hr>
-        <div class="col-md-6 col-lg-4">
-            <div class="form-group" ng-if="application.$ocMedia('max-width:767px')">
-                <label>Sort By:</label>
-                <div ng-class="{'input-group':orders.sortSelection}">
-                    <select placeholder="Sort" class="form-control" ng-model="orders.sortSelection" ng-change="orders.updateSort()">
-                        <option value="">None</option>
-                        <option value="ID">ID</option>
-                    </select>
-                    <div ng-if="orders.sortSelection" class="input-group-btn">
-                        <button class="btn btn-default" ng-click="orders.reverseSort()">
-                            <i class="fa fa-sort"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <hr>
-    </div>-->
     <div class="row">
         <div class="col-md-6">
             <h3 ng-bind-html="orders.labels.Quotes"></h3>
@@ -48,28 +10,28 @@
     <div class="row">
         <div class="col-md-12">
             <ul class="nav navbar-nav">
-                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%;text-align:left;" ui-sref="ordersMain.ordersAll({filters:orders.FilterActions('ordersAll')})">
+                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%;text-align:left;" ui-sref="ordersMain.ordersAll({filters:orders.OrderNavigation('ordersMain.ordersAll')})">
                     <a class="nav-link" ng-bind-html="orders.labels.OrdersAll" href="#"></a>
                 </li>
-                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%" ui-sref="ordersMain.quotesRequested({filters:orders.FilterActions('quotesRequested')})">
+                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%" ui-sref="ordersMain.quotesRequested({filters:orders.OrderNavigation('ordersMain.quotesRequested')})">
                     <a class="nav-link" ng-bind-html="orders.labels.QuotesRequested" href="#"></a>
                 </li>
-                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%" ui-sref="ordersMain.quotesConfirmed({filters:orders.FilterActions('quotesConfirmed')})">
+                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%" ui-sref="ordersMain.quotesConfirmed({filters:orders.OrderNavigation('ordersMain.quotesConfirmed')})">
                     <a class="nav-link" ng-bind-html="orders.labels.QuotesConfirmed" href="#"></a>
                 </li>
-                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%" ui-sref="ordersMain.quotesDeleted({filters:orders.FilterActions('quotesDeleted')})">
+                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%" ui-sref="ordersMain.quotesDeleted({filters:orders.OrderNavigation('ordersMain.quotesDeleted')})">
                     <a class="nav-link" ng-bind-html="orders.labels.QuotesDeleted" href="#"></a>
                 </li>
-                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%;text-align:left;" ui-sref="ordersMain.ordersDraft({filters:orders.FilterActions('ordersDraft')})">
+                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%;text-align:left;" ui-sref="ordersMain.ordersDraft({filters:orders.OrderNavigation('ordersMain.ordersDraft')})">
                     <a class="nav-link" ng-bind-html="orders.labels.OrdersDraft" href="#"></a>
                 </li>
-                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%" ui-sref="ordersMain.ordersConfirmed({filters:orders.FilterActions('ordersConfirmed')})">
+                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%" ui-sref="ordersMain.ordersConfirmed({filters:orders.OrderNavigation('ordersMain.ordersConfirmed')})">
                     <a class="nav-link" ng-bind-html="orders.labels.OrdersConfirmed" href="#"></a>
                 </li>
-                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%" ui-sref="ordersMain.ordersDeleted({filters:orders.FilterActions('ordersDeleted')})">
+                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%" ui-sref="ordersMain.ordersDeleted({filters:orders.OrderNavigation('ordersMain.ordersDeleted')})">
                     <a class="nav-link" ng-bind-html="orders.labels.OrdersDeleted" href="#"></a>
                 </li>
-                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%" ui-sref="ordersMain.archived({filters:orders.FilterActions('archived')})">
+                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%" ui-sref="ordersMain.archived({filters:orders.OrderNavigation('ordersMain.archived')})">
                     <a class="nav-link" ng-bind-html="orders.labels.Archived" href="#"></a>
                 </li>
             </ul>
@@ -97,15 +59,23 @@
 
     <div class="row">
         <div class="col-md-4">
-            <input type="text" title="Search by customer name" placeholder="Search by customer name" />
-            <button class="btn btn-default">Search</button>
+            <input type="text" title="Search by customer name" placeholder="Search by customer name" ng-model="orders.buyerSearch" />
+            <button class="btn btn-primary" ng-click="orders.SearchCustomerName(application.$state.current.name)">Search</button>
+            <button class="btn btn-dark" ng-click="orders.ClearCustomerName(application.$state.current.name)"
+                    ng-show="orders.SearchCustomer">Clear Search</button>
         </div>
         <div class="col-md-4">
-            <input type="text" title="Search by quote / order number" placeholder="Search by quote / order number" />
-            <button class="btn btn-default">Search</button>
+            <input type="text" title="Search by quote / order number" placeholder="Search by quote / order number" ng-model="orders.orderSearch" />
+            <button class="btn btn-primary" ng-click="orders.SearchOrderID(application.$state.current.name)">Search</button>
+            <button class="btn btn-dark" ng-click="orders.ClearOrderID(application.$state.current.name)"
+                    ng-show="orders.SearchOrder">Clear Search</button>
         </div>
         <div class="col-md-4">
-            <button class="btn btn-default">Show Quotes & Orders assigned to Me</button>
+            <button class="btn btn-light" ng-show="orders.SearchAssigned"
+                    ng-click="orders.ClearAssignedOrders(application.$state.current.name)">X</button>
+            <button class="btn btn-light"
+                    ng-class="{true:'btn btn-warning',false:'btn btn-light'}[orders.SearchAssigned]"
+                    ng-click="orders.ShowAssignedOrders(application.$state.current.name)">Show Quotes & Orders assigned to Me</button>
         </div>
     </div>
 
