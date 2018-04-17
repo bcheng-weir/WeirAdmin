@@ -1,0 +1,103 @@
+
+    <div class="">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="col-md-12 borderbox">
+                    <div class="col-md-12 text-center">
+                        <span ng-bind-html="orders.labels.QuotesInProgress"></span>
+                    </div>
+                    <table class="table table-hover table-condensed oc-table-responsive">
+                        <thead>
+                        <tr>
+                            <th ng-bind-html="orders.labels.DateUpdated" class="col1"></th>
+                            <th ng-bind-html="orders.labels.QuoteNo" class="col2"></th>
+                            <th ng-bind-html="orders.labels.CustomerRef" class="col3"></th>
+                            <th ng-bind-html="orders.labels.BusinessName" class="col4"></th>
+                            <th ng-bind-html="orders.labels.Total" class="col5"></th>
+                            <th ng-bind-html="orders.labels.status" class="col6"></th>
+                            <th ng-bind-html="orders.labels.reviewer" class="col7"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="quote in orders.Quotes.Items">
+                            <td><span ng-bind-html="quote.xp.StatusDate | weirdateonly"></span> </td>
+                            <td>
+                                <a href="#" ng-click="orders.View(quote.ID, quote.xp.BuyerID, quote.xp.CustomerID, quote.xp.CustomerName)">
+                                    <span ng-bind-html="quote.ID | MaskedQuoteID" class="weir-link"></span>
+                                </a>
+                            </td>
+                            <td><span ng-bind-html="quote.xp.RefNum"></span></td>
+                            <td><span ng-bind-html="quote.xp.CustomerName"></span> </td>
+                            <td><span ng-bind-html="orders.getStatusLabel(quote.xp.Status)"
+                                      ng-style="{height: ((home.CurrentUserOrg.ID | weirGroupFromBuyersID) == 'WPIFR') ? '42px' : ''}"
+                                      ng-class="{DR:'btn-status btn-quote-DR',SV:'btn-status btn-quote-SV',EV:'btn-status btn-quote-EV',ER:'btn-status btn-quote-ER',SB:'btn-status btn-quote-SB',RV:'btn-status btn-quote-RV',RQ:'btn-status btn-quote-RQ',CQ:'btn-status btn-quote-CQ',DEL:'btn-status btn-DEL',SE:'btn-status btn-order-SE',RO:'btn-status btn-order-RO',RR:'btn-status btn-order-RR',CO:'btn-status btn-order-CO',SP:'btn-status btn-order-SP',DP:'btn-status btn-order-DP',IV:'btn-status btn-order-IV',RE:'btn-status btn-order-RE'}[quote.xp.Status]"></span></td>
+                            <td ng-switch on="home.Currency(quote)">
+                                <span ng-switch-when="USD">{{quote.Total | OrderConversion: quote | currency:'&#36;'}}</span>
+                                <span ng-switch-when="AUD">{{quote.Total | OrderConversion: quote | currency:'&#36;'}}</span>
+                                <span ng-switch-when="GBP">{{quote.Total | OrderConversion: quote| currency:'&#163;'}}</span>
+                                <span ng-switch-when="EUR">{{quote.Total | OrderConversion: quote| currency:'&#128;'}}</span>
+                                <span ng-switch-when="ZAR">{{quote.Total | OrderConversion: quote| currency:'R'}}</span>
+                                <span ng-switch-default>{{quote.Total | OrderConversion: quote | currency:'&#163;'}}</span>
+                            </td>
+                            <td>
+                                <span ng-bind-html="quote.xp.ReviewerName"></span>
+                            </td>
+                        </tr>
+                        <tr ng-hide="orders.Quotes.Meta.TotalCount > 0">
+                            <td colspan="4"><button class="btn btn-disabled" ng-bind-html="home.labels.NoQuotes"></button></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="col-md-12 borderbox">
+                    <div class="col-md-12 text-center">
+                        <span ng-bind-html="orders.labels.OrdersInProgress"></span>
+                    </div>
+                    <table class="table table-hover table-condensed oc-table-responsive">
+                        <thead>
+                            <tr>
+                                <th ng-bind-html="orders.labels.DateUpdated" class="col1"></th>
+                                <th ng-bind-html="orders.labels.OrderNo" class="col2"></th>
+                                <th ng-bind-html="orders.labels.CustomerRef" class="col3"></th>
+                                <th ng-bind-html="orders.labels.BusinessName" class="col4"></th>
+                                <th ng-bind-html="orders.labels.Total" class="col5"></th>
+                                <th ng-bind-html="orders.labels.status" class="col6"></th>
+                                <th ng-bind-html="orders.labels.reviewer" class="col7"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="order in orders.list.Items">
+                            <td><span ng-bind-html="order.xp.StatusDate | weirdateonly"></span> </td>
+                            <td>
+                                <a href="#" ng-click="orders.View(order.ID, order.xp.BuyerID, order.xp.CustomerID, order.xp.CustomerName)">
+                                    <span ng-bind-html="order.ID | MaskedQuoteID" class="weir-link"></span>
+                                </a>
+                            </td>
+                            <td><span ng-bind-html="order.xp.RefNum"></span></td>
+                            <td><span ng-bind-html="order.xp.CustomerName"></span> </td>
+                            <td><span ng-bind-html="orders.getStatusLabel(order.xp.Status)"
+                                      ng-style="{height: ((home.CurrentUserOrg.ID | weirGroupFromBuyersID) == 'WPIFR') ? '42px' : ''}"
+                                      ng-class="{DR:'btn-status btn-quote-DR',SV:'btn-status btn-quote-SV',EV:'btn-status btn-quote-EV',ER:'btn-status btn-quote-ER',SB:'btn-status btn-quote-SB',RV:'btn-status btn-quote-RV',RQ:'btn-status btn-quote-RQ',CQ:'btn-status btn-quote-CQ',DEL:'btn-status btn-DEL',SE:'btn-status btn-order-SE',RO:'btn-status btn-order-RO',RR:'btn-status btn-order-RR',CO:'btn-status btn-order-CO',SP:'btn-status btn-order-SP',DP:'btn-status btn-order-DP',IV:'btn-status btn-order-IV',RE:'btn-status btn-order-RE'}[order.xp.Status]"></span></td>
+                            <td ng-switch on="home.Currency(quote)">
+                                <span ng-switch-when="USD">{{order.Total | OrderConversion: order | currency:'&#36;'}}</span>
+                                <span ng-switch-when="AUD">{{order.Total | OrderConversion: order | currency:'&#36;'}}</span>
+                                <span ng-switch-when="GBP">{{order.Total | OrderConversion: order| currency:'&#163;'}}</span>
+                                <span ng-switch-when="EUR">{{order.Total | OrderConversion: order| currency:'&#128;'}}</span>
+                                <span ng-switch-when="ZAR">{{order.Total | OrderConversion: order| currency:'R'}}</span>
+                                <span ng-switch-default>{{order.Total | OrderConversion: order | currency:'&#163;'}}</span>
+                            </td>
+                            <td>
+                                <span ng-bind-html="order.xp.ReviewerName"></span>
+                            </td>
+                        </tr>
+                        <tr ng-hide="orders.list.Meta.TotalCount > 0">
+                            <td colspan="4"><button class="btn btn-disabled" ng-bind-html="home.labels.NoQuotes"></button></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
