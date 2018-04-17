@@ -137,11 +137,8 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
 
     defaultErrorMessageResolver.getErrorMessages().then(function (errorMessages) {
         errorMessages['customPassword'] = 'Password must be at least eight characters long and include at least one letter and one number';
-        //regex for customPassword = ^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!$%@#£€*?&]{8,}$
         errorMessages['positiveInteger'] = 'Please enter a positive integer';
-        //regex positiveInteger = ^[0-9]*[1-9][0-9]*$
         errorMessages['ID_Name'] = 'Only Alphanumeric characters, hyphens and underscores are allowed';
-        //regex ID_Name = ([A-Za-z0-9\-\_]+)
         errorMessages['confirmpassword'] = 'Your passwords do not match';
         errorMessages['noSpecialChars'] = 'Only Alphanumeric characters are allowed';
         errorMessages['customPhone'] = 'Only numbers, spaces and parenthesis are allowed';
@@ -158,24 +155,18 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
             customers: "Customers",
             sharedCustomers: "Shared Customers",
             orders: "Orders",
-            quotesForReview: "Quotes Submitted for Review",
-            revisedQuotes: "Revised Quotes",
-            confirmedQuotes: "Confirmed Quotes",
-            deletedQuotes: "Deleted Quotes",
-            enquiryQuotes: "Enquiries submitted",
-            ordersSubmittedPO: "Orders Submitted with PO",
-            pendingPO: "Orders submitted pending PO",
-            revisedOrders: "Revised Orders",
-            confirmedOrders: "Confirmed Orders",
-            despatched: "Despatched",
-            deletedOrders: "Deleted Orders",
-            invoiced: "Invoiced",
-            allOrders: "All Orders",
-            archived: "Archived Orders",
+            archived: "Archived",
             standardDelivery: "Carriage",
             poPrintContent: "Fixed Print Content",
             sharedContent: "Shared Content",
-            currencyRates: "Manage Currencies"
+            currencyRates: "Manage Currencies",
+            OrdersAll: "All Quotes and Orders",
+            QuotesRequested: "Quotes requested",
+            QuotesConfirmed: "Confirmed quotes",
+            QuotesDeleted: "Deleted quotes",
+            OrdersDraft: "Draft orders",
+            OrdersConfirmed: "Confirmed orders",
+            OrdersDeleted: "Deleted orders",
         }
     };
 
@@ -204,36 +195,24 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
     vm.OrderAction = _actions;
     function _actions(action) {
         var filter = {
-            "ReviewQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Submitted.id + "|" + WeirService.OrderStatus.Review.id, "xp.Active":true,"xp.Archive":"!true"},
-            "RevisedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.RevisedQuote.id + "|" + WeirService.OrderStatus.RejectedQuote.id, "xp.Active":true,"xp.Archive":"!true"},
-            "ConfirmedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.ConfirmedQuote.id, "xp.Active":true,"xp.Archive":"!true"},
-            "DeletedQuotes":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Deleted.id, "xp.Active":true,"xp.Archive":"!true"},
-            "EnquiryQuotes": {"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Enquiry.id + "|" + WeirService.OrderStatus.EnquiryReview.id, "xp.Active":true,"xp.Archive":"!true"},
-            "POOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.SubmittedWithPO.id + "|" + WeirService.OrderStatus.Review.id, "xp.Active":true,"xp.Archive":"!true"},
-            "PendingPO":{"xp.Type":"Order","xp.PendingPO":true, "xp.Active":true,"xp.Archive":"!true"},
-            "RevisedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.RevisedOrder.id + "|" + WeirService.OrderStatus.RejectedRevisedOrder.id, "xp.Active":true,"xp.Archive":"!true"},
-            "ConfirmedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.ConfirmedOrder.id, "xp.Active":true,"xp.Archive":"!true"},
-            "DespatchedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Despatched.id, "xp.Active":true,"xp.Archive":"!true"},
-            "DeletedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Deleted.id, "xp.Active":true,"xp.Archive":"!true"},
-            "InvoicedOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Invoiced.id, "xp.Active":true,"xp.Archive":"!true"},
-            "AllOrders":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":"!true"},
-            "ArchivedOrders":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":"true"}
+            "AllQuotesOrders":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":"!true"},
+            "RequestedQuotes":{"xp.Type":"Quote","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.Enquiry.id + "|" + WeirService.OrderStatus.EnquiryReview.id + "|" + WeirService.OrderStatus.Submitted.id + "|" + WeirService.OrderStatus.RevisedQuote.id + "|" + WeirService.OrderStatus.RejectedQuote.id},
+            "ConfirmedQuotes":{"xp.Type":"Quote","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.ConfirmedQuote.id},
+            "DeletedQuotes":{"xp.Type":"Quote","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.Deleted.id},
+            "DraftOrders":{"xp.Type":"Order","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.SubmittedPendingPO.id + "|" + WeirService.OrderStatus.RevisedOrder.id + "|" + WeirService.OrderStatus.RejectedRevisedOrder.id},
+            "ConfirmedOrders":{"xp.Type":"Order","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.ConfirmedOrder.id + "|" + WeirService.OrderStatus.SubmittedWithPO.id + "|" + WeirService.OrderStatus.Despatched.id},
+            "DeletedOrders":{"xp.Type":"Order","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.Deleted.id},
+            "ArchivedOrders":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":true}
         };
         var destination = {
-            "ReviewQuotes":"ordersMain.quotesReview",
-            "RevisedQuotes":"ordersMain.quotesRevised",
+            "AllQuotesOrders":"ordersMain.ordersAll",
+            "RequestedQuotes":"ordersMain.quotesRequested",
             "ConfirmedQuotes":"ordersMain.quotesConfirmed",
             "DeletedQuotes": "ordersMain.quotesDeleted",
-            "EnquiryQuotes":"ordersMain.quotesEnquiry",
-            "POOrders":"ordersMain.POOrders",
-            "PendingPO":"ordersMain.pendingPO",
-            "RevisedOrders":"ordersMain.ordersRevised",
+            "DraftOrders":"ordersMain.ordersDraft",
             "ConfirmedOrders":"ordersMain.ordersConfirmed",
-            "DespatchedOrders":"ordersMain.ordersDespatched",
             "DeletedOrders":"ordersMain.ordersDeleted",
-            "InvoicedOrders":"ordersMain.ordersInvoiced",
-            "AllOrders":"ordersMain.ordersAll",
-            "ArchivedOrders": "ordersMain.ordersArchived"
+            "ArchivedOrders": "ordersMain.archived"
         };
         $state.go(destination[action], {filters:JSON.stringify(filter[action])},{reload:true});
     }

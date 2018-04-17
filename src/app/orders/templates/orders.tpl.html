@@ -1,28 +1,7 @@
 <article id="COMPONENT_Orders" class="container-fluid">
-    <div class="page-header">
-        <h3>{{orders.labels[orders.titles[orders.StateName]]}}</h3>
-        <p ng-if="orders.StateName!='ordersMain.listOfRevisions' || orders.StateName!='ordersMain.listOfRevisions'">
-            <span>{{orders.labels['view'+orders.xpType]}}</span><br>
-            <span ng-if="orders.StateName=='ordersMain.quotesRevised' || orders.StateName=='ordersMain.ordersRevised'">{{orders.labels['view'+orders.xpType+'Revisions']}}</span>
-        </p>
-        <p ng-if="orders.StateName=='ordersMain.listOfRevisions' || orders.StateName=='ordersMain.listOfRevisions'">
-            {{orders.labels.selectRevision}}
-            <br>
-            {{orders.labels.viewRevision}}
-        </p>
-        <p ng-if="orders.StateName=='ordersMain.quotesRevised'||orders.StateName=='ordersMain.ordersRevised'">
-            {{orders.labels.StatusRV}}<br/>
-            {{orders.labels.StatusRQ}}<br/>
-            {{orders.labels.StatusRO}}<br/>
-            {{orders.labels.StatusRR}}<br/>
-        </p>
-        <!--<p ng-if="orders.StateName=='ordersMain.quotesEnquiry'">
-            {{orders.labels.StatusEN}}<br/>
-            {{orders.labels.StatusER}}<br/>
-        </p>-->
-    </div>
 
     <!--====== SEARCH/FILTERS ======-->
+    <!-- ORIGINAL
     <form name="OrderSearchForm" class="form-inline" ng-submit="orders.search()">
         <fieldset class="form-group">
             <input type="search" placeholder="{{orders.labels.SearchPlaceholder}}" ng-model="orders.parameters.search" class="form-control">
@@ -57,8 +36,88 @@
             </div>
         </div>
         <hr>
+    </div>-->
+    <div class="row">
+        <div class="col-md-6">
+            <h3 ng-bind-html="orders.labels.Quotes"></h3>
+        </div>
+        <div class="col-md-6">
+            <h3 ng-bind-html="orders.labels.Orders"></h3>
+        </div>
     </div>
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav navbar-nav">
+                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%;text-align:left;" ui-sref="ordersMain.ordersAll({filters:orders.FilterActions('ordersAll')})">
+                    <a class="nav-link" ng-bind-html="orders.labels.OrdersAll" href="#"></a>
+                </li>
+                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%" ui-sref="ordersMain.quotesRequested({filters:orders.FilterActions('quotesRequested')})">
+                    <a class="nav-link" ng-bind-html="orders.labels.QuotesRequested" href="#"></a>
+                </li>
+                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%" ui-sref="ordersMain.quotesConfirmed({filters:orders.FilterActions('quotesConfirmed')})">
+                    <a class="nav-link" ng-bind-html="orders.labels.QuotesConfirmed" href="#"></a>
+                </li>
+                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%" ui-sref="ordersMain.quotesDeleted({filters:orders.FilterActions('quotesDeleted')})">
+                    <a class="nav-link" ng-bind-html="orders.labels.QuotesDeleted" href="#"></a>
+                </li>
+                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%;text-align:left;" ui-sref="ordersMain.ordersDraft({filters:orders.FilterActions('ordersDraft')})">
+                    <a class="nav-link" ng-bind-html="orders.labels.OrdersDraft" href="#"></a>
+                </li>
+                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%" ui-sref="ordersMain.ordersConfirmed({filters:orders.FilterActions('ordersConfirmed')})">
+                    <a class="nav-link" ng-bind-html="orders.labels.OrdersConfirmed" href="#"></a>
+                </li>
+                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%" ui-sref="ordersMain.ordersDeleted({filters:orders.FilterActions('ordersDeleted')})">
+                    <a class="nav-link" ng-bind-html="orders.labels.OrdersDeleted" href="#"></a>
+                </li>
+                <li role="presentation" class="nav-item" ui-sref-active="active" style="width:12%" ui-sref="ordersMain.archived({filters:orders.FilterActions('archived')})">
+                    <a class="nav-link" ng-bind-html="orders.labels.Archived" href="#"></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h2 ng-if="['ordersMain.ordersAll'].indexOf(application.$state.current.name) > -1">{{orders.labels.OrdersAll}}</h2>
+            <h2 ng-if="['ordersMain.quotesRequested'].indexOf(application.$state.current.name) > -1">{{orders.labels.QuotesRequested}}</h2>
+            <h2 ng-if="['ordersMain.quotesConfirmed'].indexOf(application.$state.current.name) > -1">{{orders.labels.QuotesConfirmed}}</h2>
+            <h2 ng-if="['ordersMain.quotesDeleted'].indexOf(application.$state.current.name) > -1">{{orders.labels.QuotesDeleted}}</h2>
+            <h2 ng-if="['ordersMain.ordersDraft'].indexOf(application.$state.current.name) > -1">{{orders.labels.OrdersDraft}}</h2>
+            <h2 ng-if="['ordersMain.ordersConfirmed'].indexOf(application.$state.current.name) > -1">{{orders.labels.OrdersConfirmed}}</h2>
+            <h2 ng-if="['ordersMain.ordersDeleted'].indexOf(application.$state.current.name) > -1">{{orders.labels.OrdersDeleted}}</h2>
+            <h2 ng-if="['ordersMain.archived'].indexOf(application.$state.current.name) > -1">{{orders.labels.Archived}}</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <hr>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <input type="text" title="Search by customer name" placeholder="Search by customer name" />
+            <button class="btn btn-default">Search</button>
+        </div>
+        <div class="col-md-4">
+            <input type="text" title="Search by quote / order number" placeholder="Search by quote / order number" />
+            <button class="btn btn-default">Search</button>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-default">Show Quotes & Orders assigned to Me</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <hr>
+        </div>
+    </div>
+
     <div ui-view=""></div>
+
+    <!-- TODO Hide when state is orders.default. -->
     <div class="text-center" ng-if="application.$ocMedia('min-width:768px') && orders.list.Meta.TotalPages > 1">
         <uib-pagination boundary-links="orders.list.Meta.TotalPages > 5" max-size="5"
                         total-items="orders.list.Meta.TotalCount" items-per-page="orders.list.Meta.PageSize"

@@ -4,7 +4,7 @@ angular.module('orderCloud')
     .controller('RouteToOrderCtrl', RouteToOrderController)
 ;
 
-function OrdersConfig($stateProvider, buyerid) {
+function OrdersConfig($stateProvider) {
     $stateProvider
         .state('ordersMain', {
             parent: 'base',
@@ -22,12 +22,13 @@ function OrdersConfig($stateProvider, buyerid) {
                 },
                 Orders: function (OrderCloudSDK, Parameters, Me, CurrentBuyer) {
                     CurrentBuyer.SetBuyerID(undefined);
+                    Parameters.filters = Parameters.filters || {};
                     var arrSearchOn = Parameters.searchOn;
                     if(arrSearchOn) {
                         var indexArr = arrSearchOn.indexOf("xp");
                         arrSearchOn = indexArr > -1 ? arrSearchOn.splice(index, 1) : arrSearchOn;
                     }
-                    Parameters.searchOn = (Parameters.search) ? (Parameters.searchOn ? arrSearchOn : "ID") : null; //  "ID,FromUserID,Total";
+                    Parameters.searchOn = (Parameters.search) ? (Parameters.searchOn ? arrSearchOn : "ID") : null;
 	                Parameters.filters["FromCompanyID"] = Me.xp.WeirGroup.label+'*';
                     var opts = {
                         from: Parameters.from,
@@ -41,6 +42,19 @@ function OrdersConfig($stateProvider, buyerid) {
                     };
                     return OrderCloudSDK.Orders.List("Incoming", opts);
                 },
+				Quotes: function (OrderCloudSDK, Parameters, Me) {
+            		//On the default view only, i need to get the top 20 quotes, but even this view can be filtered.
+                    Parameters.filters = Parameters.filters || {};
+                    Parameters.filters["xp.Type"] = "Quote";
+                    Parameters.filters["FromCompanyID"] = Me.xp.WeirGroup.label+'*';
+                    var opts = {
+                        sortBy: Parameters.sortBy,
+                        page: 1,
+                        pageSize: 20,
+                        filters: Parameters.filters
+                    };
+                    return OrderCloudSDK.Orders.List("Incoming", opts);
+				},
 				Languages: function (OrderCloudSDK, Orders) {
             		var filter;
             		angular.forEach(Orders.Items, function(value,key) {
@@ -61,115 +75,61 @@ function OrdersConfig($stateProvider, buyerid) {
 				}
             }
         })
-		.state('ordersMain.quotesRevised', {
-		    url: '/quotesRevised',
-		    templateUrl: 'orders/templates/quote.revised.tpl.html',
-		    parent: 'ordersMain'
+		.state('ordersMain.default', {
+			url:'/default',
+			templateUrl:'orders/templates/order.default.tpl.html',
+			parent:'ordersMain'
 		})
-		.state('ordersMain.quotesReview', {
-		    url: '/quotesReview',
-		    templateUrl: 'orders/templates/quote.review.tpl.html',
-		    parent: 'ordersMain'
-		})
-		.state('ordersMain.quotesConfirmed', {
-		    url: '/quotesConfirmed',
-		    templateUrl: 'orders/templates/quote.confirm.tpl.html',
-		    parent: 'ordersMain'
-		})
+        .state('ordersMain.ordersAll', {
+            url: '/ordersAll',
+            templateUrl: 'orders/templates/order.all.tpl.html',
+            parent: 'ordersMain'
+        })
+        .state('ordersMain.quotesRequested', {
+            url: '/quotesRequested',
+            templateUrl: 'orders/templates/quote.requested.tpl.html',
+            parent: 'ordersMain'
+        })
+        .state('ordersMain.quotesConfirmed', {
+            url: '/quotesConfirmed',
+            templateUrl: 'orders/templates/order.standard.tpl.html',
+            parent: 'ordersMain'
+        })
         .state('ordersMain.quotesDeleted', {
-		    url: '/quotesDeleted',
-		    templateUrl: 'orders/templates/quote.deleted.tpl.html',
-		    parent: 'ordersMain'
-		})
-	    .state('ordersMain.quotesEnquiry', {
-	    	url: '/quotesEnquiry',
-		    templateUrl: 'orders/templates/quote.enquiry.tpl.html',
-		    parent: 'ordersMain'
-	    })
-		.state('ordersMain.ordersRevised', {
-		    url: '/ordersRevised',
-		    templateUrl: 'orders/templates/order.revised.tpl.html',
-		    parent: 'ordersMain'
-		})
-		.state('ordersMain.POOrders', {
-		    url: '/ordersSubmitted',
-		    templateUrl: 'orders/templates/order.submitted.tpl.html',
-		    parent: 'ordersMain'
-		})
-		.state('ordersMain.pendingPO', {
-		    url: '/PendingPO',
-		    templateUrl: 'orders/templates/order.pending.tpl.html',
-		    parent: 'ordersMain'
-		})
-		.state('ordersMain.ordersConfirmed', {
-		    url: '/orderConfirmed',
-		    templateUrl: 'orders/templates/order.confirmed.tpl.html',
-		    parent: 'ordersMain'
-		})
-		.state('ordersMain.ordersDespatched', {
-		    url: '/orderDespatched',
-		    templateUrl: 'orders/templates/order.despatched.tpl.html',
-		    parent: 'ordersMain'
-		})
+            url: '/quotesDeleted',
+            templateUrl: 'orders/templates/order.standard.tpl.html',
+            parent: 'ordersMain'
+        })
+        .state('ordersMain.ordersDraft', {
+            url: '/ordersDraft',
+            templateUrl: 'orders/templates/order.standard.tpl.html',
+            parent: 'ordersMain'
+        })
+        .state('ordersMain.ordersConfirmed', {
+            url: '/ordersConfirmed',
+            templateUrl: 'orders/templates/order.standard.tpl.html',
+            parent: 'ordersMain'
+        })
         .state('ordersMain.ordersDeleted', {
-		    url: '/orderDeleted',
-		    templateUrl: 'orders/templates/order.deleted.tpl.html',
-		    parent: 'ordersMain'
-		})
-		.state('ordersMain.ordersInvoiced', {
-		    url: '/quotesReview',
-		    templateUrl: 'orders/templates/order.invoiced.tpl.html',
-		    parent: 'ordersMain'
-		})
-        .state('ordersMain.listOfRevisions', {
-            url: '/listOfRevisions',
-            templateUrl: 'orders/templates/order.revisions.tpl.html',
+            url: '/ordersDeleted',
+            templateUrl: 'orders/templates/order.standard.tpl.html',
             parent: 'ordersMain'
         })
-		.state('ordersMain.ordersAll', {
-		    url: '/ordersAll',
-		    templateUrl: 'orders/templates/order.all.tpl.html',
-		    parent: 'ordersMain'
-        })
-        .state('ordersMain.ordersArchived', {
-            url: '/orderArchived',
-            templateUrl: 'orders/templates/order.archived.tpl.html',
+        .state('ordersMain.archived', {
+            url: '/archived',
+            templateUrl: 'orders/templates/order.standard.tpl.html',
             parent: 'ordersMain'
-        })
-    	.state('gotoOrder', {
-    	    url: '/orders/:buyerID/:orderID',
-    	    controller: 'RouteToOrderCtrl',
-    	    resolve: {
-    	        Order: function ($q, appname, $localForage, $stateParams, OrderCloudSDK, toastr, $state, $exceptionHandler) {
-    	            var d = $q.defer();
-    	            var storageName = appname + '.routeto';
-    	            $localForage.setItem(storageName, { state: 'gotoOrder', id: $stateParams.orderID, buyer: $stateParams.buyerID })
-	                    .then(function () {
-	                        OrderCloudSDK.Orders.Get("Incoming", $stateParams.orderID)
-		                        .then(function (order) {
-		                            $localForage.removeItem(storageName);
-		                            d.resolve(order);
-		                        })
-		                        .catch(function (ex) {
-		                            if (ex.status == 404) {
-		                                $localForage.removeItem(storageName);
-		                                toastr.error("Order not found");
-		                                $state.go('home');
-		                            }
-		                        });
-	                    });
-    	            return d.promise;
-    	        }
-    	    }
-    	})
-    ;
+        });
 }
 
-function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler, OrderCloudSDK, OrderCloudParameters, Orders, Parameters, buyerid, CurrentOrder, WeirService, CurrentBuyer, Languages, Underscore, $uibModal, $document) {
+function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler, OrderCloudSDK, OrderCloudParameters,
+						  Orders, Quotes, Parameters, buyerid, CurrentOrder, WeirService, CurrentBuyer, Languages,
+						  Underscore, $uibModal, $document) {
 	var vm = this;
 	vm.xpType = Parameters.filters ? Parameters.filters["xp.Type"] : {};
 	vm.StateName = $state.current.name;
 	vm.list = Orders;
+	vm.Quotes = Quotes;
 	vm.parameters = Parameters;
 	vm.sortSelection = Parameters.sortBy ? (Parameters.sortBy.indexOf('!') == 0 ? Parameters.sortBy.split('!')[1] : Parameters.sortBy) : null;
 	//Check if filters are applied
@@ -335,7 +295,26 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			enquiriesSubmitted: "Enquiries submitted",
 			Language: "Language",
 			Currency: "Currency",
-			validUntil: "Valid Until"
+			validUntil: "Valid Until",
+            OrdersAll: "All Quotes and Orders",
+            QuotesRequested: "Quotes requested",
+            QuotesConfirmed: "Confirmed quotes",
+            QuotesDeleted: "Deleted quotes",
+            OrdersDraft: "Draft orders",
+            OrdersConfirmed: "Confirmed orders",
+            OrdersDeleted: "Deleted orders",
+            Dashboard: "Dashboard",
+            Quotes: "Quotes",
+            Orders: "Orders",
+            Archived: "Archived",
+			QuotesInProgress: "Quotes in progress",
+			OrdersInProgress: "Orders in progress",
+            DateUpdated: "Date Updated",
+			QuoteNo: "Quote No.",
+            OrderNo: "Order No.",
+			CustomerRef: "Customer ref;",
+			BusinessName: "Business name",
+			Total: "Total"
 		},
 		fr: {
 			search:$sce.trustAsHtml("Search"),
@@ -388,28 +367,29 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			enquiriesSubmitted: $sce.trustAsHtml("Enquiries submitted"),
             Language: $sce.trustAsHtml("Language"),
             Currency: $sce.trustAsHtml("Currency"),
-            validUntil: $sce.trustAsHtml("Valid Until")
+            validUntil: $sce.trustAsHtml("Valid Until"),
+            OrdersAll: "All Quotes and Orders",
+            QuotesRequested: "Quotes requested",
+            QuotesConfirmed: "Confirmed quotes",
+            QuotesDeleted: "Deleted quotes",
+            OrdersDraft: "Draft orders",
+            OrdersConfirmed: "Confirmed orders",
+            OrdersDeleted: "Deleted orders",
+            Dashboard: "Dashboard",
+            Quotes: "Quotes",
+            Orders: "Orders",
+            Archived: "Archived",
+            QuotesInProgress: "Quotes in progress",
+            OrdersInProgress: "Orders in progress",
+            DateUpdated: "Date Updated",
+            QuoteNo: "Quote No.",
+			OrderNo: "Order No.",
+            CustomerRef: "Customer ref;",
+            BusinessName: "Business name",
+            Total: "Total"
 		}
 	};
 	vm.labels = labels.en;
-
-	vm.titles = {
-		"ordersMain.quotesReview":"quotesForReview",
-		"ordersMain.quotesRevised":"revisedQuotes",
-		"ordersMain.quotesConfirmed":"confirmedQuotes",
-        "ordersMain.quotesDeleted":"deletedQuotes",
-		"ordersMain.quotesEnquiry":"enquiriesSubmitted",
-		"ordersMain.POOrders":"ordersSubmittedPO",
-		"ordersMain.pendingPO":"ordersPendingPO",
-		"ordersMain.ordersRevised":"revisedOrders",
-		"ordersMain.ordersConfirmed":"confirmedOrders",
-		"ordersMain.ordersDespatched":"despatched",
-        "ordersMain.ordersDeleted":"deletedOrders",
-		"ordersMain.ordersInvoiced":"invoiced",
-		"ordersMain.ordersAll":"allOrders",
-        "ordersMain.ordersArchived": "archived",
-		"ordersMain.listOfRevisions":"revisionsList"
-	};
 
 	vm.View = function(orderId, buyerId, customerId, customerName) {
 		CurrentBuyer.SetBuyerID(buyerId);
@@ -498,8 +478,23 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 				$exceptionHandler(ex);
 		});
 	};
+
+	vm.FilterActions = function(action) {
+		var filter = {
+            "ordersAll":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":"!true"},
+            "quotesRequested":{"xp.Type":"Quote","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.Enquiry.id + "|" + WeirService.OrderStatus.EnquiryReview.id + "|" + WeirService.OrderStatus.Submitted.id + "|" + WeirService.OrderStatus.RevisedQuote.id + "|" + WeirService.OrderStatus.RejectedQuote.id},
+            "quotesConfirmed":{"xp.Type":"Quote","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.ConfirmedQuote.id},
+            "quotesDeleted":{"xp.Type":"Quote","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.Deleted.id},
+            "ordersDraft":{"xp.Type":"Order","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.SubmittedPendingPO.id + "|" + WeirService.OrderStatus.RevisedOrder.id + "|" + WeirService.OrderStatus.RejectedRevisedOrder.id},
+            "ordersConfirmed":{"xp.Type":"Order","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.ConfirmedOrder.id + "|" + WeirService.OrderStatus.SubmittedWithPO.id + "|" + WeirService.OrderStatus.Despatched.id},
+            "ordersDeleted":{"xp.Type":"Order","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.Deleted.id},
+            "archived":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":true}
+		};
+        return JSON.stringify(filter[action]);
+	};
 }
-function RouteToOrderController($rootScope, $state, OrderCloudSDK, CurrentOrder, CurrentBuyer,  toastr, Order, $exceptionHandler) {
+
+function RouteToOrderController($rootScope, $state, OrderCloudSDK, CurrentOrder, CurrentBuyer, toastr, Order, $exceptionHandler) {
     if (Order) {
             reviewOrder(Order.ID, Order.xp.Status, Order.xp.BuyerID, Order.xp.CustomerID, Order.xp.CustomerName);
     } else {
@@ -513,7 +508,7 @@ function RouteToOrderController($rootScope, $state, OrderCloudSDK, CurrentOrder,
 			    CurrentOrder.SetCurrentCustomer({
 			        id: customerId,
 			        name: customerName
-			    })
+			    });
 			})
 			.then(function () {
 			    $rootScope.$broadcast('SwitchCart');

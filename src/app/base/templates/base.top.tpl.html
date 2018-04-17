@@ -8,7 +8,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="" ui-sref="home">{{application.name}}</a>
+            <a class="navbar-brand" href="" ui-sref="ordersMain.default({filters:'{}'})">{{application.name}}</a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
@@ -38,18 +38,13 @@
                 <li uib-dropdown ng-if="!base.currentUser.Anonymous">
                     <a href="#" uib-dropdown-toggle role="button">{{base.labels.orders}} <span class="caret"></span></a>
                     <ul uib-dropdown-menu>
-                        <li><a href="" ng-click="base.OrderAction('AllOrders')">{{base.labels.allOrders}}</a></li>
-                        <li><a href="" ng-click="base.OrderAction('EnquiryQuotes')">{{base.labels.enquiryQuotes}}</a></li>
-                        <li><a href="" ng-click="base.OrderAction('ReviewQuotes')">{{base.labels.quotesForReview}}</a></li>
-                        <li><a href="" ng-click="base.OrderAction('RevisedQuotes')">{{base.labels.revisedQuotes}}</a></li>
-                        <li><a href="" ng-click="base.OrderAction('ConfirmedQuotes')">{{base.labels.confirmedQuotes}}</a></li>
-                        <li><a href="" ng-click="base.OrderAction('DeletedQuotes')">{{base.labels.deletedQuotes}}</a></li>
-                        <li><a href="" ng-click="base.OrderAction('POOrders')">{{base.labels.ordersSubmittedPO}}</a></li>
-                        <li><a href="" ng-click="base.OrderAction('PendingPO')">{{base.labels.pendingPO}}</a></li>
-                        <li><a href="" ng-click="base.OrderAction('RevisedOrders')">{{base.labels.revisedOrders}}</a></li>
-                        <li><a href="" ng-click="base.OrderAction('ConfirmedOrders')">{{base.labels.confirmedOrders}}</a></li>
-                        <li><a href="" ng-click="base.OrderAction('DespatchedOrders')">{{base.labels.despatched}}</a></li>
-                        <li><a href="" ng-click="base.OrderAction('DeletedOrders')">{{base.labels.deletedOrders}}</a></li>
+                        <li><a href="" ng-click="base.OrderAction('AllQuotesOrders')">{{base.labels.OrdersAll}}</a></li>
+                        <li><a href="" ng-click="base.OrderAction('RequestedQuotes')">{{base.labels.QuotesRequested}}</a></li>
+                        <li><a href="" ng-click="base.OrderAction('ConfirmedQuotes')">{{base.labels.QuotesConfirmed}}</a></li>
+                        <li><a href="" ng-click="base.OrderAction('DeletedQuotes')">{{base.labels.QuotesDeleted}}</a></li>
+                        <li><a href="" ng-click="base.OrderAction('DraftOrders')">{{base.labels.OrdersDraft}}</a></li>
+                        <li><a href="" ng-click="base.OrderAction('ConfirmedOrders')">{{base.labels.OrdersConfirmed}}</a></li>
+                        <li><a href="" ng-click="base.OrderAction('DeletedOrders')">{{base.labels.OrdersDeleted}}</a></li>
                         <li><a href="" ng-click="base.OrderAction('ArchivedOrders')">{{base.labels.archived}}</a></li>
                     </ul>
                 </li>
