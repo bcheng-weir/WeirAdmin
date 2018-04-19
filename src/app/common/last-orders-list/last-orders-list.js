@@ -3,12 +3,13 @@ angular.module('orderCloud')
 
 function BackToList($state) {
 	var goHere = {
-		destination: 'home',
-		filters: null
+		destination: 'ordersMain.default',
+		filters: {"xp.Type":null,"xp.Active":true,"xp.Archive":"!true"}
 	};
 
 	function _goToLocation() {
-		$state.go(goHere.destination, {filters:goHere.filters},{reload:true});
+		var filter = goHere.filters;
+		$state.go(goHere.destination, {filters:filter},{reload:true});
 	}
 
 	function _getLocation() {

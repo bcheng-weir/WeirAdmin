@@ -91,7 +91,7 @@ function OrdersConfig($stateProvider) {
                 Quotes: function (OrderCloudSDK, Parameters, OrdersSearchService, Me) {
                     //On the default view only, i need to get the top 20 quotes, but even this view can be filtered.
                     Parameters.filters = Parameters.filters || {};
-                    Parameters.filters["FromCompanyID"] = Me.xp.WeirGroup.label+'*';
+                    Parameters.filters.FromCompanyID = Me.xp.WeirGroup.label+'*';
                     var opts = {
                         sortBy: Parameters.sortBy,
                         page: 1,
@@ -103,7 +103,7 @@ function OrdersConfig($stateProvider) {
                     return OrderCloudSDK.Orders.List("Incoming", opts);
                 },
                 Orders: function (OrderCloudSDK, Parameters, Me, CurrentBuyer, OrdersSearchService) {
-                    CurrentBuyer.SetBuyerID(undefined);
+                    //CurrentBuyer.SetBuyerID(undefined);
                     Parameters.filters = Parameters.filters || {};
                     var arrSearchOn = Parameters.searchOn;
                     if(arrSearchOn) {
@@ -111,7 +111,7 @@ function OrdersConfig($stateProvider) {
                         arrSearchOn = indexArr > -1 ? arrSearchOn.splice(index, 1) : arrSearchOn;
                     }
 
-	                Parameters.filters["FromCompanyID"] = Me.xp.WeirGroup.label+'*';
+	                Parameters.filters.FromCompanyID = Me.xp.WeirGroup.label+'*';
                     var opts = {
                         from: Parameters.from,
                         to: Parameters.to,
@@ -316,7 +316,7 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 
 	var labels = {
 		en: {
-			search:"Search",
+			search:$sce.trustAsHtml("Search <i class='fa fa-search fa-3' aria-hidden='true'></i>"),
 			Quote: "Quote ID",
 			Order: "Order ID",
 			customerRef: "Customer Ref",
@@ -397,7 +397,7 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 			Total: "Total"
 		},
 		fr: {
-			search:$sce.trustAsHtml("Search"),
+            search:$sce.trustAsHtml("Search <i class='fa fa-search fa-3' aria-hidden='true'></i>"),
 			Quote: $sce.trustAsHtml("Quote ID"),
 			Order: $sce.trustAsHtml("Order ID"),
 			customerRef: $sce.trustAsHtml("Customer Ref"),

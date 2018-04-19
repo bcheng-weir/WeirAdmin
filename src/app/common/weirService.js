@@ -875,7 +875,10 @@ function WeirService($q, $cookieStore, $sce, OrderCloudSDK, CurrentOrder, buyern
 					return OrderCloudSDK.SetImpersonationToken(data['access_token']);
 				})
 				.then(function() {
-					return OrderCloudSDK.As().LineItems.Create("Outgoing", order.ID, li);
+				    //ToDo is this the right way? Will it cause problems going forward? Test by adding an item then
+                    // reviewing that item in the buyer app.
+					//return OrderCloudSDK.As().LineItems.Create("Outgoing", order.ID, li);
+                    OrderCloudSDK.LineItems.Create("Incoming", order.ID, li);
 				})
 				.then(function(lineItem) {
 					deferred.resolve({Order: order, LineItem: lineItem});

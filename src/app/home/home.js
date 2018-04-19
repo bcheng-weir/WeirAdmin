@@ -50,80 +50,79 @@ function HomeController($sce, $state, WeirService, IsAdmin, IsInternalSales) {
     vm.IsAdmin = IsAdmin;
     vm.CanEditCustomers = IsAdmin || IsInternalSales;
     $state.go('ordersMain.default',{"filters":{"xp.Type":null,"xp.Active":true,"xp.Archive":"!true"}});
-    /*vm.currentUser = CurrentUser; //We get this from base.js
 
-	var labels = {
-		en: {
-			Welcome: "Welcome to the sales administration area of<br>www.store.flowcontrol.weir",
-			Orders: "Customer Quotes and Orders",
-			SubmittedQuotes: "Quotes submitted for review",
-			RevisedQuotes: "Revised Quotes",
-			ConfirmedQuotes: "Confirmed Quotes",
+    /*var labels = {
+        en: {
+            Welcome: "Welcome to the sales administration area of<br>www.store.flowcontrol.weir",
+            Orders: "Customer Quotes and Orders",
+            SubmittedQuotes: "Quotes submitted for review",
+            RevisedQuotes: "Revised Quotes",
+            ConfirmedQuotes: "Confirmed Quotes",
             DeletedQuotes: "Deleted Quotes",
-			SubmittedOrders: "Orders submitted with PO",
-			PendingOrders: "Orders submitted - pending PO",
-			RevisedOrders: "Revised Orders",
-			ConfirmedOrders: "Confirmed Orders",
+            SubmittedOrders: "Orders submitted with PO",
+            PendingOrders: "Orders submitted - pending PO",
+            RevisedOrders: "Revised Orders",
+            ConfirmedOrders: "Confirmed Orders",
             DeletedOrders: "Deleted Orders",
-			Despatched: "Despatched",
-			Invoiced: "Invoiced",
-			All: "All",
+            Despatched: "Despatched",
+            Invoiced: "Invoiced",
+            All: "All",
             Archived: "Archived Orders",
-			Admin: "Admin",
-			ManageAdmins: "Manage admins",
-			StandardDelivery: "Carriage",
+            Admin: "Admin",
+            ManageAdmins: "Manage admins",
+            StandardDelivery: "Carriage",
             POPrintContent: "Fixed Print Content",
             SharedContent: "Shared Content",
-			Customers: "Customers",
-			CustomerManage: "Manage customers and customer addresses",
-			EnquiryQuotes: "Enquiries submitted"
-		},
-		fr: {
-			Welcome: $sce.trustAsHtml("Welcome to the sales administration area of<br>www.store.flowcontrol.weir"),
-			Orders: $sce.trustAsHtml("Customer Quotes and Orders"),
-			SubmittedQuotes: $sce.trustAsHtml("Quotes submitted for review"),
-			RevisedQuotes: $sce.trustAsHtml("Revised Quotes"),
-			ConfirmedQuotes: $sce.trustAsHtml("Confirmed Quotes"),
+            Customers: "Customers",
+            CustomerManage: "Manage customers and customer addresses",
+            EnquiryQuotes: "Enquiries submitted"
+        },
+        fr: {
+            Welcome: $sce.trustAsHtml("Welcome to the sales administration area of<br>www.store.flowcontrol.weir"),
+            Orders: $sce.trustAsHtml("Customer Quotes and Orders"),
+            SubmittedQuotes: $sce.trustAsHtml("Quotes submitted for review"),
+            RevisedQuotes: $sce.trustAsHtml("Revised Quotes"),
+            ConfirmedQuotes: $sce.trustAsHtml("Confirmed Quotes"),
             DeletedQuotes: $sce.trustAsHtml("Deleted Quotes"),
-			SubmittedOrders: $sce.trustAsHtml("Orders submitted with PO"),
-			PendingOrders: $sce.trustAsHtml("Orders submitted - pending PO"),
-			RevisedOrders: $sce.trustAsHtml("Revised Orders"),
-			ConfirmedOrders: $sce.trustAsHtml("Confirmed Orders"),
+            SubmittedOrders: $sce.trustAsHtml("Orders submitted with PO"),
+            PendingOrders: $sce.trustAsHtml("Orders submitted - pending PO"),
+            RevisedOrders: $sce.trustAsHtml("Revised Orders"),
+            ConfirmedOrders: $sce.trustAsHtml("Confirmed Orders"),
             DeletedOrders: $sce.trustAsHtml("Deleted Orders"),
-			Despatched: $sce.trustAsHtml("Despatched"),
-			Invoiced: $sce.trustAsHtml("Invoiced"),
-			All: $sce.trustAsHtml("All"),
+            Despatched: $sce.trustAsHtml("Despatched"),
+            Invoiced: $sce.trustAsHtml("Invoiced"),
+            All: $sce.trustAsHtml("All"),
             Archived: $sce.trustAsHtml("Archived Orders"),
-			Admin: $sce.trustAsHtml("Admin"),
-			ManageAdmins: $sce.trustAsHtml("Manage admins"),
-			StandardDelivery: "Carriage",
+            Admin: $sce.trustAsHtml("Admin"),
+            ManageAdmins: $sce.trustAsHtml("Manage admins"),
+            StandardDelivery: "Carriage",
             POPrintContent: "Fixed Print Content",
             SharedContent: "Shared Content",
-			Customers: $sce.trustAsHtml("Customers"),
-			CustomerManage: $sce.trustAsHtml("Manage customers and customer addresses"),
-			EnquiryQuotes: $sce.trustAsHtml("Enquiries submitted")
-		}
-	};
-	vm.labels = labels[WeirService.Locale()];
+            Customers: $sce.trustAsHtml("Customers"),
+            CustomerManage: $sce.trustAsHtml("Manage customers and customer addresses"),
+            EnquiryQuotes: $sce.trustAsHtml("Enquiries submitted")
+        }
+    };
+    vm.labels = labels[WeirService.Locale()];
 
-	vm.OrderAction = _actions;
-	function _actions(action) {
-		var filter = {
-			"ordersMain.quotesReview":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Submitted.id + "|" + WeirService.OrderStatus.Review.id, "xp.Active":true,"xp.Archive":"!true"},
-			"ordersMain.quotesRevised":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.RevisedQuote.id + "|" + WeirService.OrderStatus.RejectedQuote.id, "xp.Active":true,"xp.Archive":"!true"},
-			"ordersMain.quotesConfirmed":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.ConfirmedQuote.id, "xp.Active":true,"xp.Archive":"!true"},
+    vm.OrderAction = _actions;
+    function _actions(action) {
+        var filter = {
+            "ordersMain.quotesReview":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Submitted.id + "|" + WeirService.OrderStatus.Review.id, "xp.Active":true,"xp.Archive":"!true"},
+            "ordersMain.quotesRevised":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.RevisedQuote.id + "|" + WeirService.OrderStatus.RejectedQuote.id, "xp.Active":true,"xp.Archive":"!true"},
+            "ordersMain.quotesConfirmed":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.ConfirmedQuote.id, "xp.Active":true,"xp.Archive":"!true"},
             "ordersMain.quotesDeleted":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Deleted.id, "xp.Active":true,"xp.Archive":"!true"},
-			"ordersMain.quotesEnquiry":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Enquiry.id + "|" + WeirService.OrderStatus.EnquiryReview.id, "xp.Active":true,"xp.Archive":"!true"},
-			"ordersMain.POOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.SubmittedWithPO.id + "|" + WeirService.OrderStatus.Review.id, "xp.Active":true,"xp.Archive":"!true"},
-			"ordersMain.pendingPO":{"xp.Type":"Order","xp.PendingPO":true, "xp.Active":true,"xp.Archive":"!true"},
-			"ordersMain.ordersRevised":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.RevisedOrder.id + "|" + WeirService.OrderStatus.RejectedRevisedOrder.id, "xp.Active":true,"xp.Archive":"!true"},
-			"ordersMain.ordersConfirmed":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.ConfirmedOrder.id, "xp.Active":true,"xp.Archive":"!true"},
-			"ordersMain.ordersDespatched":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Despatched.id, "xp.Active":true,"xp.Archive":"!true"},
+            "ordersMain.quotesEnquiry":{"xp.Type":"Quote","xp.Status":WeirService.OrderStatus.Enquiry.id + "|" + WeirService.OrderStatus.EnquiryReview.id, "xp.Active":true,"xp.Archive":"!true"},
+            "ordersMain.POOrders":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.SubmittedWithPO.id + "|" + WeirService.OrderStatus.Review.id, "xp.Active":true,"xp.Archive":"!true"},
+            "ordersMain.pendingPO":{"xp.Type":"Order","xp.PendingPO":true, "xp.Active":true,"xp.Archive":"!true"},
+            "ordersMain.ordersRevised":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.RevisedOrder.id + "|" + WeirService.OrderStatus.RejectedRevisedOrder.id, "xp.Active":true,"xp.Archive":"!true"},
+            "ordersMain.ordersConfirmed":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.ConfirmedOrder.id, "xp.Active":true,"xp.Archive":"!true"},
+            "ordersMain.ordersDespatched":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Despatched.id, "xp.Active":true,"xp.Archive":"!true"},
             "ordersMain.ordersDeleted":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Deleted.id, "xp.Active":true,"xp.Archive":"!true"},
-			"ordersMain.ordersInvoiced":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Invoiced.id, "xp.Active":true,"xp.Archive":"!true"},
-			"ordersMain.ordersAll":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":"!true"},
+            "ordersMain.ordersInvoiced":{"xp.Type":"Order","xp.Status":WeirService.OrderStatus.Invoiced.id, "xp.Active":true,"xp.Archive":"!true"},
+            "ordersMain.ordersAll":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":"!true"},
             "ordersMain.ordersArchived":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":"true"}
-		};
-		return JSON.stringify(filter[action]);
-	}*/
+        };
+        return JSON.stringify(filter[action]);
+    }*/
 }

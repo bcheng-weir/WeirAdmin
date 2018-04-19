@@ -33,8 +33,7 @@ function CartConfig($stateProvider) {
 					}
 				},
 				LineItemsList: function($q, $state, toastr, Underscore, OrderCloudSDK, LineItemHelpers, Order) {
-				    //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-				    var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+				    var direction = "Incoming";
 				    var dfd = $q.defer();
 					OrderCloudSDK.LineItems.List(direction, Order.ID)
 						.then(function(data) {
@@ -81,8 +80,7 @@ function CartController($q, $rootScope, $timeout, OrderCloudSDK, LineItemHelpers
 	};
 
 	function PagingFunction() {
-	    //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-	    var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+	    var direction = "Incoming";
 	    var dfd = $q.defer();
 		if (vm.lineItems.Meta.Page < vm.lineItems.Meta.TotalPages) {
 		    OrderCloudSDK.LineItems.List(direction, vm.order.ID, { page: vm.lineItems.Meta.Page + 1, pageSize: vm.lineItems.Meta.PageSize })
@@ -107,8 +105,7 @@ function CartController($q, $rootScope, $timeout, OrderCloudSDK, LineItemHelpers
 	});
 
 	$rootScope.$on('OC:UpdateLineItem', function(event,Order) {
-	    //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-	    var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+	    var direction = "Incoming";
 	    OrderCloudSDK.LineItems.List(direction, Order.ID)
 			.then(function(data) {
 				LineItemHelpers.GetProductInfo(data.Items, Order)
@@ -170,8 +167,7 @@ function MiniCartController($q, $state, $rootScope,$uibModal, $ocMedia, $sce, Or
 		var filter = {
 			'order.xp.BuyerID' : order.xp.BuyerID
 		};
-		//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-		var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+		var direction = "Incoming";
 		OrderCloudSDK.LineItems.List(direction, order.ID, { 'filters': filter })
 			.then(function(li) {
 				vm.LineItems = li;

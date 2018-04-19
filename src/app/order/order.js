@@ -190,7 +190,7 @@ function orderConfig($stateProvider) {
                             lang = Buyer.xp.Lang.id;
                         }
 			            //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-				        var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+				        var direction = "Incoming";
 				        OrderCloudSDK.LineItems.List(direction, prevId, { 'filters': { 'Order.xp.BuyerID': Order.xp.BuyerID } })
 					        .then(function(data) {
 						        if (!data.Items.length) {
@@ -226,7 +226,7 @@ function orderConfig($stateProvider) {
                         var prevId = pieces[0] + "-Rev" + (pieces[1] - 1).toString();
                         var dfd = $q.defer();
                         //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-                        var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+                        var direction = "Incoming";
                         OrderCloudSDK.Orders.Get(/* DIRECTION NEEDED */direction, prevId)
                     .then(function(data) {
 								dfd.resolve( data.ShippingCost );
@@ -241,7 +241,7 @@ function orderConfig($stateProvider) {
                 },
 	            Payments: function (Order, OrderCloudSDK) {
 	                //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-	                var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+	                var direction = "Incoming";
 	                return OrderCloudSDK.Payments.List(direction, Order.ID, { 'filters': { 'Order.xp.BuyerID': Order.xp.BuyerID } });
 	            },
 	            UserGroups: function (UserGroupsService) {
@@ -435,7 +435,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
             ShareRevision: "Share revision",
 	        Update: "Update",
             Comments: "Comments",
-            Download: "Download",
+            Download: $sce.trustAsHtml("<i class='fa fa-download fa-3' aria-hidden='true'></i> Download"),
             Archive: "Archive",
             Archived: "Archived",
             Print: "Print",
@@ -461,8 +461,12 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
             Updated: "Updated",
             New: "New",
             //buttons above table
+			BackToOrders: {
+            	Quote:"<i class='fa fa-angle-left' aria-hidden='true'></i> Back to Quotes",
+				Order:"<i class='fa fa-angle-left' aria-hidden='true'></i> Back to Orders"
+			},
             BackToQuote: "Back to Quotes",
-            AddNewItems: "Add new items",
+            AddNewItems:$sce.trustAsHtml("Add new items <i class='fa fa-search fa-3' aria-hidden='true'></i>"),
             AddABlankItem: "Add a blank item",
             //footers
             YourRefNo: "Your Reference No;",
@@ -505,7 +509,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
             ShareRevision:$sce.trustAsHtml( "Share revision"),
 	        Update: $sce.trustAsHtml("Update"),
             Comments:$sce.trustAsHtml( "Comments"),
-            Download:$sce.trustAsHtml( "Download"),
+            Download: $sce.trustAsHtml("<i class='fa fa-download fa-3' aria-hidden='true'></i> Download"),
             Archive: $sce.trustAsHtml("Archive"),
             Archived: $sce.trustAsHtml("Archived"),
             Print:$sce.trustAsHtml( "Print"),
@@ -531,8 +535,11 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
             Updated:$sce.trustAsHtml( "Updated"),
             New:$sce.trustAsHtml( "New"),
             //buttons above table
-            BackToQuote:$sce.trustAsHtml( "Back to Quotes"),
-            AddNewItems:$sce.trustAsHtml( "Add new items"),
+            BackToOrders: {
+                Quote:"<i class='fa fa-angle-left' aria-hidden='true'></i> Back to Quotes",
+                Order:"<i class='fa fa-angle-left' aria-hidden='true'></i> Back to Orders"
+            },
+            AddNewItems:$sce.trustAsHtml("Add new items <i class='fa fa-search fa-3' aria-hidden='true'></i>"),
             AddABlankItem:$sce.trustAsHtml( "Add a blank item"),
             //footers
             YourRefNo:$sce.trustAsHtml( "Your Reference No;"),
@@ -587,8 +594,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			    data.xp.ReviewerEmail = Me.Email;
 			}
 
-			//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-			var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+			var direction = "Incoming";
 			OrderCloudSDK.Orders.Patch(direction, vm.Order.ID, data)
 				.then(function (order) {
 					toastr.success(vm.labels.POSaveMessage + order.xp.PONumber, vm.labels.POSaveTitle);
@@ -782,8 +788,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 					LeadTime: line.xp.LeadTime
 				}
 			};
-			//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-			var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+
+			var direction = "Incoming";
 			OrderCloudSDK.LineItems.Create(direction, vm.Order.ID, item)
 				.then(function () {
 					$rootScope.$broadcast('SwitchCart');
@@ -884,8 +890,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 
     vm.EditOrderShipping = _editShipping;
     function _editShipping() {
-        //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-        var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+        var direction = "Incoming";
         var patch = {
             ShippingCost : vm.Order.ShippingCost,
             xp: {
@@ -926,9 +931,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 			line.ID = null;
 			line.Quantity = line.TempQty;
 			line.DateAdded = new Date();
-			//line.xp.OriginalQty = line.xp.OriginalQty ? line.xp.OriginalQty : 0;
-			//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-			var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+
+			var direction = "Incoming";
 			OrderCloudSDK.LineItems.Create(direction, vm.Order.ID, line)
 				.then(function () {
 					$rootScope.$broadcast('SwitchCart');
@@ -965,8 +969,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		}
 
 		if(patch.xp.Status) {
-		    //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-		    var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+		    var direction = "Incoming";
 		    OrderCloudSDK.Orders.Patch(direction, vm.Order.ID, patch)
 				.then(function(order) {
 					$state.go($state.current,{}, {reload:true});
@@ -989,8 +992,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 				vm.Order.xp.CommentsToWeir = [];
 			}
 			vm.Order.xp.CommentsToWeir.push(comment);
-			//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-			var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+			var direction = "Incoming";
 			OrderCloudSDK.Orders.Patch(direction, vm.Order.ID, { xp: { CommentsToWeir: vm.Order.xp.CommentsToWeir } })
 				.then(function(order) {
 					vm.CommentToWeir = "";
@@ -1024,8 +1026,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		}
 
 		if(patch.xp.Status) {
-		    //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-		    var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+		    var direction = "Incoming";
 		    OrderCloudSDK.Orders.Patch(direction, vm.Order.ID, patch)
 				.then(function(order) {
 					vm.order = order;
@@ -1136,8 +1137,7 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 		};
 
 		// Patch the current order with the updated status, ID and active state.
-		//var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-		var direction = "Incoming"; /*isImpersonating == true ? 'Outgoing' :*/
+		var direction = "Incoming";
 
         OrderCloudSDK.Users.Get(vm.Order.xp.BuyerID, vm.Order.FromUser.ID)
 			.then(function(buyer) {
@@ -1203,8 +1203,8 @@ function OrderController($q, $rootScope, $state, $sce, $exceptionHandler, UserGr
 	        if (oldID) {
 	            data.xp.PriorReviewerID = oldID;
 	        }
-	        //var isImpersonating = typeof (OrderCloudSDK.GetImpersonationToken()) != 'undefined' ? true : false;
-	        var direction = /*isImpersonating == true ? 'Outgoing' :*/ "Incoming";
+
+	        var direction = "Incoming";
 	        OrderCloudSDK.Orders.Patch(direction, vm.Order.ID, data)
             .then(function (order) {
                 vm.Order = order;

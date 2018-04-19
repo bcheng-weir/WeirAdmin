@@ -7,9 +7,58 @@
         <div class="col-lg-2"><a ui-sref="productSearch">Search</a></div>
         <div class="col-lg-2"></div>
     </div>
-    <!-- header -->
-    <div class="row">
-        <div class="col-lg-12">
+    <!-- header rows -->
+    <div class="row" style="padding-top:8px; padding-bottom:8px;">
+        <div class="col-md-4">
+            <ul>
+                <ul class="nav navbar-nav navbar-left">
+                    <li ng-click="order.BackToList()">
+                        <button type="button" class="btn btn-dark btn-lg" ng-bind-html="order.labels.BackToOrders[order.Order.xp.Type]"></button>
+                    </li>
+                </ul>
+            </ul>
+        </div>
+        <div class="col-md-8">
+            <ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li ng-if="order.showAssign" ng-click="order.AssignToMe()" style="padding: 0px 10px 0px 0px;">
+                        <button type="button" class="btn btn-lg btn-primary"><span ng-bind-html='order.labels.AssignToMe'></span></button>
+                    </li>
+                    <li style="padding: 0px 10px 0px 0px;" ng-if="order.ShowConfirm()"> <!--  ng-if="order.ShowConfirm()" -->
+                        <button type="button" ng-click="order.Confirm(base.currentUser)" class="btn btn-lg btn-success" ng-disabled="order.LineItemZero() || order.InvalidPO()">
+                            <span ng-bind-html='order.labels.Confirm'></span>
+                        </button>
+                    </li>
+                    <li ng-click="order.Revise(base.currentUser)" style="padding: 0px 10px 0px 10px;" ng-if="order.ShowRevise()">
+                        <button type="button" class="btn btn-lg btn-warning"><span ng-bind-html='order.labels.Revise'></span></button>
+                    </li>
+                    <li style="padding: 0px 10px 0px 10px;" ng-if="order.ShowShareRevision()">
+                        <button type="button" class="btn btn-lg btn-primary" ng-click="order.ShareRevision(base.currentUser)" ng-disabled="order.LineItemZero()">
+                            <span ng-bind-html='order.labels.ShareRevision'></span>
+                        </button>
+                    </li>
+                    <li ng-click="order.Update()" style="padding: 0px 10px 0px 10px;" ng-if="order.ShowUpdate()">
+                        <button type="button" class="btn btn-lg btn-primary"><span ng-bind-html="order.labels.Update"></span></button>
+                    </li>
+                    <li ng-click="order.Comments()" style="padding: 0px 10px 0px 5px;">
+                        <a role="button" class="btn btn-lg btn-default" href="#Comments"><span ng-bind-html="order.labels.Comments"></span></a>
+                    </li>
+                    <li style="padding: 0px 10px 0px 0px;" class="panelButton"> <!-- Download -->
+                        <button type="button" class="btn btn-lg btn-default" ng-csv="order.ToCsvJson" add-bom="true" filename="{{order.CsvFilename}}" ng-bind-html="order.labels.Download"></button>
+                    </li>
+                    <li style="padding: 0px 10px 0px 0px;"> <!-- Print Button -->
+                        <print-order-button buyer="order.Buyer" order="order.Order" items="order.LineItems" address="order.DeliveryAddress" pocontent="order.POContent"></print-order-button>
+                    </li>
+                    <li style="padding: 0px 10px 0px 0px;">
+                        <button type="button" ng-if="!order.Order.xp.Archive == true" class="btn btn-lg btn-default" style="border-style:solid;border-color:#425563;background-color:#425563;color:#ffffff;" ng-click="order.archive(order.Order.ID);"><span style="margin-left:1px;margin-right:1px;" ng-bind-html="order.labels.Archive"></span><object style="height:20px;width:20px;float:right;pointer-events:none;" data="../src/assets/images/Archive2.svg" type="image/svg+xml"></object></button>
+                        <button type="button" ng-if="order.Order.xp.Archive == true" disabled class="btn btn-lg btn-default" style="border-style:solid;border-color:#425563;background-color:#425563;color:#ffffff;pointer-events:none;"><span ng-bind-html="order.labels.Archived"></span></button>
+                    </li>
+                </ul>
+            </ul>
+        </div>
+    </div>
+    <div class="row" >
+        <div class="col-lg-9" style="background-color: rgb(248, 248, 248)">
             <ul class="nav nav-tabs nav-justified" style="padding-top: 20px; background-color: rgb(248, 248, 248)">
                 <li>
                     <ul class="nav navbar-nav navbar-left">
@@ -46,55 +95,26 @@
                                 <span ng-bind-html="order.Order.xp.Currency.ConvertTo || ((order.Order.xp.CustomerID | weirGroupFromBuyersID) == 'WPIFR' ? 'EUR' : 'GBP')"></span>
                             </h4>
                         </li>
-                        <li style="padding: 10px 16px 0px 10px;" ng-show="order.ShowFX()">
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="col-lg-3" style="background-color: rgb(248, 248, 248)">
+            <ul class="nav nav-tabs nav-justified" style="padding-top: 20px; background-color: rgb(248, 248, 248)">
+                <li>
+                    <ul class="nav navbar-nav">
+                        <li ng-show="order.ShowFX()" style="padding: 10px 0px 0px 0px; color:#005bc8">
                             <span ng-bind-html='order.labels.validUntil'></span><br />
                             <h4>
-                                <span ng-bind-html="order.Order.xp.ValidUntil | weirdate"></span>
+                                <span ng-bind-html="order.Order.xp.ValidUntil | weirdateonly"></span>&nbsp;
                             </h4>
-                        </li>
-                    </ul>
-                    <ul class="nav navbar-nav navbar-right">
-                        <li ng-if="order.showAssign" ng-click="order.AssignToMe()" style="padding: 0px 10px 0px 0px;">
-                            <button type="button" class="btn btn-lg btn-primary"><span ng-bind-html='order.labels.AssignToMe'></span></button>
-                        </li>
-                        <li style="padding: 0px 10px 0px 0px;" ng-if="order.ShowConfirm()"> <!--  ng-if="order.ShowConfirm()" -->
-                            <button type="button" ng-click="order.Confirm(base.currentUser)" class="btn btn-lg btn-success" ng-disabled="order.LineItemZero() || order.InvalidPO()">
-                                <span ng-bind-html='order.labels.Confirm'></span>
-                            </button>
-                        </li>
-                        <li ng-click="order.Revise(base.currentUser)" style="padding: 0px 10px 0px 10px;" ng-if="order.ShowRevise()">
-                            <button type="button" class="btn btn-lg btn-warning"><span ng-bind-html='order.labels.Revise'></span></button>
-                        </li>
-                        <li style="padding: 0px 10px 0px 10px;" ng-if="order.ShowShareRevision()">
-                            <button type="button" class="btn btn-lg btn-primary" ng-click="order.ShareRevision(base.currentUser)" ng-disabled="order.LineItemZero()">
-                                <span ng-bind-html='order.labels.ShareRevision'></span>
-                            </button>
-                        </li>
-                        <li ng-click="order.Update()" style="padding: 0px 10px 0px 10px;" ng-if="order.ShowUpdate()">
-                            <button type="button" class="btn btn-lg btn-primary"><span ng-bind-html="order.labels.Update"></span></button>
-                        </li>
-                        <li ng-click="order.Comments()" style="padding: 0px 10px 0px 5px;">
-                            <a role="button" class="btn btn-lg btn-default" href="#Comments"><span ng-bind-html="order.labels.Comments"></span></a>
-                        </li>
-
-                        <li style="padding: 0px 10px 0px 0px;"> <!-- Print Button -->
-                            <print-order-button buyer="order.Buyer" order="order.Order" items="order.LineItems" address="order.DeliveryAddress" pocontent="order.POContent"></print-order-button>
-                        </li>
-
-                        <li style="padding: 0px 10px 0px 0px;" class="panelButton">
-                            <button type="button" class="btn btn-lg btn-default" ng-csv="order.ToCsvJson" add-bom="true" filename="{{order.CsvFilename}}" ng-bind-html="order.labels.Download"></button>
-                        </li>
-                        <li style="padding: 0px 10px 0px 0px;">
-                            <button type="button" ng-if="!order.Order.xp.Archive == true" class="btn btn-lg btn-default" style="border-style:solid;border-color:#425563;background-color:#425563;color:#ffffff;" ng-click="order.archive(order.Order.ID);"><span style="margin-left:1px;margin-right:1px;" ng-bind-html="order.labels.Archive"></span><object style="height:20px;width:20px;float:right;pointer-events:none;" data="../src/assets/images/Archive2.svg" type="image/svg+xml"></object></button>
-                            <button type="button" ng-if="order.Order.xp.Archive == true" disabled class="btn btn-lg btn-default" style="border-style:solid;border-color:#425563;background-color:#425563;color:#ffffff;pointer-events:none;"><span ng-bind-html="order.labels.Archived"></span></button>
                         </li>
                     </ul>
                 </li>
             </ul>
         </div>
     </div>
-    <!-- Table -->
-     <div class="row">
+    <div class="row">
          <div class="col-md-9">
              <p class="directions" ng-show="order.Order.xp.Status=='RE'">
                  <span ng-bind-html="order.labels.Directions"></span>
@@ -126,12 +146,11 @@
                 <ordercloud-po-upload model="order.Order" keyname="PODocument" label=''></ordercloud-po-upload>
              </span>
          </div>
-
          <div class="col-md-3" ng-if="order.ShowShareRevision() && order.ShowFX()">
              <div class="row">
                  <div class="col-md-12">
                      <p class="fx-area">
-                        <button class="btn btn-sm btn-primary" ng-click="order.applyFxRate()">Apply current FX rate</button>
+                        <button class="btn btn-primary" ng-click="order.applyFxRate()">Apply current FX rate</button>
                      </p>
                  </div>
              </div>
@@ -144,7 +163,7 @@
              </div>
              <div class="row">
                  <div class="col-md-10">
-                     <i class="input-group fx-area">
+                     <p class="input-group fx-area">
                          <input name="ExtendedValidityDate" type="text" class="form-control text-calendar" uib-datepicker-popup="dd/MM/yyyy" ng-model="order.ExtendedValidity"
                                 is-open="order.popupStart.opened" close-text="Close" width="20" />
                         <span class="input-group-btn">
@@ -163,11 +182,22 @@
                      </p>
                  </div>
              </div>
+             <div class="row">
+                 <div class="col-md-10">
+                     <p class="input-group fx-area">
+                         <button type="button" class="btn btn-primary" style="background-color: darkgreen;" ui-sref="productSearch" ng-bind-html='order.labels.AddNewItems' ng-show="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'" ng-if="order.ShowAddItems()"></button>
+                     </p>
+                     <p class="input-group fx-area">
+                         <button type="button" class="btn btn-primary" style="background-color: darkgreen;" ng-click="order.AddBlankItem()" ng-bind-html='order.labels.AddABlankItem' ng-show="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'" ng-if="order.ShowAddItems()"></button>
+                     </p>
+                 </div>
+             </div>
          </div>
      </div>
 
-     <div class="row">
-         <div class="col-xs-9">
+    <!-- Table -->
+    <div class="row">
+         <div class="col-lg-12">
              <table ng-if="order.Order.xp.Status=='EN' || order.Order.xp.Status=='ER'" class="enquiry">
                  <thead>
                      <tr>
@@ -192,216 +222,211 @@
              <br>
              <table class="table table-bordered oc-table-responsive weir-results-table" style="float: left;border-right: 0">
                  <thead class="header-cell">
-                 <tr style="background-color: blue; color: white;">
-                     <th ng-bind-html='order.labels.SerialNum'></th>
-                     <th ng-bind-html='order.labels.TagNum'></th>
-                     <th ng-bind-html='order.labels.PartNum'></th>
-                     <th ng-bind-html='order.labels.Description'></th>
-                     <th ng-bind-html='order.labels.RecReplacement'></th>
-                     <th ng-bind-html='order.labels.LeadTimeAvailability'></th>
-                     <th ng-bind-html='order.labels.PricePerItem'></th>
-                     <th ng-show="order.ShowFX()" ng-bind-html='order.labels.PricePerItem'></th>
-                     <th ng-bind-html='order.labels.Quantity'></th>
-                     <th style="border:0;background-color: white;width:200px"></th>
-                 </tr>
+                     <tr style="background-color: blue; color: white;">
+                         <th ng-bind-html='order.labels.SerialNum'></th>
+                         <th ng-bind-html='order.labels.TagNum'></th>
+                         <th ng-bind-html='order.labels.PartNum'></th>
+                         <th ng-bind-html='order.labels.Description'></th>
+                         <th ng-bind-html='order.labels.RecReplacement'></th>
+                         <th ng-bind-html='order.labels.LeadTimeAvailability'></th>
+                         <th ng-bind-html='order.labels.PricePerItem'></th>
+                         <th ng-show="order.ShowFX()" ng-bind-html='order.labels.PricePerItem'></th>
+                         <th ng-bind-html='order.labels.Quantity'></th>
+                         <th style="border:0;background-color: white;width:200px"></th>
+                     </tr>
                  </thead>
                  <tbody>
-                 <!-- Standard line items. -->
-                 <!-- Have two rows. One shows when in review mode, the other in non-review. In review mode, all fields are editable. -->
-                 <!-- Non-review mode -->
-                 <tr ng-if="order.Order.xp.Status!='RE' && order.Order.xp.Status!='ER'" ng-repeat="line in order.LineItems" style="border-right-width: 0;">
-                     <td ng-bind-html="line.xp.SN"></td>
-                     <td ng-bind-html="line.xp.TagNumber"></td>
-                     <td>
-                         <span ng-bind-html="line.xp.ProductName"></span>
-                     </td>
-                     <td>
-                         <span ng-bind-html="line.xp.Description"></span>
-                     </td>
-                     <td>
-                         <span ng-bind-html="line.xp.ReplacementSchedule"></span>
-                     </td>
-                     <td>
-                         <span ng-bind-html="line.xp.LeadTime"></span>
-                     </td>
-                     <td ng-show="order.ShowFX()">
-                         <span ng-bind-html="line.UnitPrice"></span>
-                     </td>
-                     <td class='text-right'>
-                         <span ng-bind-html="line.UnitPrice | OrderConversion:order.Order | currency:order.currency"></span>
-                     </td>
-                     <td ng-bind-html="line.Quantity"></td>
-                     <td style="border:0;width:100px;">
-                         <h4>
-                             <span class="label label-warning" ng-show="line.displayStatus=='UPDATED'" ng-bind-html="order.labels.Updated"></span>
-                             <span class="label label-success" ng-show="line.displayStatus=='NEW'" ng-bind-html="order.labels.New"></span>
-                         </h4>
-                     </td>
-                 </tr>
-                 <!-- Review Mode -->
-                 <tr ng-if="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'" ng-repeat="line in order.LineItems" style="border-right-width: 0;">
-                     <td>
-                         <input type="text" class="form-control input-sm" ng-model="line.xp.SN" ng-enter="order.NoOp()" />
-                     </td>
-                     <td>
-                         <input type="text" class="form-control input-sm" ng-model="line.xp.TagNumber" ng-enter="order.NoOp()" />
-                     </td>
-                     <td>
-                         <input type="text" class="form-control input-sm" ng-model="line.xp.ProductName" ng-enter="order.NoOp()" />
-                     </td>
-                     <td>
-                         <input type="text" class="form-control input-sm" ng-model="line.xp.Description" ng-enter="order.NoOp()" />
-                     </td>
-                     <td>
-                         <input type="text" class="form-control input-sm" ng-model="line.xp.ReplacementSchedule" ng-enter="order.NoOp()" />
-                     </td>
-                     <td>
-                         <input type="text" class="form-control input-sm" ng-model="line.xp.LeadTime" ng-enter="order.NoOp()" />
-                     </td>
-                     <td>
-                         <input type="text" class="form-control input-sm" ng-model="line.UnitPrice" ng-enter="order.NoOp()" />
-                     </td>
-                     <td ng-show="order.ShowFX()">
-                         <span ng-bind-html="line.UnitPrice | OrderConversion:order.Order | currency:order.currency"></span>
-                     </td>
-                     <td>
-                         <input type="number" class="form-control input-sm" ng-model="line.Quantity" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" ng-enter="order.NoOp()" />
-                     </td>
-                     <td style="border:0;width:100px;">
-                         <h4>
-                             <span class="label label-default" ng-show="order.ShowEdit(order.Order.xp.Status, line)" ng-bind-html="order.labels.Edit" ng-click="order.EditLineItems()"></span>
-                            <span class="label label-warning" ng-show="line.displayStatus=='UPDATED'" ng-bind-html="order.labels.Updated"></span>
-                             <span class="label label-success" ng-show="line.displayStatus=='NEW'" ng-bind-html="order.labels.New"></span>
-                         </h4>
-                     </td>
-                 </tr>
+                     <!-- Standard line items. -->
+                     <!-- Have two rows. One shows when in review mode, the other in non-review. In review mode, all fields are editable. -->
+                     <!-- Non-review mode -->
+                     <tr ng-if="order.Order.xp.Status!='RE' && order.Order.xp.Status!='ER'" ng-repeat="line in order.LineItems" style="border-right-width: 0;">
+                         <td ng-bind-html="line.xp.SN"></td>
+                         <td ng-bind-html="line.xp.TagNumber"></td>
+                         <td>
+                             <span ng-bind-html="line.xp.ProductName"></span>
+                         </td>
+                         <td>
+                             <span ng-bind-html="line.xp.Description"></span>
+                         </td>
+                         <td>
+                             <span ng-bind-html="line.xp.ReplacementSchedule"></span>
+                         </td>
+                         <td>
+                             <span ng-bind-html="line.xp.LeadTime"></span>
+                         </td>
+                         <td ng-show="order.ShowFX()">
+                             <span ng-bind-html="line.UnitPrice"></span>
+                         </td>
+                         <td class='text-right'>
+                             <span ng-bind-html="line.UnitPrice | OrderConversion:order.Order | currency:order.currency"></span>
+                         </td>
+                         <td ng-bind-html="line.Quantity"></td>
+                         <td style="border:0;width:100px;">
+                             <h4>
+                                 <span class="label label-warning" ng-show="line.displayStatus=='UPDATED'" ng-bind-html="order.labels.Updated"></span>
+                                 <span class="label label-success" ng-show="line.displayStatus=='NEW'" ng-bind-html="order.labels.New"></span>
+                             </h4>
+                         </td>
+                     </tr>
+                     <!-- Review Mode -->
+                     <tr ng-if="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'" ng-repeat="line in order.LineItems" style="border-right-width: 0;">
+                         <td>
+                             <input type="text" class="form-control input-sm" ng-model="line.xp.SN" ng-enter="order.NoOp()" />
+                         </td>
+                         <td>
+                             <input type="text" class="form-control input-sm" ng-model="line.xp.TagNumber" ng-enter="order.NoOp()" />
+                         </td>
+                         <td>
+                             <input type="text" class="form-control input-sm" ng-model="line.xp.ProductName" ng-enter="order.NoOp()" />
+                         </td>
+                         <td>
+                             <input type="text" class="form-control input-sm" ng-model="line.xp.Description" ng-enter="order.NoOp()" />
+                         </td>
+                         <td>
+                             <input type="text" class="form-control input-sm" ng-model="line.xp.ReplacementSchedule" ng-enter="order.NoOp()" />
+                         </td>
+                         <td>
+                             <input type="text" class="form-control input-sm" ng-model="line.xp.LeadTime" ng-enter="order.NoOp()" />
+                         </td>
+                         <td>
+                             <input type="text" class="form-control input-sm" ng-model="line.UnitPrice" ng-enter="order.NoOp()" />
+                         </td>
+                         <td ng-show="order.ShowFX()">
+                             <span ng-bind-html="line.UnitPrice | OrderConversion:order.Order | currency:order.currency"></span>
+                         </td>
+                         <td>
+                             <input type="number" class="form-control input-sm" ng-model="line.Quantity" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" ng-enter="order.NoOp()" />
+                         </td>
+                         <td style="border:0;width:100px;">
+                             <h4>
+                                 <span class="label label-default" ng-show="order.ShowEdit(order.Order.xp.Status, line)" ng-bind-html="order.labels.Edit" ng-click="order.EditLineItems()"></span>
+                                <span class="label label-warning" ng-show="line.displayStatus=='UPDATED'" ng-bind-html="order.labels.Updated"></span>
+                                 <span class="label label-success" ng-show="line.displayStatus=='NEW'" ng-bind-html="order.labels.New"></span>
+                             </h4>
+                         </td>
+                     </tr>
 
-                 <tr ng-repeat="line in order.BlankItems">
-                     <td><input type="text" class="form-control input-sm" ng-model="line.xp.SN" /></td>
-                     <td><input type="text" class="form-control input-sm" ng-model="line.xp.TagNumber" /></td>
-                     <td><input type="text" class="form-control input-sm" ng-model="line.xp.ProductName" /></td>
-                     <td><input type="text" class="form-control input-sm" ng-model="line.xp.Description" /></td>
-                     <td><input type="text" class="form-control input-sm" ng-model="line.xp.ReplacementSchedule" /></td>
-                     <td><input type="text" class="form-control input-sm" ng-model="line.xp.LeadTime" /></td>
-                     <td><input type="float" class="form-control input-sm" ng-model="line.UnitPrice" /></td>
-                     <td ng-if="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'">
-                         <input type="number" class="form-control input-sm" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" ng-model="line.Quantity" />
-                     </td>
-                     <td style="border:0;width:100px;">
-                         <h4>
-                             <span class="label label-default" ng-show="order.ShowEdit(order.Order.xp.Status, line)" ng-bind-html="order.labels.Edit" ng-click="order.AddBlankItem(line)"></span>
-                             <span class="label label-success" ng-bind-html="order.labels.New"></span>
-                         </h4>
-                     </td>
-                 </tr>
+                     <tr ng-repeat="line in order.BlankItems">
+                         <td><input type="text" class="form-control input-sm" ng-model="line.xp.SN" /></td>
+                         <td><input type="text" class="form-control input-sm" ng-model="line.xp.TagNumber" /></td>
+                         <td><input type="text" class="form-control input-sm" ng-model="line.xp.ProductName" /></td>
+                         <td><input type="text" class="form-control input-sm" ng-model="line.xp.Description" /></td>
+                         <td><input type="text" class="form-control input-sm" ng-model="line.xp.ReplacementSchedule" /></td>
+                         <td><input type="text" class="form-control input-sm" ng-model="line.xp.LeadTime" /></td>
+                         <td><input type="float" class="form-control input-sm" ng-model="line.UnitPrice" /></td>
+                         <td ng-show="order.ShowFX()">
+                             <span ng-bind-html="line.UnitPrice | OrderConversion:order.Order | currency:order.currency"></span>
+                         </td>
+                         <td ng-if="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'">
+                             <input type="number" class="form-control input-sm" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" ng-model="line.Quantity" />
+                         </td>
+                         <td style="border:0;width:100px;">
+                             <h4>
+                                 <span class="label label-default" ng-show="order.ShowEdit(order.Order.xp.Status, line)" ng-bind-html="order.labels.Edit" ng-click="order.AddBlankItem(line)"></span>
+                                 <span class="label label-success" ng-bind-html="order.labels.New"></span>
+                             </h4>
+                         </td>
+                     </tr>
 
-                 <!-- Previous Line Items Non-review Mode -->
-                 <tr ng-if="order.Order.xp.Status!='RE' && order.Order.xp.Status!='ER'" ng-repeat="line in order.PreviousLineItems" style="border-right-width: 0;">
-                     <td ng-bind-html="line.xp.SN"></td>
-                     <td ng-bind-html="line.xp.TagNumber"></td>
-                     <td>
-                         <span ng-bind-html="line.xp.ProductName"></span>
-                     </td>
-                     <td>
-                         <span ng-bind-html="line.xp.Description"></span>
-                     </td>
-                     <td>
-                         <span ng-bind-html="line.xp.ReplacementSchedule"></span>
-                     </td>
-                     <td>
-                         <span ng-bind-html="line.xp.LeadTime"></span>
-                     </td>
-                     <td class='text-right'>
-                         <span ng-bind-html="line.UnitPrice | defaultCurrency:order.Order.xp.Currency.ConvertTo:(order.Order.xp.CustomerID | weirGroupFromBuyersID)"></span>
-                     </td>
-                     <td ng-bind-html="line.TempQty"></td>
-                     <td style="border:0;width:100px;">
-                         <h4>
-                             <span class="label label-danger" ng-bind-html="order.labels.Removed"></span>
-                         </h4>
-                     </td>
-                 </tr>
-                <!-- Previous Line Items Review Mode -->
-                 <tr ng-if="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'" ng-repeat="line in order.PreviousLineItems" style="border-right-width: 0;">
-                     <td>
-                         <input type="text" class="form-control input-sm" ng-model="line.xp.SN" ng-enter="order.NoOp()" />
-                     </td>
-                     <td>
-                         <input type="text" class="form-control input-sm" ng-model="line.xp.TagNumber" ng-enter="order.NoOp()" />
-                     </td>
-                     <td>
-                         <input type="text" class="form-control input-sm" ng-model="line.xp.ProductName" ng-enter="order.NoOp()" />
-                     </td>
-                     <td>
-                         <input type="text" class="form-control input-sm" ng-model="line.xp.Description" ng-enter="order.NoOp()" />
-                     </td>
-                     <td>
-                         <input type="text" class="form-control input-sm" ng-model="line.xp.ReplacementSchedule" ng-enter="order.NoOp()" />
-                     </td>
-                     <td>
-                         <input type="text" class="form-control input-sm" ng-model="line.xp.LeadTime" ng-enter="order.NoOp()" />
-                     </td>
-                     <td>
-                         <input type="text" class="form-control input-sm" ng-model="line.UnitPrice" ng-enter="order.NoOp()" />
-                     </td>
-                     <td>
-                         <!--<input type="number" class="form-control input-sm" ng-model="line.Quantity" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" ng-enter="order.NoOp()" />-->
-                         <input type="number" class="form-control" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" ng-model="line.TempQty" />
-                     </td>
-                     <td style="border:0;width:100px;">
-                         <h4>
-                             <span class="label label-default" ng-show="order.ShowEdit(order.Order.xp.Status, line)" ng-bind-html="order.labels.Edit" ng-click="order.AddLineItem(line)"></span>
-                             <span class="label label-danger" ng-bind-html="order.labels.Removed"></span>
-                         </h4>
-                     </td>
-                 </tr>
+                     <!-- Previous Line Items Non-review Mode -->
+                     <tr ng-if="order.Order.xp.Status!='RE' && order.Order.xp.Status!='ER'" ng-repeat="line in order.PreviousLineItems" style="border-right-width: 0;">
+                         <td ng-bind-html="line.xp.SN"></td>
+                         <td ng-bind-html="line.xp.TagNumber"></td>
+                         <td>
+                             <span ng-bind-html="line.xp.ProductName"></span>
+                         </td>
+                         <td>
+                             <span ng-bind-html="line.xp.Description"></span>
+                         </td>
+                         <td>
+                             <span ng-bind-html="line.xp.ReplacementSchedule"></span>
+                         </td>
+                         <td>
+                             <span ng-bind-html="line.xp.LeadTime"></span>
+                         </td>
+                         <td class='text-right'>
+                             <span ng-bind-html="line.UnitPrice | defaultCurrency:order.Order.xp.Currency.ConvertTo:(order.Order.xp.CustomerID | weirGroupFromBuyersID)"></span>
+                         </td>
+                         <td ng-bind-html="line.TempQty"></td>
+                         <td style="border:0;width:100px;">
+                             <h4>
+                                 <span class="label label-danger" ng-bind-html="order.labels.Removed"></span>
+                             </h4>
+                         </td>
+                     </tr>
+                    <!-- Previous Line Items Review Mode -->
+                     <tr ng-if="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'" ng-repeat="line in order.PreviousLineItems" style="border-right-width: 0;">
+                         <td>
+                             <input type="text" class="form-control input-sm" ng-model="line.xp.SN" ng-enter="order.NoOp()" />
+                         </td>
+                         <td>
+                             <input type="text" class="form-control input-sm" ng-model="line.xp.TagNumber" ng-enter="order.NoOp()" />
+                         </td>
+                         <td>
+                             <input type="text" class="form-control input-sm" ng-model="line.xp.ProductName" ng-enter="order.NoOp()" />
+                         </td>
+                         <td>
+                             <input type="text" class="form-control input-sm" ng-model="line.xp.Description" ng-enter="order.NoOp()" />
+                         </td>
+                         <td>
+                             <input type="text" class="form-control input-sm" ng-model="line.xp.ReplacementSchedule" ng-enter="order.NoOp()" />
+                         </td>
+                         <td>
+                             <input type="text" class="form-control input-sm" ng-model="line.xp.LeadTime" ng-enter="order.NoOp()" />
+                         </td>
+                         <td>
+                             <input type="text" class="form-control input-sm" ng-model="line.UnitPrice" ng-enter="order.NoOp()" />
+                         </td>
+                         <td>
+                             <!--<input type="number" class="form-control input-sm" ng-model="line.Quantity" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" ng-enter="order.NoOp()" />-->
+                             <input type="number" class="form-control" ng-min="0" ng-pattern="/^[0-9]{1,5}$/" pattern-err-type="wholenumber" ng-model="line.TempQty" />
+                         </td>
+                         <td style="border:0;width:100px;">
+                             <h4>
+                                 <span class="label label-default" ng-show="order.ShowEdit(order.Order.xp.Status, line)" ng-bind-html="order.labels.Edit" ng-click="order.AddLineItem(line)"></span>
+                                 <span class="label label-danger" ng-bind-html="order.labels.Removed"></span>
+                             </h4>
+                         </td>
+                     </tr>
 
-                 <tr>
-                     <td></td>
-                     <td></td>
-                     <td></td>
-                     <td ng-if="order.Order.xp.Status!='RE' && order.Order.xp.Status!='ER'" ng-bind-html="order.Order.xp.ShippingDescription"></td>
-                     <td ng-if="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'">
-                         <input type="text" class="form-control" name="ShippingDescription" ng-model="order.Order.xp.ShippingDescription"
-                                maxlength="100" required ng-trim="false" placeholder="Carriage Type">
-                     </td>
-                     <td></td>
-                     <td></td>
-                     <td ng-if="order.Order.xp.Status!='RE' && order.Order.xp.Status!='ER'"></td>
-                     <td ng-if="(order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER') && order.ShowFX()"></td>
-                     <td ng-if="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'">
-                         <input type="text" class="form-control" name="ShippingPrice" ng-model="order.Order.ShippingCost"
-                                ng-pattern="/^[0-9\.]*$/" required ng-trim="false" placeholder="Carriage Rate">
-                     </td>
-                     <td class='text-right' ng-if="order.Order.xp.Status!='RE' && order.Order.xp.Status!='ER'">
-                         <span ng-bind-html="order.Order.ShippingCost | defaultCurrency:order.Order.xp.Currency.ConvertTo:(order.Order.xp.CustomerID | weirGroupFromBuyersID)"></span>
-                     </td>
-                     <td ng-if="order.Order.xp.Status!='RE' || order.Order.xp.Status!='ER'"></td>
-                     <td style="border:0;width:100px;">
-                         <h4>
-                             <span class="label label-default" ng-show="order.ShowEdit(order.Order.xp.Status, order.ShippingCost)" ng-bind-html="order.labels.Edit" ng-click="order.EditOrderShipping()"></span>
-                             <span class="label label-warning" ng-show="order.ShowUpdatedShipping()" ng-bind-html="order.labels.Updated"></span>
-                         </h4>
-                     </td>
-                 </tr>
+                     <tr>
+                         <td></td>
+                         <td></td>
+                         <td></td>
+                         <td ng-if="order.Order.xp.Status!='RE' && order.Order.xp.Status!='ER'" ng-bind-html="order.Order.xp.ShippingDescription"></td>
+                         <td ng-if="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'">
+                             <input type="text" class="form-control" name="ShippingDescription" ng-model="order.Order.xp.ShippingDescription"
+                                    maxlength="100" required ng-trim="false" placeholder="Carriage Type">
+                         </td>
+                         <td></td>
+                         <td></td>
+                         <td ng-if="order.Order.xp.Status!='RE' && order.Order.xp.Status!='ER'"></td>
+                         <td ng-if="(order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER') && order.ShowFX()"></td>
+                         <td ng-if="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'">
+                             <input type="text" class="form-control" name="ShippingPrice" ng-model="order.Order.ShippingCost"
+                                    ng-pattern="/^[0-9\.]*$/" required ng-trim="false" placeholder="Carriage Rate">
+                         </td>
+                         <td class='text-right' ng-if="order.Order.xp.Status!='RE' && order.Order.xp.Status!='ER'">
+                             <span ng-bind-html="order.Order.ShippingCost | defaultCurrency:order.Order.xp.Currency.ConvertTo:(order.Order.xp.CustomerID | weirGroupFromBuyersID)"></span>
+                         </td>
+                         <td ng-if="order.Order.xp.Status!='RE' || order.Order.xp.Status!='ER'"></td>
+                         <td style="border:0;width:100px;">
+                             <h4>
+                                 <span class="label label-default" ng-show="order.ShowEdit(order.Order.xp.Status, order.ShippingCost)" ng-bind-html="order.labels.Edit" ng-click="order.EditOrderShipping()"></span>
+                                 <span class="label label-warning" ng-show="order.ShowUpdatedShipping()" ng-bind-html="order.labels.Updated"></span>
+                             </h4>
+                         </td>
+                     </tr>
 
-                 <tr ng-if="order.LineItems.length > 0">
-                     <td class="button-th" colspan="6"></td>
-                     <td ng-bind-html='order.labels.Total'></td>
-                     <td class='text-right'>
-                         <span ng-bind-html="order.Order.Total | defaultCurrency:order.Order.xp.Currency.ConvertTo:(order.Order.xp.CustomerID | weirGroupFromBuyersID)"></span>
-                     </td>
-                 </tr>
+                     <tr ng-if="order.LineItems.length > 0">
+                         <td class="button-th" colspan="6"></td>
+                         <td ng-bind-html='order.labels.Total'></td>
+                         <td class='text-right'>
+                             <span ng-bind-html="order.Order.Total | defaultCurrency:order.Order.xp.Currency.ConvertTo:(order.Order.xp.CustomerID | weirGroupFromBuyersID)"></span>
+                         </td>
+                     </tr>
                  </tbody>
              </table>
-         </div>
-         <div class="col-xs-3">
-             <div class="pull-right" style="padding: 30px 25px 0px 0px; float: right;">
-                 <p><a ng-if="order.Order.xp.Type == 'Quote' && order.Order.xp.Status!='SB' && order.Order.xp.Status!='SP'" href="#" ng-click="order.BackToList()">Back to Quotes</a></p>
-                 <p><a ng-if="order.Order.xp.Type == 'Order'" href="#" ng-click="order.BackToList()">Back to Orders</a></p>
-                 <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ui-sref="productSearch" ng-bind-html='order.labels.AddNewItems' ng-show="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'" ng-if="order.ShowAddItems()"></button></p>
-                 <p><button type="button" class="btn btn-primary btn-lg" style="background-color: darkgreen;" ng-click="order.AddBlankItem()" ng-bind-html='order.labels.AddABlankItem' ng-show="order.Order.xp.Status=='RE' || order.Order.xp.Status=='ER'" ng-if="order.ShowAddItems()"></button></p>
-             </div>
          </div>
      </div>
 
