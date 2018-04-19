@@ -32,17 +32,17 @@ function LoginService($q, $window, $state, toastr, OrderCloudSDK, TokenRefresh, 
         .then(function (rte) {
             $localForage.removeItem(storageName);
             if (rte && rte.state) {
-                if (rte.state == 'gotoOrder' && rte.id && rte.buyer) {
+                if (rte.state === 'gotoOrder' && rte.id && rte.buyer) {
                     $state.go('gotoOrder', { orderID: rte.id, buyerID: rte.buyer });
                 } else {
-                    $state.go('home');
+                    $state.go('ordersMain.default',{filters:JSON.stringify({"xp.Type":null,"xp.Active":true,"xp.Archive":"!true"})});
                 }
             } else {
-                $state.go('home');
+                $state.go('ordersMain.default',{filters:JSON.stringify({"xp.Type":null,"xp.Active":true,"xp.Archive":"!true"})});
             }
         })
         .catch(function () {
-            $state.go('home');
+            $state.go('ordersMain.default',{filters:JSON.stringify({"xp.Type":null,"xp.Active":true,"xp.Archive":"!true"})});
         });
     }
 
@@ -140,21 +140,16 @@ function LoginController($stateParams, $exceptionHandler, OrderCloudSDK, LoginSe
 			};
 			vm.rememberStatus = username ? true : false;
 		});
-    /*vm.credentials = {
-        Username: null,
-        Password: null
-    };*/
+
     vm.token = $stateParams.token;
     vm.form = vm.token ? 'reset' : 'login';
     vm.setForm = function(form) {
         vm.form = form;
     };
-    //vm.rememberStatus = false;
 
     vm.submit = function() {
 	    OrderCloudSDK.Auth.Login(vm.credentials.Username,vm.credentials.Password,clientid,scope)
             .then(function(data) {
-                //vm.rememberStatus ? TokenRefresh.SetToken(data['refresh_token']) : angular.noop();
 	            if(vm.rememberStatus) {
 		            LoginService.SetUsername(vm.credentials.Username);
 	            } else {

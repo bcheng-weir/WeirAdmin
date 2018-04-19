@@ -45,11 +45,12 @@ function HomeConfig($stateProvider) {
 		});
 }
 
-function HomeController($sce, WeirService, IsAdmin, IsInternalSales, CurrentUser) {
+function HomeController($sce, $state, WeirService, IsAdmin, IsInternalSales) {
     var vm = this;
     vm.IsAdmin = IsAdmin;
     vm.CanEditCustomers = IsAdmin || IsInternalSales;
-    vm.currentUser = CurrentUser; //We get this from base.js
+    $state.go('ordersMain.default',{"filters":{"xp.Type":null,"xp.Active":true,"xp.Archive":"!true"}});
+    /*vm.currentUser = CurrentUser; //We get this from base.js
 
 	var labels = {
 		en: {
@@ -124,5 +125,5 @@ function HomeController($sce, WeirService, IsAdmin, IsInternalSales, CurrentUser
             "ordersMain.ordersArchived":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":"true"}
 		};
 		return JSON.stringify(filter[action]);
-	}
+	}*/
 }

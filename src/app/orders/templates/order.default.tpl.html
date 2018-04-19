@@ -13,8 +13,8 @@
                             <th ng-bind-html="orders.labels.QuoteNo" class="col2"></th>
                             <th ng-bind-html="orders.labels.CustomerRef" class="col3"></th>
                             <th ng-bind-html="orders.labels.BusinessName" class="col4"></th>
-                            <th ng-bind-html="orders.labels.Total" class="col5"></th>
                             <th ng-bind-html="orders.labels.status" class="col6"></th>
+                            <th ng-bind-html="orders.labels.Total" class="col5"></th>
                             <th ng-bind-html="orders.labels.reviewer" class="col7"></th>
                         </tr>
                         </thead>
@@ -30,7 +30,7 @@
                             <td><span ng-bind-html="quote.xp.CustomerName"></span> </td>
                             <td><span ng-bind-html="orders.getStatusLabel(quote.xp.Status)"
                                       ng-style="{height: ((home.CurrentUserOrg.ID | weirGroupFromBuyersID) == 'WPIFR') ? '42px' : ''}"
-                                      ng-class="{DR:'btn-status btn-quote-DR',SV:'btn-status btn-quote-SV',EV:'btn-status btn-quote-EV',EN:'btn-status btn-quote-EN',ER:'btn-status btn-quote-ER',SB:'btn-status btn-quote-SB',RV:'btn-status btn-quote-RV',RQ:'btn-status btn-quote-RQ',CQ:'btn-status btn-quote-CQ',DEL:'btn-status btn-DEL',SE:'btn-status btn-order-SE',RO:'btn-status btn-order-RO',RR:'btn-status btn-order-RR',CO:'btn-status btn-order-CO',SP:'btn-status btn-order-SP',DP:'btn-status btn-order-DP',IV:'btn-status btn-order-IV',RE:'btn-status btn-order-RE'}[order.xp.Status]"></span></td>
+                                      ng-class="{DR:'btn-status btn-quote-DR',SV:'btn-status btn-quote-SV',EV:'btn-status btn-quote-EV',EN:'btn-status btn-quote-EN',ER:'btn-status btn-quote-ER',SB:'btn-status btn-quote-SB',RV:'btn-status btn-quote-RV',RQ:'btn-status btn-quote-RQ',CQ:'btn-status btn-quote-CQ',DEL:'btn-status btn-DEL',SE:'btn-status btn-order-SE',RO:'btn-status btn-order-RO',RR:'btn-status btn-order-RR',CO:'btn-status btn-order-CO',SP:'btn-status btn-order-SP',DP:'btn-status btn-order-DP',IV:'btn-status btn-order-IV',RE:'btn-status btn-order-RE'}[quote.xp.Status]"></span></td>
                             <td ng-switch on="home.Currency(quote)">
                                 <span ng-switch-when="USD">{{quote.Total | OrderConversion: quote | currency:'&#36;'}}</span>
                                 <span ng-switch-when="AUD">{{quote.Total | OrderConversion: quote | currency:'&#36;'}}</span>
@@ -62,8 +62,8 @@
                                 <th ng-bind-html="orders.labels.OrderNo" class="col2"></th>
                                 <th ng-bind-html="orders.labels.CustomerRef" class="col3"></th>
                                 <th ng-bind-html="orders.labels.BusinessName" class="col4"></th>
-                                <th ng-bind-html="orders.labels.Total" class="col5"></th>
                                 <th ng-bind-html="orders.labels.status" class="col6"></th>
+                                <th ng-bind-html="orders.labels.Total" class="col5"></th>
                                 <th ng-bind-html="orders.labels.reviewer" class="col7"></th>
                             </tr>
                         </thead>

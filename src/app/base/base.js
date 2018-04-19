@@ -195,6 +195,7 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
     vm.OrderAction = _actions;
     function _actions(action) {
         var filter = {
+            "default":{"xp.Type":null,"xp.Active":true,"xp.Archive":"!true"},
             "AllQuotesOrders":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":"!true"},
             "RequestedQuotes":{"xp.Type":"Quote","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.Enquiry.id + "|" + WeirService.OrderStatus.EnquiryReview.id + "|" + WeirService.OrderStatus.Submitted.id + "|" + WeirService.OrderStatus.RevisedQuote.id + "|" + WeirService.OrderStatus.RejectedQuote.id},
             "ConfirmedQuotes":{"xp.Type":"Quote","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.ConfirmedQuote.id},
@@ -205,6 +206,7 @@ function BaseController($rootScope, $ocMedia, $state, $uibModal, Underscore, sna
             "ArchivedOrders":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":true}
         };
         var destination = {
+            "default":"ordersMain.default",
             "AllQuotesOrders":"ordersMain.ordersAll",
             "RequestedQuotes":"ordersMain.quotesRequested",
             "ConfirmedQuotes":"ordersMain.quotesConfirmed",

@@ -1,8 +1,76 @@
 angular.module('orderCloud')
+	.service('OrdersSearchService',OrdersSearchService)
 	.config(OrdersConfig)
 	.controller('OrdersCtrl', OrdersController)
     .controller('RouteToOrderCtrl', RouteToOrderController)
 ;
+
+function OrdersSearchService() {
+	/*
+	* I need to know:
+	* 1. Buyer Name
+	* 2. Quote or Order number
+	* 3. Assigned to Me
+	* 4. All of the usual filters
+	*
+	*/
+
+	var CustomerName = null;
+	var OrderNumber = null;
+	var AssignedToMe = false;
+
+	function getCustomerName() {
+		return CustomerName;
+	}
+
+	function setCustomerName(v) {
+		CustomerName = v;
+	}
+
+	function getOrderNumber() {
+		return OrderNumber;
+	}
+
+	function setOrderNumber(v) {
+		OrderNumber = v;
+	}
+
+	function getAssignedToMe() {
+		return AssignedToMe;
+	}
+
+	function setAssignedToMe(v) {
+		AssignedToMe = v;
+	}
+
+	function ApplyOpts(opts, Me) {
+        if(getCustomerName()) {
+            opts.filters["xp.CustomerName"] = getCustomerName();
+        }
+
+        if(getOrderNumber()) {
+            opts.search = getOrderNumber();
+            opts.searchOn = "ID";
+        }
+
+        if(getAssignedToMe()) {
+            opts.filters["xp.ReviewerID"] = Me.ID;
+        }
+
+        return opts;
+	}
+
+	var service = {
+        setCustomerName:setCustomerName,
+        setOrderNumber:setOrderNumber,
+        setAssignedToMe:setAssignedToMe,
+        getCustomerName:getCustomerName,
+        getOrderNumber:getOrderNumber,
+        getAssignedToMe:getAssignedToMe,
+		ApplyOpts:ApplyOpts
+	};
+	return service;
+}
 
 function OrdersConfig($stateProvider) {
     $stateProvider
@@ -20,7 +88,21 @@ function OrdersConfig($stateProvider) {
                 Parameters: function ($stateParams, OrderCloudParameters) {
                     return OrderCloudParameters.Get($stateParams);
                 },
-                Orders: function (OrderCloudSDK, Parameters, Me, CurrentBuyer) {
+                Quotes: function (OrderCloudSDK, Parameters, OrdersSearchService, Me) {
+                    //On the default view only, i need to get the top 20 quotes, but even this view can be filtered.
+                    Parameters.filters = Parameters.filters || {};
+                    Parameters.filters["FromCompanyID"] = Me.xp.WeirGroup.label+'*';
+                    var opts = {
+                        sortBy: Parameters.sortBy,
+                        page: 1,
+                        pageSize: 20,
+                        filters: angular.copy(Parameters.filters)
+                    };
+                    opts.filters["xp.Type"] = "Quote";
+                    opts = OrdersSearchService.ApplyOpts(opts, Me);
+                    return OrderCloudSDK.Orders.List("Incoming", opts);
+                },
+                Orders: function (OrderCloudSDK, Parameters, Me, CurrentBuyer, OrdersSearchService) {
                     CurrentBuyer.SetBuyerID(undefined);
                     Parameters.filters = Parameters.filters || {};
                     var arrSearchOn = Parameters.searchOn;
@@ -28,7 +110,7 @@ function OrdersConfig($stateProvider) {
                         var indexArr = arrSearchOn.indexOf("xp");
                         arrSearchOn = indexArr > -1 ? arrSearchOn.splice(index, 1) : arrSearchOn;
                     }
-                    Parameters.searchOn = (Parameters.search) ? (Parameters.searchOn ? arrSearchOn : "ID") : null;
+
 	                Parameters.filters["FromCompanyID"] = Me.xp.WeirGroup.label+'*';
                     var opts = {
                         from: Parameters.from,
@@ -38,23 +120,13 @@ function OrdersConfig($stateProvider) {
                         sortBy: Parameters.sortBy,
                         page: Parameters.page,
                         pageSize: Parameters.pageSize || 20,
-                        filters: Parameters.filters
+                        filters: angular.copy(Parameters.filters)
                     };
+                    opts.filters["xp.Type"] = Parameters.filters["xp.Type"] ? Parameters.filters["xp.Type"] : "Order";
+                    opts = OrdersSearchService.ApplyOpts(opts, Me);
+
                     return OrderCloudSDK.Orders.List("Incoming", opts);
                 },
-				Quotes: function (OrderCloudSDK, Parameters, Me) {
-            		//On the default view only, i need to get the top 20 quotes, but even this view can be filtered.
-                    Parameters.filters = Parameters.filters || {};
-                    Parameters.filters["xp.Type"] = "Quote";
-                    Parameters.filters["FromCompanyID"] = Me.xp.WeirGroup.label+'*';
-                    var opts = {
-                        sortBy: Parameters.sortBy,
-                        page: 1,
-                        pageSize: 20,
-                        filters: Parameters.filters
-                    };
-                    return OrderCloudSDK.Orders.List("Incoming", opts);
-				},
 				Languages: function (OrderCloudSDK, Orders) {
             		var filter;
             		angular.forEach(Orders.Items, function(value,key) {
@@ -124,15 +196,15 @@ function OrdersConfig($stateProvider) {
 
 function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler, OrderCloudSDK, OrderCloudParameters,
 						  Orders, Quotes, Parameters, buyerid, CurrentOrder, WeirService, CurrentBuyer, Languages,
-						  Underscore, $uibModal, $document, Me) {
+						  Underscore, $uibModal, $document, Me, OrdersSearchService) {
 	var vm = this;
-	vm.SearchAssigned = (Parameters.filters && Parameters.filters["xp.ReviewerID"]) ? true : false; //Toggle thh X button by the "Search orders assigned to me button"
+	vm.SearchAssigned = OrdersSearchService.getAssignedToMe();
 
-    vm.SearchCustomer = (Parameters.filters && Parameters.filters["xp.CustomerName"]) ? true : false; //This is the customer name search.
-    vm.buyerSearch = vm.SearchCustomer ? Parameters.filters["xp.CustomerName"] : null;
+    vm.SearchCustomer = OrdersSearchService.getCustomerName() ? true : false; //This is the customer name search.
+    vm.buyerSearch = OrdersSearchService.getCustomerName();
 
-    vm.SearchOrder = (Parameters && Parameters.searchOn && Parameters.searchOn == "ID") ? true : false; // This is the order number search.
-    vm.orderSearch = vm.SearchOrder ? Parameters.search : null;
+    vm.SearchOrder = OrdersSearchService.getOrderNumber() ? true : false; // This is the order number search.
+    vm.orderSearch = OrdersSearchService.getOrderNumber();
 
 	vm.xpType = Parameters.filters ? Parameters.filters["xp.Type"] : {};
 	vm.StateName = $state.current.name;
@@ -489,7 +561,7 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
 
 	function FilterActions(action) {
 		var filter = {
-			"ordersMain.default":{},
+			"ordersMain.default":{"xp.Type":null,"xp.Active":true,"xp.Archive":"!true"},
             "ordersMain.ordersAll":{"xp.Type":"Order|Quote","xp.Active":true,"xp.Archive":"!true"},
             "ordersMain.quotesRequested":{"xp.Type":"Quote","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.Enquiry.id + "|" + WeirService.OrderStatus.EnquiryReview.id + "|" + WeirService.OrderStatus.Submitted.id + "|" + WeirService.OrderStatus.RevisedQuote.id + "|" + WeirService.OrderStatus.RejectedQuote.id},
             "ordersMain.quotesConfirmed":{"xp.Type":"Quote","xp.Active":true,"xp.Archive":"!true","xp.Status":WeirService.OrderStatus.ConfirmedQuote.id},
@@ -507,44 +579,46 @@ function OrdersController($rootScope, $state, $sce, $ocMedia, $exceptionHandler,
         return JSON.stringify(filter);
 	};
 
-	vm.ShowAssignedOrders = function(currentState) {
-        vm.SearchAssigned = true;
-		var filter = FilterActions(currentState);
-		filter["xp.ReviewerID"] = Me.ID;
-        $state.go($state.current, {filters:JSON.stringify(filter)}, {reload:true});
-	};
-
-	vm.ClearAssignedOrders = function(currentState) {
-        vm.SearchAssigned = false;
-        var filter = FilterActions(currentState);
-        $state.go($state.current, {filters:JSON.stringify(filter)}, {reload:true});
-	};
-
 	vm.SearchCustomerName = function(currentState) {
         vm.SearchCustomer = true;
+        OrdersSearchService.setCustomerName(vm.buyerSearch);
 		var filter = FilterActions(currentState);
-		if(vm.buyerSearch) {
-            filter["xp.CustomerName"] = vm.buyerSearch;
-		}
         $state.go($state.current, {filters:JSON.stringify(filter)}, {reload:true});
 	};
 
 	vm.ClearCustomerName = function(currentState) {
         vm.SearchCustomer = false;
+        OrdersSearchService.setCustomerName(null);
         var filter = FilterActions(currentState);
         $state.go($state.current, {filters:JSON.stringify(filter)}, {reload:true});
 	};
 
     vm.SearchOrderID = function(currentState) {
         vm.SearchOrder = true;
+        OrdersSearchService.setOrderNumber(vm.orderSearch);
         var filter = FilterActions(currentState);
-        $state.go($state.current, {filters:JSON.stringify(filter), search:vm.orderSearch,searchOn:"ID"}, {reload:true});
+        $state.go($state.current, {filters:JSON.stringify(filter)}, {reload:true});
     };
 
     vm.ClearOrderID = function(currentState) {
         vm.SearchOrder = false;
+        OrdersSearchService.setOrderNumber(null);
         var filter = FilterActions(currentState);
-        $state.go($state.current, {filters:JSON.stringify(filter), search:null,searchOn:null}, {reload:true});
+        $state.go($state.current, {filters:JSON.stringify(filter)}, {reload:true});
+    };
+
+    vm.ShowAssignedOrders = function(currentState) {
+        vm.SearchAssigned = true;
+        OrdersSearchService.setAssignedToMe(true);
+        var filter = FilterActions(currentState);
+        $state.go($state.current, {filters:JSON.stringify(filter)}, {reload:true});
+    };
+
+    vm.ClearAssignedOrders = function(currentState) {
+        vm.SearchAssigned = false;
+        OrdersSearchService.setAssignedToMe(false);
+        var filter = FilterActions(currentState);
+        $state.go($state.current, {filters:JSON.stringify(filter)}, {reload:true});
     };
 }
 
