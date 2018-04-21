@@ -50,7 +50,7 @@
                         <print-order-button buyer="order.Buyer" order="order.Order" items="order.LineItems" address="order.DeliveryAddress" pocontent="order.POContent"></print-order-button>
                     </li>
                     <li style="padding: 0px 10px 0px 0px;">
-                        <button type="button" ng-if="!order.Order.xp.Archive == true" class="btn btn-lg btn-default" style="border-style:solid;border-color:#425563;background-color:#425563;color:#ffffff;" ng-click="order.archive(order.Order.ID);"><span style="margin-left:1px;margin-right:1px;" ng-bind-html="order.labels.Archive"></span><object style="height:20px;width:20px;float:right;pointer-events:none;" data="../src/assets/images/Archive2.svg" type="image/svg+xml"></object></button>
+                        <button type="button" ng-if="!order.Order.xp.Archive == true" class="btn btn-lg btn-default" style="border-style:solid;border-color:#425563;background-color:#425563;color:#ffffff;" ng-click="order.archive(order.Order.ID);"><span style="margin-left:1px;margin-right:3px;" ng-bind-html="order.labels.Archive"></span><object style="height:20px;width:20px;float:right;pointer-events:none;margin-top:1px;" data="/assets/images/Archive2.svg" type="image/svg+xml"></object></button>
                         <button type="button" ng-if="order.Order.xp.Archive == true" disabled class="btn btn-lg btn-default" style="border-style:solid;border-color:#425563;background-color:#425563;color:#ffffff;pointer-events:none;"><span ng-bind-html="order.labels.Archived"></span></button>
                     </li>
                 </ul>
