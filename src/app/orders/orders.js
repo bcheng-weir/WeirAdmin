@@ -7,12 +7,9 @@ angular.module('orderCloud')
 
 function OrdersSearchService() {
 	/*
-	* I need to know:
-	* 1. Buyer Name
-	* 2. Quote or Order number
-	* 3. Assigned to Me
-	* 4. All of the usual filters
-	*
+	* This service allows the search parameters on the list views to persist.
+	* TODO: Refactor so that the list view navigations on orders and home/base are all consolidated here. Look for the
+	* functions called FilterActions.
 	*/
 
 	var CustomerName = null;
@@ -43,6 +40,10 @@ function OrdersSearchService() {
 		AssignedToMe = v;
 	}
 
+	/*
+	* When the controller config loads, the opts for Orders.List() are first passed here to determine if any of the
+	* user entered search parameters should be added to the standard navigation.
+	*/
 	function ApplyOpts(opts, Me) {
         if(getCustomerName()) {
             opts.filters["xp.CustomerName"] = getCustomerName();
